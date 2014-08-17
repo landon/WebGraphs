@@ -1,0 +1,209 @@
+﻿<#@ output extension=".cs" #>
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+<#
+	Generate("ulong", 64, "UL");
+	Generate("uint", 32, "U");
+	Generate("ushort", 16, "");
+	Generate("byte", 8, "");
+#>
+
+<#+
+void Generate(string T, int bits, string literal)
+{
+#>
+
+namespace BitLevelGeneration
+{
+    public static class Assignments_<#=T#>
+    {
+        public static List<<#=T#>[]> Generate(IEnumerable<int> sizes, int potSize, int countEstimate = 2048)
+        {
+            var sizesCount = sizes.Count();
+            var sizeVector = BitVectors_<#=T#>.ToBitVector(sizes);
+
+            var assignments = new List<<#=T#>[]>(countEstimate);
+            var assignment = new <#=T#>[potSize];
+
+            var r = new List<<#=T#>>[potSize];
+            for (int i = 0; i < potSize; i++)
+                r[i] = BitVectors_<#=T#>.ToBitVector(Enumerable.Repeat(potSize - 1 - i, sizesCount));
+
+            <#=T#> c = sizeVector.GreaterThan(r[0]);
+            <#=T#> dc = (<#=T#>)(~(c | sizeVector.Zeroes()));
+            Generate(sizeVector, assignments, assignment, r, 0, 1, c, dc);
+
+            return assignments;
+        }
+
+        static void Generate(List<<#=T#>> sizes, List<<#=T#>[]> assignments, <#=T#>[] assignment, List<<#=T#>>[] r, int i, <#=T#> last, <#=T#> care, <#=T#> dontCare)
+        {
+            <#=T#> x;
+
+            var g = (<#=T#>)(care & ~last);
+            var q = (<#=T#>)(~care & ~dontCare & last);
+
+            if (g > q)
+            {
+                var f = g.RightFillToMSB();
+                x = (<#=T#>)((care & f) | (last & ~f));
+            }
+            else if (q > g)
+            {
+                var f = q.RightFillToMSB();
+                var t = (<#=T#>)(~f & last);
+                var y = (<#=T#>)(dontCare & ~f & ~t);
+                if (y == 0)
+                    return;
+
+                var y2 = (<#=T#>)(dontCare & t & (y | (y - 1)));
+
+                x = (<#=T#>)((care & (f >> 1)) | (t & ~y2) | (y & (0 - y)));
+            }
+            else
+            {
+                x = last;
+            }
+
+            var end = (<#=T#>)(care | dontCare);
+            if (i >= assignment.Length - 1)
+            {
+                while (true)
+                {
+                    assignment[i] = x;
+
+                    var assignmentCopy = new <#=T#>[assignment.Length];
+					Array.Copy(assignment, assignmentCopy, assignmentCopy.Length);
+                    assignments.Add(assignmentCopy);
+
+                    if (x == end)
+                        break;
+
+                    x = (<#=T#>)(((x - (care + dontCare)) & dontCare) + care);
+                }
+            }
+            else
+            {
+                while (true)
+                {
+                    assignment[i] = x;
+
+                    sizes.Decrement(x);
+                    var c = sizes.GreaterThan(r[i + 1]);
+                    var z = sizes.Zeroes();
+
+                    if ((c & z) == 0)
+                    {
+                        var dc = (<#=T#>)(~(c | z));
+                        Generate(sizes, assignments, assignment, r, i + 1, x, c, dc);
+                    }
+
+                    sizes.Increment(x);
+
+                    if (x == end)
+                        break;
+
+                    x = (<#=T#>)(((x - (care + dontCare)) & dontCare) + care);
+                }
+            }
+        }
+
+		public static IEnumerable<<#=T#>[]> Enumerate(IEnumerable<int> sizes, int potSize)
+        {
+            var sizesCount = sizes.Count();
+            var sizeVector = BitVectors_<#=T#>.ToBitVector(sizes);
+
+            var assignment = new <#=T#>[potSize];
+
+            var r = new List<<#=T#>>[potSize];
+            for (int i = 0; i < potSize; i++)
+                r[i] = BitVectors_<#=T#>.ToBitVector(Enumerable.Repeat(potSize - 1 - i, sizesCount));
+
+            <#=T#> c = sizeVector.GreaterThan(r[0]);
+            <#=T#> dc = (<#=T#>)(~(c | sizeVector.Zeroes()));
+            return Enumerate(sizeVector, assignment, r, 0, 1, c, dc);
+        }
+
+        static IEnumerable<<#=T#>[]> Enumerate(List<<#=T#>> sizes, <#=T#>[] assignment, List<<#=T#>>[] r, int i, <#=T#> last, <#=T#> care, <#=T#> dontCare)
+        {
+            <#=T#> x;
+
+            var g = (<#=T#>)(care & ~last);
+            var q = (<#=T#>)(~care & ~dontCare & last);
+
+            if (g > q)
+            {
+                var f = g.RightFillToMSB();
+                x = (<#=T#>)((care & f) | (last & ~f));
+            }
+            else if (q > g)
+            {
+                var f = q.RightFillToMSB();
+                var t = (<#=T#>)(~f & last);
+                var y = (<#=T#>)(dontCare & ~f & ~t);
+                if (y == 0)
+                    yield break;
+
+                var y2 = (<#=T#>)(dontCare & t & (y | (y - 1)));
+
+                x = (<#=T#>)((care & (f >> 1)) | (t & ~y2) | (y & (0 - y)));
+            }
+            else
+            {
+                x = last;
+            }
+
+            var end = (<#=T#>)(care | dontCare);
+            if (i >= assignment.Length - 1)
+            {
+                while (true)
+                {
+                    assignment[i] = x;
+
+                    var assignmentCopy = new <#=T#>[assignment.Length];
+					Array.Copy(assignment, assignmentCopy, assignmentCopy.Length);
+                    
+					yield return assignmentCopy;
+
+                    if (x == end)
+                        break;
+
+                    x = (<#=T#>)(((x - (care + dontCare)) & dontCare) + care);
+                }
+            }
+            else
+            {
+                while (true)
+                {
+                    assignment[i] = x;
+
+                    sizes.Decrement(x);
+                    var c = sizes.GreaterThan(r[i + 1]);
+                    var z = sizes.Zeroes();
+
+                    if ((c & z) == 0)
+                    {
+                        var dc = (<#=T#>)(~(c | z));
+                        foreach(var a in Enumerate(sizes, assignment, r, i + 1, x, c, dc))
+							yield return a;
+                    }
+
+                    sizes.Increment(x);
+
+                    if (x == end)
+                        break;
+
+                    x = (<#=T#>)(((x - (care + dontCare)) & dontCare) + care);
+                }
+            }
+        }
+    }
+}
+
+<#+
+}
+#>

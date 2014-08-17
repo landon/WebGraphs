@@ -1,0 +1,81 @@
+﻿<#@ output extension=".cs" #>
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+<#
+	Generate("ulong", 64, "UL");
+	Generate("uint", 32, "U");
+	Generate("ushort", 16, "");
+	Generate("byte", 8, "");
+#>
+
+<#+
+void Generate(string T, int bits, string literal)
+{
+#>
+namespace BitLevelGeneration
+{
+    public class HashedAssignment_<#=T#>
+    {
+        <#=T#>[] _assignment; 
+        int _length;
+		int _hashCode;
+
+        public HashedAssignment_<#=T#>(<#=T#>[] assignment, int index, <#=T#> on)
+        {
+            _assignment = new <#=T#>[assignment.Length - index];
+            _length = 0;
+
+            for (int i = index; i < assignment.Length; i++)
+            {
+                var x = (<#=T#>)(assignment[i] & on);
+                if (x != 0)
+                {
+                    _assignment[_length] = x;
+                    _length++;
+                }
+            }
+
+            Array.Sort(_assignment, 0, _length);
+
+            _hashCode = Hash(_assignment, _length);
+        }
+
+        int Hash(<#=T#>[] list, int length)
+        {
+            ulong hash = 5381;
+            for (int i = 0; i < length; i++)
+                hash = (ulong)(list[i] + (hash << 5) + hash);
+
+            return (int)hash;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as HashedAssignment_<#=T#>);
+        }
+
+        public bool Equals(HashedAssignment_<#=T#> other)
+        {
+            if (other == null || _length != other._length)
+                return false;
+
+            for (int i = 0; i < _length; i++)
+                if (_assignment[i] != other._assignment[i])
+                    return false;
+
+			return true;
+        }
+
+        public override int GetHashCode()
+        {
+            return _hashCode;
+        }
+    }
+}
+<#+
+}
+#>
