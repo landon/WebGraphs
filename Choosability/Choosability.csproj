@@ -112,7 +112,6 @@
     <Compile Include="OnlineChoiceHashGraph.cs" />
     <Compile Include="OrientationHashGraph.cs" />
     <Compile Include="Int64Usage.cs" />
-    <Compile Include="PolynomialMasterFuncLib.cs" />
     <Compile Include="Polynomials\PrimeNumbers.cs" />
     <Compile Include="Polynomials\SignLookup.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -148,10 +147,6 @@
     <ProjectReference Include="..\BitLevelGeneration\BitLevelGeneration.csproj">
       <Project>{fc557259-af5c-461c-9faa-b0fb01f1a947}</Project>
       <Name>BitLevelGeneration</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\PortableFuncLib\PortableFuncLib.csproj">
-      <Project>{1bb8a17f-4911-4e70-a18a-b503ba869b3a}</Project>
-      <Name>PortableFuncLib</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup />

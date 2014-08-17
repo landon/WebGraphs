@@ -95,7 +95,7 @@
     <Compile Include="Vertex.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\GraphicsLayer\GraphicsLayer.csproj">
+    <ProjectReference Include="..\GraphicsLayer\GraphicsLayer.csproj">
       <Project>{82eb0f02-e510-4446-9d00-423414ec38e4}</Project>
       <Name>GraphicsLayer</Name>
     </ProjectReference>
