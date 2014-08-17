@@ -1,0 +1,110 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+This file is used by the publish/package process of your Web project. You can customize the behavior of this process
+by editing this MSBuild file. In order to learn more about this please visit http://go.microsoft.com/fwlink/?LinkID=208121. 
+-->
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <TimeStampOfAssociatedLegacyPublishXmlFile />
+    <EncryptedPassword>AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAAOJshHp5k00iSypjPrt+hhAAAAAACAAAAAAAQZgAAAAEAACAAAAAFR5V7lSRSfUOphJq+jVwlVu5bTDXvRwXS8n6togbT5AAAAAAOgAAAAAIAACAAAAD43qKBO7M3wqoxKO20Lp/aWpGMCDv3k0vr/1RPCX3UkSAAAADTJtKOIuandoPqFswKkDDtv2YsJ9+uS9GipTW8pjbboEAAAABts8bj1eRJdG/UsBDaW2wqh7t7WG1JDgwGqc0moFwlE8hf9mT2dN5phpEqwqUTjUXFYx8Lw14nBPiAb5YSJW50</EncryptedPassword>
+    <_PublishTargetUrl>ftp://safetyvisionmobilevideo.com/slot</_PublishTargetUrl>
+  </PropertyGroup>
+  <ItemGroup>
+    <File Include="bin/WebGraphs.Web.dll">
+      <publishTime>04/22/2014 14:31:53</publishTime>
+    </File>
+    <File Include="ClientBin/clear.png">
+      <publishTime>08/06/2013 17:31:16</publishTime>
+    </File>
+    <File Include="ClientBin/complement.png">
+      <publishTime>08/06/2013 17:31:16</publishTime>
+    </File>
+    <File Include="ClientBin/compress-hi.png">
+      <publishTime>08/06/2013 17:31:16</publishTime>
+    </File>
+    <File Include="ClientBin/copy.png">
+      <publishTime>08/06/2013 17:31:16</publishTime>
+    </File>
+    <File Include="ClientBin/cut.png">
+      <publishTime>08/06/2013 17:31:16</publishTime>
+    </File>
+    <File Include="ClientBin/delete.png">
+      <publishTime>08/06/2013 17:31:16</publishTime>
+    </File>
+    <File Include="ClientBin/find.png">
+      <publishTime>08/06/2013 17:31:16</publishTime>
+    </File>
+    <File Include="ClientBin/Gchempaint.ico">
+      <publishTime>08/06/2013 17:31:16</publishTime>
+    </File>
+    <File Include="ClientBin/Gchempaint.png">
+      <publishTime>08/06/2013 17:31:16</publishTime>
+    </File>
+    <File Include="ClientBin/Gnome-x-office-drawing.svg.ico">
+      <publishTime>08/06/2013 17:31:16</publishTime>
+    </File>
+    <File Include="ClientBin/line graph.png">
+      <publishTime>08/06/2013 17:31:16</publishTime>
+    </File>
+    <File Include="ClientBin/new doc.png">
+      <publishTime>08/06/2013 17:31:16</publishTime>
+    </File>
+    <File Include="ClientBin/new.png">
+      <publishTime>08/06/2013 17:31:16</publishTime>
+    </File>
+    <File Include="ClientBin/open.png">
+      <publishTime>08/06/2013 17:31:16</publishTime>
+    </File>
+    <File Include="ClientBin/paste.png">
+      <publishTime>08/06/2013 17:31:16</publishTime>
+    </File>
+    <File Include="ClientBin/properties.png">
+      <publishTime>08/06/2013 17:31:16</publishTime>
+    </File>
+    <File Include="ClientBin/redo.png">
+      <publishTime>08/06/2013 17:31:16</publishTime>
+    </File>
+    <File Include="ClientBin/refresh.png">
+      <publishTime>08/06/2013 17:31:16</publishTime>
+    </File>
+    <File Include="ClientBin/save.png">
+      <publishTime>08/06/2013 17:31:16</publishTime>
+    </File>
+    <File Include="ClientBin/saveas.png">
+      <publishTime>08/06/2013 17:31:16</publishTime>
+    </File>
+    <File Include="ClientBin/send.png">
+      <publishTime>08/06/2013 17:31:16</publishTime>
+    </File>
+    <File Include="ClientBin/squared.PNG">
+      <publishTime>08/06/2013 17:31:16</publishTime>
+    </File>
+    <File Include="ClientBin/undo.png">
+      <publishTime>08/06/2013 17:31:16</publishTime>
+    </File>
+    <File Include="ClientBin/WebGraphs.xap">
+      <publishTime>04/22/2014 14:44:23</publishTime>
+    </File>
+    <File Include="ClientBin/zoom fit.png">
+      <publishTime>08/06/2013 17:31:16</publishTime>
+    </File>
+    <File Include="ClientBin/zoom in.png">
+      <publishTime>08/06/2013 17:31:16</publishTime>
+    </File>
+    <File Include="ClientBin/zoom out.png">
+      <publishTime>08/06/2013 17:31:16</publishTime>
+    </File>
+    <File Include="Silverlight.js">
+      <publishTime>08/04/2013 21:41:50</publishTime>
+    </File>
+    <File Include="Web.config">
+      <publishTime>04/22/2014 14:32:08</publishTime>
+    </File>
+    <File Include="WebGraphsTestPage.aspx">
+      <publishTime>04/15/2014 08:07:43</publishTime>
+    </File>
+    <File Include="WebGraphsTestPage.html">
+      <publishTime>08/04/2013 21:41:50</publishTime>
+    </File>
+  </ItemGroup>
+</Project>

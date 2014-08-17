@@ -1,0 +1,171 @@
+﻿<UserControl x:Class="WebGraphs.MenuBar"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:local="clr-namespace:SilverlightEnhancedMenuItem"
+    xmlns:menu="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls.Input.Toolkit"
+    xmlns:toolkit="http://schemas.microsoft.com/winfx/2006/xaml/presentation/toolkit"
+    mc:Ignorable="d" Height="35" Width="678">
+
+    <UserControl.Resources>
+        <Style TargetType="Button" x:Key="MenuButton">
+            <Setter Property="Foreground" Value="Black"/>
+            <Setter Property="FontStyle" Value="Normal"/>
+            <Setter Property="FontFamily" Value="Arial"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Height" Value="35"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid>
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup x:Name="CommomStates">
+                                    <VisualState x:Name="Normal"/>
+                                    <VisualState x:Name="MouseOver">
+                                        <Storyboard>
+                                            <ColorAnimation Duration="0" To="LightGray" Storyboard.TargetProperty="(Shape.Fill).(SolidColorBrush.Color)" Storyboard.TargetName="rectangle"/>
+                                        </Storyboard>
+                                    </VisualState>
+                                    <VisualState x:Name="Pressed">
+                                        <Storyboard>
+                                            <ColorAnimation Duration="0" To="LightGray" Storyboard.TargetProperty="(Shape.Fill).(SolidColorBrush.Color)" Storyboard.TargetName="rectangle"/>
+                                        </Storyboard>
+                                    </VisualState>
+                                    <VisualState x:Name="Disabled" >
+                                        <Storyboard>
+                                            <ColorAnimation Duration="0" To="LightGray" Storyboard.TargetProperty="(Shape.Fill).(SolidColorBrush.Color)" Storyboard.TargetName="rectangle"/>
+                                        </Storyboard>
+                                    </VisualState>
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
+                            <Rectangle x:Name="rectangle" Fill="#FFF4F4F4"/>
+                            <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <StackPanel x:Name="LayoutRoot" Background="#FFF4F4F4" Height="35" Orientation="Horizontal" Margin="0,0,-41,0">
+        <Button Content="File" Style="{StaticResource MenuButton}" Width="50" Click="MenuTopLevelClick" MouseRightButtonDown="MenuTopLevelRightClick">
+            <menu:ContextMenuService.ContextMenu>
+                <menu:ContextMenu>
+                    <local:SuperMenuItem Header="New" Click="MenuItemClick"/>
+                    <menu:Separator/>
+                    <local:SuperMenuItem Header="Close" Click="MenuItemClick"/>
+                    <local:SuperMenuItem Header="Close All" Click="MenuItemClick"/>
+                    <menu:Separator/>
+                    <local:SuperMenuItem Header="Export web link" Click="MenuItemClick"/>
+                    <local:SuperMenuItem Header="Export mobile web link" Click="MenuItemClick"/>
+                    <menu:Separator/>
+                    <local:SuperMenuItem Header="Export graph6" Click="MenuItemClick"/>
+                    <local:SuperMenuItem Header="Export edge weights" Click="MenuItemClick"/>
+                    <local:SuperMenuItem Header="Export adjacency matrix" Click="MenuItemClick"/>
+                    <menu:Separator/>
+                    <local:SuperMenuItem Header="Export TeX to clipboard" Click="MenuItemClick"/>
+                </menu:ContextMenu>
+            </menu:ContextMenuService.ContextMenu>
+        </Button>
+        <Button Content="Edit" Style="{StaticResource MenuButton}" Width="50" Click="MenuTopLevelClick" MouseRightButtonDown="MenuTopLevelRightClick">
+            <menu:ContextMenuService.ContextMenu>
+                <menu:ContextMenu>
+                    <local:SuperMenuItem Header="Undo" Click="MenuItemClick"/>
+                    <local:SuperMenuItem Header="Redo" Click="MenuItemClick"/>
+                    <menu:Separator/>
+                    <local:SuperMenuItem Header="Cut" Click="MenuItemClick"/>
+                    <local:SuperMenuItem Header="Copy" Click="MenuItemClick"/>
+                    <local:SuperMenuItem Header="Paste" Click="MenuItemClick"/>
+                </menu:ContextMenu>
+            </menu:ContextMenuService.ContextMenu>
+        </Button>
+        <Button Content="View" Style="{StaticResource MenuButton}" Width="50"  Click="MenuTopLevelClick" MouseRightButtonDown="MenuTopLevelRightClick" x:Name="_viewButton">
+            <menu:ContextMenuService.ContextMenu>
+                <menu:ContextMenu>
+                    <local:SuperMenuItem Header="Hide Properties" Click="MenuItemClick"/>
+                    <local:SuperMenuItem Header="Zoom" Click="MenuItemClick">
+                        <local:SuperMenuItem Header="In" Click="MenuItemClick"/>
+                        <local:SuperMenuItem Header="Out" Click="MenuItemClick"/>
+                        <local:SuperMenuItem Header="Fit" Click="MenuItemClick"/>
+                    </local:SuperMenuItem>
+                </menu:ContextMenu>
+            </menu:ContextMenuService.ContextMenu>
+        </Button>
+        <Button Content="Label" Style="{StaticResource MenuButton}" Width="60" Click="MenuTopLevelClick" MouseRightButtonDown="MenuTopLevelRightClick">
+            <menu:ContextMenuService.ContextMenu>
+                <menu:ContextMenu>
+                    <local:SuperMenuItem Header="with degrees" Click="MenuItemClick"/>
+                    <local:SuperMenuItem Header="with in degrees" Click="MenuItemClick"/>
+                    <local:SuperMenuItem Header="with out degrees" Click="MenuItemClick"/>
+                    <local:SuperMenuItem Header="with out degrees plus one" Click="MenuItemClick"/>
+                    <menu:Separator/>
+                    <local:SuperMenuItem Header="selected with 'd'" Click="MenuItemClick"/>
+                    <local:SuperMenuItem Header="selected with 'd-1'" Click="MenuItemClick"/>
+                    <local:SuperMenuItem Header="selected with ..." Click="MenuItemClick"/>
+                    <menu:Separator/>
+                    <local:SuperMenuItem Header="clear selected" Click="MenuItemClick"/>
+                </menu:ContextMenu>
+            </menu:ContextMenuService.ContextMenu>
+        </Button>
+        <Button Content="Coloring" Style="{StaticResource MenuButton}" Width="80" Click="MenuTopLevelClick" MouseRightButtonDown="MenuTopLevelRightClick">
+            <menu:ContextMenuService.ContextMenu>
+                <menu:ContextMenu>
+                    <local:SuperMenuItem Header="check f-choosable" Click="MenuItemClick"/>
+                    <local:SuperMenuItem Header="Δ-1 color" Click="MenuItemClick"/>
+                </menu:ContextMenu>
+            </menu:ContextMenuService.ContextMenu>
+        </Button>
+        <Button Content="Painting" Style="{StaticResource MenuButton}" Width="80" Click="MenuTopLevelClick" MouseRightButtonDown="MenuTopLevelRightClick">
+            <menu:ContextMenuService.ContextMenu>
+                <menu:ContextMenu>
+                    <local:SuperMenuItem Header="check f-paintable" Click="MenuItemClick"/>
+                    <local:SuperMenuItem Header="check d1-paintable" Click="MenuItemClick"/>
+                    <local:SuperMenuItem Header="check 2-fold d1-paintable" Click="MenuItemClick"/>
+                </menu:ContextMenu>
+            </menu:ContextMenuService.ContextMenu>
+        </Button>
+        <Button Content="Orientations" Style="{StaticResource MenuButton}" Width="90" Click="MenuTopLevelClick" MouseRightButtonDown="MenuTopLevelRightClick">
+            <menu:ContextMenuService.ContextMenu>
+                <menu:ContextMenu>
+                    <local:SuperMenuItem Header="compute coefficient" Click="MenuItemClick"/>
+                    <local:SuperMenuItem Header="count eulerian subgraphs" Click="MenuItemClick"/>
+                    <menu:Separator/>
+                    <local:SuperMenuItem Header="check f-AT using formula" Click="MenuItemClick"/>
+                    <local:SuperMenuItem Header="check f-AT (slow)" Click="MenuItemClick"/>
+                    <local:SuperMenuItem Header="check d1-AT (slow)" Click="MenuItemClick"/>                   
+                    <menu:Separator/>
+                    <local:SuperMenuItem Header="generate random orientation" Click="MenuItemClick"/>
+                    <local:SuperMenuItem Header="generate balanced orientation" Click="MenuItemClick"/>
+                    <local:SuperMenuItem Header="clear orientation" Click="MenuItemClick"/>
+                </menu:ContextMenu>
+            </menu:ContextMenuService.ContextMenu>
+        </Button>
+        <Button Content="Fixer/Breaker" Style="{StaticResource MenuButton}" Width="111" Click="MenuTopLevelClick" MouseRightButtonDown="MenuTopLevelRightClick">
+            <menu:ContextMenuService.ContextMenu>
+                <menu:ContextMenu>
+                    <local:SuperMenuItem Header="analyze" Click="MenuItemClick"/>
+                    <local:SuperMenuItem Header="analyze only near colorings" Click="MenuItemClick"/>
+                    <local:SuperMenuItem Header="analyze only near colorings for selected edge" Click="MenuItemClick"/>
+                </menu:ContextMenu>
+            </menu:ContextMenuService.ContextMenu>
+        </Button>
+        <Button Content="Layout" Style="{StaticResource MenuButton}" Width="52" Click="MenuTopLevelClick" MouseRightButtonDown="MenuTopLevelRightClick">
+            <menu:ContextMenuService.ContextMenu>
+                <menu:ContextMenu>
+                    <local:SuperMenuItem Header="springs" Click="MenuItemClick"/>
+                </menu:ContextMenu>
+            </menu:ContextMenuService.ContextMenu>
+        </Button>
+        <Button Content="Help" Style="{StaticResource MenuButton}" Width="52" Click="MenuTopLevelClick" MouseRightButtonDown="MenuTopLevelRightClick">
+            <menu:ContextMenuService.ContextMenu>
+                <menu:ContextMenu>
+                    <local:SuperMenuItem Header="instructions" Click="MenuItemClick"/>
+                    <local:SuperMenuItem Header="about" Click="MenuItemClick"/>
+                </menu:ContextMenu>
+            </menu:ContextMenuService.ContextMenu>
+        </Button>
+    </StackPanel>
+</UserControl>
