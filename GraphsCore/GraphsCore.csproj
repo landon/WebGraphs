@@ -1,0 +1,115 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{079B33E9-0150-412B-B94F-08AA0170E580}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>GraphsCore</RootNamespace>
+    <AssemblyName>GraphsCore</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Profile24</TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{786C830F-07A1-408B-BD7F-6EE04809D6DB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <MinimumVisualStudioVersion>10.0</MinimumVisualStudioVersion>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <OldToolsVersion>4.0</OldToolsVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Batch.cs" />
+    <Compile Include="BrowsableAttribute.cs" />
+    <Compile Include="GraphIO.cs" />
+    <Compile Include="Index.cs" />
+    <Compile Include="Layout.cs" />
+    <Compile Include="Prepend.cs" />
+    <Compile Include="QuickLZ.cs" />
+    <Compile Include="Edge.cs" />
+    <Compile Include="Graph.cs" />
+    <Compile Include="GraphCanvas.cs" />
+    <Compile Include="IHittable.cs" />
+    <Compile Include="PolygonContainer.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Satsuma\AStar.cs" />
+    <Compile Include="Satsuma\BellmanFord.cs" />
+    <Compile Include="Satsuma\Bfs.cs" />
+    <Compile Include="Satsuma\CompleteBipartiteGraph.cs" />
+    <Compile Include="Satsuma\CompleteGraph.cs" />
+    <Compile Include="Satsuma\Connectivity.cs" />
+    <Compile Include="Satsuma\ContractedGraph.cs" />
+    <Compile Include="Satsuma\Dfs.cs" />
+    <Compile Include="Satsuma\Dijsktra.cs" />
+    <Compile Include="Satsuma\DisjointSet.cs" />
+    <Compile Include="Satsuma\Graph.cs" />
+    <Compile Include="Satsuma\IO.cs" />
+    <Compile Include="Satsuma\IO.GraphML.cs" />
+    <Compile Include="Satsuma\Layout.cs" />
+    <Compile Include="Satsuma\Matching.cs" />
+    <Compile Include="Satsuma\MaximumMatching.cs" />
+    <Compile Include="Satsuma\MinimumCostMatching.cs" />
+    <Compile Include="Satsuma\NetworkSimplex.cs" />
+    <Compile Include="Satsuma\Path.cs" />
+    <Compile Include="Satsuma\Preflow.cs" />
+    <Compile Include="Satsuma\PriorityQueue.cs" />
+    <Compile Include="Satsuma\RedirectedGraph.cs" />
+    <Compile Include="Satsuma\ReverseGraph.cs" />
+    <Compile Include="Satsuma\SpanningForest.cs" />
+    <Compile Include="Satsuma\Subgraph.cs" />
+    <Compile Include="Satsuma\Supergraph.cs" />
+    <Compile Include="Satsuma\Tsp.cs" />
+    <Compile Include="Satsuma\UndirectedGraph.cs" />
+    <Compile Include="Satsuma\Utils.cs" />
+    <Compile Include="SerializationClasses.cs" />
+    <Compile Include="TeXConverter.cs" />
+    <Compile Include="Utility.cs" />
+    <Compile Include="Vector.cs" />
+    <Compile Include="Vertex.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\GraphicsLayer\GraphicsLayer.csproj">
+      <Project>{82eb0f02-e510-4446-9d00-423414ec38e4}</Project>
+      <Name>GraphicsLayer</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Choosability\Choosability.csproj">
+      <Project>{2221b992-6478-462e-a865-eee305ffcae4}</Project>
+      <Name>Choosability</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
