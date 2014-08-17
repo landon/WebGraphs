@@ -1,0 +1,166 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{2221B992-6478-462E-A865-EEE305FFCAE4}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Choosability</RootNamespace>
+    <AssemblyName>Choosability</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Profile24</TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{786C830F-07A1-408B-BD7F-6EE04809D6DB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <MinimumVisualStudioVersion>10.0</MinimumVisualStudioVersion>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <OldToolsVersion>4.0</OldToolsVersion>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AssignmentEnumerator.cs" />
+    <Compile Include="ChoosabilityResult.cs" />
+    <Compile Include="Counting.cs" />
+    <Compile Include="Delegates.cs" />
+    <Compile Include="FixerBreaker\Board.cs" />
+    <Compile Include="FixerBreaker\Chronicle\BranchGenerator.cs" />
+    <Compile Include="FixerBreaker\Chronicle\ChronicledBranch.cs" />
+    <Compile Include="FixerBreaker\KnowledgeEngine\IMind.cs" />
+    <Compile Include="FixerBreaker\KnowledgeEngine\Slim\SortedIntList.cs" />
+    <Compile Include="FixerBreaker\KnowledgeEngine\Slim\Super\Hashing.cs" />
+    <Compile Include="FixerBreaker\KnowledgeEngine\Slim\Super\SuperSlimBoard.cs" />
+    <Compile Include="FixerBreaker\KnowledgeEngine\Slim\Super\SuperSlimColoringAnalyzer.cs" />
+    <Compile Include="FixerBreaker\KnowledgeEngine\Slim\Super\SuperSlimMind.cs" />
+    <Compile Include="FixerBreaker\KnowledgeEngine\Slim\Super\SuperSlimSwapAnalyzer.cs" />
+    <Compile Include="OneFactorizationsOfCompleteGraph.cs" />
+    <Compile Include="Polynomials\FactoredRational.cs" />
+    <Compile Include="Polynomials\GraphPolynomial.cs" />
+    <Compile Include="Polynomials\Normalizer.cs" />
+    <Compile Include="FixerBreaker\SlowBoard.cs" />
+    <Compile Include="FixerBreaker\Enumerations.cs" />
+    <Compile Include="FixerBreaker\KnowledgeEngine\BoardKnowledge.cs" />
+    <Compile Include="FixerBreaker\KnowledgeEngine\ColoringAnalyzer.cs" />
+    <Compile Include="FixerBreaker\KnowledgeEngine\CommonColorAnalyzer.cs" />
+    <Compile Include="FixerBreaker\KnowledgeEngine\GoodnessAnalyzer.cs" />
+    <Compile Include="FixerBreaker\KnowledgeEngine\GraphKnowledge.cs" />
+    <Compile Include="FixerBreaker\KnowledgeEngine\IBoardAnalyzer.cs" />
+    <Compile Include="FixerBreaker\KnowledgeEngine\KiersteadAnalyzer.cs" />
+    <Compile Include="FixerBreaker\KnowledgeEngine\Knowledge.cs" />
+    <Compile Include="FixerBreaker\KnowledgeEngine\KnowledgeTree.cs" />
+    <Compile Include="FixerBreaker\KnowledgeEngine\MetaKnowledge.cs" />
+    <Compile Include="FixerBreaker\KnowledgeEngine\Mind.cs" />
+    <Compile Include="FixerBreaker\KnowledgeEngine\PotKnowledge.cs" />
+    <Compile Include="FixerBreaker\KnowledgeEngine\ReductionAnalyzer.cs" />
+    <Compile Include="FixerBreaker\KnowledgeEngine\Slim\SlimMind.cs" />
+    <Compile Include="FixerBreaker\KnowledgeEngine\Slim\SlimSwapAnalyzer.cs" />
+    <Compile Include="FixerBreaker\KnowledgeEngine\SubTemplateAnalyzer.cs" />
+    <Compile Include="FixerBreaker\KnowledgeEngine\SwapAnalyzer.cs" />
+    <Compile Include="FixerBreaker\KnowledgeEngine\Template.cs" />
+    <Compile Include="FixerBreaker\KnowledgeEngine\TemplateKnowledge.cs" />
+    <Compile Include="FixerBreaker\KnowledgeEngine\ThoughtProgress.cs" />
+    <Compile Include="FixerBreaker\Move.cs" />
+    <Compile Include="FixerBreaker\Tree.cs" />
+    <Compile Include="GenericExtensions.cs" />
+    <Compile Include="Graph.cs" />
+    <Compile Include="Graphs.cs" />
+    <Compile Include="HereditaryClassEnumeration.cs" />
+    <Compile Include="Int32Usage.cs" />
+    <Compile Include="Mozhan.cs" />
+    <Compile Include="OnlineChoiceHashGraph.cs" />
+    <Compile Include="OrientationHashGraph.cs" />
+    <Compile Include="Int64Usage.cs" />
+    <Compile Include="PolynomialMasterFuncLib.cs" />
+    <Compile Include="Polynomials\PrimeNumbers.cs" />
+    <Compile Include="Polynomials\SignLookup.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SubsetEnumerator.cs" />
+    <Compile Include="TransitivePartition.cs" />
+    <Compile Include="UnpermutedAssignmentEnumerator.cs" />
+    <Compile Include="Utility\EquivalenceRelation.cs" />
+    <Compile Include="Utility\Factoradic.cs" />
+    <Compile Include="Utility\Flows.cs" />
+    <Compile Include="Utility\LinqExtensions.cs" />
+    <Compile Include="Utility\ListUtility.cs" />
+    <Compile Include="Utility\PartialOrders.cs" />
+    <Compile Include="Utility\Permutation.cs" />
+    <Compile Include="Utility\SafeCollection.cs" />
+    <Compile Include="Utility\ThreadLocal.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\BitLevelGeneration\BitLevelGeneration.csproj">
+      <Project>{fc557259-af5c-461c-9faa-b0fb01f1a947}</Project>
+      <Name>BitLevelGeneration</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PortableFuncLib\PortableFuncLib.csproj">
+      <Project>{1bb8a17f-4911-4e70-a18a-b503ba869b3a}</Project>
+      <Name>PortableFuncLib</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
