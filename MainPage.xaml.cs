@@ -21,6 +21,7 @@ using System.Windows.Browser;
 using GraphsCore;
 using BitLevelGeneration;
 using Choosability.Polynomials;
+using SLPropertyGrid.MultiObject;
 
 namespace WebGraphs
 {
@@ -78,7 +79,6 @@ namespace WebGraphs
             _mainMenu.ClearOrientation += ClearOrientation;
             _mainMenu.AnalyzeOnlyNearColorings += AnalyzeOnlyNearColorings;
             _mainMenu.AnalyzeOnlyNearColoringsForSelectedEdge += AnalyzeOnlyNearColoringsForSelectedEdge;
-            _mainMenu.LabelWithChoose += LabelWithChoose;
             
             _propertyGrid.SomethingChanged += _propertyGrid_SomethingChanged;
 
@@ -690,22 +690,6 @@ trash can button.
                 return;
 
             tabCanvas.Operations.DoClearLabels("d-1", AlgorithmBlob.Create(SelectedTabCanvas).SelectedVertices);
-        }
-        void LabelWithChoose()
-        {
-            var f = new ChooseLabelWindow();
-            f.Finished = label =>
-                {
-                    if (label != null)
-                    {
-                        var tabCanvas = SelectedTabCanvas;
-                        if (tabCanvas == null)
-                            return;
-
-                        tabCanvas.Operations.DoClearLabels(label, AlgorithmBlob.Create(SelectedTabCanvas).SelectedVertices);
-                    }
-                };
-            f.Show();
         }
 
         void ClearLabels()

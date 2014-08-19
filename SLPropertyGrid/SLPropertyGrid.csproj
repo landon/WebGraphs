@@ -53,6 +53,7 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.CSharp, Version=5.0.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="mscorlib" />
     <Reference Include="System.Windows" />
     <Reference Include="system" />
@@ -97,6 +98,8 @@
     <Compile Include="MultilineStringEditorChildWindow.xaml.cs">
       <DependentUpon>MultilineStringEditorChildWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="MultiObject\MultiObject.cs" />
+    <Compile Include="MultiObject\PropertySettingNotificationTypeWrapperBuilder.cs" />
     <Compile Include="NestedObjectValueEditor.cs" />
     <Compile Include="DateTimeValueEditor.cs" />
     <Compile Include="DisplayNameAttribute.cs" />

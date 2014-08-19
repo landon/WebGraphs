@@ -88,10 +88,10 @@ namespace Graphs
             return bounds;
         }
 
-        [Browsable(true)]
+        [Browsable(false)]
         public GraphicsLayer.ARGB Color { get; set; }
 
-        [Browsable(true)]
+        [Browsable(false)]
         public int Modifier { get; set; }
 
         [Browsable(false)]

@@ -104,7 +104,7 @@
                     <menu:Separator/>
                     <local:SuperMenuItem Header="selected with 'd'" Click="MenuItemClick"/>
                     <local:SuperMenuItem Header="selected with 'd-1'" Click="MenuItemClick"/>
-                    <local:SuperMenuItem Header="selected with ..." Click="MenuItemClick"/>
+
                     <menu:Separator/>
                     <local:SuperMenuItem Header="clear selected" Click="MenuItemClick"/>
                 </menu:ContextMenu>

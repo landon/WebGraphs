@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using SLPropertyGrid.MultiObject;
 
 namespace WebGraphs
 {
@@ -124,10 +125,11 @@ namespace WebGraphs
         {
             set 
             {
-                if (value != null && value.Count() == 1)
+                PropertyGrid.SelectedObject = new MultiObject(value).Representative;
+                /*if (value != null && value.Count() == 1)
                     PropertyGrid.SelectedObject = value.FirstOrDefault();
                 else
-                    PropertyGrid.SelectedObject = null;
+                    PropertyGrid.SelectedObject = null;*/
             }
         }
 
