@@ -122,6 +122,7 @@
             <menu:ContextMenuService.ContextMenu>
                 <menu:ContextMenu>
                     <local:SuperMenuItem Header="check f-paintable" Click="MenuItemClick"/>
+                    <local:SuperMenuItem Header="check (f:g)-paintable" Click="MenuItemClick"/>
                     <local:SuperMenuItem Header="check d1-paintable" Click="MenuItemClick"/>
                     <local:SuperMenuItem Header="check 2-fold d1-paintable" Click="MenuItemClick"/>
                 </menu:ContextMenu>

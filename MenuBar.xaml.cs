@@ -64,6 +64,7 @@ namespace WebGraphs
         public event Action ClearOrientation;
         public event Action AnalyzeOnlyNearColorings;
         public event Action AnalyzeOnlyNearColoringsForSelectedEdge;
+        public event Action CheckFGPaintable;
 
         public MenuBar()
         {
@@ -241,6 +242,9 @@ namespace WebGraphs
                     break;
                 case "analyze only near colorings for selected edge":
                     A(AnalyzeOnlyNearColoringsForSelectedEdge);
+                    break;
+                case "check (f:g)-paintable":
+                    A(CheckFGPaintable);
                     break;
             }
         }

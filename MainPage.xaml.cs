@@ -79,6 +79,7 @@ namespace WebGraphs
             _mainMenu.ClearOrientation += ClearOrientation;
             _mainMenu.AnalyzeOnlyNearColorings += AnalyzeOnlyNearColorings;
             _mainMenu.AnalyzeOnlyNearColoringsForSelectedEdge += AnalyzeOnlyNearColoringsForSelectedEdge;
+            _mainMenu.CheckFGPaintable += CheckFGPaintable;
             
             _propertyGrid.SomethingChanged += _propertyGrid_SomethingChanged;
 
@@ -906,12 +907,43 @@ trash can button.
             }
         }
 
+        bool ParseListAndDemandSizes(AlgorithmBlob blob, ResultWindow resultWindow, out List<int> f, out List<int> g)
+        {
+            f = new List<int>();
+            g = new List<int>();
+
+            foreach (var v in blob.AlgorithmGraph.Vertices)
+            {
+                var s = blob.UIGraph.Vertices[v].Label.Trim(' ', '(', ')');
+                var parts = s.Split(new[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Length < 2)
+                    goto fail;
+
+                var fv = ParseDegreeDependentString(parts[0], blob.AlgorithmGraph.Degree(v));
+                var gv = ParseDegreeDependentString(parts[1], blob.AlgorithmGraph.Degree(v));
+
+                if (fv < 0 || gv < 0)
+                    goto fail;
+
+                f.Add(fv);
+                g.Add(gv);
+
+                continue;
+        
+            fail:
+                resultWindow.AddChild(new TextBlock() { Text = "label vertices with desired list sizes and demands like (d:2)\nunable to parse " + blob.UIGraph.Vertices[v].Label });
+                return false;
+            }
+
+            return true;
+        }
+
         List<int> ParseListSizes(AlgorithmBlob blob, ResultWindow resultWindow)
         {
             var listSizes = new List<int>();
             foreach (var v in blob.AlgorithmGraph.Vertices)
             {
-                var s = ParseListSizeString(blob.UIGraph.Vertices[v].Label, blob.AlgorithmGraph.Degree(v));
+                var s = ParseDegreeDependentString(blob.UIGraph.Vertices[v].Label, blob.AlgorithmGraph.Degree(v));
 
                 if (s < 0)
                 {
@@ -1075,6 +1107,30 @@ trash can button.
                 resultWindow.AddChild(new TextBlock() { Text = (paintable ? "is f-paintable" : "not f-paintable") + Environment.NewLine + Choosability.Graph.NodesVisited + " nodes visited" + Environment.NewLine + Choosability.Graph.CacheHits + " cache hits" });
             }
         }
+
+        async void CheckFGPaintable()
+        {
+            var blob = AlgorithmBlob.Create(SelectedTabCanvas);
+            if (blob == null)
+                return;
+
+            using (var resultWindow = new ResultWindow())
+            {
+                List<int> f;
+                List<int> g;
+                if (!ParseListAndDemandSizes(blob, resultWindow, out f, out g))
+                    return;
+
+                var paintable = false;
+                await Task.Factory.StartNew(() =>
+                {
+                    paintable = blob.AlgorithmGraph.IsOnlineFGChoosable(v => f[v], v => g[v]);
+                });
+
+                resultWindow.AddChild(new TextBlock() { Text = (paintable ? "is (f:g)-paintable" : "not (f:g)-paintable") + Environment.NewLine + Choosability.Graph.NodesVisited + " nodes visited" + Environment.NewLine + Choosability.Graph.CacheHits + " cache hits" });
+            }
+        }
+        
         async void Check2FoldD1Paintable()
         {
             var blob = AlgorithmBlob.Create(SelectedTabCanvas);
@@ -1146,31 +1202,21 @@ trash can button.
             });
         }
 
-        int ParseListSizeString(string p, int degree)
+        int ParseDegreeDependentString(string p, int degree)
         {
-            p = p.ToLower().Replace(" ", "");
-
-            int x;
-            if (int.TryParse(p, out x))
-                return x;
-
-            if (p == "d")
-                return degree;
-
-            if (p.Length < 3)
+            if (string.IsNullOrEmpty(p))
                 return -1;
 
-            int modifier;
-            if (!int.TryParse(p.Substring(2), out modifier))
-                return -1;
+            var code = string.Format("var d = {0};{1};", degree, p);
 
-            if (p.StartsWith("d+"))
-                return degree + modifier;
-            if (p.StartsWith("d-"))
-                return degree - modifier;
-
+            try
+            {
+                return Convert.ToInt32(HtmlPage.Window.Eval(code));
+            }
+            catch { }
             return -1;
         }
+
         void FindATNumber()
         {
         }
