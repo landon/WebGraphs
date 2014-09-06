@@ -171,7 +171,7 @@ namespace WebGraphs
                 case "find paint number":
                     A(FindPaintNumber);
                     break;
-                case "Export TeX to clipboard":
+                case "Export TeX":
                     A(ExportTeX);
                     break;
                 case "analyze":

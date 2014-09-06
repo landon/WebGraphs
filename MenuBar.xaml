@@ -60,13 +60,12 @@
                     <local:SuperMenuItem Header="Close All" Click="MenuItemClick"/>
                     <menu:Separator/>
                     <local:SuperMenuItem Header="Export web link" Click="MenuItemClick"/>
-                    <local:SuperMenuItem Header="Export mobile web link" Click="MenuItemClick"/>
                     <menu:Separator/>
                     <local:SuperMenuItem Header="Export graph6" Click="MenuItemClick"/>
                     <local:SuperMenuItem Header="Export edge weights" Click="MenuItemClick"/>
                     <local:SuperMenuItem Header="Export adjacency matrix" Click="MenuItemClick"/>
                     <menu:Separator/>
-                    <local:SuperMenuItem Header="Export TeX to clipboard" Click="MenuItemClick"/>
+                    <local:SuperMenuItem Header="Export TeX" Click="MenuItemClick"/>
                 </menu:ContextMenu>
             </menu:ContextMenuService.ContextMenu>
         </Button>

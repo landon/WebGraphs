@@ -712,11 +712,7 @@ trash can button.
             var tikz = TeXConverter.ToTikz(tabCanvas.Operations);
             if (!string.IsNullOrEmpty(tikz))
             {
-                try
-                {
-                    tabCanvas.SetClipboardText(tikz);
-                }
-                catch { }
+                ShowText(tikz);
             }
         }
 
@@ -775,7 +771,8 @@ trash can button.
                 var t = new TextBox();
                 t.IsReadOnly = true;
                 t.Text = s;
-
+                t.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
+                t.Height = 250;
                 r.AddChild(t);
                 r.Show();
             }
