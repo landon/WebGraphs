@@ -13,6 +13,7 @@ using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using SLPropertyGrid.MultiObject;
+using System.Collections.Generic;
 
 namespace WebGraphs
 {
@@ -22,6 +23,7 @@ namespace WebGraphs
         public Canvas Canvas { get; private set; }
         public GraphCanvas Operations { get; private set; }
         SLPropertyGrid.PropertyGrid PropertyGrid { get; set; }
+        Dictionary<Type, Tuple<List<FrameworkElement>, List<FrameworkElement>>> _typedChildren = new Dictionary<Type, Tuple<List<FrameworkElement>, List<FrameworkElement>>>();
 
         public TabCanvas(Canvas canvas, GraphCanvas graphCanvas, SLPropertyGrid.PropertyGrid propertyGrid)
         {
@@ -30,10 +32,10 @@ namespace WebGraphs
             Operations.Canvas = this;
             PropertyGrid = propertyGrid;
 
-            Canvas.MouseLeftButtonDown += image_MouseLeftButtonDown;
-            Canvas.MouseRightButtonDown += image_MouseRightButtonDown;
-            Canvas.MouseLeftButtonUp += image_MouseLeftButtonUp;
-            Canvas.MouseRightButtonUp += image_MouseRightButtonUp;
+            Canvas.MouseLeftButtonDown += OnMouseLeftButtonDown;
+            Canvas.MouseRightButtonDown += OnMouseRightButtonDown;
+            Canvas.MouseLeftButtonUp += OnMouseLeftButtonUp;
+            Canvas.MouseRightButtonUp += OnMouseRightButtonUp;
             Canvas.MouseMove += image_MouseMove;
 
             Canvas.Loaded += delegate { Invalidate(); };
@@ -47,7 +49,7 @@ namespace WebGraphs
                 MouseMoved(p.X, p.Y);
         }
 
-        void image_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        void OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             Canvas.CaptureMouse();
 
@@ -64,7 +66,7 @@ namespace WebGraphs
                     MouseButtonDown(p.X, p.Y, MouseButton.Left);
             }
         }
-        void image_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        void OnMouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
             var p = e.GetPosition(Canvas);
 
@@ -79,7 +81,7 @@ namespace WebGraphs
                     MouseButtonDown(p.X, p.Y, MouseButton.Right);
             }
         }
-        void image_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        void OnMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             Canvas.ReleaseMouseCapture();
 
@@ -88,7 +90,7 @@ namespace WebGraphs
             if (MouseButtonUp != null)
                 MouseButtonUp(p.X, p.Y, MouseButton.Left);
         }
-        void image_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
+        void OnMouseRightButtonUp(object sender, MouseButtonEventArgs e)
         {
             var p = e.GetPosition(Canvas);
 
@@ -135,10 +137,12 @@ namespace WebGraphs
 
         public void Invalidate()
         {
-            var g = new Graphics(Canvas);
+            var g = new FastGraphics(Canvas, _typedChildren);
             Canvas.Clip = new RectangleGeometry() { Rect = new Rect(0, 0, Canvas.ActualWidth, Canvas.ActualHeight) };
 
             Operations.Paint(g, (int)Canvas.ActualWidth, (int)Canvas.ActualHeight);
+
+            g.FinalizeGraphics();
         }
 
         public string Title

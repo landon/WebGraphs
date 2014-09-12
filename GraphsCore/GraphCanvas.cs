@@ -506,7 +506,7 @@ namespace Graphs
         }
         #endregion
 
-         void PaintGrid(IGraphics g)
+        void PaintGrid(IGraphics g)
         {
             if (!DrawGrid || GridStep <= 0)
                 return;

@@ -27,7 +27,7 @@ namespace Graphs
         public Vertex(double x, double y, string label)
         {
             _Location = new Vector(x, y);
-            _Label = label;
+            _label = label;
         }
 
         public Vertex(SerializationVertex v)
@@ -42,13 +42,13 @@ namespace Graphs
         {
             var bounds = ComputeBounds(g, width, height);
 
-            if (!string.IsNullOrEmpty(_Label))
+            if (!string.IsNullOrEmpty(_label))
             {
                 if (IsUniversal)
                     g.FillEllipse(UniversalVertexFillBrushColor, bounds);
 
                 g.DrawEllipse(_IsSelected ? BoundarySelectedPenColor : BoundaryPenColor, bounds, _IsSelected ? BoundarySelectedPenWidth : 1);
-                g.DrawString(_Label, LabelFont, LabelBrushColor, bounds);
+                g.DrawString(_label, LabelFont, LabelBrushColor, bounds);
             }
             else
             {
@@ -70,9 +70,9 @@ namespace Graphs
         {
             GraphicsLayer.Box bounds;
 
-            if (!string.IsNullOrEmpty(_Label))
+            if (!string.IsNullOrEmpty(_label))
             {
-                var size = g.MeasureString(_Label, LabelFont);
+                var size = g.MeasureString(_label, LabelFont);
 
                 bounds = new GraphicsLayer.Box(X * width - size.Width / 2, Y * height - size.Height / 2, size.Width, size.Height);
             }
@@ -138,14 +138,14 @@ namespace Graphs
         {
             get
             {
-                return _Label;
+                return _label;
             }
             set
             {
-                if (value == _Label)
+                if (value == _label)
                     return;
 
-                _Label = value;
+                _label = value;
             }
         }
 
@@ -224,7 +224,7 @@ namespace Graphs
 
         Vector _Location;
         GraphicsLayer.Box _DragOffset = GraphicsLayer.Box.Empty;
-        string _Label;
+        string _label;
         string _Style;
         bool _IsSelected;
 

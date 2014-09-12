@@ -136,6 +136,7 @@
     <Compile Include="ChooseTermWindow.xaml.cs">
       <DependentUpon>ChooseTermWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="FastGraphics.cs" />
     <Compile Include="Graphics.cs" />
     <Compile Include="HelperExtensions.cs" />
     <Compile Include="LayoutAnimation.cs" />
