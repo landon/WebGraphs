@@ -155,6 +155,7 @@
     <Compile Include="ResultWindow.xaml.cs">
       <DependentUpon>ResultWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Storage.cs" />
     <Compile Include="SuperMenuItem.cs" />
     <Compile Include="TabCanvas.cs" />
     <Compile Include="VisualizationWindow.xaml.cs">

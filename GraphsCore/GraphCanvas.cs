@@ -10,6 +10,8 @@ namespace Graphs
 {
     public class GraphCanvas : GraphicsLayer.IPaintable
     {
+        public event Action<Graph> GraphModified;
+
         const int BaseViewScale = 800;
         const int MaxZoomScale = 6000;
         const double ZoomDelta = 0.25;
@@ -90,7 +92,7 @@ namespace Graphs
         }
         public bool IsEmpty { get { return _graph.Vertices.Count <= 0; } }
 
-        States _State = States.Idle;
+        States _state = States.Idle;
         int _viewScale = BaseViewScale;
         double _Zoom = 1.0;
         Func<Choosability.Graph, Graph> _layoutEngine;
@@ -132,6 +134,9 @@ namespace Graphs
 
             _history.Add(new HistoricalGraph() { Graph = _graph.Clone(), Zoom = _Zoom, ViewScale = _viewScale });
             _historyIndex = _history.Count - 1;
+
+            if (GraphModified != null)
+                GraphModified(Graph);
         }
 
         public bool DoUndo()
@@ -161,6 +166,10 @@ namespace Graphs
             ViewScale = _history[_historyIndex].ViewScale;
             Zoom = _history[_historyIndex].Zoom;
             _graph.ParametersDirty = true;
+
+            if (GraphModified != null)
+                GraphModified(Graph);
+
             Invalidate();
         }
 
@@ -553,7 +562,7 @@ namespace Graphs
 
             _graph.Paint(g, _viewScale, _viewScale);
 
-            switch (_State)
+            switch (_state)
             {
                 case States.Idle:
                     break;
@@ -584,7 +593,7 @@ namespace Graphs
             var x = X / _viewScale;
             var y = Y / _viewScale;
 
-            switch (_State)
+            switch (_state)
             {
                 case States.Idle:
                     break;
@@ -629,7 +638,7 @@ namespace Graphs
 
             var o = GetHit(x, y);
 
-            switch (_State)
+            switch (_state)
             {
                 case States.Idle:
                     {
@@ -639,7 +648,7 @@ namespace Graphs
                             {
                                 _selectionPoints.Clear();
                                 _selectionPoints.Add(new Box(x, y));
-                                _State = States.DraggingSelectionRegion;
+                                _state = States.DraggingSelectionRegion;
                             }
                             else if (o is Vertex)
                             {
@@ -650,13 +659,13 @@ namespace Graphs
                                         v.DragOffset = new Box(v.X - x, v.Y - y);
                                     }
 
-                                    _State = States.DraggingSelectedVertices;
+                                    _state = States.DraggingSelectedVertices;
                                 }
                                 else
                                 {
                                     _DraggedVertex = (Vertex)o;
                                     _DraggedVertex.DragOffset = new Box(_DraggedVertex.X - x, _DraggedVertex.Y - y);
-                                    _State = States.DraggingVertex;
+                                    _state = States.DraggingVertex;
                                 }
                             }
                             else if (o is Edge)
@@ -692,7 +701,7 @@ namespace Graphs
 
             var o = GetHit(x, y);
 
-            switch (_State)
+            switch (_state)
             {
                 case States.Idle:
                     {
@@ -702,10 +711,12 @@ namespace Graphs
                     {
                         if (button == MouseButton.Left)
                         {
-                            _State = States.Idle;
+                            _state = States.Idle;
 
                             if (SnapToGrid)
                                 DoSnapToGrid();
+
+                            GraphChanged();
                         }
                         break;
                     }
@@ -713,7 +724,7 @@ namespace Graphs
                     {
                         if (button == MouseButton.Left)
                         {
-                            _State = States.Idle;
+                            _state = States.Idle;
 
                             List<Box> selectionPoints;
                             lock (_SelectionPointsToken)
@@ -735,7 +746,10 @@ namespace Graphs
                 case States.DraggingSelectedVertices:
                     {
                         if (button == MouseButton.Left)
-                            _State = States.Idle;
+                        {
+                            _state = States.Idle;
+                            GraphChanged();
+                        }
                         break;
                     }
             }
@@ -751,7 +765,7 @@ namespace Graphs
             var o = GetHit(x, y);
 
             var graphChanged = false;
-            switch (_State)
+            switch (_state)
             {
                 case States.Idle:
                 case States.DraggingVertex:

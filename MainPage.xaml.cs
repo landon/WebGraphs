@@ -22,6 +22,7 @@ using GraphsCore;
 using BitLevelGeneration;
 using Choosability.Polynomials;
 using SLPropertyGrid.MultiObject;
+using System.IO.IsolatedStorage;
 
 namespace WebGraphs
 {
@@ -136,8 +137,23 @@ namespace WebGraphs
             }
             catch { }
 
-            NewTab();
+            if (!LoadFromLocalStorage())
+                NewTab();
         }
+
+        bool LoadFromLocalStorage()
+        {
+            var loadedSomething = false;
+            foreach (var name in Storage.GetFileNames())
+            {
+                var g = Storage.Load(name);
+                AddTab(g, name);
+                loadedSomething = true;
+            }
+
+            return loadedSomething;
+        }
+
         void _propertyGrid_SomethingChanged()
         {
             var tabCanvas = SelectedTabCanvas;
@@ -208,11 +224,18 @@ namespace WebGraphs
             if (selected == null)
                 return;
 
+            var tc = (TabCanvas)selected.Tag;
+            Storage.Delete(tc.Title);
             _tabControl.Items.Remove(selected);
         }
 
         void CloseAllTabs()
         {
+            foreach (TabItem item in _tabControl.Items)
+            {
+                var tc = (TabCanvas)item.Tag;
+                Storage.Delete(tc.Title);
+            }
             _tabControl.Items.Clear();
         }
 

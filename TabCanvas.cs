@@ -14,6 +14,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using SLPropertyGrid.MultiObject;
 using System.Collections.Generic;
+using System.IO.IsolatedStorage;
+using System.IO;
 
 namespace WebGraphs
 {
@@ -40,6 +42,13 @@ namespace WebGraphs
 
             Canvas.Loaded += delegate { Invalidate(); };
             Canvas.SizeChanged += delegate { Invalidate(); };
+
+            Operations.GraphModified += OnGraphModified;
+        }
+
+        void OnGraphModified(Graph g)
+        {
+            Storage.Save(g, Title);
         }
 
         void image_MouseMove(object sender, MouseEventArgs e)
@@ -128,10 +137,6 @@ namespace WebGraphs
             set 
             {
                 PropertyGrid.SelectedObject = new MultiObject(value).Representative;
-                /*if (value != null && value.Count() == 1)
-                    PropertyGrid.SelectedObject = value.FirstOrDefault();
-                else
-                    PropertyGrid.SelectedObject = null;*/
             }
         }
 
