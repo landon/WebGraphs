@@ -34,10 +34,11 @@ namespace GraphsCore
                 bw.Write((byte)g.Vertices.Count);
                 foreach (var v in g.Vertices)
                 {
-                    bw.Write((UInt16)(v.X * Scale));
-                    bw.Write((UInt16)(v.Y * Scale));
-                    bw.Write((UInt16)(v.Padding * Scale));
+                    bw.Write((UInt16)Math.Round(v.X * Scale));
+                    bw.Write((UInt16)Math.Round(v.Y * Scale));
+                    bw.Write((UInt16)Math.Round(v.Padding * Scale));
                     bw.Write(v.Label);
+                    bw.Write(v.Style);
                 }
 
                 bw.Write((UInt16)g.Edges.Count);
@@ -47,7 +48,8 @@ namespace GraphsCore
                     bw.Write((byte)(g.Vertices.IndexOf(e.V2)));
                     bw.Write((byte)e.Multiplicity);
                     bw.Write((byte)e.Orientation);
-                    bw.Write((UInt16)(e.Thickness * 100));
+                    bw.Write((UInt16)Math.Round(e.Thickness * 100));
+                    bw.Write(e.Style);
                 }
 
                 return m.ToArray();
@@ -74,10 +76,10 @@ namespace GraphsCore
             using (var br = new BinaryReader(m, Encoding.UTF8))
             {
                 var n = br.ReadByte();
-                var vertices = Enumerable.Range(0, n).Select(_ => new Vertex((double)br.ReadUInt16() / Scale, (double)br.ReadUInt16() / Scale) { Padding = (float)br.ReadUInt16() / Scale, Label = br.ReadString() }).ToList();
+                var vertices = Enumerable.Range(0, n).Select(_ => new Vertex((double)br.ReadUInt16() / Scale, (double)br.ReadUInt16() / Scale) { Padding = (float)br.ReadUInt16() / Scale, Label = br.ReadString(), Style = br.ReadString() }).ToList();
 
                 var e = br.ReadUInt16();
-                var edges = Enumerable.Range(0, e).Select(_ => new Edge(vertices[br.ReadByte()], vertices[br.ReadByte()]) { Multiplicity = br.ReadByte(), Orientation = (Edge.Orientations)br.ReadByte(), Thickness = (float)br.ReadUInt16() / 100 }).ToList();
+                var edges = Enumerable.Range(0, e).Select(_ => new Edge(vertices[br.ReadByte()], vertices[br.ReadByte()]) { Multiplicity = br.ReadByte(), Orientation = (Edge.Orientations)br.ReadByte(), Thickness = (float)br.ReadUInt16() / 100, Style = br.ReadString() }).ToList();
 
                 return new Graph(vertices, edges);
             }
