@@ -11,6 +11,41 @@
     x:Class="WebGraphs.MainPage"
     mc:Ignorable="d"
     d:DesignHeight="500" d:DesignWidth="1000">
+    
+    <UserControl.Resources>
+        <Style TargetType="Button" x:Key="ButtonStyle">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid x:Name="RootElement" Background="Transparent">
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup x:Name="CommonStates">
+                                    <VisualState x:Name="MouseOver">
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="buttonScale" Storyboard.TargetProperty="ScaleX" To="1.2" Duration="00:00:00.25"/>
+                                            <DoubleAnimation Storyboard.TargetName="buttonScale" Storyboard.TargetProperty="ScaleY" To="1.2" Duration="00:00:00.25" />
+                                        </Storyboard>
+                                    </VisualState>
+                                    <VisualState x:Name="Pressed">
+                                        <Storyboard>
+                                            <DoubleAnimation Storyboard.TargetName="buttonScale" Storyboard.TargetProperty="ScaleX" To="1.4" Duration="00:00:00.25" />
+                                            <DoubleAnimation Storyboard.TargetName="buttonScale" Storyboard.TargetProperty="ScaleY" To="1.4" Duration="00:00:00.25" />
+                                        </Storyboard>
+                                    </VisualState>
+                                    <VisualState x:Name="Normal"/>
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
+                            <ContentPresenter Content="{TemplateBinding Content}" RenderTransformOrigin="0.5,0.5">
+                                <ContentPresenter.RenderTransform>
+                                    <ScaleTransform x:Name="buttonScale" />
+                                </ContentPresenter.RenderTransform>
+                            </ContentPresenter>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
 
     <toolkit:DockPanel LastChildFill="True">
         <toolkit:DockPanel LastChildFill="True" toolkit:DockPanel.Dock="Top">
@@ -19,61 +54,83 @@
         </toolkit:DockPanel>
     
         <StackPanel Orientation="Horizontal" toolkit:DockPanel.Dock="Top">
-            <Image Source="/images/new.png" Height="36" Width="36" Margin="3" MouseLeftButtonDown="ToolStripButtonClicked">
-                <ToolTipService.ToolTip>
-                    <ToolTip Content="New"/>
-                </ToolTipService.ToolTip>
-            </Image>
-            <Image Source="/images/delete.png" Height="36" Width="36" Margin="3" MouseLeftButtonDown="ToolStripButtonClicked">
-                <ToolTipService.ToolTip>
-                    <ToolTip Content="Delete"/>
-                </ToolTipService.ToolTip>
-            </Image>
-            <Image Source="/images/cut.png" Height="36" Width="36" Margin="3" MouseLeftButtonDown="ToolStripButtonClicked">
-                <ToolTipService.ToolTip>
-                    <ToolTip Content="Cut"/>
-                </ToolTipService.ToolTip>
-            </Image>
-            <Image Source="/images/copy.png" Height="36" Width="36" Margin="3" MouseLeftButtonDown="ToolStripButtonClicked">
-                <ToolTipService.ToolTip>
-                    <ToolTip Content="Copy"/>
-                </ToolTipService.ToolTip>
-            </Image>
-            <Image Source="/images/paste.png" Height="36" Width="36" Margin="3" MouseLeftButtonDown="ToolStripButtonClicked">
-                <ToolTipService.ToolTip>
-                    <ToolTip Content="Paste"/>
-                </ToolTipService.ToolTip>
-            </Image>
-            <Image Source="/images/zoom fit.png" Height="36" Width="36" Margin="3" MouseLeftButtonDown="ToolStripButtonClicked">
-                <ToolTipService.ToolTip>
-                    <ToolTip Content="Zoom Fit"/>
-                </ToolTipService.ToolTip>
-            </Image>
-            <Image Source="/images/complement.png" Height="36" Width="36" Margin="3" MouseLeftButtonDown="ToolStripButtonClicked">
-                <ToolTipService.ToolTip>
-                    <ToolTip Content="Complement Selected"/>
-                </ToolTipService.ToolTip>
-            </Image>
-            <Image Source="/images/line graph.png" Height="36" Width="36" Margin="3" MouseLeftButtonDown="ToolStripButtonClicked">
-                <ToolTipService.ToolTip>
-                    <ToolTip Content="Take Line Graph"/>
-                </ToolTipService.ToolTip>
-            </Image>
-            <Image Source="/images/clear.png" Height="36" Width="36" Margin="3" MouseLeftButtonDown="ToolStripButtonClicked">
-                <ToolTipService.ToolTip>
-                    <ToolTip Content="Clear Selected Labels"/>
-                </ToolTipService.ToolTip>
-            </Image>
-            <Image Source="/images/compress-hi.png" Height="36" Width="36" Margin="3" MouseLeftButtonDown="ToolStripButtonClicked">
-                <ToolTipService.ToolTip>
-                    <ToolTip Content="Contract Selected"/>
-                </ToolTipService.ToolTip>
-            </Image>
-            <Image Source="/images/squared.png" Height="36" Width="36" Margin="3" MouseLeftButtonDown="ToolStripButtonClicked">
-                <ToolTipService.ToolTip>
-                    <ToolTip Content="Take Square"/>
-                </ToolTipService.ToolTip>
-            </Image>
+            <Button Height="36" Width="36" Style="{StaticResource ButtonStyle}">
+                <Image Source="/images/new.png" MouseLeftButtonDown="ToolStripButtonClicked">
+                    <ToolTipService.ToolTip>
+                        <ToolTip Content="New"/>
+                    </ToolTipService.ToolTip>
+                </Image>
+            </Button>
+            <Button Height="36" Width="36" Style="{StaticResource ButtonStyle}">
+                <Image Source="/images/delete.png" MouseLeftButtonDown="ToolStripButtonClicked">
+                    <ToolTipService.ToolTip>
+                        <ToolTip Content="Delete"/>
+                    </ToolTipService.ToolTip>
+                </Image>
+            </Button>
+            <Button Height="36" Width="36" Style="{StaticResource ButtonStyle}">
+                <Image Source="/images/cut.png" MouseLeftButtonDown="ToolStripButtonClicked">
+                    <ToolTipService.ToolTip>
+                        <ToolTip Content="Cut"/>
+                    </ToolTipService.ToolTip>
+                </Image>
+            </Button>
+            <Button Height="36" Width="36" Style="{StaticResource ButtonStyle}">
+                <Image Source="/images/copy.png" MouseLeftButtonDown="ToolStripButtonClicked">
+                    <ToolTipService.ToolTip>
+                        <ToolTip Content="Copy"/>
+                    </ToolTipService.ToolTip>
+                </Image>
+            </Button>
+            <Button Height="36" Width="36" Style="{StaticResource ButtonStyle}">
+                <Image Source="/images/paste.png"  MouseLeftButtonDown="ToolStripButtonClicked">
+                    <ToolTipService.ToolTip>
+                        <ToolTip Content="Paste"/>
+                    </ToolTipService.ToolTip>
+                </Image>
+            </Button>
+            <Button Height="36" Width="36" Style="{StaticResource ButtonStyle}">
+                <Image Source="/images/zoom fit.png" MouseLeftButtonDown="ToolStripButtonClicked">
+                    <ToolTipService.ToolTip>
+                        <ToolTip Content="Zoom Fit"/>
+                    </ToolTipService.ToolTip>
+                </Image>
+            </Button>
+            <Button Height="36" Width="36" Style="{StaticResource ButtonStyle}">
+                <Image Source="/images/complement.png" MouseLeftButtonDown="ToolStripButtonClicked">
+                    <ToolTipService.ToolTip>
+                        <ToolTip Content="Complement Selected"/>
+                    </ToolTipService.ToolTip>
+                </Image>
+            </Button>
+            <Button Height="36" Width="36" Style="{StaticResource ButtonStyle}">
+                <Image Source="/images/line graph.png" MouseLeftButtonDown="ToolStripButtonClicked">
+                    <ToolTipService.ToolTip>
+                        <ToolTip Content="Take Line Graph"/>
+                    </ToolTipService.ToolTip>
+                </Image>
+            </Button>
+            <Button Height="36" Width="36" Style="{StaticResource ButtonStyle}">
+                <Image Source="/images/clear.png"  MouseLeftButtonDown="ToolStripButtonClicked">
+                    <ToolTipService.ToolTip>
+                        <ToolTip Content="Clear Selected Labels"/>
+                    </ToolTipService.ToolTip>
+                </Image>
+            </Button>
+            <Button Height="36" Width="36" Style="{StaticResource ButtonStyle}">
+                <Image Source="/images/compress-hi.png" MouseLeftButtonDown="ToolStripButtonClicked">
+                    <ToolTipService.ToolTip>
+                        <ToolTip Content="Contract Selected"/>
+                    </ToolTipService.ToolTip>
+                </Image>
+            </Button>
+            <Button Height="36" Width="36" Margin="8,0,0,0" Style="{StaticResource ButtonStyle}">
+                <Image Source="/images/squared.png" MouseLeftButtonDown="ToolStripButtonClicked">
+                    <ToolTipService.ToolTip>
+                        <ToolTip Content="Take Square"/>
+                    </ToolTipService.ToolTip>
+                </Image>
+            </Button>
         </StackPanel>
         <Grid toolkit:DockPanel.Dock="Right" Width="250" Margin="0, 21, 0, 0" x:Name="_propertiesContainer">
             <Grid.RowDefinitions>
