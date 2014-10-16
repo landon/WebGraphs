@@ -91,6 +91,17 @@ namespace WebGraphs
         {
             try
             {
+                var c = HtmlPage.Window.Invoke("GetURLParameter", "c") as string;
+                if (!string.IsNullOrEmpty(c))
+                {
+                    AddTab(CompactSerializer.Deserialize(c), FindUnusedName());
+                    return;
+                }
+            }
+            catch { }
+
+            try
+            {
                 var jib = HtmlPage.Window.Invoke("GetURLParameter", "jib") as string;
                 if (!string.IsNullOrEmpty(jib))
                 {
@@ -177,7 +188,7 @@ namespace WebGraphs
             item.Content = canvas;
             canvas.HorizontalAlignment = System.Windows.HorizontalAlignment.Stretch;
             canvas.VerticalAlignment = System.Windows.VerticalAlignment.Stretch;
-            var tabCanvas = new TabCanvas(canvas, new GraphCanvas(g), _propertyGrid);
+            var tabCanvas = new TabCanvas(canvas, new GraphCanvas(g), _propertyGrid, item);
             tabCanvas.Title = name;
             item.Tag = tabCanvas;
 
@@ -745,11 +756,8 @@ trash can button.
             if (tabCanvas == null)
                 return;
 
-            var json = tabCanvas.Operations.Graph.Serialize();
-
-            var g = HttpUtility.UrlEncode(Utility.Compress(json));
-
-            var url = @"https://dl.dropboxusercontent.com/u/8609833/Web/WebGraphs/WebGraphsTestPage.html?jib=" + g;
+            var g = HttpUtility.UrlEncode(CompactSerializer.Serialize(tabCanvas.Operations.Graph));
+            var url = @"https://dl.dropboxusercontent.com/u/8609833/Web/WebGraphs/WebGraphsTestPage.html?c=" + g;
 
             try
             {

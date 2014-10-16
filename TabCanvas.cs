@@ -24,15 +24,17 @@ namespace WebGraphs
         string _title;
         public Canvas Canvas { get; private set; }
         public GraphCanvas Operations { get; private set; }
+        TabItem Container { get; set; }
         SLPropertyGrid.PropertyGrid PropertyGrid { get; set; }
         Dictionary<Type, Tuple<List<FrameworkElement>, List<FrameworkElement>>> _typedChildren = new Dictionary<Type, Tuple<List<FrameworkElement>, List<FrameworkElement>>>();
 
-        public TabCanvas(Canvas canvas, GraphCanvas graphCanvas, SLPropertyGrid.PropertyGrid propertyGrid)
+        public TabCanvas(Canvas canvas, GraphCanvas graphCanvas, SLPropertyGrid.PropertyGrid propertyGrid, TabItem container)
         {
             Operations = graphCanvas;
             Canvas = canvas;
             Operations.Canvas = this;
             PropertyGrid = propertyGrid;
+            Container = container;
 
             Canvas.MouseLeftButtonDown += OnMouseLeftButtonDown;
             Canvas.MouseRightButtonDown += OnMouseRightButtonDown;
@@ -44,6 +46,15 @@ namespace WebGraphs
             Canvas.SizeChanged += delegate { Invalidate(); };
 
             Operations.GraphModified += OnGraphModified;
+            Operations.NameModified += OnNameModified;
+        }
+
+        void OnNameModified(string name)
+        {
+            Storage.Delete(Title);
+            Title = name;
+            Container.Header = Title;
+            Storage.Save(Operations.Graph, Title);
         }
 
         void OnGraphModified(Graph g)

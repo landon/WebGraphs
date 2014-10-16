@@ -126,6 +126,12 @@ namespace Graphs
             Name = g.Name;
         }
 
+        public Graph(IEnumerable<Vertex> vertices, IEnumerable<Edge> edges)
+        {
+            _vertices = vertices.ToList();
+            _edges = edges.ToList();
+        }
+
         public Graph(Choosability.Graph g, List<Tuple<double, double>> position, bool directed = true)
             : this()
         {
@@ -399,7 +405,7 @@ namespace Graphs
         {
             return AddEdge(v1, v2, Edge.Orientations.None, multiplicity);
         }
-        public bool AddEdge(Vertex v1, Vertex v2, Edge.Orientations orientation, int multiplicity = 1)
+        public bool AddEdge(Vertex v1, Vertex v2, Edge.Orientations orientation, int multiplicity = 1, float thickness = 2)
         {
             if (v1 == v2)
             {
@@ -413,6 +419,7 @@ namespace Graphs
                 {
                     var edge = new Edge(v1, v2, orientation);
                     edge.Multiplicity = multiplicity;
+                    edge.Thickness = thickness;
                     _edges.Add(edge);
                     ParametersDirty = true;
 
@@ -492,7 +499,7 @@ namespace Graphs
                 {
                     Edge e;
                     if (EdgeExists(v1, v2, out e))
-                        induced.AddEdge(v1, v2, e.Orientation != Edge.Orientations.None ? Edge.Orientations.Forward : Edge.Orientations.None);
+                        induced.AddEdge(v1, v2, e.Orientation != Edge.Orientations.None ? Edge.Orientations.Forward : Edge.Orientations.None, e.Multiplicity, e.Thickness);
                 }
             }
 
@@ -505,7 +512,7 @@ namespace Graphs
                 AddVertex(v);
 
             foreach (var e in g.Edges)
-                AddEdge(e.V1, e.V2, e.Orientation, Math.Max(1, e.Multiplicity));
+                AddEdge(e.V1, e.V2, e.Orientation, Math.Max(1, e.Multiplicity), e.Thickness);
         }
 
         public List<Vertex> FindNeighbors(Vertex v)

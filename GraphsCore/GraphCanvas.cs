@@ -11,6 +11,7 @@ namespace Graphs
     public class GraphCanvas : GraphicsLayer.IPaintable
     {
         public event Action<Graph> GraphModified;
+        public event Action<string> NameModified;
 
         const int BaseViewScale = 800;
         const int MaxZoomScale = 6000;
@@ -249,9 +250,10 @@ namespace Graphs
             DoDelete();
         }
 
-        public void DoCopy()
+        public void DoCopy(bool verbose = false)
         {
-            var s = _graph.InducedSubgraph(_graph.SelectedVertices).Serialize();
+            var h =  _graph.InducedSubgraph(_graph.SelectedVertices);
+            var s = verbose ? h.Serialize() : CompactSerializer.Serialize(h);
 
             if (!string.IsNullOrEmpty(s))
             {
@@ -267,7 +269,7 @@ namespace Graphs
         public void DoPaste()
         {
             var s = Canvas.GetClipboardText();
-            var g = Graph.Deserialize(s);
+            var g = CompactSerializer.LooksLikeASerializedGraph(s) ? CompactSerializer.Deserialize(s) : Graph.Deserialize(s);
 
             if (g != null)
             {
@@ -304,7 +306,11 @@ namespace Graphs
 
                     if (g != null)
                     {
+                        var empty = _graph.Vertices.Count <= 0;
                         _graph.DisjointUnion(g);
+
+                        if (empty)
+                            NameModified(g.Name);
 
                         Invalidate();
                         GraphChanged();
