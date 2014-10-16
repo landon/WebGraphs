@@ -12,7 +12,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{DAADDB
 		.nuget\NuGet.Config = .nuget\NuGet.Config
 		.nuget\NuGet.exe = .nuget\NuGet.exe
 		..\..\..\..\..\Desktop\NuGet.targets = ..\..\..\..\..\Desktop\NuGet.targets
-		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BitLevelGeneration", "BitLevelGeneration\BitLevelGeneration.csproj", "{FC557259-AF5C-461C-9FAA-B0FB01F1A947}"
