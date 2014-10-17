@@ -268,8 +268,21 @@ namespace Graphs
         
         public void DoPaste()
         {
-            var s = Canvas.GetClipboardText();
-            var g = CompactSerializer.LooksLikeASerializedGraph(s) ? CompactSerializer.Deserialize(s) : Graph.Deserialize(s);
+            var s = Canvas.GetClipboardText() ?? "";
+
+            Graph g;
+            if (s.Contains("tikzpicture"))
+            {
+                g = TeXConverter.FromTikz(s);
+            }
+            else if (CompactSerializer.LooksLikeASerializedGraph(s))
+            {
+                g = CompactSerializer.Deserialize(s);
+            }
+            else
+            {
+                g = Graph.Deserialize(s);
+            }
 
             if (g != null)
             {

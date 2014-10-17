@@ -423,7 +423,7 @@ static class QuickLZ
                         hash = (int)(((fetch >> 12) ^ fetch) & (HASH_VALUES - 1));
                         hashtable[hash] = last_hashed;
                         hash_counter[hash] = 1;
-                        fetch = (uint)(fetch >> 8 & 0xffff | destination[last_hashed + 3] << 16);
+                        fetch = (uint)(fetch >> 8 & 0xffff | (uint)(destination[last_hashed + 3] << 16));
                     }
                     fetch = (uint)(source[src] | (source[src + 1] << 8) | (source[src + 2] << 16));
                 }
@@ -452,11 +452,11 @@ static class QuickLZ
                             hashtable[hash] = last_hashed;
                             hash_counter[hash] = 1;
                         }
-                        fetch = (uint)(fetch >> 8 & 0xffff | source[src + 2] << 16);
+                        fetch = (uint)(fetch >> 8 & 0xffff | (uint)(source[src + 2] << 16));
                     }
                     else
                     {
-                        fetch = (uint)(fetch >> 8 & 0xffff | source[src + 2] << 16 | source[src + 3] << 24);
+                        fetch = (uint)(fetch >> 8 & 0xffff | (uint)(source[src + 2] << 16) | (uint)(source[src + 3] << 24));
                     }
                 }
                 else

@@ -743,7 +743,7 @@ trash can button.
             if (tabCanvas == null)
                 return;
 
-            var tikz = TeXConverter.ToTikz(tabCanvas.Operations);
+            var tikz = TeXConverter.ToTikz(tabCanvas.Operations.Graph);
             if (!string.IsNullOrEmpty(tikz))
             {
                 ShowText(tikz);

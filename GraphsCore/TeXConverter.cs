@@ -2,16 +2,67 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Graphs
 {
     public static class TeXConverter
     {
-        public static string ToTikz(GraphCanvas canvas)
+        static readonly Regex VertexRegex = new Regex(@"\\Vertex\[[^x]*x\s*=\s*([-+]?\d*\.?\d+)\s*,\s*y\s*=\s*([-+]?\d*\.?\d+)\s*,\s*L\s*=\s*[^\{]*\{([^\}]*)\}\s*]\{([^\}]*)\}");
+        static readonly Regex EdgeRegex = new Regex(@"\\Edge\[\s*([^\]]*)\s*]\(([^\)]+)\)\(([^\)]+)\)");
+
+        public static Graph FromTikz(string tikz)
+        {
+            var idToVertex = new Dictionary<string, Vertex>();
+
+            foreach (Match match in VertexRegex.Matches(tikz))
+            {
+                if (match.Groups.Count != 5)
+                    return null;
+
+                double x;
+                if (!double.TryParse(match.Groups[1].Value, out x))
+                    return null;
+                double y;
+                if (!double.TryParse(match.Groups[2].Value, out y))
+                    return null;
+                var label = match.Groups[3].Value ?? "";
+                var id = match.Groups[4].Value;
+                if (string.IsNullOrEmpty(id))
+                    return null;
+
+                idToVertex[id] = new Vertex(x, 1.0 - y, label.Trim('$'));
+            }
+
+            var edges = new List<Edge>();
+            foreach (Match match in EdgeRegex.Matches(tikz))
+            {
+                if (match.Groups.Count != 4)
+                    return null;
+
+                var style = match.Groups[1].Value ?? "";
+                var id1 = match.Groups[2].Value;
+                var id2 = match.Groups[3].Value;
+
+                if (string.IsNullOrEmpty(id1) || string.IsNullOrEmpty(id2))
+                    return null;
+
+                var orientation = Edge.Orientations.None;
+                if (style.Contains("pre"))
+                    orientation = Edge.Orientations.Backward;
+                else if (style.Contains("post"))
+                    orientation = Edge.Orientations.Forward;
+
+
+                edges.Add(new Edge(idToVertex[id1], idToVertex[id2], orientation));
+            }
+
+            return new Graph(idToVertex.Values, edges);
+        }
+
+        public static string ToTikz(Graph graph)
         {
             var scale = 10.0;
-
-            var graph = canvas.Graph;
 
             var noLabels = graph.Vertices.All(v => string.IsNullOrEmpty(v.Label));
 
