@@ -756,8 +756,10 @@ trash can button.
             if (tabCanvas == null)
                 return;
 
-            var g = HttpUtility.UrlEncode(CompactSerializer.Serialize(tabCanvas.Operations.Graph));
-            var url = @"https://dl.dropboxusercontent.com/u/8609833/Web/WebGraphs/WebGraphsTestPage.html?c=" + g;
+            var json = tabCanvas.Operations.Graph.Serialize();
+            var g = HttpUtility.UrlEncode(Utility.Compress(json));
+
+            var url = @"https://dl.dropboxusercontent.com/u/8609833/Web/WebGraphs/WebGraphsTestPage.html?jib=" + g;
 
             try
             {
