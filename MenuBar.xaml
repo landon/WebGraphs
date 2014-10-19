@@ -155,6 +155,8 @@
         <Button Content="Layout" Style="{StaticResource MenuButton}" Width="52" Click="MenuTopLevelClick" MouseRightButtonDown="MenuTopLevelRightClick">
             <menu:ContextMenuService.ContextMenu>
                 <menu:ContextMenu>
+                    <local:SuperMenuItem Header="laplacian" Click="MenuItemClick"/>
+                    <local:SuperMenuItem Header="walk matrix" Click="MenuItemClick"/>
                     <local:SuperMenuItem Header="springs" Click="MenuItemClick"/>
                 </menu:ContextMenu>
             </menu:ContextMenuService.ContextMenu>

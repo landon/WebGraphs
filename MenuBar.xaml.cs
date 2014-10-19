@@ -65,6 +65,8 @@ namespace WebGraphs
         public event Action AnalyzeOnlyNearColorings;
         public event Action AnalyzeOnlyNearColoringsForSelectedEdge;
         public event Action CheckFGPaintable;
+        public event Action DoLaplacianLayout;
+        public event Action DoWalkMatrixLayout;
 
         public MenuBar()
         {
@@ -245,6 +247,12 @@ namespace WebGraphs
                     break;
                 case "check (f:g)-paintable":
                     A(CheckFGPaintable);
+                    break;
+                case "laplacian":
+                    A(DoLaplacianLayout);
+                    break;
+                case "walk matrix":
+                    A(DoWalkMatrixLayout);
                     break;
             }
         }

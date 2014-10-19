@@ -26,12 +26,19 @@ namespace WebGraphs
         double[] _ystep;
         int _step = 0;
 
-        public LayoutAnimation(AlgorithmBlob blob, Action update, Action finalUpdate)
+        public LayoutAnimation(AlgorithmBlob blob, Action update, Action finalUpdate, Layout.Algorithm layoutAlgorithm)
         {
             _blob = blob;
             _update = update;
             _finalUpdate = finalUpdate;
-            _layout = blob.AlgorithmGraph.GetSpringsLayout();
+            try
+            {
+                _layout = layoutAlgorithm(blob.AlgorithmGraph);
+            }
+            catch { }
+
+            if (_layout == null)
+                return;
 
             _xstep = new double[_layout.Count];
             _ystep = new double[_layout.Count];

@@ -81,6 +81,8 @@ namespace WebGraphs
             _mainMenu.AnalyzeOnlyNearColorings += AnalyzeOnlyNearColorings;
             _mainMenu.AnalyzeOnlyNearColoringsForSelectedEdge += AnalyzeOnlyNearColoringsForSelectedEdge;
             _mainMenu.CheckFGPaintable += CheckFGPaintable;
+            _mainMenu.DoLaplacianLayout += DoLaplacianLayout;
+            _mainMenu.DoWalkMatrixLayout += DoWalkMatrixLayout;
             
             _propertyGrid.SomethingChanged += _propertyGrid_SomethingChanged;
 
@@ -1214,22 +1216,37 @@ trash can button.
 
         void DoSpringsLayout()
         {
+            DoLayout((Layout.Algorithm)Layout.GetSpringsLayout);
+        }
+
+        void DoLaplacianLayout()
+        {
+            DoLayout((Layout.Algorithm)Layout.GetLaplacianLayout);
+        }
+
+        void DoWalkMatrixLayout()
+        {
+            DoLayout((Layout.Algorithm)Layout.GetWalkMatrixLayout);
+        }
+
+        void DoLayout(Layout.Algorithm algorithm)
+        {
             var blob = AlgorithmBlob.Create(SelectedTabCanvas);
             if (blob == null)
                 return;
 
             SelectedTabCanvas.Operations.SnapToGrid = false;
             var layoutAnimation = new LayoutAnimation(blob, () =>
-                {
-                    SelectedTabCanvas.Operations.Invalidate();
-                }
-             , () =>
             {
-                SelectedTabCanvas.Operations.SnapToGrid = true;
-                blob.UIGraph.ParametersDirty = true;
-                SelectedTabCanvas.Operations.GraphChanged();
                 SelectedTabCanvas.Operations.Invalidate();
-            });
+            }
+             , () =>
+             {
+                 SelectedTabCanvas.Operations.SnapToGrid = true;
+                 blob.UIGraph.ParametersDirty = true;
+                 SelectedTabCanvas.Operations.GraphChanged();
+                 SelectedTabCanvas.Operations.Invalidate();
+             }, algorithm);
         }
 
         int ParseDegreeDependentString(string p, int degree)

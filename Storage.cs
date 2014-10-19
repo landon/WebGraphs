@@ -19,10 +19,14 @@ namespace WebGraphs
     {
         public static void Save(Graph g, string name)
         {
-            using (var store = IsolatedStorageFile.GetUserStoreForApplication())
-            using (var file = store.CreateFile(name))
-            using (var sw = new StreamWriter(file))
-                sw.Write(g.Serialize());
+            try
+            {
+                using (var store = IsolatedStorageFile.GetUserStoreForApplication())
+                using (var file = store.CreateFile(name))
+                using (var sw = new StreamWriter(file))
+                    sw.Write(g.Serialize());
+            }
+            catch { }
         }
 
         public static void Delete(string name)
