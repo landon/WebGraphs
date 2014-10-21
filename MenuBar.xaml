@@ -6,7 +6,7 @@
     xmlns:local="clr-namespace:SilverlightEnhancedMenuItem"
     xmlns:menu="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls.Input.Toolkit"
     xmlns:toolkit="http://schemas.microsoft.com/winfx/2006/xaml/presentation/toolkit"
-    mc:Ignorable="d" Height="35" Width="678">
+    mc:Ignorable="d" Height="35" Width="818">
 
     <UserControl.Resources>
         <Style TargetType="Button" x:Key="MenuButton">
@@ -149,6 +149,13 @@
                     <local:SuperMenuItem Header="analyze" Click="MenuItemClick"/>
                     <local:SuperMenuItem Header="analyze only near colorings" Click="MenuItemClick"/>
                     <local:SuperMenuItem Header="analyze only near colorings for selected edge" Click="MenuItemClick"/>
+                </menu:ContextMenu>
+            </menu:ContextMenuService.ContextMenu>
+        </Button>
+        <Button Content="Independence Ratio" Style="{StaticResource MenuButton}" Width="145" Click="MenuTopLevelClick" MouseRightButtonDown="MenuTopLevelRightClick">
+            <menu:ContextMenuService.ContextMenu>
+                <menu:ContextMenu>
+                    <local:SuperMenuItem Header="find good 3-partition" Click="MenuItemClick"/>
                 </menu:ContextMenu>
             </menu:ContextMenuService.ContextMenu>
         </Button>

@@ -23,6 +23,7 @@ using BitLevelGeneration;
 using Choosability.Polynomials;
 using SLPropertyGrid.MultiObject;
 using System.IO.IsolatedStorage;
+using Choosability.IndependenceRatio;
 
 namespace WebGraphs
 {
@@ -83,6 +84,7 @@ namespace WebGraphs
             _mainMenu.CheckFGPaintable += CheckFGPaintable;
             _mainMenu.DoLaplacianLayout += DoLaplacianLayout;
             _mainMenu.DoWalkMatrixLayout += DoWalkMatrixLayout;
+            _mainMenu.FindGood3Partition += FindGood3Partition;
             
             _propertyGrid.SomethingChanged += _propertyGrid_SomethingChanged;
 
@@ -1622,6 +1624,46 @@ trash can button.
             }
 
             PaintMozhan(graphCanvas, canvas);
+        }
+
+        async void FindGood3Partition()
+        {
+            var blob = AlgorithmBlob.Create(SelectedTabCanvas);
+            if (blob == null)
+                return;
+
+            using (var resultWindow = new ResultWindow())
+            {
+
+                var r = await Task.Factory.StartNew<List<Tuple<List<int>, List<int>>>>(() =>
+                                {
+                                    return MinorFinder.FindWithJ(blob.AlgorithmGraph, blob.UIGraph.SelectedVertices.Select(sv => blob.UIGraph.Vertices.IndexOf(sv)).ToList()).FirstOrDefault();
+                                });
+
+                if (r == null)
+                {
+                    resultWindow.AddChild(new TextBlock() { Text = "no good 3-partitions" });
+                }
+                else
+                {
+                    foreach (var v in blob.UIGraph.Vertices)
+                        v.Label = "";
+
+                    for(int i = 0; i < 3; i++)
+                    {
+                        foreach(var v in r[i].Item1)
+                            blob.UIGraph.Vertices[v].Label += (i + 1) + ",";
+                        foreach(var v in r[i].Item2)
+                            blob.UIGraph.Vertices[v].Label += "I_" + (i + 1) + ",";
+                    }
+
+                    foreach(var v in blob.UIGraph.Vertices)
+                        v.Label = v.Label.TrimEnd(',');
+
+                    SelectedTabCanvas.Invalidate();
+                    resultWindow.AddChild(new TextBlock() { Text = "marked a good 3-partition on the graph" });
+                }
+            }
         }
         #endregion
     }

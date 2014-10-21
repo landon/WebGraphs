@@ -895,6 +895,20 @@ namespace Choosability
 
             return false;
         }
+
+        public int IndependenceNumber()
+        {
+            return IndependenceNumber(Vertices);
+        }
+        public int IndependenceNumber(IEnumerable<int> subgraph)
+        {
+            return _independentSets.Value.Max(I => I.IntersectionCount(subgraph));
+        }
+        public List<int> MaximumIndependentSubset(IEnumerable<int> subgraph)
+        {
+            var i = IndependenceNumber(subgraph);
+            return _independentSets.Value.First(I => I.IntersectionCount(subgraph) == i);
+        }
         #endregion
 
         #region List coloring

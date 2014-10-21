@@ -67,6 +67,7 @@ namespace WebGraphs
         public event Action CheckFGPaintable;
         public event Action DoLaplacianLayout;
         public event Action DoWalkMatrixLayout;
+        public event Action FindGood3Partition;
 
         public MenuBar()
         {
@@ -253,6 +254,9 @@ namespace WebGraphs
                     break;
                 case "walk matrix":
                     A(DoWalkMatrixLayout);
+                    break;
+                case "find good 3-partition":
+                    A(FindGood3Partition);
                     break;
             }
         }

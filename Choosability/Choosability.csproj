@@ -77,6 +77,7 @@
     <Compile Include="FixerBreaker\KnowledgeEngine\Slim\Super\SuperSlimColoringAnalyzer.cs" />
     <Compile Include="FixerBreaker\KnowledgeEngine\Slim\Super\SuperSlimMind.cs" />
     <Compile Include="FixerBreaker\KnowledgeEngine\Slim\Super\SuperSlimSwapAnalyzer.cs" />
+    <Compile Include="IndependenceRatio\MinorFinder.cs" />
     <Compile Include="OneFactorizationsOfCompleteGraph.cs" />
     <Compile Include="Polynomials\FactoredRational.cs" />
     <Compile Include="Polynomials\GraphPolynomial.cs" />
