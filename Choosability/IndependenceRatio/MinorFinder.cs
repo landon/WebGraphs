@@ -39,6 +39,7 @@ namespace Choosability.IndependenceRatio
         static IEnumerable<Tuple<List<int>, List<int>, List<int>>> EnumerateConnectedThreePartPartitions(Graph g, List<int> J)
         {
             var rest = g.Vertices.Except(J).ToList();
+            rest.Shuffle();
             foreach (var first in rest.EnumerateSublists())
             {
                 first.Add(J[0]);
@@ -62,5 +63,19 @@ namespace Choosability.IndependenceRatio
             }
         }
 
+
+        static void Shuffle<T>(this IList<T> list)
+        {
+            var rng = new Random(DateTime.Now.Millisecond);
+            int n = list.Count;
+            while (n > 1)
+            {
+                n--;
+                int k = rng.Next(n + 1);
+                T value = list[k];
+                list[k] = list[n];
+                list[n] = value;
+            }
+        }
     }
 }
