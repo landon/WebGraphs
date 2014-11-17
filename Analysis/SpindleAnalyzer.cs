@@ -13,14 +13,51 @@ namespace WebGraphs.Analysis
 
         public enum DiamondType
         {
-            Up,
-            Down,
-            Left,
-            Right,
-            UpLeft,
-            UpRight,
-            DownLeft,
-            DownRight
+            U,
+            D,
+            L,
+            R,
+            UL,
+            UR,
+            DL,
+            DR
+        }
+
+        public static Graph BuildSerendipitousEdgeGraph(AlgorithmBlob blob, List<Vector> p, List<List<int>> diamonds)
+        {
+            var vertices = new List<Vertex>();
+            for (int i = 0; i < diamonds.Count; i++)
+            {
+                var v = new Vertex(diamonds[i].Select(t => p[t].X).Average(), diamonds[i].Select(t => p[t].Y).Average());
+                v.Label = Enum.GetName(typeof(DiamondType), ClassifyDiamond(p, diamonds[i]));
+                vertices.Add(v);
+            }
+
+            var rotatedDiamonds = diamonds.Select(d => RotateCoordinates(p, d)).ToList();
+            var edges = new List<Edge>();
+
+            var r = p[diamonds[0][0]].Distance(p[diamonds[0][2]]);
+            for(int a = 0; a < diamonds.Count; a++)
+            {
+                for(int b = a + 1; b < diamonds.Count; b++)
+                {
+                    if (ClassifyDiamond(p, diamonds[a]) == ClassifyDiamond(p, diamonds[b]))
+                        continue;
+
+                    for (int i = 1; i < 4; i++)
+                    {
+                        for (int j = 1; j < 4; j++)
+                        {
+                            if (Math.Abs(rotatedDiamonds[a][i].Distance(rotatedDiamonds[b][j]) - r) < MinDelta)
+                            {
+                                edges.Add(new Edge(vertices[a], vertices[b]));
+                            }
+                        }
+                    }
+                }
+            }
+
+            return new Graph(vertices, edges);
         }
 
         public static List<string> FindSerendipitousEdges(AlgorithmBlob blob, List<Vector> p, List<List<int>> diamonds)
@@ -75,7 +112,7 @@ namespace WebGraphs.Analysis
                     var Y = X.OrderBy(x => p[x].X).OrderBy(x => blob.AlgorithmGraph.DegreeInSubgraph(x, X)).ToList();
 
                     var type = ClassifyDiamond(p, Y);
-                    if (type != DiamondType.Up && type != DiamondType.DownRight && type != DiamondType.DownLeft)
+                    if (type != DiamondType.U && type != DiamondType.DR && type != DiamondType.DL)
                     {
                         var temp = Y[0];
                         Y[0] = Y[1];
@@ -127,25 +164,25 @@ namespace WebGraphs.Analysis
 
             if (Equalish(b.X, t.X))
             {
-                if (b.Y < t.Y)
-                    return DiamondType.Up;
-                return DiamondType.Down;
+                if (b.Y > t.Y)
+                    return DiamondType.U;
+                return DiamondType.D;
             }
             else if (b.X < t.X)
             {
                 if (Equalish(b.Y, t.Y))
-                    return DiamondType.Right;
-                else if (b.Y < t.Y)
-                    return DiamondType.UpRight;
-                return DiamondType.DownRight;
+                    return DiamondType.R;
+                else if (b.Y > t.Y)
+                    return DiamondType.UR;
+                return DiamondType.DR;
             }
             else
             {
                 if (Equalish(b.Y, t.Y))
-                    return DiamondType.Left;
-                else if (b.Y < t.Y)
-                    return DiamondType.UpLeft;
-                return DiamondType.DownLeft;
+                    return DiamondType.L;
+                else if (b.Y > t.Y)
+                    return DiamondType.UL;
+                return DiamondType.DL;
             }
         }
 

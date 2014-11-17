@@ -115,8 +115,10 @@ namespace WebGraphs
                 var jib = HtmlPage.Window.Invoke("GetURLParameter", "jib") as string;
                 if (!string.IsNullOrEmpty(jib))
                 {
+                    var grid = HtmlPage.Window.Invoke("GetURLParameter", "grid") as string;
+
                     var json = Utility.Decompress(jib);
-                    AddTab(Graphs.Graph.Deserialize(json), FindUnusedName());
+                    AddTab(Graphs.Graph.Deserialize(json), FindUnusedName(), grid != "False");
                     return;
                 }
             }
@@ -770,19 +772,25 @@ trash can button.
             if (SelectedTabCanvas == null)
                 return;
 
-            using (var resultWindow = new ResultWindow())
+            var blob = AlgorithmBlob.Create(SelectedTabCanvas);
+            var p = blob.UIGraph.Vertices.Select(v => new Vector(v.X, v.Y)).ToList();
+
+            var e = await Task.Factory.StartNew<List<string>>(() =>
             {
-                var blob = AlgorithmBlob.Create(SelectedTabCanvas);
-                var p = blob.UIGraph.Vertices.Select(v => new Vector(v.X, v.Y)).ToList();
+                var diamonds = SpindleAnalyzer.FindDiamonds(blob, p);
+                return SpindleAnalyzer.FindSerendipitousEdges(blob, p, diamonds);
+            });
 
-                var e = await Task.Factory.StartNew<List<string>>(() =>
-                {
-                    var diamonds = SpindleAnalyzer.FindDiamonds(blob, p);
-                    return SpindleAnalyzer.FindSerendipitousEdges(blob, p, diamonds);
-                });
+            var g = await Task.Factory.StartNew<Graphs.Graph>(() =>
+            {
+                var diamonds = SpindleAnalyzer.FindDiamonds(blob, p);
+                return SpindleAnalyzer.BuildSerendipitousEdgeGraph(blob, p, diamonds);
+            });
 
-                resultWindow.AddChild(new TextBox() { Text = "total: " + e.Count + Environment.NewLine + string.Join(Environment.NewLine, e) });
-            }
+            blob.UIGraph.DisjointUnion(g);
+            SelectedTabCanvas.Invalidate();
+
+            ShowText("total: " + e.Count + Environment.NewLine + string.Join(Environment.NewLine, e));
         }
 
         void ClearLabels()
@@ -817,7 +825,7 @@ trash can button.
             var json = tabCanvas.GraphCanvas.Graph.Serialize();
             var g = HttpUtility.UrlEncode(Utility.Compress(json));
 
-            var url = @"https://dl.dropboxusercontent.com/u/8609833/Web/WebGraphs/WebGraphsTestPage.html?jib=" + g;
+            var url = @"https://dl.dropboxusercontent.com/u/8609833/Web/WebGraphs/WebGraphsTestPage.html?grid=" + tabCanvas.GraphCanvas.SnapToGrid + "&jib=" + g;
 
             try
             {
