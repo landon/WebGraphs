@@ -136,7 +136,7 @@ namespace GraphsCore
 
             var maxDegree = g.MaxDegree;
 
-            for (int qqq = 0; qqq < 50; qqq++)
+            for (int qqq = 0; qqq < 10; qqq++)
             {
                 var maxes = g.Vertices.ToList();
                 maxes.Shuffle();

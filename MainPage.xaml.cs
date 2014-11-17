@@ -24,6 +24,7 @@ using Choosability.Polynomials;
 using SLPropertyGrid.MultiObject;
 using System.IO.IsolatedStorage;
 using Choosability.IndependenceRatio;
+using GraphsCore.Famlies;
 
 namespace WebGraphs
 {
@@ -87,13 +88,13 @@ namespace WebGraphs
             _mainMenu.FindGood3Partition += FindGood3Partition;
             _mainMenu.DoGridToggle += _mainMenu_DoGridToggle;
             _mainMenu.DoUnitDistanceLayout += _mainMenu_DoUnitDistanceLayout;
+            _mainMenu.DoMakeHexGrid += _mainMenu_DoMakeHexGrid;
             
             _propertyGrid.SomethingChanged += _propertyGrid_SomethingChanged;
 
             DoAutoLoad();
         }
 
-      
     
         void DoAutoLoad()
         {
@@ -186,7 +187,7 @@ namespace WebGraphs
             AddTab(null, FindUnusedName());
         }
 
-        void AddTab(Graphs.Graph g, string name)
+        void AddTab(Graphs.Graph g, string name, bool snapToGrid = true)
         {
             var item = new TabItem();
             item.Header = name;
@@ -196,7 +197,10 @@ namespace WebGraphs
             item.Content = canvas;
             canvas.HorizontalAlignment = System.Windows.HorizontalAlignment.Stretch;
             canvas.VerticalAlignment = System.Windows.VerticalAlignment.Stretch;
-            var tabCanvas = new TabCanvas(canvas, new GraphCanvas(g), _propertyGrid, item);
+            var gc = new GraphCanvas(g);
+            gc.SnapToGrid = snapToGrid;
+            gc.DrawGrid = snapToGrid;
+            var tabCanvas = new TabCanvas(canvas, gc, _propertyGrid, item);
             tabCanvas.Title = name;
             item.Tag = tabCanvas;
 
@@ -733,6 +737,30 @@ trash can button.
                 return;
 
             tabCanvas.GraphCanvas.DoClearLabels("d-1", AlgorithmBlob.Create(SelectedTabCanvas).SelectedVertices);
+        }
+
+        void _mainMenu_DoMakeHexGrid()
+        {
+            int n = 5;
+
+            if (SelectedTabCanvas != null)
+            {
+                n = SelectedTabCanvas.GraphCanvas.Graph.Vertices.Select(v =>
+                    {
+                        int q;
+                        int.TryParse(v.Label, out q);
+                        return q;
+                    }).Aggregate(0, (t, x) => Math.Max(t, x));
+
+                if (n <= 0)
+                    n = 5;
+            }
+
+            var g = new HexGrid().Create(1.0, n);
+
+            AddTab(g, "hex " + n, snapToGrid: false);
+
+            FocusSelectedTab();
         }
 
         void ClearLabels()

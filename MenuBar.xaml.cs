@@ -70,6 +70,7 @@ namespace WebGraphs
         public event Action DoWalkMatrixLayout;
         public event Action FindGood3Partition;
         public event Action DoGridToggle;
+        public event Action DoMakeHexGrid;
 
         public MenuBar()
         {
@@ -265,6 +266,9 @@ namespace WebGraphs
                     break;
                 case "unit distance":
                     A(DoUnitDistanceLayout);
+                    break;
+                case "make hex grid":
+                    A(DoMakeHexGrid);
                     break;
             }
         }
