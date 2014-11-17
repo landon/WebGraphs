@@ -55,6 +55,8 @@
     <Compile Include="Batch.cs" />
     <Compile Include="BrowsableAttribute.cs" />
     <Compile Include="CompactSerializer.cs" />
+    <Compile Include="Famlies\HexGrid.cs" />
+    <Compile Include="Famlies\IFamily.cs" />
     <Compile Include="GraphIO.cs" />
     <Compile Include="Index.cs" />
     <Compile Include="Layout.cs" />

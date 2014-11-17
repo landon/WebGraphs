@@ -25,6 +25,7 @@ using SLPropertyGrid.MultiObject;
 using System.IO.IsolatedStorage;
 using Choosability.IndependenceRatio;
 using GraphsCore.Famlies;
+using WebGraphs.Analysis;
 
 namespace WebGraphs
 {
@@ -89,13 +90,13 @@ namespace WebGraphs
             _mainMenu.DoGridToggle += _mainMenu_DoGridToggle;
             _mainMenu.DoUnitDistanceLayout += _mainMenu_DoUnitDistanceLayout;
             _mainMenu.DoMakeHexGrid += _mainMenu_DoMakeHexGrid;
-            
+            _mainMenu.DoListExtraSpindleEdges += _mainMenu_DoListExtraSpindleEdges;
+
             _propertyGrid.SomethingChanged += _propertyGrid_SomethingChanged;
 
             DoAutoLoad();
         }
 
-    
         void DoAutoLoad()
         {
             try
@@ -763,6 +764,27 @@ trash can button.
             FocusSelectedTab();
         }
 
+
+        async void _mainMenu_DoListExtraSpindleEdges()
+        {
+            if (SelectedTabCanvas == null)
+                return;
+
+            using (var resultWindow = new ResultWindow())
+            {
+                var blob = AlgorithmBlob.Create(SelectedTabCanvas);
+                var p = blob.UIGraph.Vertices.Select(v => new Vector(v.X, v.Y)).ToList();
+
+                var e = await Task.Factory.StartNew<List<string>>(() =>
+                {
+                    var diamonds = SpindleAnalyzer.FindDiamonds(blob, p);
+                    return SpindleAnalyzer.FindSerendipitousEdges(blob, p, diamonds);
+                });
+
+                resultWindow.AddChild(new TextBox() { Text = "total: " + e.Count + Environment.NewLine + string.Join(Environment.NewLine, e) });
+            }
+        }
+
         void ClearLabels()
         {
             var tabCanvas = SelectedTabCanvas;
@@ -840,6 +862,7 @@ trash can button.
                 var t = new TextBox();
                 t.IsReadOnly = true;
                 t.Text = s;
+                t.HorizontalScrollBarVisibility = ScrollBarVisibility.Auto;
                 t.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
                 t.Height = 250;
                 r.AddChild(t);

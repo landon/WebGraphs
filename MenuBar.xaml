@@ -158,6 +158,7 @@
                 <menu:ContextMenu>
                     <local:SuperMenuItem Header="find good 3-partition" Click="MenuItemClick"/>
                     <local:SuperMenuItem Header="make hex grid" Click="MenuItemClick"/>
+                    <local:SuperMenuItem Header="list extra spindle edges" Click="MenuItemClick"/>
                 </menu:ContextMenu>
             </menu:ContextMenuService.ContextMenu>
         </Button>

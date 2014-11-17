@@ -33,8 +33,12 @@ namespace WebGraphs
         {
             using (var store = IsolatedStorageFile.GetUserStoreForApplication())
             {
-                if (store.FileExists(name))
-                    store.DeleteFile(name);
+                try
+                {
+                    if (store.FileExists(name))
+                        store.DeleteFile(name);
+                }
+                catch { }
             }
         }
 

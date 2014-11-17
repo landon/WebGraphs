@@ -71,6 +71,7 @@ namespace WebGraphs
         public event Action FindGood3Partition;
         public event Action DoGridToggle;
         public event Action DoMakeHexGrid;
+        public event Action DoListExtraSpindleEdges;
 
         public MenuBar()
         {
@@ -269,6 +270,9 @@ namespace WebGraphs
                     break;
                 case "make hex grid":
                     A(DoMakeHexGrid);
+                    break;
+                case "list extra spindle edges":
+                    A(DoListExtraSpindleEdges);
                     break;
             }
         }

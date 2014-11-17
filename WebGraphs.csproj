@@ -158,6 +158,7 @@
     <Compile Include="ResultWindow.xaml.cs">
       <DependentUpon>ResultWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Analysis\SpindleAnalyzer.cs" />
     <Compile Include="Storage.cs" />
     <Compile Include="SuperMenuItem.cs" />
     <Compile Include="TabCanvas.cs" />

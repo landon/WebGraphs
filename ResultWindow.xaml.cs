@@ -47,6 +47,15 @@ namespace WebGraphs
 
         public void AddChild(FrameworkElement c)
         {
+            var tt = c as TextBox;
+            if (tt != null)
+            {
+                tt.HorizontalScrollBarVisibility = ScrollBarVisibility.Auto;
+                tt.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
+                tt.IsReadOnly = true;
+                tt.Height = 250;
+            }
+
             _layoutRoot.Children.Add(c);
         }
 
