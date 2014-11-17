@@ -781,14 +781,19 @@ trash can button.
                 return SpindleAnalyzer.FindSerendipitousEdges(blob, p, diamonds);
             });
 
-            var g = await Task.Factory.StartNew<Graphs.Graph>(() =>
+            var gg = await Task.Factory.StartNew<Tuple<Graphs.Graph, Graphs.Graph>>(() =>
             {
                 var diamonds = SpindleAnalyzer.FindDiamonds(blob, p);
-                return SpindleAnalyzer.BuildSerendipitousEdgeGraph(blob, p, diamonds);
+                Graphs.Graph rotated;
+                var g = SpindleAnalyzer.BuildSerendipitousEdgeGraph(blob, p, diamonds, out rotated);
+
+                return new Tuple<Graphs.Graph, Graphs.Graph>(g, rotated);
             });
 
-            blob.UIGraph.DisjointUnion(g);
+            blob.UIGraph.DisjointUnion(gg.Item1);
             SelectedTabCanvas.Invalidate();
+
+            AddTab(gg.Item2, "rotated", snapToGrid:false);
 
             ShowText("total: " + e.Count + Environment.NewLine + string.Join(Environment.NewLine, e));
         }

@@ -23,8 +23,11 @@ namespace WebGraphs.Analysis
             DR
         }
 
-        public static Graph BuildSerendipitousEdgeGraph(AlgorithmBlob blob, List<Vector> p, List<List<int>> diamonds)
+        public static Graph BuildSerendipitousEdgeGraph(AlgorithmBlob blob, List<Vector> p, List<List<int>> diamonds, out Graph rotatedGraph)
         {
+            var dim = GraphicsLayer.ARGB.FromFractional(0.5, 0.5, 0.5, 0.5);
+            var transparent = GraphicsLayer.ARGB.FromFractional(0.0, 0.5, 0.5, 0.5);
+
             var vertices = new List<Vertex>();
             for (int i = 0; i < diamonds.Count; i++)
             {
@@ -37,6 +40,49 @@ namespace WebGraphs.Analysis
             var edges = new List<Edge>();
 
             var r = p[diamonds[0][0]].Distance(p[diamonds[0][2]]);
+
+            var rotatedVertices = new List<Vertex>();
+            var rotatedEdges = new List<Edge>();
+            
+            var rotatedVertexLookup = new Vertex[diamonds.Count, 4];
+            for (int a = 0; a < diamonds.Count; a++)
+            {
+                for (int i = 0; i < 4; i++)
+                {
+                    var v = new Vertex(rotatedDiamonds[a][i].X, rotatedDiamonds[a][i].Y);
+                    if (i == 0)
+                        v.Padding = 0.02f;
+
+                    rotatedVertices.Add(v);
+                    rotatedVertexLookup[a, i] = v;
+                }
+
+                var originals = new Vertex[4];
+                for (int i = 1; i < 4; i++)
+                {
+                    var v = new Vertex(p[diamonds[a][i]].X, p[diamonds[a][i]].Y);
+                    v.Color = transparent;
+                    v.Padding = 0.02f;
+
+                    rotatedVertices.Add(v);
+                    originals[i] = v;
+                }
+
+                rotatedEdges.Add(new Edge(rotatedVertexLookup[a, 0], originals[2]) { Color = dim });
+                rotatedEdges.Add(new Edge(rotatedVertexLookup[a, 0], originals[3]) { Color = dim });
+                rotatedEdges.Add(new Edge(originals[2], originals[3]) { Color = dim });
+                rotatedEdges.Add(new Edge(originals[1], originals[2]) { Color = dim });
+                rotatedEdges.Add(new Edge(originals[1], originals[3]) { Color = dim });
+
+                rotatedEdges.Add(new Edge(rotatedVertexLookup[a, 0], rotatedVertexLookup[a, 2]));
+                rotatedEdges.Add(new Edge(rotatedVertexLookup[a, 0], rotatedVertexLookup[a, 3]));
+                rotatedEdges.Add(new Edge(rotatedVertexLookup[a, 1], rotatedVertexLookup[a, 2]));
+                rotatedEdges.Add(new Edge(rotatedVertexLookup[a, 1], rotatedVertexLookup[a, 3]));
+                rotatedEdges.Add(new Edge(rotatedVertexLookup[a, 2], rotatedVertexLookup[a, 3]));
+                rotatedEdges.Add(new Edge(originals[1], rotatedVertexLookup[a, 1]));
+            }
+            
+
             for(int a = 0; a < diamonds.Count; a++)
             {
                 for(int b = a + 1; b < diamonds.Count; b++)
@@ -48,15 +94,24 @@ namespace WebGraphs.Analysis
                     {
                         for (int j = 1; j < 4; j++)
                         {
-                            if (Math.Abs(rotatedDiamonds[a][i].Distance(rotatedDiamonds[b][j]) - r) < MinDelta)
+                            var distance = rotatedDiamonds[a][i].Distance(rotatedDiamonds[b][j]);
+                            var offset = Math.Abs(distance - r);
+                            if (offset < MinDelta)
                             {
-                                edges.Add(new Edge(vertices[a], vertices[b]));
+                                var e = new Edge(vertices[a], vertices[b]);
+                                e.Thickness = 6;
+                                edges.Add(e);
+
+                                var ee = new Edge(rotatedVertexLookup[a, i], rotatedVertexLookup[b, j]);
+                                ee.Thickness = 6;
+                                rotatedEdges.Add(ee);
                             }
                         }
                     }
                 }
             }
 
+            rotatedGraph = new Graph(rotatedVertices, rotatedEdges);
             return new Graph(vertices, edges);
         }
 
