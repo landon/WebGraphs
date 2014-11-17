@@ -35,7 +35,7 @@ namespace WebGraphs
 
         AlgorithmBlob(TabCanvas tabCanvas)
         {
-            UIGraph = tabCanvas.Operations.Graph;
+            UIGraph = tabCanvas.GraphCanvas.Graph;
             AlgorithmGraph = new Choosability.Graph(UIGraph.GetEdgeWeights());
             BitGraph = new BitLevelGeneration.BitGraph(UIGraph.GetEdgeWeights());
             SelectedVertices = UIGraph.Vertices.Select((v, i) => v.IsSelected ? i : -1).Where(x => x >= 0).ToList();

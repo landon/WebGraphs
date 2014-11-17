@@ -23,16 +23,16 @@ namespace WebGraphs
     {
         string _title;
         public Canvas Canvas { get; private set; }
-        public GraphCanvas Operations { get; private set; }
+        public GraphCanvas GraphCanvas { get; private set; }
         TabItem Container { get; set; }
         SLPropertyGrid.PropertyGrid PropertyGrid { get; set; }
         Dictionary<Type, Tuple<List<FrameworkElement>, List<FrameworkElement>>> _typedChildren = new Dictionary<Type, Tuple<List<FrameworkElement>, List<FrameworkElement>>>();
 
         public TabCanvas(Canvas canvas, GraphCanvas graphCanvas, SLPropertyGrid.PropertyGrid propertyGrid, TabItem container)
         {
-            Operations = graphCanvas;
+            GraphCanvas = graphCanvas;
             Canvas = canvas;
-            Operations.Canvas = this;
+            GraphCanvas.Canvas = this;
             PropertyGrid = propertyGrid;
             Container = container;
 
@@ -45,8 +45,8 @@ namespace WebGraphs
             Canvas.Loaded += delegate { Invalidate(); };
             Canvas.SizeChanged += delegate { Invalidate(); };
 
-            Operations.GraphModified += OnGraphModified;
-            Operations.NameModified += OnNameModified;
+            GraphCanvas.GraphModified += OnGraphModified;
+            GraphCanvas.NameModified += OnNameModified;
         }
 
         void OnNameModified(string name)
@@ -54,7 +54,7 @@ namespace WebGraphs
             Storage.Delete(Title);
             Title = name;
             Container.Header = Title;
-            Storage.Save(Operations.Graph, Title);
+            Storage.Save(GraphCanvas.Graph, Title);
         }
 
         void OnGraphModified(Graph g)
@@ -156,7 +156,7 @@ namespace WebGraphs
             var g = new FastGraphics(Canvas, _typedChildren);
             Canvas.Clip = new RectangleGeometry() { Rect = new Rect(0, 0, Canvas.ActualWidth, Canvas.ActualHeight) };
 
-            Operations.Paint(g, (int)Canvas.ActualWidth, (int)Canvas.ActualHeight);
+            GraphCanvas.Paint(g, (int)Canvas.ActualWidth, (int)Canvas.ActualHeight);
 
             g.FinalizeGraphics();
         }

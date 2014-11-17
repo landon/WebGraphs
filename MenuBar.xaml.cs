@@ -57,6 +57,7 @@ namespace WebGraphs
         public event Action GenerateRandomOrientation;
         public event Action GenerateBalancedOrientation;
         public event Action DoSpringsLayout;
+        public event Action DoUnitDistanceLayout;
         public event Action CheckfChoosable;
         public event Action OnInstructions;
         public event Action OnAbout;
@@ -68,6 +69,7 @@ namespace WebGraphs
         public event Action DoLaplacianLayout;
         public event Action DoWalkMatrixLayout;
         public event Action FindGood3Partition;
+        public event Action DoGridToggle;
 
         public MenuBar()
         {
@@ -257,6 +259,12 @@ namespace WebGraphs
                     break;
                 case "find good 3-partition":
                     A(FindGood3Partition);
+                    break;
+                case "toggle grid":
+                    A(DoGridToggle);
+                    break;
+                case "unit distance":
+                    A(DoUnitDistanceLayout);
                     break;
             }
         }

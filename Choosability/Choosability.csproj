@@ -79,6 +79,7 @@
     <Compile Include="FixerBreaker\KnowledgeEngine\Slim\Super\SuperSlimSwapAnalyzer.cs" />
     <Compile Include="IndependenceRatio\MinorFinder.cs" />
     <Compile Include="OneFactorizationsOfCompleteGraph.cs" />
+    <Compile Include="DataStructures\UnionFind.cs" />
     <Compile Include="Polynomials\FactoredRational.cs" />
     <Compile Include="Polynomials\GraphPolynomial.cs" />
     <Compile Include="Polynomials\Normalizer.cs" />
@@ -120,6 +121,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SubsetEnumerator.cs" />
     <Compile Include="TransitivePartition.cs" />
+    <Compile Include="DataStructures\UnionFindTrackedRoots.cs" />
     <Compile Include="UnpermutedAssignmentEnumerator.cs" />
     <Compile Include="Utility\EquivalenceRelation.cs" />
     <Compile Include="Utility\Factoradic.cs" />

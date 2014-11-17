@@ -85,12 +85,16 @@ namespace WebGraphs
             _mainMenu.DoLaplacianLayout += DoLaplacianLayout;
             _mainMenu.DoWalkMatrixLayout += DoWalkMatrixLayout;
             _mainMenu.FindGood3Partition += FindGood3Partition;
+            _mainMenu.DoGridToggle += _mainMenu_DoGridToggle;
+            _mainMenu.DoUnitDistanceLayout += _mainMenu_DoUnitDistanceLayout;
             
             _propertyGrid.SomethingChanged += _propertyGrid_SomethingChanged;
 
             DoAutoLoad();
         }
 
+      
+    
         void DoAutoLoad()
         {
             try
@@ -272,7 +276,7 @@ namespace WebGraphs
                 return;
 
             var p = e.GetPosition(tabCanvas.Canvas);
-            tabCanvas.Operations.DoZoom(e.Delta / 120, new GraphicsLayer.Box((double)p.X / tabCanvas.Canvas.ActualWidth, (double)p.Y / tabCanvas.Canvas.ActualHeight));
+            tabCanvas.GraphCanvas.DoZoom(e.Delta / 120, new GraphicsLayer.Box((double)p.X / tabCanvas.Canvas.ActualWidth, (double)p.Y / tabCanvas.Canvas.ActualHeight));
 
             base.OnMouseWheel(e);
         }
@@ -548,7 +552,7 @@ trash can button.
             if (tabCanvas == null)
                 return;
 
-            tabCanvas.Operations.DoDelete();
+            tabCanvas.GraphCanvas.DoDelete();
 
             FocusSelectedTab();
         }
@@ -558,7 +562,7 @@ trash can button.
             if (tabCanvas == null)
                 return;
 
-            tabCanvas.Operations.DoComplement();
+            tabCanvas.GraphCanvas.DoComplement();
 
             FocusSelectedTab();
         }
@@ -568,7 +572,7 @@ trash can button.
             if (tabCanvas == null)
                 return;
 
-            tabCanvas.Operations.DoContractSelectedSubgraph();
+            tabCanvas.GraphCanvas.DoContractSelectedSubgraph();
 
             FocusSelectedTab();
         }
@@ -578,7 +582,7 @@ trash can button.
             if (tabCanvas == null)
                 return;
 
-            tabCanvas.Operations.DoZoomFit();
+            tabCanvas.GraphCanvas.DoZoomFit();
 
             FocusSelectedTab();
         }
@@ -588,7 +592,7 @@ trash can button.
             if (tabCanvas == null)
                 return;
 
-            tabCanvas.Operations.DoZoom(1, new GraphicsLayer.Box(0.5, 0.5));
+            tabCanvas.GraphCanvas.DoZoom(1, new GraphicsLayer.Box(0.5, 0.5));
 
             FocusSelectedTab();
         }
@@ -598,7 +602,7 @@ trash can button.
             if (tabCanvas == null)
                 return;
 
-            tabCanvas.Operations.DoZoom(-1, new GraphicsLayer.Box(0.5, 0.5));
+            tabCanvas.GraphCanvas.DoZoom(-1, new GraphicsLayer.Box(0.5, 0.5));
 
             FocusSelectedTab();
         }
@@ -608,7 +612,7 @@ trash can button.
             if (tabCanvas == null)
                 return;
 
-            tabCanvas.Operations.DoCut();
+            tabCanvas.GraphCanvas.DoCut();
 
             FocusSelectedTab();
         }
@@ -618,7 +622,7 @@ trash can button.
             if (tabCanvas == null)
                 return;
 
-            tabCanvas.Operations.DoCopy();
+            tabCanvas.GraphCanvas.DoCopy();
 
             FocusSelectedTab();
         }
@@ -628,7 +632,7 @@ trash can button.
             if (tabCanvas == null)
                 return;
 
-            tabCanvas.Operations.DoPaste();
+            tabCanvas.GraphCanvas.DoPaste();
 
             FocusSelectedTab();
         }
@@ -638,7 +642,7 @@ trash can button.
             if (tabCanvas == null)
                 return;
 
-            tabCanvas.Operations.DoUndo();
+            tabCanvas.GraphCanvas.DoUndo();
 
             FocusSelectedTab();
         }
@@ -648,7 +652,7 @@ trash can button.
             if (tabCanvas == null)
                 return;
 
-            tabCanvas.Operations.DoRedo();
+            tabCanvas.GraphCanvas.DoRedo();
 
             FocusSelectedTab();
         }
@@ -658,7 +662,7 @@ trash can button.
             if (tabCanvas == null)
                 return;
 
-            var g = tabCanvas.Operations.DoSquare();
+            var g = tabCanvas.GraphCanvas.DoSquare();
             AddTab(g, string.Format("({0})^2", tabCanvas.Title));
 
             FocusSelectedTab();
@@ -669,7 +673,7 @@ trash can button.
             if (tabCanvas == null)
                 return;
 
-            var g = tabCanvas.Operations.DoLineGraph();
+            var g = tabCanvas.GraphCanvas.DoLineGraph();
             AddTab(g, string.Format("L({0})", tabCanvas.Title));
 
             FocusSelectedTab();
@@ -680,7 +684,7 @@ trash can button.
             if (tabCanvas == null)
                 return;
 
-            tabCanvas.Operations.DoDegreeLabeling();
+            tabCanvas.GraphCanvas.DoDegreeLabeling();
 
             FocusSelectedTab();
         }
@@ -690,7 +694,7 @@ trash can button.
             if (tabCanvas == null)
                 return;
 
-            tabCanvas.Operations.DoInDegreeLabeling();
+            tabCanvas.GraphCanvas.DoInDegreeLabeling();
 
             FocusSelectedTab();
         }
@@ -700,7 +704,7 @@ trash can button.
             if (tabCanvas == null)
                 return;
 
-            tabCanvas.Operations.DoOutDegreeLabeling();
+            tabCanvas.GraphCanvas.DoOutDegreeLabeling();
 
             FocusSelectedTab();
         }
@@ -710,7 +714,7 @@ trash can button.
             if (tabCanvas == null)
                 return;
 
-            tabCanvas.Operations.DoOutDegreePlusOneLabeling();
+            tabCanvas.GraphCanvas.DoOutDegreePlusOneLabeling();
 
             FocusSelectedTab();
         }
@@ -720,7 +724,7 @@ trash can button.
             if (tabCanvas == null)
                 return;
 
-            tabCanvas.Operations.DoClearLabels("d", AlgorithmBlob.Create(SelectedTabCanvas).SelectedVertices);
+            tabCanvas.GraphCanvas.DoClearLabels("d", AlgorithmBlob.Create(SelectedTabCanvas).SelectedVertices);
         }
         void LabelWithDegreeSymbolMinusOne()
         {
@@ -728,7 +732,7 @@ trash can button.
             if (tabCanvas == null)
                 return;
 
-            tabCanvas.Operations.DoClearLabels("d-1", AlgorithmBlob.Create(SelectedTabCanvas).SelectedVertices);
+            tabCanvas.GraphCanvas.DoClearLabels("d-1", AlgorithmBlob.Create(SelectedTabCanvas).SelectedVertices);
         }
 
         void ClearLabels()
@@ -737,7 +741,7 @@ trash can button.
             if (tabCanvas == null)
                 return;
 
-            tabCanvas.Operations.DoClearLabels("", AlgorithmBlob.Create(SelectedTabCanvas).SelectedVertices);
+            tabCanvas.GraphCanvas.DoClearLabels("", AlgorithmBlob.Create(SelectedTabCanvas).SelectedVertices);
 
             FocusSelectedTab();
         }
@@ -747,7 +751,7 @@ trash can button.
             if (tabCanvas == null)
                 return;
 
-            var tikz = TeXConverter.ToTikz(tabCanvas.Operations.Graph);
+            var tikz = TeXConverter.ToTikz(tabCanvas.GraphCanvas.Graph);
             if (!string.IsNullOrEmpty(tikz))
             {
                 ShowText(tikz);
@@ -760,7 +764,7 @@ trash can button.
             if (tabCanvas == null)
                 return;
 
-            var json = tabCanvas.Operations.Graph.Serialize();
+            var json = tabCanvas.GraphCanvas.Graph.Serialize();
             var g = HttpUtility.UrlEncode(Utility.Compress(json));
 
             var url = @"https://dl.dropboxusercontent.com/u/8609833/Web/WebGraphs/WebGraphsTestPage.html?jib=" + g;
@@ -784,7 +788,7 @@ trash can button.
             if (tabCanvas == null)
                 return;
 
-            var json = tabCanvas.Operations.Graph.Serialize();
+            var json = tabCanvas.GraphCanvas.Graph.Serialize();
             var g = HttpUtility.UrlEncode(json);
             var url = @"https://dl.dropboxusercontent.com/u/8609833/Web/Playground/CanvasGraphs/canvasgraphs.html?graph=" + g;
 
@@ -816,15 +820,24 @@ trash can button.
         }
         void DoAdjacencyMatrix()
         {
-            ShowText(SelectedTabCanvas.Operations.Graph.GetEdgeWeights().ToAdjacencyMatrix(SelectedTabCanvas.Operations.Graph.IsDirected));
+            ShowText(SelectedTabCanvas.GraphCanvas.Graph.GetEdgeWeights().ToAdjacencyMatrix(SelectedTabCanvas.GraphCanvas.Graph.IsDirected));
         }
         void DoEdgeWeights()
         {
-            ShowText(string.Join(" ", SelectedTabCanvas.Operations.Graph.GetEdgeWeights()));
+            ShowText(string.Join(" ", SelectedTabCanvas.GraphCanvas.Graph.GetEdgeWeights()));
         }
         void DoGraph6()
         {
-            ShowText(SelectedTabCanvas.Operations.Graph.GetEdgeWeights().ToGraph6());
+            ShowText(SelectedTabCanvas.GraphCanvas.Graph.GetEdgeWeights().ToGraph6());
+        }
+
+        void _mainMenu_DoGridToggle()
+        {
+            if (SelectedTabCanvas == null)
+                return;
+
+            SelectedTabCanvas.GraphCanvas.SnapToGrid = !SelectedTabCanvas.GraphCanvas.SnapToGrid;
+            SelectedTabCanvas.GraphCanvas.DrawGrid = SelectedTabCanvas.GraphCanvas.SnapToGrid;
         }
 
         async void CountEulerianSubgraphs()
@@ -1195,24 +1208,31 @@ trash can button.
                 if (listSizes == null)
                     return;
 
-                var choosable = false;
-                List<List<int>> badAssignment = null;
-                long nodesVisited = 0;
-                long cacheHits = 0;
-                await Task.Factory.StartNew(() =>
+                try
                 {
-                    choosable = blob.BitGraph.IsFChoosable(v => listSizes[v], out badAssignment, out nodesVisited, out cacheHits);
-                });
+                    var choosable = false;
+                    List<List<int>> badAssignment = null;
+                    long nodesVisited = 0;
+                    long cacheHits = 0;
+                    await Task.Factory.StartNew(() =>
+                    {
+                        choosable = blob.BitGraph.IsFChoosable(v => listSizes[v], out badAssignment, out nodesVisited, out cacheHits);
+                    });
 
-                if (badAssignment != null)
-                {
-                    var gr = blob.UIGraph.Clone();
-                    for (int i = 0; i < gr.Vertices.Count; i++)
-                        gr.Vertices[i].Label = string.Join(", ", badAssignment[i]);
+                    if (badAssignment != null)
+                    {
+                        var gr = blob.UIGraph.Clone();
+                        for (int i = 0; i < gr.Vertices.Count; i++)
+                            gr.Vertices[i].Label = string.Join(", ", badAssignment[i]);
 
-                    AddTab(gr, "bad f-assignment");
+                        AddTab(gr, "bad f-assignment");
+                    }
+                    resultWindow.AddChild(new TextBlock() { Text = (choosable ? "is f-choosable" : "not f-choosable") + Environment.NewLine + nodesVisited + " nodes visited" + Environment.NewLine + cacheHits + " cache hits" });
                 }
-                resultWindow.AddChild(new TextBlock() { Text = (choosable ? "is f-choosable" : "not f-choosable") + Environment.NewLine + nodesVisited + " nodes visited" + Environment.NewLine + cacheHits + " cache hits" });
+                catch (Exception ex)
+                {
+                    resultWindow.AddChild(new TextBlock() { Text = ex.Message });
+                }
             }
         }
 
@@ -1230,25 +1250,38 @@ trash can button.
         {
             DoLayout((Layout.Algorithm)Layout.GetWalkMatrixLayout);
         }
+        
+        void _mainMenu_DoUnitDistanceLayout()
+        {
+            if (SelectedTabCanvas == null)
+                return;
 
-        void DoLayout(Layout.Algorithm algorithm)
+            SelectedTabCanvas.GraphCanvas.SnapToGrid = false;
+            SelectedTabCanvas.GraphCanvas.DrawGrid = SelectedTabCanvas.GraphCanvas.SnapToGrid;
+
+            DoLayout((Layout.Algorithm)Layout.GetUnitDistanceLayout, SelectedTabCanvas.GraphCanvas.Graph.Vertices.Select(v => v.Location).ToList());
+        }
+
+
+        void DoLayout(Layout.Algorithm algorithm, List<Vector> layout = null)
         {
             var blob = AlgorithmBlob.Create(SelectedTabCanvas);
             if (blob == null)
                 return;
 
-            SelectedTabCanvas.Operations.SnapToGrid = false;
+            var snap = SelectedTabCanvas.GraphCanvas.SnapToGrid;
+            SelectedTabCanvas.GraphCanvas.SnapToGrid = false;
             var layoutAnimation = new LayoutAnimation(blob, () =>
             {
-                SelectedTabCanvas.Operations.Invalidate();
+                SelectedTabCanvas.GraphCanvas.Invalidate();
             }
              , () =>
              {
-                 SelectedTabCanvas.Operations.SnapToGrid = true;
+                 SelectedTabCanvas.GraphCanvas.SnapToGrid = snap;
                  blob.UIGraph.ParametersDirty = true;
-                 SelectedTabCanvas.Operations.GraphChanged();
-                 SelectedTabCanvas.Operations.Invalidate();
-             }, algorithm);
+                 SelectedTabCanvas.GraphCanvas.GraphChanged();
+                 SelectedTabCanvas.GraphCanvas.Invalidate();
+             }, algorithm, layout);
         }
 
         int ParseDegreeDependentString(string p, int degree)

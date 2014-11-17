@@ -10,7 +10,7 @@ namespace GraphsCore
 {
     public static class Layout
     {
-        public delegate List<Tuple<double, double>> Algorithm(Choosability.Graph g);
+        public delegate List<Graphs.Vector> Algorithm(Choosability.Graph g, List<Graphs.Vector> layout = null);
 
         public static Supergraph CreateSatsumaGraph(this Choosability.Graph g)
         {
@@ -39,12 +39,12 @@ namespace GraphsCore
             return satsumaGraph;
         }
 
-        public static List<Tuple<double, double>> GetSpringsLayout(this Choosability.Graph g)
+        public static List<Graphs.Vector> GetSpringsLayout(this Choosability.Graph g, List<Graphs.Vector> layout = null)
         {
             return GetSpringsLayout(g, 0);
         }
 
-        public static List<Tuple<double, double>> GetSpringsLayout(this Choosability.Graph g, int randomSeed)
+        public static List<Graphs.Vector> GetSpringsLayout(this Choosability.Graph g, int randomSeed)
         {
             var satsumaGraph = g.CreateSatsumaGraph();
             var layout = new ForceDirectedLayout(satsumaGraph, null, randomSeed);
@@ -66,10 +66,10 @@ namespace GraphsCore
             var width = maxX - minX;
             var height = maxY - minY;
 
-            return satsumaGraph.Nodes().Select(n => new Tuple<double, double>(0.1 + 0.7 * (layout.NodePositions[n].X - minX) / width, 0.1 + 0.7 * (layout.NodePositions[n].Y - minY) / height)).ToList();
+            return satsumaGraph.Nodes().Select(n => new Graphs.Vector(0.1 + 0.7 * (layout.NodePositions[n].X - minX) / width, 0.1 + 0.7 * (layout.NodePositions[n].Y - minY) / height)).ToList();
         }
 
-        public static List<Tuple<double, double>> GetLaplacianLayout(this Choosability.Graph g)
+        public static List<Graphs.Vector> GetLaplacianLayout(this Choosability.Graph g, List<Graphs.Vector> layout = null)
         {
             var D = Matrix.Build.Diagonal(g.N, g.N, v => g.Degree(v));
             var A = Matrix.Build.Dense(g.N, g.N, (v, w) => g[v, w] ? 1 : 0);
@@ -82,7 +82,7 @@ namespace GraphsCore
             return GetEigenVectorLayout(x, y);
         }
 
-        public static List<Tuple<double, double>> GetWalkMatrixLayout(this Choosability.Graph g)
+        public static List<Graphs.Vector> GetWalkMatrixLayout(this Choosability.Graph g, List<Graphs.Vector> layout = null)
         {
             var D = Matrix.Build.Diagonal(g.N, g.N, v => g.Degree(v));
             var A = Matrix.Build.Dense(g.N, g.N, (v, w) => g[v, w] ? 1 : 0);
@@ -107,7 +107,7 @@ namespace GraphsCore
             return GetEigenVectorLayout(x, y);
         }
 
-        static List<Tuple<double, double>> GetEigenVectorLayout(MathNet.Numerics.LinearAlgebra.Vector<double> x, MathNet.Numerics.LinearAlgebra.Vector<double> y)
+        static List<Graphs.Vector> GetEigenVectorLayout(MathNet.Numerics.LinearAlgebra.Vector<double> x, MathNet.Numerics.LinearAlgebra.Vector<double> y)
         {
             var minX = double.MaxValue;
             var minY = double.MaxValue;
@@ -125,7 +125,175 @@ namespace GraphsCore
             var width = maxX - minX;
             var height = maxY - minY;
 
-            return Enumerable.Range(0, x.Count).Select(v => new Tuple<double, double>(0.1 + 0.7 * (x[v] - minX) / width, 0.1 + 0.7 * (y[v] - minY) / height)).ToList();
+            return Enumerable.Range(0, x.Count).Select(v => new Graphs.Vector(0.1 + 0.7 * (x[v] - minX) / width, 0.1 + 0.7 * (y[v] - minY) / height)).ToList();
         }
+
+        public static List<Graphs.Vector> GetUnitDistanceLayout(this Choosability.Graph g, List<Graphs.Vector> layout = null)
+        {
+            var modifiedLayout = layout.ToList();
+
+            for (int qq = 0; qq < 1000; qq++)
+            {
+                var nonzeroCount = 0;
+                var total = 0.0;
+                for (int i = 0; i < g.N; i++)
+                {
+                    for (int j = i + 1; j < g.N; j++)
+                    {
+                        if (g[i, j])
+                        {
+                            var d = modifiedLayout[i].Distance(modifiedLayout[j]);
+                            if (d > 0)
+                            {
+                                nonzeroCount++;
+                                total += d;
+                            }
+                        }
+                    }
+                }
+
+                var length = total / Math.Max(1, nonzeroCount);
+
+                var RNG = new Random(DateTime.Now.Millisecond);
+                var maxDegree = g.MaxDegree;
+                var maxes = g.Vertices.Where(v => g.Degree(v) == maxDegree).ToList();
+                var first = maxes[RNG.Next(0, maxes.Count)];
+                modifiedLayout = modifiedLayout.ToList();
+                var remaining = g.Vertices.Where(v => v != first).ToList();
+                var anchor = new List<Tuple<int, Graphs.Vector>>() { new Tuple<int, Graphs.Vector>(first, modifiedLayout[first]) };
+
+                while (remaining.Count > 0)
+                {
+                    var count = remaining.Count;
+                    var removed = new List<int>();
+                    foreach (var v in remaining)
+                    {
+                        var neighbors = anchor.Where(a => g[a.Item1, v]).ToList();
+                        if (neighbors.Count <= 0)
+                            continue;
+
+                        if (neighbors.Count >= 2)
+                        {
+                            var a = neighbors.First().Item2;
+                            var b = neighbors.Skip(1).First().Item2;
+
+                            double x1, y1, x2, y2;
+                            if (IntersectionOfTwoCircles(a.X, a.Y, length, b.X, b.Y, length, out x1, out y1, out x2, out y2))
+                            {
+                                if (new Graphs.Vector(x1, y1).Distance(modifiedLayout[v]) < new Graphs.Vector(x2, y2).Distance(modifiedLayout[v]))
+                                {
+                                    modifiedLayout[v] = new Graphs.Vector(x1, y1);
+                                }
+                                else
+                                {
+                                    modifiedLayout[v] = new Graphs.Vector(x2, y2);
+                                }
+
+                                removed.Add(v);
+                                anchor.Add(new Tuple<int, Graphs.Vector>(v, modifiedLayout[v]));
+                            }
+                        }
+                    }
+
+                    remaining.RemoveAll(v => removed.Contains(v));
+                    removed.Clear();
+
+                    foreach (var v in remaining)
+                    {
+                        var neighbors = anchor.Where(a => g[a.Item1, v]).ToList();
+                        if (neighbors.Count <= 0)
+                            continue;
+
+                        var p = neighbors.First().Item2;
+                        var q = modifiedLayout[v];
+
+                        var offset = q - p;
+                        var ok = offset.Normalize();
+
+                        if (ok)
+                        {
+                            offset *= length;
+                            modifiedLayout[v] = p + offset;
+
+                            removed.Add(v);
+                            anchor.Add(new Tuple<int, Graphs.Vector>(v, modifiedLayout[v]));
+                            goto skipper;
+                        }
+                    }
+
+                skipper:
+                    remaining.RemoveAll(v => removed.Contains(v));
+                    if (remaining.Count == count)
+                    {
+                        var x = remaining[0];
+                        remaining.RemoveAt(0);
+                        anchor.Add(new Tuple<int, Graphs.Vector>(x, modifiedLayout[x]));
+                    }
+                }
+            }
+
+            return modifiedLayout;
+        }
+
+        static bool IntersectionOfTwoCircles(double x0, double y0, double r0, double x1, double y1, double r1, out double xi, out double yi, out double xi_prime, out double yi_prime)
+        {
+            xi = yi = xi_prime = yi_prime = 0.0;
+            double a, dx, dy, d, h, rx, ry;
+            double x2, y2;
+
+            /* dx and dy are the vertical and horizontal distances between
+             * the circle centers.
+             */
+            dx = x1 - x0;
+            dy = y1 - y0;
+
+            /* Determine the straight-line distance between the centers. */
+            //d = sqrt((dy*dy) + (dx*dx));
+            d = Math.Sqrt(dy * dy + dx * dx);
+
+            /* Check for solvability. */
+            if (d > (r0 + r1))
+            {
+                /* no solution. circles do not intersect. */
+                return false;
+            }
+            if (d < Math.Abs(r0 - r1))
+            {
+                /* no solution. one circle is contained in the other */
+                return false;
+            }
+
+            /* 'point 2' is the point where the line through the circle
+             * intersection points crosses the line between the circle
+             * centers.  
+             */
+
+            /* Determine the distance from point 0 to point 2. */
+            a = ((r0 * r0) - (r1 * r1) + (d * d)) / (2.0 * d);
+
+            /* Determine the coordinates of point 2. */
+            x2 = x0 + (dx * a / d);
+            y2 = y0 + (dy * a / d);
+
+            /* Determine the distance from point 2 to either of the
+             * intersection points.
+             */
+            h = Math.Sqrt((r0 * r0) - (a * a));
+
+            /* Now determine the offsets of the intersection points from
+             * point 2.
+             */
+            rx = -dy * (h / d);
+            ry = dx * (h / d);
+
+            /* Determine the absolute intersection points. */
+            xi = x2 + rx;
+            xi_prime = x2 - rx;
+            yi = y2 + ry;
+            yi_prime = y2 - ry;
+
+            return true;
+        }
+
     }
 }

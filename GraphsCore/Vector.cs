@@ -21,12 +21,14 @@ namespace Graphs
             }
         }
 
-        public void Normalize()
+        public bool Normalize()
         {
             var length = Length;
 
             _X = _X / length;
             _Y = _Y / length;
+
+            return length > 0;
         }
 
         public double Dot(Vector vector)

@@ -21,19 +21,19 @@ namespace WebGraphs
         Action _update;
         Action _finalUpdate;
         Storyboard _storyBoard;
-        List<Tuple<double, double>> _layout;
+        List<Graphs.Vector> _layout;
         double[] _xstep;
         double[] _ystep;
         int _step = 0;
 
-        public LayoutAnimation(AlgorithmBlob blob, Action update, Action finalUpdate, Layout.Algorithm layoutAlgorithm)
+        public LayoutAnimation(AlgorithmBlob blob, Action update, Action finalUpdate, Layout.Algorithm layoutAlgorithm, List<Graphs.Vector> layout = null)
         {
             _blob = blob;
             _update = update;
             _finalUpdate = finalUpdate;
             try
             {
-                _layout = layoutAlgorithm(blob.AlgorithmGraph);
+                _layout = layoutAlgorithm(blob.AlgorithmGraph, layout);
             }
             catch { }
 
@@ -44,8 +44,8 @@ namespace WebGraphs
             _ystep = new double[_layout.Count];
             for (int i = 0; i < _layout.Count; i++)
             {
-                _xstep[i] = (_layout[i].Item1 - _blob.UIGraph.Vertices[i].X) / Steps;
-                _ystep[i] = (_layout[i].Item2 - _blob.UIGraph.Vertices[i].Y) / Steps;
+                _xstep[i] = (_layout[i].X - _blob.UIGraph.Vertices[i].X) / Steps;
+                _ystep[i] = (_layout[i].Y - _blob.UIGraph.Vertices[i].Y) / Steps;
             }
 
             _storyBoard = new Storyboard();
@@ -74,8 +74,8 @@ namespace WebGraphs
         {
             for (int i = 0; i < _layout.Count; i++)
             {
-                _blob.UIGraph.Vertices[i].X = _layout[i].Item1;
-                _blob.UIGraph.Vertices[i].Y = _layout[i].Item2;
+                _blob.UIGraph.Vertices[i].X = _layout[i].X;
+                _blob.UIGraph.Vertices[i].Y = _layout[i].Y;
             }
             _finalUpdate();
         }

@@ -132,10 +132,10 @@ namespace Graphs
             _edges = edges.ToList();
         }
 
-        public Graph(Choosability.Graph g, List<Tuple<double, double>> position, bool directed = true)
+        public Graph(Choosability.Graph g, List<Vector> position, bool directed = true)
             : this()
         {
-            _vertices = g.Vertices.Select(v => new Vertex(position[v].Item1, position[v].Item2)).ToList();
+            _vertices = g.Vertices.Select(v => new Vertex(position[v].X, position[v].Y)).ToList();
             _edges = new List<Edge>();
 
             for (int i = 0; i < g.N; i++)
