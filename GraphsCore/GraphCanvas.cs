@@ -570,39 +570,43 @@ namespace Graphs
 
         public void Paint(GraphicsLayer.IGraphics g, int width, int height)
         {
-            Width = width;
-            Height = height;
-
-            if (SnapToGrid)
-                DoSnapToGrid();
-
-            g.Clear(BackgroundColor);
-            PaintGrid(g);
-
-            _graph.Paint(g, _viewScale, _viewScale);
-
-            switch (_state)
+            try
             {
-                case States.Idle:
-                    break;
-                case States.DraggingVertex:
-                    break;
-                case States.DraggingSelectionRegion:
-                    {
-                        List<Box> selectionPoints;
-                        lock (_SelectionPointsToken)
-                        {
-                            selectionPoints = new List<Box>(_selectionPoints.Count);
-                            foreach (var p in _selectionPoints)
-                                selectionPoints.Add(new Box(p.X * _viewScale, p.Y * _viewScale));
-                        }
+                Width = width;
+                Height = height;
 
-                        if (selectionPoints.Count > 1)
-                            g.DrawLines(SelectionPenColor, selectionPoints);
+                if (SnapToGrid)
+                    DoSnapToGrid();
 
+                g.Clear(BackgroundColor);
+                PaintGrid(g);
+
+                _graph.Paint(g, _viewScale, _viewScale);
+
+                switch (_state)
+                {
+                    case States.Idle:
                         break;
-                    }
+                    case States.DraggingVertex:
+                        break;
+                    case States.DraggingSelectionRegion:
+                        {
+                            List<Box> selectionPoints;
+                            lock (_SelectionPointsToken)
+                            {
+                                selectionPoints = new List<Box>(_selectionPoints.Count);
+                                foreach (var p in _selectionPoints)
+                                    selectionPoints.Add(new Box(p.X * _viewScale, p.Y * _viewScale));
+                            }
+
+                            if (selectionPoints.Count > 1)
+                                g.DrawLines(SelectionPenColor, selectionPoints);
+
+                            break;
+                        }
+                }
             }
+            catch { }
 
             HasPainted = true;
         }

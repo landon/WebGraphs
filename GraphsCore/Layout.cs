@@ -132,7 +132,10 @@ namespace GraphsCore
         {
             var modifiedLayout = layout.ToList();
 
-            for (int qq = 0; qq < 1000; qq++)
+            var maxDegree = g.MaxDegree;
+            var maxes = g.Vertices.Where(v => g.Degree(v) == maxDegree).ToList();
+
+            foreach(var first in maxes)
             {
                 var nonzeroCount = 0;
                 var total = 0.0;
@@ -153,11 +156,7 @@ namespace GraphsCore
                 }
 
                 var length = total / Math.Max(1, nonzeroCount);
-
-                var RNG = new Random(DateTime.Now.Millisecond);
-                var maxDegree = g.MaxDegree;
-                var maxes = g.Vertices.Where(v => g.Degree(v) == maxDegree).ToList();
-                var first = maxes[RNG.Next(0, maxes.Count)];
+                
                 modifiedLayout = modifiedLayout.ToList();
                 var remaining = g.Vertices.Where(v => v != first).ToList();
                 var anchor = new List<Tuple<int, Graphs.Vector>>() { new Tuple<int, Graphs.Vector>(first, modifiedLayout[first]) };
