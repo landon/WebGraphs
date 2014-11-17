@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+using Choosability;
+
 namespace GraphsCore
 {
     public static class Layout
@@ -133,100 +135,115 @@ namespace GraphsCore
             var modifiedLayout = layout.ToList();
 
             var maxDegree = g.MaxDegree;
-            var maxes = g.Vertices.Where(v => g.Degree(v) == maxDegree).ToList();
 
-            foreach(var first in maxes)
+            for (int qqq = 0; qqq < 50; qqq++)
             {
-                var nonzeroCount = 0;
-                var total = 0.0;
-                for (int i = 0; i < g.N; i++)
+                var maxes = g.Vertices.ToList();
+                maxes.Shuffle();
+
+                foreach (var first in maxes)
                 {
-                    for (int j = i + 1; j < g.N; j++)
+                    var nonzeroCount = 0;
+                    var total = 0.0;
+                    for (int i = 0; i < g.N; i++)
                     {
-                        if (g[i, j])
+                        for (int j = i + 1; j < g.N; j++)
                         {
-                            var d = modifiedLayout[i].Distance(modifiedLayout[j]);
-                            if (d > 0)
+                            if (g[i, j])
                             {
-                                nonzeroCount++;
-                                total += d;
-                            }
-                        }
-                    }
-                }
-
-                var length = total / Math.Max(1, nonzeroCount);
-                
-                modifiedLayout = modifiedLayout.ToList();
-                var remaining = g.Vertices.Where(v => v != first).ToList();
-                var anchor = new List<Tuple<int, Graphs.Vector>>() { new Tuple<int, Graphs.Vector>(first, modifiedLayout[first]) };
-
-                while (remaining.Count > 0)
-                {
-                    var count = remaining.Count;
-                    var removed = new List<int>();
-                    foreach (var v in remaining)
-                    {
-                        var neighbors = anchor.Where(a => g[a.Item1, v]).ToList();
-                        if (neighbors.Count <= 0)
-                            continue;
-
-                        if (neighbors.Count >= 2)
-                        {
-                            var a = neighbors.First().Item2;
-                            var b = neighbors.Skip(1).First().Item2;
-
-                            double x1, y1, x2, y2;
-                            if (IntersectionOfTwoCircles(a.X, a.Y, length, b.X, b.Y, length, out x1, out y1, out x2, out y2))
-                            {
-                                if (new Graphs.Vector(x1, y1).Distance(modifiedLayout[v]) < new Graphs.Vector(x2, y2).Distance(modifiedLayout[v]))
+                                var d = modifiedLayout[i].Distance(modifiedLayout[j]);
+                                if (d > 0)
                                 {
-                                    modifiedLayout[v] = new Graphs.Vector(x1, y1);
+                                    nonzeroCount++;
+                                    total += d;
                                 }
-                                else
-                                {
-                                    modifiedLayout[v] = new Graphs.Vector(x2, y2);
-                                }
-
-                                removed.Add(v);
-                                anchor.Add(new Tuple<int, Graphs.Vector>(v, modifiedLayout[v]));
                             }
                         }
                     }
 
-                    remaining.RemoveAll(v => removed.Contains(v));
-                    removed.Clear();
+                    var length = total / Math.Max(1, nonzeroCount);
 
-                    foreach (var v in remaining)
+                    for (int qq = 0; qq < 10; qq++)
                     {
-                        var neighbors = anchor.Where(a => g[a.Item1, v]).ToList();
-                        if (neighbors.Count <= 0)
-                            continue;
+                        modifiedLayout = modifiedLayout.ToList();
+                        var remaining = g.Vertices.Where(v => v != first).ToList();
+                        remaining.Shuffle();
+                        var anchor = new List<Tuple<int, Graphs.Vector>>() { new Tuple<int, Graphs.Vector>(first, modifiedLayout[first]) };
 
-                        var p = neighbors.First().Item2;
-                        var q = modifiedLayout[v];
-
-                        var offset = q - p;
-                        var ok = offset.Normalize();
-
-                        if (ok)
+                        while (remaining.Count > 0)
                         {
-                            offset *= length;
-                            modifiedLayout[v] = p + offset;
+                            var count = remaining.Count;
+                            var removed = new List<int>();
+                            foreach (var v in remaining)
+                            {
+                                var neighbors = anchor.Where(a => g[a.Item1, v]).ToList();
+                                if (neighbors.Count <= 0)
+                                    continue;
 
-                            removed.Add(v);
-                            anchor.Add(new Tuple<int, Graphs.Vector>(v, modifiedLayout[v]));
-                            goto skipper;
+                                if (neighbors.Count >= 2)
+                                {
+                                    var a = neighbors.First().Item2;
+                                    var b = neighbors.Skip(1).First().Item2;
+
+                                    double x1, y1, x2, y2;
+                                    if (IntersectionOfTwoCircles(a.X, a.Y, length, b.X, b.Y, length, out x1, out y1, out x2, out y2))
+                                    {
+                                        var d1 = new Graphs.Vector(x1, y1).Distance(modifiedLayout[v]);
+                                        var d2 = new Graphs.Vector(x2, y2).Distance(modifiedLayout[v]);
+
+                                        if (d1 < d2 && d1 > 0.001)
+                                        {
+                                            modifiedLayout[v] = new Graphs.Vector(x1, y1);
+                                        }
+                                        else if (d2 < d1 && d2 > 0.001)
+                                        {
+                                            modifiedLayout[v] = new Graphs.Vector(x2, y2);
+                                        }
+
+                                        removed.Add(v);
+                                        anchor.Add(new Tuple<int, Graphs.Vector>(v, modifiedLayout[v]));
+                                    }
+                                }
+                            }
+
+                            var tt = remaining.RemoveAll(v => removed.Contains(v));
+                            removed.Clear();
+
+                            if (tt == 0)
+                            {
+                                foreach (var v in remaining)
+                                {
+                                    var neighbors = anchor.Where(a => g[a.Item1, v]).ToList();
+                                    if (neighbors.Count <= 0)
+                                        continue;
+
+                                    var p = neighbors.First().Item2;
+                                    var q = modifiedLayout[v];
+
+                                    var offset = q - p;
+                                    var ok = offset.Normalize();
+
+                                    if (ok)
+                                    {
+                                        offset *= length;
+                                        modifiedLayout[v] = p + offset;
+
+                                        removed.Add(v);
+                                        anchor.Add(new Tuple<int, Graphs.Vector>(v, modifiedLayout[v]));
+                                        goto skipper;
+                                    }
+                                }
+
+                            skipper:
+                                remaining.RemoveAll(v => removed.Contains(v));
+                                if (remaining.Count == count)
+                                {
+                                    var x = remaining[0];
+                                    remaining.RemoveAt(0);
+                                    anchor.Add(new Tuple<int, Graphs.Vector>(x, modifiedLayout[x]));
+                                }
+                            }
                         }
-                    }
-
-                skipper:
-                    remaining.RemoveAll(v => removed.Contains(v));
-                    if (remaining.Count == count)
-                    {
-                        var x = remaining[0];
-                        remaining.RemoveAt(0);
-                        anchor.Add(new Tuple<int, Graphs.Vector>(x, modifiedLayout[x]));
                     }
                 }
             }
