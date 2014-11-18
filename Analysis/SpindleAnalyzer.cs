@@ -126,15 +126,15 @@ namespace WebGraphs.Analysis
             heaviestIndependentSet = new List<int>();
             var maxWeight = 0.0;
 
-            foreach (var X in blob.AlgorithmGraph.EnumerateIndependentSets())
+            foreach (var X in blob.AlgorithmGraph.EnumerateMaximalIndependentSets())
             {
                 var weight = X.Sum(v => w[v]) + diamonds.Count;
                 if (weight <= maxWeight) continue;
-                weight -= ComputeLostSpindles(p, diamonds, X, w, DiamondType.U);
+                weight -= ComputeLostSpindles(p, diamonds, X, DiamondType.U);
                 if (weight <= maxWeight) continue;
-                weight -= ComputeLostSpindles(p, diamonds, X, w, DiamondType.DL);
+                weight -= ComputeLostSpindles(p, diamonds, X, DiamondType.DL);
                 if (weight <= maxWeight) continue;
-                weight -= ComputeLostSpindles(p, diamonds, X, w, DiamondType.DR);
+                weight -= ComputeLostSpindles(p, diamonds, X, DiamondType.DR);
 
                 if (weight > maxWeight)
                 {
@@ -146,24 +146,29 @@ namespace WebGraphs.Analysis
             return maxWeight;
         }
 
-        public static double ComputeBestWeightMaxIndependent(AlgorithmBlob blob, List<Vector> p, List<List<int>> diamonds, List<double> w)
+        public static string ComputeTotalWeightFormula(AlgorithmBlob blob, List<Vector> p, List<List<int>> diamonds, List<string> w)
         {
-            var maxWeight = 0.0;
-            foreach (var X in blob.AlgorithmGraph.MaximalIndependentSets)
-            {
-                var lostSpindlesU = ComputeLostSpindles(p, diamonds, X, w, DiamondType.U);
-                var lostSpindlesDL = ComputeLostSpindles(p, diamonds, X, w, DiamondType.DL);
-                var lostSpindlesDR = ComputeLostSpindles(p, diamonds, X, w, DiamondType.DR);
+            var spindle = 3 * diamonds.Count;
 
-                var weight = X.Sum(v => w[v]) + diamonds.Count - lostSpindlesU - lostSpindlesDL - lostSpindlesDR;
-                if (weight > maxWeight)
-                    maxWeight = weight;
-            }
-
-            return maxWeight;
+            return string.Join(" + ", blob.AlgorithmGraph.Vertices.GroupBy(v => w[v]).Select(x => (x.Count() > 1 ? x.Count().ToString() : "") + x.Key)) + " + " + spindle + "s";
         }
 
-        public static double ComputeLostSpindles(List<Vector> p, List<List<int>> diamonds, List<int> independentSet, List<double> w, DiamondType direction)
+        public static List<string> ComputeLPConstraints(AlgorithmBlob blob, List<Vector> p, List<List<int>> diamonds, List<string> w)
+        {
+            return blob.AlgorithmGraph.EnumerateMaximalIndependentSets().Select(X => GenerateConstraint(X, p, diamonds, w)).ToList();
+        }
+
+        static string GenerateConstraint(List<int> X, List<Vector> p, List<List<int>> diamonds, List<string> w)
+        {
+            var lostSpindlesU = ComputeLostSpindles(p, diamonds, X, DiamondType.U);
+            var lostSpindlesDL = ComputeLostSpindles(p, diamonds, X, DiamondType.DL);
+            var lostSpindlesDR = ComputeLostSpindles(p, diamonds, X, DiamondType.DR);
+            var spindle = diamonds.Count - lostSpindlesU - lostSpindlesDL - lostSpindlesDR;
+
+            return string.Join(" + ", X.GroupBy(v => w[v]).OrderBy(x => x.Key).Select(x => (x.Count() > 1 ? x.Count().ToString() : "") + x.Key)) + " + " + spindle + "s";
+        }
+    
+        public static double ComputeLostSpindles(List<Vector> p, List<List<int>> diamonds, List<int> independentSet, DiamondType direction)
         {
             var directionDiamonds = diamonds.Where(d => ClassifyDiamond(p, d) == direction).ToList();
 
@@ -182,35 +187,7 @@ namespace WebGraphs.Analysis
             }
 
             var vs = H.Vertices.Where(v => lists[v] != 0).ToList();
-
-            /*var low = 0;
-            var high = H.N + 1;
-
-            while (low <= high - 2)
-            {
-                var size = (low + high) / 2;
-
-                var down = true;
-                var vs = H.Vertices.Where(v => lists[v] != 0).ToList();
-                if (vs.Count >= size)
-                {
-                    foreach (var set in vs.EnumerateSublists(size))
-                    {
-                        if (H.IsChoosable(lists, set))
-                        {
-                            low = size;
-                            down = false;
-                            break;
-                        }
-                    }
-                }
-
-                if (down)
-                    high = size;
-            }
-
-            return H.N - low;*/
-
+            
             var best = 0;
             for (int size = 1; size <= vs.Count; size++)
             {

@@ -26,6 +26,7 @@ using System.IO.IsolatedStorage;
 using Choosability.IndependenceRatio;
 using GraphsCore.Famlies;
 using WebGraphs.Analysis;
+using System.Text;
 
 namespace WebGraphs
 {
@@ -93,12 +94,14 @@ namespace WebGraphs
             _mainMenu.DoListExtraSpindleEdges += _mainMenu_DoListExtraSpindleEdges;
             _mainMenu.DoBasesAndTopsWeighting += _mainMenu_DoBasesAndTopsWeighting;
             _mainMenu.DoMaxFractionalClique += _mainMenu_DoMaxFractionalClique;
+            _mainMenu.DoSolveLP += _mainMenu_DoSolveLP;
 
             _propertyGrid.SomethingChanged += _propertyGrid_SomethingChanged;
 
             DoAutoLoad();
         }
 
+   
         void DoAutoLoad()
         {
             try
@@ -852,7 +855,32 @@ trash can button.
             }
         }
 
+        async void _mainMenu_DoSolveLP()
+        {
+            if (SelectedTabCanvas == null)
+                return;
 
+            using (var resultWindow = new ResultWindow())
+            {
+                var blob = AlgorithmBlob.Create(SelectedTabCanvas);
+                var p = blob.UIGraph.Vertices.Select(v => new Vector(v.X, v.Y)).ToList();
+
+                var diamonds = SpindleAnalyzer.FindDiamonds(blob, p);
+                var w = blob.AlgorithmGraph.Vertices.Select(v => blob.UIGraph.Vertices[v].Label).ToList();
+                
+                var totalFormula = SpindleAnalyzer.ComputeTotalWeightFormula(blob, p, diamonds, w);
+                var constraints = await Task.Factory.StartNew<List<string>>(() => SpindleAnalyzer.ComputeLPConstraints(blob, p, diamonds, w));
+
+                var sb = new StringBuilder();
+                sb.AppendLine("Maximize t = " + totalFormula + " subject to");
+                foreach (var c in constraints.Distinct())
+                {
+                    sb.AppendLine(c + " <= 1");
+                }
+
+                resultWindow.AddChild(new TextBox() { Text = sb.ToString() });
+            }
+        }
 
         void ClearLabels()
         {

@@ -16,6 +16,7 @@ namespace Choosability
 
         bool[,] _adjacent;
         Lazy<List<List<int>>> _neighbors;
+        Lazy<List<List<int>>> _nonNeighbors;
         Lazy<List<List<int>>> _outNeighbors;
         Lazy<List<List<int>>> _inNeighbors;
         Lazy<List<List<int>>> _laterNeighbors;
@@ -43,6 +44,7 @@ namespace Choosability
         }
 
         public List<List<int>> Neighbors { get { return _neighbors.Value; } }
+        public List<List<int>> NonNeighbors { get { return _nonNeighbors.Value; } }
         public List<List<int>> OutNeighbors { get { return _outNeighbors.Value; } }
         public List<List<int>> InNeighbors { get { return _inNeighbors.Value; } }
         public List<int> Vertices { get { return _vertices; } }
@@ -155,6 +157,20 @@ namespace Choosability
 
                     return neighbors;
                 });
+
+            _nonNeighbors = new Lazy<List<List<int>>>(() =>
+            {
+                var nn = new List<List<int>>();
+                for (int i = 0; i < N; i++)
+                    nn.Add(new List<int>());
+
+                for (int i = 0; i < N; i++)
+                    for (int j = 0; j < N; j++)
+                        if (i != j && !_adjacent[i, j])
+                            nn[i].Add(j);
+
+                return nn;
+            });
 
             _outNeighbors = new Lazy<List<List<int>>>(() =>
             {
@@ -848,10 +864,7 @@ namespace Choosability
         #endregion
 
         #region Independent sets
-        public IEnumerable<List<int>> EnumerateIndependentSets()
-        {
-            return IndependentSetsInSubgraph(0);
-        }
+     
         IEnumerable<List<int>> IndependentSetsInSubgraph(int firstVertex)
         {
             if (firstVertex >= N) return new List<List<int>>() { new List<int>() };
@@ -916,6 +929,52 @@ namespace Choosability
             var i = IndependenceNumber(subgraph);
             return _independentSets.Value.First(I => I.IntersectionCount(subgraph) == i);
         }
+
+        public IEnumerable<List<int>> EnumerateMaximalIndependentSets()
+        {
+            return EnumerateBronKerbosch(Vertices, new List<int>(), new List<int>());
+        }
+
+        IEnumerable<List<int>> EnumerateBronKerbosch(List<int> P, List<int> R, List<int> X)
+        {
+            if (P.Count == 0 && X.Count == 0)
+                yield return R.ToList();
+            else
+            {
+                var PC = P.ToList();
+                var XC = X.ToList();
+
+                var u = TomitaPivot(P, X);
+                foreach (var v in P.Except(NonNeighbors[u]))
+                {
+                    R.Add(v);
+                    foreach (var set in EnumerateBronKerbosch(PC.Intersection(NonNeighbors[v]), R, XC.Intersection(NonNeighbors[v])))
+                        yield return set;
+
+                    R.Remove(v);
+                    PC.Remove(v);
+                    XC.Add(v);
+                }
+            }
+        }
+
+        int TomitaPivot(List<int> P, List<int> X)
+        {
+            var max = -1;
+            var best = -1;
+            foreach (var u in P.Concat(X))
+            {
+                var n = Neighbors[u].IntersectionCount(P);
+                if (n > max)
+                {
+                    max = n;
+                    best = u;
+                }
+            }
+
+            return best;
+        }
+
         #endregion
 
         #region List coloring

@@ -74,6 +74,7 @@ namespace WebGraphs
         public event Action DoListExtraSpindleEdges;
         public event Action DoBasesAndTopsWeighting;
         public event Action DoMaxFractionalClique;
+        public event Action DoSolveLP;
 
         public MenuBar()
         {
@@ -281,6 +282,9 @@ namespace WebGraphs
                     break;
                 case "max fractional clique":
                     A(DoMaxFractionalClique);
+                    break;
+                case "generate LP":
+                    A(DoSolveLP);
                     break;
             }
         }
