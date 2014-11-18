@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Choosability;
 
 namespace WebGraphs.Analysis
 {
@@ -23,7 +24,7 @@ namespace WebGraphs.Analysis
             DR
         }
 
-        public static Graph BuildSerendipitousEdgeGraph(AlgorithmBlob blob, List<Vector> p, List<List<int>> diamonds, out Graph rotatedGraph)
+        public static Graphs.Graph BuildSerendipitousEdgeGraph(AlgorithmBlob blob, List<Vector> p, List<List<int>> diamonds, out Graphs.Graph rotatedGraph)
         {
             var dim = GraphicsLayer.ARGB.FromFractional(0.5, 0.5, 0.5, 0.5);
             var transparent = GraphicsLayer.ARGB.FromFractional(0.0, 0.5, 0.5, 0.5);
@@ -111,8 +112,140 @@ namespace WebGraphs.Analysis
                 }
             }
 
-            rotatedGraph = new Graph(rotatedVertices, rotatedEdges);
-            return new Graph(vertices, edges);
+            rotatedGraph = new Graphs.Graph(rotatedVertices, rotatedEdges);
+            return new Graphs.Graph(vertices, edges);
+        }
+
+        public static double ComputeTotalWeight(AlgorithmBlob blob, List<Vector> p, List<List<int>> diamonds, List<double> w)
+        {
+            return blob.AlgorithmGraph.Vertices.Sum(v => w[v]) + 3 * diamonds.Count;
+        }
+
+        public static double ComputeBestWeight(AlgorithmBlob blob, List<Vector> p, List<List<int>> diamonds, List<double> w, out List<int> heaviestIndependentSet)
+        {
+            heaviestIndependentSet = new List<int>();
+            var maxWeight = 0.0;
+
+            foreach (var X in blob.AlgorithmGraph.EnumerateIndependentSets())
+            {
+                var weight = X.Sum(v => w[v]) + diamonds.Count;
+                if (weight <= maxWeight) continue;
+                weight -= ComputeLostSpindles(p, diamonds, X, w, DiamondType.U);
+                if (weight <= maxWeight) continue;
+                weight -= ComputeLostSpindles(p, diamonds, X, w, DiamondType.DL);
+                if (weight <= maxWeight) continue;
+                weight -= ComputeLostSpindles(p, diamonds, X, w, DiamondType.DR);
+
+                if (weight > maxWeight)
+                {
+                    maxWeight = weight;
+                    heaviestIndependentSet = X;
+                }
+            }
+
+            return maxWeight;
+        }
+
+        public static double ComputeBestWeightMaxIndependent(AlgorithmBlob blob, List<Vector> p, List<List<int>> diamonds, List<double> w)
+        {
+            var maxWeight = 0.0;
+            foreach (var X in blob.AlgorithmGraph.MaximalIndependentSets)
+            {
+                var lostSpindlesU = ComputeLostSpindles(p, diamonds, X, w, DiamondType.U);
+                var lostSpindlesDL = ComputeLostSpindles(p, diamonds, X, w, DiamondType.DL);
+                var lostSpindlesDR = ComputeLostSpindles(p, diamonds, X, w, DiamondType.DR);
+
+                var weight = X.Sum(v => w[v]) + diamonds.Count - lostSpindlesU - lostSpindlesDL - lostSpindlesDR;
+                if (weight > maxWeight)
+                    maxWeight = weight;
+            }
+
+            return maxWeight;
+        }
+
+        public static double ComputeLostSpindles(List<Vector> p, List<List<int>> diamonds, List<int> independentSet, List<double> w, DiamondType direction)
+        {
+            var directionDiamonds = diamonds.Where(d => ClassifyDiamond(p, d) == direction).ToList();
+
+            var bases = directionDiamonds.IndicesWhere(d => independentSet.Contains(d[0])).ToList();
+            var tops = directionDiamonds.IndicesWhere(d => independentSet.Contains(d[1])).ToList();
+            
+            var H = BuildSingleDirectionGraph(p, directionDiamonds);
+            var lists = Enumerable.Repeat(7L, H.N).ToList();
+
+            for (int i = 0; i < lists.Count; i++)
+            {
+                if (bases.Contains(i))
+                    lists[i] &= 1;
+                if (tops.Contains(i))
+                    lists[i] &= 6;
+            }
+
+            var vs = H.Vertices.Where(v => lists[v] != 0).ToList();
+
+            /*var low = 0;
+            var high = H.N + 1;
+
+            while (low <= high - 2)
+            {
+                var size = (low + high) / 2;
+
+                var down = true;
+                var vs = H.Vertices.Where(v => lists[v] != 0).ToList();
+                if (vs.Count >= size)
+                {
+                    foreach (var set in vs.EnumerateSublists(size))
+                    {
+                        if (H.IsChoosable(lists, set))
+                        {
+                            low = size;
+                            down = false;
+                            break;
+                        }
+                    }
+                }
+
+                if (down)
+                    high = size;
+            }
+
+            return H.N - low;*/
+
+            var best = 0;
+            for (int size = 1; size <= vs.Count; size++)
+            {
+                foreach (var set in vs.EnumerateSublists(size))
+                {
+                    if (H.IsChoosable(lists, set))
+                    {
+                        best = size;
+                        break;
+                    }
+                }
+            }
+
+            return H.N - best;
+        }
+
+        static Choosability.Graph BuildSingleDirectionGraph(List<Vector> p, List<List<int>> diamonds)
+        {
+            var a = new bool[diamonds.Count, diamonds.Count];
+            var r = p[diamonds[0][0]].Distance(p[diamonds[0][2]]);
+
+            for (int v = 0; v < diamonds.Count; v++)
+            {
+                for (int w = v + 1; w < diamonds.Count; w++)
+                {
+                    var distance = p[diamonds[v][0]].Distance(p[diamonds[w][0]]);
+                    var offset = Math.Abs(distance - r);
+                    if (offset < MinDelta)
+                    {
+                        a[v, w] = true;
+                    }
+                }
+            }
+
+            return new Choosability.Graph(a);
         }
 
         public static List<string> FindSerendipitousEdges(AlgorithmBlob blob, List<Vector> p, List<List<int>> diamonds)

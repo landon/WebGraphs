@@ -72,6 +72,8 @@ namespace WebGraphs
         public event Action DoGridToggle;
         public event Action DoMakeHexGrid;
         public event Action DoListExtraSpindleEdges;
+        public event Action DoBasesAndTopsWeighting;
+        public event Action DoMaxFractionalClique;
 
         public MenuBar()
         {
@@ -273,6 +275,12 @@ namespace WebGraphs
                     break;
                 case "list extra spindle edges":
                     A(DoListExtraSpindleEdges);
+                    break;
+                case "bases and tops weighting":
+                    A(DoBasesAndTopsWeighting);
+                    break;
+                case "max fractional clique":
+                    A(DoMaxFractionalClique);
                     break;
             }
         }

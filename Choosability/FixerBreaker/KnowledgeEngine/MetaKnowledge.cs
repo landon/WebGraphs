@@ -34,6 +34,15 @@ namespace Choosability.FixerBreaker.KnowledgeEngine
 
             return null;
         }
+        public static double? TryParseDouble(this string s)
+        {
+            double x;
+            if (double.TryParse(s, out x))
+                return x;
+
+            return null;
+        }
+
 
         public static bool DegreeCondition(this Graph g, Board b, Func<List<int>, int> missingEdges = null)
         {

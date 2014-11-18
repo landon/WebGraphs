@@ -91,6 +91,8 @@ namespace WebGraphs
             _mainMenu.DoUnitDistanceLayout += _mainMenu_DoUnitDistanceLayout;
             _mainMenu.DoMakeHexGrid += _mainMenu_DoMakeHexGrid;
             _mainMenu.DoListExtraSpindleEdges += _mainMenu_DoListExtraSpindleEdges;
+            _mainMenu.DoBasesAndTopsWeighting += _mainMenu_DoBasesAndTopsWeighting;
+            _mainMenu.DoMaxFractionalClique += _mainMenu_DoMaxFractionalClique;
 
             _propertyGrid.SomethingChanged += _propertyGrid_SomethingChanged;
 
@@ -797,6 +799,60 @@ trash can button.
 
             ShowText("total: " + e.Count + Environment.NewLine + string.Join(Environment.NewLine, e));
         }
+
+        void _mainMenu_DoBasesAndTopsWeighting()
+        {
+            if (SelectedTabCanvas == null)
+                return;
+
+            var blob = AlgorithmBlob.Create(SelectedTabCanvas);
+            var p = blob.UIGraph.Vertices.Select(v => new Vector(v.X, v.Y)).ToList();
+
+            var diamonds = SpindleAnalyzer.FindDiamonds(blob, p);
+
+            var bases = Enumerable.Range(0, blob.AlgorithmGraph.N).Select(v => diamonds.Count(d => d[0] == v)).ToList();
+            var tops = Enumerable.Range(0, blob.AlgorithmGraph.N).Select(v => diamonds.Count(d => d[1] == v)).ToList();
+
+            for (int v = 0; v < blob.UIGraph.Vertices.Count; v++)
+            {
+                blob.UIGraph.Vertices[v].Label = (2 * bases[v] + tops[v]).ToString();
+            }
+
+            SelectedTabCanvas.Invalidate();
+        }
+
+
+        async void _mainMenu_DoMaxFractionalClique()
+        {
+            if (SelectedTabCanvas == null)
+                return;
+
+            using (var resultWindow = new ResultWindow())
+            {
+                var blob = AlgorithmBlob.Create(SelectedTabCanvas);
+                var p = blob.UIGraph.Vertices.Select(v => new Vector(v.X, v.Y)).ToList();
+
+                var diamonds = SpindleAnalyzer.FindDiamonds(blob, p);
+                var w = blob.AlgorithmGraph.Vertices.Select(v => blob.UIGraph.Vertices[v].Label.TryParseDouble().Value).ToList();
+
+                var total = SpindleAnalyzer.ComputeTotalWeight(blob, p, diamonds, w);
+
+                var best = await Task.Factory.StartNew<Tuple<double, List<int>>>(() =>
+                    {
+                        List<int> heaviestIndependentSet;
+                        var weight = SpindleAnalyzer.ComputeBestWeight(blob, p, diamonds, w, out heaviestIndependentSet);
+
+                        return new Tuple<double, List<int>>(weight, heaviestIndependentSet);
+                    });
+
+                blob.UIGraph.SelectVertices(best.Item2.Select(v => blob.UIGraph.Vertices[v]), false);
+                SelectedTabCanvas.Invalidate();
+
+                resultWindow.AddChild(new TextBlock() { Text = total + " / " + best.Item1 + " = " + ((double)total / best.Item1) });
+            }
+        }
+
+
 
         void ClearLabels()
         {

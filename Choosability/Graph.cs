@@ -54,6 +54,9 @@ namespace Choosability
         TransitivePartition TransitivePartition { get; set; }
         public List<int> EdgeWeightsWithMultiplicity { get; set; }
 
+        public List<List<int>> IndependentSets { get { return _independentSets.Value; } }
+        public List<List<int>> MaximalIndependentSets { get { return _maximalIndependentSets.Value; } }
+
         public Graph FromOutNeighborLists(Dictionary<int, List<int>> outNeighbors)
         {
             var N = outNeighbors.Count;
@@ -845,6 +848,10 @@ namespace Choosability
         #endregion
 
         #region Independent sets
+        public IEnumerable<List<int>> EnumerateIndependentSets()
+        {
+            return IndependentSetsInSubgraph(0);
+        }
         IEnumerable<List<int>> IndependentSetsInSubgraph(int firstVertex)
         {
             if (firstVertex >= N) return new List<List<int>>() { new List<int>() };
@@ -912,6 +919,32 @@ namespace Choosability
         #endregion
 
         #region List coloring
+        public bool IsChoosable(List<long> assignment, List<int> subset)
+        {
+            return IsChoosable(assignment, 0, subset);
+        }
+        bool IsChoosable(List<long> assignment, int v, List<int> subset)
+        {
+            if (v >= subset.Count)
+                return true;
+
+            var colors = assignment[subset[v]];
+            while (colors != 0)
+            {
+                var color = colors & -colors;
+
+                var assignmentCopy = new List<long>(assignment);
+                foreach (var neighbor in _laterNeighbors.Value[subset[v]])
+                    assignmentCopy[neighbor] &= ~color;
+
+                if (IsChoosable(assignmentCopy, v + 1, subset))
+                    return true;
+
+                colors ^= color;
+            }
+
+            return false;
+        }
         public bool IsChoosable(List<long> assignment)
         {
             return IsChoosable(assignment, 0);
