@@ -149,26 +149,61 @@ namespace WebGraphs.Analysis
         public static string ComputeTotalWeightFormula(AlgorithmBlob blob, List<Vector> p, List<List<int>> diamonds, List<string> w)
         {
             var spindle = 3 * diamonds.Count;
-
-            return string.Join(" + ", blob.AlgorithmGraph.Vertices.GroupBy(v => w[v]).Select(x => (x.Count() > 1 ? x.Count().ToString() : "") + x.Key)) + " + " + spindle + "s";
+            return string.Join(" + ", blob.AlgorithmGraph.Vertices.GroupBy(v => w[v]).OrderBy(x => x.Key).Select(x => (x.Count() > 1 ? x.Count().ToString() : "") + x.Key)) + " + " + spindle + "s";
         }
 
-        public static List<string> ComputeLPConstraints(AlgorithmBlob blob, List<Vector> p, List<List<int>> diamonds, List<string> w)
+        static string GeneratePrettyConstraint(List<int> X, List<Vector> p, List<List<int>> diamonds, List<string> w)
         {
-            return blob.AlgorithmGraph.EnumerateMaximalIndependentSets().Select(X => GenerateConstraint(X, p, diamonds, w)).ToList();
+            var spindleCount = ComputeSpindleCount(X, p, diamonds);
+            return string.Join(" + ", X.GroupBy(v => w[v]).OrderBy(x => x.Key).Select(x => (x.Count() > 1 ? x.Count().ToString() : "") + x.Key)) + " + " + spindleCount + "s <= 1";
         }
 
-        static string GenerateConstraint(List<int> X, List<Vector> p, List<List<int>> diamonds, List<string> w)
+        public static string GenerateGLPKCode(AlgorithmBlob blob, List<Vector> p, List<List<int>> diamonds, List<string> w)
+        {
+            var spindle = 3 * diamonds.Count;
+            var variables = w.Distinct().OrderBy(x => x).ToList();
+
+            var sb = new StringBuilder();
+            sb.AppendLine("maximize");
+            sb.AppendLine(string.Join(" + ", blob.AlgorithmGraph.Vertices.GroupBy(v => w[v]).OrderBy(x => x.Key).Select(x => (x.Count() > 1 ? x.Count().ToString() : "") + x.Key)) + " + " + spindle + "s");
+
+            sb.AppendLine();
+            sb.AppendLine("subject to");
+            sb.AppendLine(string.Join(Environment.NewLine, blob.AlgorithmGraph.EnumerateMaximalIndependentSets().Select(X => GeneratePrettyConstraint(X, p, diamonds, w)).Distinct()));
+
+            sb.AppendLine();
+            sb.AppendLine("bounds");
+            foreach (var v in variables)
+                sb.AppendLine(v + " >= 0");
+
+            sb.AppendLine("s >= 0");
+
+            sb.AppendLine();
+            sb.AppendLine("generals");
+            foreach (var v in variables)
+                sb.AppendLine(v);
+            sb.AppendLine("s");
+
+            sb.AppendLine();
+            sb.AppendLine("end");
+            return sb.ToString();
+        }
+
+        static int CountOccurrences(string x, List<string> w, List<int> subset)
+        {
+            return subset.Count(i => x == w[i]);
+        }
+
+        private static int ComputeSpindleCount(List<int> X, List<Vector> p, List<List<int>> diamonds)
         {
             var lostSpindlesU = ComputeLostSpindles(p, diamonds, X, DiamondType.U);
             var lostSpindlesDL = ComputeLostSpindles(p, diamonds, X, DiamondType.DL);
             var lostSpindlesDR = ComputeLostSpindles(p, diamonds, X, DiamondType.DR);
-            var spindle = diamonds.Count - lostSpindlesU - lostSpindlesDL - lostSpindlesDR;
 
-            return string.Join(" + ", X.GroupBy(v => w[v]).OrderBy(x => x.Key).Select(x => (x.Count() > 1 ? x.Count().ToString() : "") + x.Key)) + " + " + spindle + "s";
+            return diamonds.Count - lostSpindlesU - lostSpindlesDL - lostSpindlesDR;
         }
     
-        public static double ComputeLostSpindles(List<Vector> p, List<List<int>> diamonds, List<int> independentSet, DiamondType direction)
+        public static int ComputeLostSpindles(List<Vector> p, List<List<int>> diamonds, List<int> independentSet, DiamondType direction)
         {
             var directionDiamonds = diamonds.Where(d => ClassifyDiamond(p, d) == direction).ToList();
 

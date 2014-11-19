@@ -868,7 +868,7 @@ trash can button.
                 var diamonds = SpindleAnalyzer.FindDiamonds(blob, p);
                 var w = blob.AlgorithmGraph.Vertices.Select(v => blob.UIGraph.Vertices[v].Label).ToList();
                 
-                var totalFormula = SpindleAnalyzer.ComputeTotalWeightFormula(blob, p, diamonds, w);
+            /*    var totalFormula = SpindleAnalyzer.ComputeTotalWeightFormula(blob, p, diamonds, w);
                 var constraints = await Task.Factory.StartNew<List<string>>(() => SpindleAnalyzer.ComputeLPConstraints(blob, p, diamonds, w));
 
                 var sb = new StringBuilder();
@@ -876,9 +876,11 @@ trash can button.
                 foreach (var c in constraints.Distinct())
                 {
                     sb.AppendLine(c + " <= 1");
-                }
+                }*/
 
-                resultWindow.AddChild(new TextBox() { Text = sb.ToString() });
+                var code = await Task.Factory.StartNew<string>(() => SpindleAnalyzer.GenerateGLPKCode(blob, p, diamonds, w));
+
+                resultWindow.AddChild(new TextBox() { Text = code });
             }
         }
 
