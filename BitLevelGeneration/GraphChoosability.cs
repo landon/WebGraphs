@@ -91,7 +91,7 @@ namespace BitLevelGeneration
             //var cache = new Dictionary<BitLevelGeneration.HashedAssignment_uint, bool>();
             Dictionary<BitLevelGeneration.HashedAssignment_uint, bool> cache = null;
 
-            return graph.IsChoosable(colorGraph, Enumerable.Repeat(1, graph.N).To_uint(), 0, cache, ref nodesVisited, ref cacheHits);
+            return graph.IsChoosable(colorGraph, Enumerable.Range(0, graph.N).To_uint(), 0, cache, ref nodesVisited, ref cacheHits);
         }
 
         static bool IsChoosable(this IGraph_uint graph, uint[] colorGraph, uint liveVertexBits, int c, Dictionary<BitLevelGeneration.HashedAssignment_uint, bool> cache, ref long nodesVisited, ref long cacheHits)
@@ -219,7 +219,7 @@ namespace BitLevelGeneration
 
         public static bool IsChoosable(this IGraph_long graph, long[] colorGraph)
         {
-            return graph.IsChoosable(colorGraph, Enumerable.Repeat(1, graph.N).To_long(), 0);
+            return graph.IsChoosable(colorGraph, Enumerable.Range(0, graph.N).To_long(), 0);
         }
 
         static bool IsChoosable(this IGraph_long graph, long[] colorGraph, long liveVertexBits, int c)
