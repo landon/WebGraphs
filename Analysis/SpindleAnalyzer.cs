@@ -223,20 +223,47 @@ namespace WebGraphs.Analysis
 
             var vs = H.Vertices.Where(v => lists[v] != 0).ToList();
             
-            var best = 0;
-            for (int size = 1; size <= vs.Count; size++)
+            //var best = 0;
+            //for (int size = 1; size <= vs.Count; size++)
+            //{
+            //    foreach (var set in vs.EnumerateSublists(size))
+            //    {
+            //        if (H.IsChoosable(lists, set))
+            //        {
+            //            best = size;
+            //            break;
+            //        }
+            //    }
+            //}
+
+            //return H.N - best;
+
+            var low = 0;
+            var high = H.N + 1;
+
+            while (low <= high - 2)
             {
-                foreach (var set in vs.EnumerateSublists(size))
+                var size = (low + high) / 2;
+
+                var down = true;
+                if (vs.Count >= size)
                 {
-                    if (H.IsChoosable(lists, set))
+                    foreach (var set in vs.EnumerateSublists(size))
                     {
-                        best = size;
-                        break;
+                        if (H.IsChoosable(lists, set))
+                        {
+                            low = size;
+                            down = false;
+                            break;
+                        }
                     }
                 }
+
+                if (down)
+                    high = size;
             }
 
-            return H.N - best;
+            return H.N - low;
         }
 
         static Choosability.Graph BuildSingleDirectionGraph(List<Vector> p, List<List<int>> diamonds)
