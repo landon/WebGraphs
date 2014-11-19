@@ -16,7 +16,7 @@ namespace Choosability
 
         bool[,] _adjacent;
         Lazy<List<List<int>>> _neighbors;
-        Lazy<List<List<int>>> _nonNeighbors;
+        Lazy<List<List<int>>> _complementNeighbors;
         Lazy<List<List<int>>> _outNeighbors;
         Lazy<List<List<int>>> _inNeighbors;
         Lazy<List<List<int>>> _laterNeighbors;
@@ -44,7 +44,7 @@ namespace Choosability
         }
 
         public List<List<int>> Neighbors { get { return _neighbors.Value; } }
-        public List<List<int>> NonNeighbors { get { return _nonNeighbors.Value; } }
+        public List<List<int>> ComplementNeighbors { get { return _complementNeighbors.Value; } }
         public List<List<int>> OutNeighbors { get { return _outNeighbors.Value; } }
         public List<List<int>> InNeighbors { get { return _inNeighbors.Value; } }
         public List<int> Vertices { get { return _vertices; } }
@@ -158,7 +158,7 @@ namespace Choosability
                     return neighbors;
                 });
 
-            _nonNeighbors = new Lazy<List<List<int>>>(() =>
+            _complementNeighbors = new Lazy<List<List<int>>>(() =>
             {
                 var nn = new List<List<int>>();
                 for (int i = 0; i < N; i++)
@@ -945,10 +945,10 @@ namespace Choosability
                 var XC = X.ToList();
 
                 var u = TomitaPivot(P, X);
-                foreach (var v in P.Except(NonNeighbors[u]))
+                foreach (var v in P.Except(ComplementNeighbors[u]))
                 {
                     R.Add(v);
-                    foreach (var set in EnumerateBronKerbosch(PC.Intersection(NonNeighbors[v]), R, XC.Intersection(NonNeighbors[v])))
+                    foreach (var set in EnumerateBronKerbosch(PC.Intersection(ComplementNeighbors[v]), R, XC.Intersection(ComplementNeighbors[v])))
                         yield return set;
 
                     R.Remove(v);
@@ -964,7 +964,7 @@ namespace Choosability
             var best = -1;
             foreach (var u in P.Concat(X))
             {
-                var n = Neighbors[u].IntersectionCount(P);
+                var n = ComplementNeighbors[u].IntersectionCount(P);
                 if (n > max)
                 {
                     max = n;
@@ -978,6 +978,51 @@ namespace Choosability
         #endregion
 
         #region List coloring
+
+        public int MaxColorableSubset(List<long> assignment, List<int> subset)
+        {
+            return MaxColorableSubset(assignment, 0, subset);
+        }
+
+        int MaxColorableSubset(List<long> assignment, int v, List<int> subset)
+        {
+            if (v >= subset.Count)
+                return 0;
+
+            var max = MaxColorableSubset(assignment, v + 1, subset);
+
+            var colors = assignment[subset[v]];
+            while (colors != 0)
+            {
+                var color = colors & -colors;
+
+                var assignmentCopy = new List<long>(assignment);
+                foreach (var neighbor in _laterNeighbors.Value[subset[v]])
+                    assignmentCopy[neighbor] &= ~color;
+
+                max = Math.Max(max, 1 + MaxColorableSubset(assignmentCopy, v + 1, subset));
+                if (max >= subset.Count)
+                    break;
+
+                colors ^= color;
+            }
+
+            return max;
+        }
+
+        public int GreedyColor(List<long> assignment, List<int> subset)
+        {
+            var coloring = new long[N];
+            foreach (var v in subset)
+            {
+                var lost = Neighbors[v].Aggregate(0L, (l, x) => l | coloring[x]);
+                var colors = assignment[v] & ~lost;
+                coloring[v] = colors & -colors;
+            }
+
+            return coloring.Count(c => c != 0);
+        }
+
         public bool IsChoosable(List<long> assignment, List<int> subset)
         {
             return IsChoosable(assignment, 0, subset);

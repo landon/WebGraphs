@@ -864,21 +864,13 @@ trash can button.
             {
                 var blob = AlgorithmBlob.Create(SelectedTabCanvas);
                 var p = blob.UIGraph.Vertices.Select(v => new Vector(v.X, v.Y)).ToList();
-
-                var diamonds = SpindleAnalyzer.FindDiamonds(blob, p);
-                var w = blob.AlgorithmGraph.Vertices.Select(v => blob.UIGraph.Vertices[v].Label).ToList();
-                
-            /*    var totalFormula = SpindleAnalyzer.ComputeTotalWeightFormula(blob, p, diamonds, w);
-                var constraints = await Task.Factory.StartNew<List<string>>(() => SpindleAnalyzer.ComputeLPConstraints(blob, p, diamonds, w));
-
-                var sb = new StringBuilder();
-                sb.AppendLine("Maximize t = " + totalFormula + " subject to");
-                foreach (var c in constraints.Distinct())
-                {
-                    sb.AppendLine(c + " <= 1");
-                }*/
-
-                var code = await Task.Factory.StartNew<string>(() => SpindleAnalyzer.GenerateGLPKCode(blob, p, diamonds, w));
+            
+                var code = await Task.Factory.StartNew<string>(() =>
+                    {
+                        var diamonds = SpindleAnalyzer.FindDiamonds(blob, p);
+                        var w = blob.AlgorithmGraph.Vertices.Select(v => blob.UIGraph.Vertices[v].Label).ToList();
+                        return SpindleAnalyzer.GenerateGLPKCode(blob, p, diamonds, w);
+                    });
 
                 resultWindow.AddChild(new TextBox() { Text = code });
             }
@@ -1362,11 +1354,9 @@ trash can button.
                 {
                     var choosable = false;
                     List<List<int>> badAssignment = null;
-                    long nodesVisited = 0;
-                    long cacheHits = 0;
                     await Task.Factory.StartNew(() =>
                     {
-                        choosable = blob.BitGraph.IsFChoosable(v => listSizes[v], out badAssignment, out nodesVisited, out cacheHits);
+                        choosable = blob.BitGraph.IsFChoosable(v => listSizes[v], out badAssignment);
                     });
 
                     if (badAssignment != null)
@@ -1377,7 +1367,7 @@ trash can button.
 
                         AddTab(gr, "bad f-assignment");
                     }
-                    resultWindow.AddChild(new TextBlock() { Text = (choosable ? "is f-choosable" : "not f-choosable") + Environment.NewLine + nodesVisited + " nodes visited" + Environment.NewLine + cacheHits + " cache hits" });
+                    resultWindow.AddChild(new TextBlock() { Text = (choosable ? "is f-choosable" : "not f-choosable")});
                 }
                 catch (Exception ex)
                 {

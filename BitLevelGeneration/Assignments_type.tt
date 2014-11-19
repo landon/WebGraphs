@@ -7,6 +7,7 @@ using System.Text;
 
 <#
 	Generate("ulong", 64, "UL");
+	Generate("long", 64, "L");
 	Generate("uint", 32, "U");
 	Generate("ushort", 16, "");
 	Generate("byte", 8, "");

@@ -117,6 +117,117 @@ namespace BitLevelGeneration
 }
 namespace BitLevelGeneration
 {
+    public static class BitVectors_long
+    {
+        public static List<int> FromBitVector(this List<long> n) 
+        {
+            var v = new List<int>(64);
+            for (int i = 0; i < 64; i++)
+            {
+                var b = (long)(1L << i);
+                int m = 0;
+                for (int j = 0; j < n.Count; j++)
+                {
+                    if ((b & n[j]) != 0)
+                        m += 1 << j;
+                }
+
+                v.Add(m);
+            }
+
+            return v;
+        }
+
+        public static List<long> ToBitVector(IEnumerable<int> w)
+        {
+            var v = w.ToList();
+            var n = new List<long>();
+            while (true)
+            {
+                long m = 0;
+                var zero = true;
+                for (int i = 0; i < v.Count; i++)
+                {
+                    if (v[i] != 0)
+                        zero = false;
+
+                    if ((v[i] & 1) != 0)
+                        m |= (long)(1L << i);
+
+                    v[i] >>= 1;
+                }
+
+                n.Add(m);
+
+                if (zero)
+                    break;
+            }
+
+            return n;
+        }
+
+        public static void Increment(this List<long> n, long m)
+        {
+            var i = 0;
+            while (m != 0)
+            {
+                var t1 = (long)(m & n[i]);
+                var t2 = (long)(m ^ n[i]);
+
+                m = t1;
+                n[i] = t2;
+
+                i++;
+            }
+        }
+
+        public static void Decrement(this List<long> n, long m)
+        {
+            var i = 0;
+            while (m != 0)
+            {
+                var t1 = (long)(m & ~n[i]);
+                var t2 = (long)(m ^ n[i]);
+
+                m = t1;
+                n[i] = t2;
+
+                i++;
+            }
+        }
+
+        public static long Zeroes(this List<long> n)
+        {
+            long m = 0;
+            for (int i = 0; i < n.Count; i++)
+                m |= n[i];
+
+            return (long)~m;
+        }
+
+        public static long GreaterThan(this List<long> n, List<long> k)
+        {
+            long a = 0;
+            long b = 0;
+            for (int i = Math.Max(n.Count, k.Count) - 1; i >= 0; i--)
+            {
+                if (i >= k.Count)
+                    a |= n[i];
+                else if (i >= n.Count)
+                    b |= k[i];
+                else
+                {
+                    a |= (long)(~b & n[i] & ~k[i]);
+                    b |= (long)(~a & ~n[i] & k[i]);
+                }
+            }
+
+            return (long)(a & ~b);
+        }
+    }
+}
+namespace BitLevelGeneration
+{
     public static class BitVectors_uint
     {
         public static List<int> FromBitVector(this List<uint> n) 

@@ -143,4 +143,92 @@ namespace BitLevelGeneration
             return true;
         }
     }
+
+    public static class BitUsage_long
+    {
+        const UInt64 DeBruijnMultiplier = 0x07EDD5E59A4E28C2;
+        static int[] DeBruijnLookup = {
+                                           63,  0, 58,  1, 59, 47, 53,  2,
+                                           60, 39, 48, 27, 54, 33, 42,  3,
+                                           61, 51, 37, 40, 49, 18, 28, 20,
+                                           55, 30, 34, 11, 43, 14, 22,  4,
+                                           62, 57, 46, 52, 38, 26, 32, 41,
+                                           50, 36, 17, 19, 29, 10, 13, 21,
+                                           56, 45, 25, 31, 35, 16,  9, 12,
+                                           44, 24, 15,  8, 23,  7,  6,  5
+                                       };
+
+        public static int Extract(this long x)
+        {
+            return DeBruijnLookup[((UInt64)x * DeBruijnMultiplier) >> 58];
+        }
+
+        public static int LeastSignificantBit(this long x)
+        {
+            return DeBruijnLookup[unchecked((UInt64)(x & -x) * DeBruijnMultiplier >> 58)];
+        }
+
+        public static int GetAndClearLeastSignificantBit(ref long x)
+        {
+            var m = x & -x;
+            x ^= m;
+            return DeBruijnLookup[((UInt64)m * DeBruijnMultiplier) >> 58];
+        }
+
+        public static int PopulationCount(this long b)
+        {
+            int q = 0;
+            while (b > 0)
+            {
+                q++;
+                b &= b - 1;
+            }
+            return q;
+        }
+        public static List<int> ToSet(long x)
+        {
+            var onBits = new List<int>(10);
+            while (x != 0)
+                onBits.Add(GetAndClearLeastSignificantBit(ref x));
+
+            return onBits;
+        }
+        public static long RightFillToMSB(this long x)
+        {
+            x |= x >> 1;
+            x |= x >> 2;
+            x |= x >> 4;
+            x |= x >> 8;
+            x |= x >> 16;
+
+            return x;
+        }
+        public static long To_long(this IEnumerable<int> bits)
+        {
+            long x = 0;
+            foreach (var bit in bits)
+                x |= 1L << bit;
+
+            return x;
+        }
+
+        public static long Or(this long[] colorGraph, int offset)
+        {
+            var result = 0L;
+            for (int i = offset; i < colorGraph.Length; i++)
+                result |= colorGraph[i];
+            return result;
+        }
+
+        public static bool TrueForAllBitIndices(this long x, Func<int, bool> predicate)
+        {
+            while (x != 0)
+            {
+                if (!predicate(GetAndClearLeastSignificantBit(ref x)))
+                    return false;
+            }
+
+            return true;
+        }
+    }
 }

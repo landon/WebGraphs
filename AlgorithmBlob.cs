@@ -19,7 +19,7 @@ namespace WebGraphs
     {
         public Graphs.Graph UIGraph { get; private set; }
         public Choosability.Graph AlgorithmGraph { get; private set; }
-        public BitLevelGeneration.BitGraph BitGraph { get; private set; }
+        public BitLevelGeneration.BitGraph_long BitGraph { get; private set; }
         public List<int> SelectedVertices { get; private set; }
         public List<Tuple<int, int>> SelectedEdges { get; private set; }
         public List<int> SelectedEdgeIndices { get; private set; }
@@ -37,7 +37,7 @@ namespace WebGraphs
         {
             UIGraph = tabCanvas.GraphCanvas.Graph;
             AlgorithmGraph = new Choosability.Graph(UIGraph.GetEdgeWeights());
-            BitGraph = new BitLevelGeneration.BitGraph(UIGraph.GetEdgeWeights());
+            BitGraph = new BitLevelGeneration.BitGraph_long(UIGraph.GetEdgeWeights());
             SelectedVertices = UIGraph.Vertices.Select((v, i) => v.IsSelected ? i : -1).Where(x => x >= 0).ToList();
             SelectedEdges = UIGraph.Edges.Where(e => e.IsSelected).Select(e => new Tuple<int, int>(UIGraph.Vertices.IndexOf(e.V1), UIGraph.Vertices.IndexOf(e.V2))).ToList();
 

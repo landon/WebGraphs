@@ -1,0 +1,129 @@
+﻿<#@ output extension=".cs" #>
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+<#
+	Generate("long", 64, "L");
+	Generate("uint", 32, "U");
+#>
+
+<#+
+void Generate(string T, int bits, string literal)
+{
+#>
+
+namespace BitLevelGeneration
+{
+    public class BitGraph_<#=T#> : IGraph
+    {
+        int[] _vertices;
+        <#=T#>[] _neighborhood;
+
+        public BitGraph_<#=T#>(List<int> edgeWeights)
+        {
+            var n = (int)((1 + Math.Sqrt(1 + 8 * edgeWeights.Count)) / 2);
+            _vertices = Enumerable.Range(0, n).ToArray();
+
+            _neighborhood = new <#=T#>[n];
+
+            int k = 0;
+            for (int i = 0; i < n; i++)
+            {
+                var iBit = 1<#=literal#> << i;
+                for (int j = i + 1; j < n; j++)
+                {
+                    var jBit = 1<#=literal#> << j;
+
+                    if (edgeWeights[k] != 0)
+                    {
+                        _neighborhood[i] |= jBit;
+                        _neighborhood[j] |= iBit;
+                    }
+
+                    k++;
+                }
+            }
+        }
+
+        public int N { get { return _vertices.Length; } }
+        public IEnumerable<int> Vertices { get { return _vertices; } }
+
+        public bool IsIndependent(<#=T#> set)
+        {
+            return set.TrueForAllBitIndices(i => (_neighborhood[i] & set) == 0);
+        }
+        public int Degree(int v)
+        {
+            return _neighborhood[v].PopulationCount();
+        }
+        public int DegreeInSet(int v, <#=T#> set)
+        {
+            return (_neighborhood[v] & set).PopulationCount();
+        }
+
+        public IEnumerable<<#=T#>> MaximalIndependentSubsets(<#=T#> set)
+        {
+            var list = new List<<#=T#>>(8);
+            BronKerbosch(set, 0<#=literal#>, 0<#=literal#>, list);
+            return list;
+        }
+
+        void BronKerbosch(<#=T#> P, <#=T#> R, <#=T#> X, List<<#=T#>> list)
+        {
+            if (P == 0 && X == 0)
+                list.Add(R);
+            else
+            {
+                var PC = P;
+                var XC = X;
+
+                var u = TomitaPivot(P, X);
+                var q = P & ((1<#=literal#> << u) | _neighborhood[u]);
+
+                while (q != 0)
+                {
+                    var bit = q & (~q + 1);
+                    var v = bit.Extract();
+                    var non = ~(bit | _neighborhood[v]);
+
+                    BronKerbosch(PC & non, R | bit, XC & non, list);
+
+                    q ^= bit;
+                    PC ^= bit;
+                    XC |= bit;
+                }
+            }
+        }
+
+        int TomitaPivot(<#=T#> P, <#=T#> X)
+        {
+            var max = -1;
+            var best = -1;
+            var q = P | X;
+
+            while (q != 0)
+            {
+                var bit = q & (~q + 1);
+                var u = bit.Extract();
+
+                var n = (~((1<#=literal#> << u) | _neighborhood[u]) & P).PopulationCount();
+                if (n > max)
+                {
+                    max = n;
+                    best = u;
+                }
+
+                q ^= bit;
+            }
+
+            return best;
+        }
+    }
+}
+
+<#+
+}
+#>

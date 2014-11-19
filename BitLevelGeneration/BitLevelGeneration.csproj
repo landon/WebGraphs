@@ -44,7 +44,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Assignments_type.tt</DependentUpon>
     </Compile>
-    <Compile Include="BitGraph.cs" />
+    <Compile Include="BitGraph_type.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>BitGraph_type.tt</DependentUpon>
+    </Compile>
     <Compile Include="BitOperations.cs" />
     <Compile Include="BitVectors.cs">
       <AutoGen>True</AutoGen>
@@ -64,6 +68,10 @@
     <None Include="Assignments_type.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>Assignments_type.cs</LastGenOutput>
+    </None>
+    <None Include="BitGraph_type.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>BitGraph_type.cs</LastGenOutput>
     </None>
     <None Include="BitVectors.tt">
       <Generator>TextTemplatingFileGenerator</Generator>

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Choosability;
+using System.Collections;
 
 namespace WebGraphs.Analysis
 {
@@ -202,14 +203,14 @@ namespace WebGraphs.Analysis
 
             return diamonds.Count - lostSpindlesU - lostSpindlesDL - lostSpindlesDR;
         }
-    
+
         public static int ComputeLostSpindles(List<Vector> p, List<List<int>> diamonds, List<int> independentSet, DiamondType direction)
         {
             var directionDiamonds = diamonds.Where(d => ClassifyDiamond(p, d) == direction).ToList();
 
             var bases = directionDiamonds.IndicesWhere(d => independentSet.Contains(d[0])).ToList();
             var tops = directionDiamonds.IndicesWhere(d => independentSet.Contains(d[1])).ToList();
-            
+
             var H = BuildSingleDirectionGraph(p, directionDiamonds);
             var lists = Enumerable.Repeat(7L, H.N).ToList();
 
@@ -221,49 +222,39 @@ namespace WebGraphs.Analysis
                     lists[i] &= 6;
             }
 
-            var vs = H.Vertices.Where(v => lists[v] != 0).ToList();
-            
-            //var best = 0;
-            //for (int size = 1; size <= vs.Count; size++)
-            //{
-            //    foreach (var set in vs.EnumerateSublists(size))
-            //    {
-            //        if (H.IsChoosable(lists, set))
-            //        {
-            //            best = size;
-            //            break;
-            //        }
-            //    }
-            //}
+            var nonZeroes = H.Vertices.Where(v => lists[v] != 0).ToList();
+          //  var colorableCount = H.MaxColorableSubset(lists, nonZeroes);
 
-            //return H.N - best;
+            var vc = nonZeroes.ToList();
 
-            var low = 0;
-            var high = H.N + 1;
-
-            while (low <= high - 2)
+            var colorableCount = 0;
+            for (int i = 0; i < 3; i++)
             {
-                var size = (low + high) / 2;
+                colorableCount = Math.Max(colorableCount, H.GreedyColor(lists, vc));
+                if (colorableCount >= vc.Count)
+                    break;
 
-                var down = true;
-                if (vs.Count >= size)
+                vc.Shuffle();
+            }
+
+            for (int size = nonZeroes.Count; size > colorableCount; size--)
+            {
+                var done = false;
+                foreach (var set in nonZeroes.EnumerateSublists(size))
                 {
-                    foreach (var set in vs.EnumerateSublists(size))
+                    if (H.IsChoosable(lists, set))
                     {
-                        if (H.IsChoosable(lists, set))
-                        {
-                            low = size;
-                            down = false;
-                            break;
-                        }
+                        colorableCount = size;
+                        done = true;
+                        break;
                     }
                 }
 
-                if (down)
-                    high = size;
+                if (done)
+                    break;
             }
 
-            return H.N - low;
+            return H.N - colorableCount;
         }
 
         static Choosability.Graph BuildSingleDirectionGraph(List<Vector> p, List<List<int>> diamonds)
@@ -280,6 +271,7 @@ namespace WebGraphs.Analysis
                     if (offset < MinDelta)
                     {
                         a[v, w] = true;
+                        a[w, v] = true;
                     }
                 }
             }

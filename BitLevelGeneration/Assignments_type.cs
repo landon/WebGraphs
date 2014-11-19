@@ -195,6 +195,194 @@ namespace BitLevelGeneration
 
 namespace BitLevelGeneration
 {
+    public static class Assignments_long
+    {
+        public static List<long[]> Generate(IEnumerable<int> sizes, int potSize, int countEstimate = 2048)
+        {
+            var sizesCount = sizes.Count();
+            var sizeVector = BitVectors_long.ToBitVector(sizes);
+
+            var assignments = new List<long[]>(countEstimate);
+            var assignment = new long[potSize];
+
+            var r = new List<long>[potSize];
+            for (int i = 0; i < potSize; i++)
+                r[i] = BitVectors_long.ToBitVector(Enumerable.Repeat(potSize - 1 - i, sizesCount));
+
+            long c = sizeVector.GreaterThan(r[0]);
+            long dc = (long)(~(c | sizeVector.Zeroes()));
+            Generate(sizeVector, assignments, assignment, r, 0, 1, c, dc);
+
+            return assignments;
+        }
+
+        static void Generate(List<long> sizes, List<long[]> assignments, long[] assignment, List<long>[] r, int i, long last, long care, long dontCare)
+        {
+            long x;
+
+            var g = (long)(care & ~last);
+            var q = (long)(~care & ~dontCare & last);
+
+            if (g > q)
+            {
+                var f = g.RightFillToMSB();
+                x = (long)((care & f) | (last & ~f));
+            }
+            else if (q > g)
+            {
+                var f = q.RightFillToMSB();
+                var t = (long)(~f & last);
+                var y = (long)(dontCare & ~f & ~t);
+                if (y == 0)
+                    return;
+
+                var y2 = (long)(dontCare & t & (y | (y - 1)));
+
+                x = (long)((care & (f >> 1)) | (t & ~y2) | (y & (0 - y)));
+            }
+            else
+            {
+                x = last;
+            }
+
+            var end = (long)(care | dontCare);
+            if (i >= assignment.Length - 1)
+            {
+                while (true)
+                {
+                    assignment[i] = x;
+
+                    var assignmentCopy = new long[assignment.Length];
+					Array.Copy(assignment, assignmentCopy, assignmentCopy.Length);
+                    assignments.Add(assignmentCopy);
+
+                    if (x == end)
+                        break;
+
+                    x = (long)(((x - (care + dontCare)) & dontCare) + care);
+                }
+            }
+            else
+            {
+                while (true)
+                {
+                    assignment[i] = x;
+
+                    sizes.Decrement(x);
+                    var c = sizes.GreaterThan(r[i + 1]);
+                    var z = sizes.Zeroes();
+
+                    if ((c & z) == 0)
+                    {
+                        var dc = (long)(~(c | z));
+                        Generate(sizes, assignments, assignment, r, i + 1, x, c, dc);
+                    }
+
+                    sizes.Increment(x);
+
+                    if (x == end)
+                        break;
+
+                    x = (long)(((x - (care + dontCare)) & dontCare) + care);
+                }
+            }
+        }
+
+		public static IEnumerable<long[]> Enumerate(IEnumerable<int> sizes, int potSize)
+        {
+            var sizesCount = sizes.Count();
+            var sizeVector = BitVectors_long.ToBitVector(sizes);
+
+            var assignment = new long[potSize];
+
+            var r = new List<long>[potSize];
+            for (int i = 0; i < potSize; i++)
+                r[i] = BitVectors_long.ToBitVector(Enumerable.Repeat(potSize - 1 - i, sizesCount));
+
+            long c = sizeVector.GreaterThan(r[0]);
+            long dc = (long)(~(c | sizeVector.Zeroes()));
+            return Enumerate(sizeVector, assignment, r, 0, 1, c, dc);
+        }
+
+        static IEnumerable<long[]> Enumerate(List<long> sizes, long[] assignment, List<long>[] r, int i, long last, long care, long dontCare)
+        {
+            long x;
+
+            var g = (long)(care & ~last);
+            var q = (long)(~care & ~dontCare & last);
+
+            if (g > q)
+            {
+                var f = g.RightFillToMSB();
+                x = (long)((care & f) | (last & ~f));
+            }
+            else if (q > g)
+            {
+                var f = q.RightFillToMSB();
+                var t = (long)(~f & last);
+                var y = (long)(dontCare & ~f & ~t);
+                if (y == 0)
+                    yield break;
+
+                var y2 = (long)(dontCare & t & (y | (y - 1)));
+
+                x = (long)((care & (f >> 1)) | (t & ~y2) | (y & (0 - y)));
+            }
+            else
+            {
+                x = last;
+            }
+
+            var end = (long)(care | dontCare);
+            if (i >= assignment.Length - 1)
+            {
+                while (true)
+                {
+                    assignment[i] = x;
+
+                    var assignmentCopy = new long[assignment.Length];
+					Array.Copy(assignment, assignmentCopy, assignmentCopy.Length);
+                    
+					yield return assignmentCopy;
+
+                    if (x == end)
+                        break;
+
+                    x = (long)(((x - (care + dontCare)) & dontCare) + care);
+                }
+            }
+            else
+            {
+                while (true)
+                {
+                    assignment[i] = x;
+
+                    sizes.Decrement(x);
+                    var c = sizes.GreaterThan(r[i + 1]);
+                    var z = sizes.Zeroes();
+
+                    if ((c & z) == 0)
+                    {
+                        var dc = (long)(~(c | z));
+                        foreach(var a in Enumerate(sizes, assignment, r, i + 1, x, c, dc))
+							yield return a;
+                    }
+
+                    sizes.Increment(x);
+
+                    if (x == end)
+                        break;
+
+                    x = (long)(((x - (care + dontCare)) & dontCare) + care);
+                }
+            }
+        }
+    }
+}
+
+
+namespace BitLevelGeneration
+{
     public static class Assignments_uint
     {
         public static List<uint[]> Generate(IEnumerable<int> sizes, int potSize, int countEstimate = 2048)
