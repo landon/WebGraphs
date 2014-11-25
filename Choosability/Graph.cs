@@ -607,7 +607,9 @@ namespace Choosability
         }
         public Graph RemoveVertex(int v)
         {
-            return new Graph(GetEdgeWeights(new int[] { v }, new Tuple<int, int>[] { }));
+            var subgraph = Vertices.ToList();
+            subgraph.Remove(v);
+            return InducedSubgraph(subgraph);
         }
         public Graph RemoveEdge(Tuple<int, int> e)
         {

@@ -350,32 +350,36 @@ namespace Graphs
         }
         public void SelectObjects(List<GraphicsLayer.Box> selectionPoints, bool symmetricDifference)
         {
-            var bounds = new PolygonContainer(selectionPoints.ToArray());
-
-            var verticesInPolygon = _vertices.Where(v => bounds.Contains(new GraphicsLayer.Box(v.X, v.Y))).ToList();
-
-            if (verticesInPolygon.Count > 0)
+            try
             {
-                SelectVertices(verticesInPolygon, symmetricDifference);
-            }
-            else
-            {
-                var edgesHittingPolygon = _edges.Where(e =>
+                var bounds = new PolygonContainer(selectionPoints.ToArray());
+
+                var verticesInPolygon = _vertices.Where(v => bounds.Contains(new GraphicsLayer.Box(v.X, v.Y))).ToList();
+
+                if (verticesInPolygon.Count > 0)
                 {
-                    for (int i = 0; i < selectionPoints.Count; i++)
+                    SelectVertices(verticesInPolygon, symmetricDifference);
+                }
+                else
+                {
+                    var edgesHittingPolygon = _edges.Where(e =>
                     {
-                        var start = selectionPoints[i];
-                        var end = selectionPoints[(i + 1) % selectionPoints.Count];
+                        for (int i = 0; i < selectionPoints.Count; i++)
+                        {
+                            var start = selectionPoints[i];
+                            var end = selectionPoints[(i + 1) % selectionPoints.Count];
 
-                        if (Utility.HaveIntersection(start, end, e.V1.Location, e.V2.Location))
-                            return true;
-                    }
+                            if (Utility.HaveIntersection(start, end, e.V1.Location, e.V2.Location))
+                                return true;
+                        }
 
-                    return false;
-                }).ToList();
+                        return false;
+                    }).ToList();
 
-                SelectEdges(edgesHittingPolygon, symmetricDifference);
+                    SelectEdges(edgesHittingPolygon, symmetricDifference);
+                }
             }
+            catch { }
         }
         public bool AddVertex(Vertex v)
         {

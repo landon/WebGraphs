@@ -25,7 +25,7 @@ namespace WebGraphs.Analysis
             DR
         }
 
-        public static Graphs.Graph BuildSerendipitousEdgeGraph(AlgorithmBlob blob, List<Vector> p, List<List<int>> diamonds, out Graphs.Graph rotatedGraph)
+        public static Graphs.Graph BuildSerendipitousEdgeGraph(AlgorithmBlob blob, List<Vector> p, List<List<int>> diamonds, out Graphs.Graph rotatedGraph, params DiamondType[] directionExclusions)
         {
             var dim = GraphicsLayer.ARGB.FromFractional(0.5, 0.5, 0.5, 0.5);
             var transparent = GraphicsLayer.ARGB.FromFractional(0.0, 0.5, 0.5, 0.5);
@@ -49,16 +49,6 @@ namespace WebGraphs.Analysis
             var rotatedVertexLookup = new Vertex[diamonds.Count, 4];
             for (int a = 0; a < diamonds.Count; a++)
             {
-                for (int i = 0; i < 4; i++)
-                {
-                    var v = new Vertex(rotatedDiamonds[a][i].X, rotatedDiamonds[a][i].Y);
-                    if (i == 0)
-                        v.Padding = 0.02f;
-
-                    rotatedVertices.Add(v);
-                    rotatedVertexLookup[a, i] = v;
-                }
-
                 var originals = new Vertex[4];
                 for (int i = 1; i < 4; i++)
                 {
@@ -70,11 +60,25 @@ namespace WebGraphs.Analysis
                     originals[i] = v;
                 }
 
-                rotatedEdges.Add(new Edge(rotatedVertexLookup[a, 0], originals[2]) { Color = dim });
-                rotatedEdges.Add(new Edge(rotatedVertexLookup[a, 0], originals[3]) { Color = dim });
                 rotatedEdges.Add(new Edge(originals[2], originals[3]) { Color = dim });
                 rotatedEdges.Add(new Edge(originals[1], originals[2]) { Color = dim });
                 rotatedEdges.Add(new Edge(originals[1], originals[3]) { Color = dim });
+
+                if (directionExclusions != null && directionExclusions.Contains(ClassifyDiamond(p, diamonds[a])))
+                    continue;
+
+                for (int i = 0; i < 4; i++)
+                {
+                    var v = new Vertex(rotatedDiamonds[a][i].X, rotatedDiamonds[a][i].Y);
+                    if (i == 0)
+                        v.Padding = 0.02f;
+
+                    rotatedVertices.Add(v);
+                    rotatedVertexLookup[a, i] = v;
+                }
+
+                rotatedEdges.Add(new Edge(rotatedVertexLookup[a, 0], originals[2]) { Color = dim });
+                rotatedEdges.Add(new Edge(rotatedVertexLookup[a, 0], originals[3]) { Color = dim });
 
                 rotatedEdges.Add(new Edge(rotatedVertexLookup[a, 0], rotatedVertexLookup[a, 2]));
                 rotatedEdges.Add(new Edge(rotatedVertexLookup[a, 0], rotatedVertexLookup[a, 3]));
@@ -222,13 +226,39 @@ namespace WebGraphs.Analysis
                     lists[i] &= 6;
             }
 
+           /* var colorableCount = 0;
             var nonZeroes = H.Vertices.Where(v => lists[v] != 0).ToList();
-          //  var colorableCount = H.MaxColorableSubset(lists, nonZeroes);
+            while (true)
+            {
+                var c = nonZeroes.Count;
+                nonZeroes = nonZeroes.Where(v => lists[v] != 0).ToList();
 
+                var done = c == nonZeroes.Count;
+                var onesOnly = nonZeroes.Where(v => lists[v] == 1).ToList();
+                foreach (var w in onesOnly)
+                {
+                    var N = H.Neighbors[w].Intersection(nonZeroes).Where(v => (lists[v] & 1) != 0).ToList();
+                    if (N.Count <= 1 || N.Count == 2 && H[N[0], N[1]])
+                    {
+                        colorableCount++;
+                        lists[w] = 0;
+                        foreach (var v in N)
+                            lists[v] &= 6;
+
+                        done = false;
+                        break;
+                    }
+                }
+
+                if (done)
+                    break;
+            }*/
+
+            var nonZeroes = H.Vertices.Where(v => lists[v] != 0).ToList();
             var vc = nonZeroes.ToList();
 
             var colorableCount = 0;
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < 5; i++)
             {
                 colorableCount = Math.Max(colorableCount, H.GreedyColor(lists, vc));
                 if (colorableCount >= vc.Count)
@@ -253,6 +283,8 @@ namespace WebGraphs.Analysis
                 if (done)
                     break;
             }
+
+            var ratio = (double)colorableCount / H.N;
 
             return H.N - colorableCount;
         }
@@ -279,7 +311,7 @@ namespace WebGraphs.Analysis
             return new Choosability.Graph(a);
         }
 
-        public static List<string> FindSerendipitousEdges(AlgorithmBlob blob, List<Vector> p, List<List<int>> diamonds)
+        public static List<string> FindSerendipitousEdges(AlgorithmBlob blob, List<Vector> p, List<List<int>> diamonds, out List<string> identifications)
         {
             var r = p[diamonds[0][0]].Distance(p[diamonds[0][2]]);
             var c = new int[8];
@@ -294,6 +326,7 @@ namespace WebGraphs.Analysis
             }
 
             var edges = new List<string>();
+            identifications = new List<string>();
             foreach (var a in rotatedDiamonds)
             {
                 foreach (var b in rotatedDiamonds)
@@ -309,6 +342,11 @@ namespace WebGraphs.Analysis
                             {
                                 var s = a.Key + "_" + GetKind(i) + " <--> " + b.Key + "_" + GetKind(j);
                                 edges.Add(s);
+                            }
+                            else if (a.Value[i].Distance(b.Value[j]) < MinDelta)
+                            {
+                                var s = a.Key + "_" + GetKind(i) + " == " + b.Key + "_" + GetKind(j);
+                                identifications.Add(s);
                             }
                         }
                     }
@@ -337,6 +375,25 @@ namespace WebGraphs.Analysis
                         Y[0] = Y[1];
                         Y[1] = temp;
                     }
+
+                    diamonds.Add(Y);
+                }
+            }
+
+            return diamonds;
+        }
+
+        public static List<List<int>> FindAllDiamonds(AlgorithmBlob blob, List<Vector> p)
+        {
+            var diamonds = new List<List<int>>();
+
+            var d = Choosability.Graphs.Diamond;
+
+            foreach (var X in blob.AlgorithmGraph.Vertices.EnumerateSublists(4))
+            {
+                if (blob.AlgorithmGraph.InducedSubgraph(X).ContainsInduced(d))
+                {
+                    var Y = X.OrderBy(x => p[x].X).OrderBy(x => blob.AlgorithmGraph.DegreeInSubgraph(x, X)).ToList();
 
                     diamonds.Add(Y);
                 }

@@ -222,6 +222,11 @@ namespace BitLevelGeneration
             return graph.IsChoosable(colorGraph, Enumerable.Range(0, graph.N).To_long(), 0);
         }
 
+        public static bool IsChoosable(this IGraph_long graph, long[] colorGraph, long subset)
+        {
+            return graph.IsChoosable(colorGraph, subset, 0);
+        }
+
         static bool IsChoosable(this IGraph_long graph, long[] colorGraph, long liveVertexBits, int c)
         {
             graph.BeGreedy(colorGraph, ref liveVertexBits, c);

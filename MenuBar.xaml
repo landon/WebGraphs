@@ -159,6 +159,7 @@
                     <local:SuperMenuItem Header="find good 3-partition" Click="MenuItemClick"/>
                     <local:SuperMenuItem Header="make hex grid" Click="MenuItemClick"/>
                     <local:SuperMenuItem Header="list extra spindle edges" Click="MenuItemClick"/>
+                    <local:SuperMenuItem Header="6-fold way" Click="MenuItemClick"/>
                     <local:SuperMenuItem Header="max fractional clique" Click="MenuItemClick"/>
                     <local:SuperMenuItem Header="generate LP" Click="MenuItemClick"/>
                 </menu:ContextMenu>

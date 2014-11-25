@@ -75,6 +75,7 @@ namespace WebGraphs
         public event Action DoBasesAndTopsWeighting;
         public event Action DoMaxFractionalClique;
         public event Action DoSolveLP;
+        public event Action DoSixFoldWay;
 
         public MenuBar()
         {
@@ -285,6 +286,9 @@ namespace WebGraphs
                     break;
                 case "generate LP":
                     A(DoSolveLP);
+                    break;
+                case "6-fold way":
+                    A(DoSixFoldWay);
                     break;
             }
         }

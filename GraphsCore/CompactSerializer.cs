@@ -38,7 +38,7 @@ namespace GraphsCore
                     bw.Write((UInt16)Math.Round(v.Y * Scale));
                     bw.Write((UInt16)Math.Round(v.Padding * Scale));
                     bw.Write(v.Label);
-                    bw.Write(v.Style);
+                    bw.Write(v.Style ?? "");
                 }
 
                 bw.Write((UInt16)g.Edges.Count);
@@ -49,7 +49,7 @@ namespace GraphsCore
                     bw.Write((byte)e.Multiplicity);
                     bw.Write((byte)e.Orientation);
                     bw.Write((UInt16)Math.Round(e.Thickness * 100));
-                    bw.Write(e.Style);
+                    bw.Write(e.Style ?? "");
                 }
 
                 return m.ToArray();

@@ -95,12 +95,14 @@ namespace WebGraphs
             _mainMenu.DoBasesAndTopsWeighting += _mainMenu_DoBasesAndTopsWeighting;
             _mainMenu.DoMaxFractionalClique += _mainMenu_DoMaxFractionalClique;
             _mainMenu.DoSolveLP += _mainMenu_DoSolveLP;
+            _mainMenu.DoSixFoldWay += _mainMenu_DoSixFoldWay;
 
             _propertyGrid.SomethingChanged += _propertyGrid_SomethingChanged;
 
             DoAutoLoad();
         }
 
+     
    
         void DoAutoLoad()
         {
@@ -783,7 +785,8 @@ trash can button.
             var e = await Task.Factory.StartNew<List<string>>(() =>
             {
                 var diamonds = SpindleAnalyzer.FindDiamonds(blob, p);
-                return SpindleAnalyzer.FindSerendipitousEdges(blob, p, diamonds);
+                List<string> identifications;
+                return SpindleAnalyzer.FindSerendipitousEdges(blob, p, diamonds, out identifications);
             });
 
             var gg = await Task.Factory.StartNew<Tuple<Graphs.Graph, Graphs.Graph>>(() =>
@@ -802,6 +805,45 @@ trash can button.
 
             ShowText("total: " + e.Count + Environment.NewLine + string.Join(Environment.NewLine, e));
         }
+
+        async void _mainMenu_DoSixFoldWay()
+        {
+            if (SelectedTabCanvas == null)
+                return;
+
+            var blob = AlgorithmBlob.Create(SelectedTabCanvas);
+            var p = blob.UIGraph.Vertices.Select(v => new Vector(v.X, v.Y)).ToList();
+
+            var e = await Task.Factory.StartNew<List<string>>(() =>
+            {
+                var diamonds = SpindleAnalyzer.FindAllDiamonds(blob, p);
+                List<string> identifications;
+                SpindleAnalyzer.FindSerendipitousEdges(blob, p, diamonds, out identifications);
+                return identifications;
+            });
+
+            var gg = await Task.Factory.StartNew<Tuple<Graphs.Graph, Graphs.Graph>>(() =>
+            {
+                var diamonds = SpindleAnalyzer.FindAllDiamonds(blob, p);
+                Graphs.Graph rotated;
+                var g = SpindleAnalyzer.BuildSerendipitousEdgeGraph(blob, p, diamonds, out rotated, SpindleAnalyzer.DiamondType.L,
+                                                                                                    SpindleAnalyzer.DiamondType.U,
+                                                                                                    SpindleAnalyzer.DiamondType.R,
+                                                                                                    SpindleAnalyzer.DiamondType.DL,
+                                                                                                    SpindleAnalyzer.DiamondType.UL,
+                                                                                                    SpindleAnalyzer.DiamondType.UR);
+
+                return new Tuple<Graphs.Graph, Graphs.Graph>(g, rotated);
+            });
+
+            blob.UIGraph.DisjointUnion(gg.Item1);
+            SelectedTabCanvas.Invalidate();
+
+            AddTab(gg.Item2, "rotated", snapToGrid: false);
+
+            ShowText("total: " + e.Count + Environment.NewLine + string.Join(Environment.NewLine, e));
+        }
+
 
         void _mainMenu_DoBasesAndTopsWeighting()
         {
