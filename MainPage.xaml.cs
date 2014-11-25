@@ -826,12 +826,7 @@ trash can button.
             {
                 var diamonds = SpindleAnalyzer.FindAllDiamonds(blob, p);
                 Graphs.Graph rotated;
-                var g = SpindleAnalyzer.BuildSerendipitousEdgeGraph(blob, p, diamonds, out rotated, SpindleAnalyzer.DiamondType.L,
-                                                                                                    SpindleAnalyzer.DiamondType.U,
-                                                                                                    SpindleAnalyzer.DiamondType.R,
-                                                                                                    SpindleAnalyzer.DiamondType.DL,
-                                                                                                    SpindleAnalyzer.DiamondType.UL,
-                                                                                                    SpindleAnalyzer.DiamondType.UR);
+                var g = SpindleAnalyzer.BuildSerendipitousEdgeGraph(blob, p, diamonds, out rotated);
 
                 return new Tuple<Graphs.Graph, Graphs.Graph>(g, rotated);
             });

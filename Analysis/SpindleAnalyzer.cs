@@ -17,15 +17,13 @@ namespace WebGraphs.Analysis
         {
             U,
             D,
-            L,
-            R,
             UL,
             UR,
             DL,
             DR
         }
 
-        public static Graphs.Graph BuildSerendipitousEdgeGraph(AlgorithmBlob blob, List<Vector> p, List<List<int>> diamonds, out Graphs.Graph rotatedGraph, params DiamondType[] directionExclusions)
+        public static Graphs.Graph BuildSerendipitousEdgeGraph(AlgorithmBlob blob, List<Vector> p, List<List<int>> diamonds, out Graphs.Graph rotatedGraph)
         {
             var dim = GraphicsLayer.ARGB.FromFractional(0.5, 0.5, 0.5, 0.5);
             var transparent = GraphicsLayer.ARGB.FromFractional(0.0, 0.5, 0.5, 0.5);
@@ -49,6 +47,16 @@ namespace WebGraphs.Analysis
             var rotatedVertexLookup = new Vertex[diamonds.Count, 4];
             for (int a = 0; a < diamonds.Count; a++)
             {
+                for (int i = 0; i < 4; i++)
+                {
+                    var v = new Vertex(rotatedDiamonds[a][i].X, rotatedDiamonds[a][i].Y);
+                    if (i == 0)
+                        v.Padding = 0.02f;
+
+                    rotatedVertices.Add(v);
+                    rotatedVertexLookup[a, i] = v;
+                }
+
                 var originals = new Vertex[4];
                 for (int i = 1; i < 4; i++)
                 {
@@ -63,19 +71,6 @@ namespace WebGraphs.Analysis
                 rotatedEdges.Add(new Edge(originals[2], originals[3]) { Color = dim });
                 rotatedEdges.Add(new Edge(originals[1], originals[2]) { Color = dim });
                 rotatedEdges.Add(new Edge(originals[1], originals[3]) { Color = dim });
-
-                if (directionExclusions != null && directionExclusions.Contains(ClassifyDiamond(p, diamonds[a])))
-                    continue;
-
-                for (int i = 0; i < 4; i++)
-                {
-                    var v = new Vertex(rotatedDiamonds[a][i].X, rotatedDiamonds[a][i].Y);
-                    if (i == 0)
-                        v.Padding = 0.02f;
-
-                    rotatedVertices.Add(v);
-                    rotatedVertexLookup[a, i] = v;
-                }
 
                 rotatedEdges.Add(new Edge(rotatedVertexLookup[a, 0], originals[2]) { Color = dim });
                 rotatedEdges.Add(new Edge(rotatedVertexLookup[a, 0], originals[3]) { Color = dim });
@@ -393,9 +388,16 @@ namespace WebGraphs.Analysis
             {
                 if (blob.AlgorithmGraph.InducedSubgraph(X).ContainsInduced(d))
                 {
-                    var Y = X.OrderBy(x => p[x].X).OrderBy(x => blob.AlgorithmGraph.DegreeInSubgraph(x, X)).ToList();
+                    var Y = X.OrderBy(x => blob.AlgorithmGraph.DegreeInSubgraph(x, X)).ToList();
 
                     diamonds.Add(Y);
+
+                    var Y2 = Y.ToList();
+                    var temp = Y2[0];
+                    Y2[0] = Y[1];
+                    Y2[1] = temp;
+
+                    diamonds.Add(Y2);
                 }
             }
 
@@ -419,13 +421,19 @@ namespace WebGraphs.Analysis
 
         public static List<Vector> RotateCoordinates(List<Vector> p, List<int> diamond)
         {
-            return diamond.Select(v => Rotate(p[diamond[0]], p[v])).ToList();
+            var type = ClassifyDiamond(p, diamond);
+            if (type == DiamondType.U || type == DiamondType.DR || type == DiamondType.DL)
+                return diamond.Select(v => Rotate(p[diamond[0]], p[v])).ToList();
+            else
+                return diamond.Select(v => Rotate(p[diamond[0]], p[v], clockwise:true)).ToList();
         }
 
-        static Vector Rotate(Vector center, Vector v)
+        static Vector Rotate(Vector center, Vector v, bool clockwise = false)
         {
             double cos = 5.0 / 6.0;
-            double sin = -Math.Sqrt(11) / 6.0;
+            double sin = Math.Sqrt(11) / 6.0;
+            if (!clockwise)
+                sin = -sin;
 
             var x = center.X + (v.X - center.X) * cos - (v.Y - center.Y) * sin;
             var y = center.Y + (v.X - center.X) * sin + (v.Y - center.Y) * cos;
@@ -446,17 +454,13 @@ namespace WebGraphs.Analysis
             }
             else if (b.X < t.X)
             {
-                if (Equalish(b.Y, t.Y))
-                    return DiamondType.R;
-                else if (b.Y > t.Y)
+                if (b.Y > t.Y)
                     return DiamondType.UR;
                 return DiamondType.DR;
             }
             else
             {
-                if (Equalish(b.Y, t.Y))
-                    return DiamondType.L;
-                else if (b.Y > t.Y)
+                if (b.Y > t.Y)
                     return DiamondType.UL;
                 return DiamondType.DL;
             }
