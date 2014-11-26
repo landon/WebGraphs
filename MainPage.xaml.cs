@@ -844,13 +844,20 @@ trash can button.
             var blob = AlgorithmBlob.Create(SelectedTabCanvas);
             var p = blob.UIGraph.Vertices.Select(v => new Vector(v.X, v.Y)).ToList();
 
+            int i = 0;
             foreach (var X in blob.AlgorithmGraph.EnumerateMaximalIndependentSets())
             {
-                SpindleAnalyzer.DoTiling(blob.UIGraph, p, X);
-                break;
+                var g = blob.UIGraph.Clone();
+                SpindleAnalyzer.DoTiling(g, p, X);
+
+                AddTab(g, i.ToString(), snapToGrid: false);
+
+                i++;
+
+                if (i > 10)
+                    break;
             }
 
-            SelectedTabCanvas.Invalidate();
         }
 
         void _mainMenu_DoBasesAndTopsWeighting()

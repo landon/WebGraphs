@@ -33,6 +33,7 @@ namespace WebGraphs.Analysis
             var edgesToAdd = new List<Tuple<int, int>>();
             for (int i = 0; i < set.Count; i++)
             {
+                g.Vertices[set[i]].Padding = 0.02f;
                 for (int j = i + 1; j < set.Count; j++)
                 {
                     if (p[set[i]].Distance(p[set[j]]) < 3 * r)
@@ -50,38 +51,39 @@ namespace WebGraphs.Analysis
                 if (nonIncident.Any(ea => SegmentsIntersect(g.Vertices[e.Item1], g.Vertices[e.Item2], g.Vertices[ea.Item1], g.Vertices[ea.Item2])))
                     continue;
 
-                var between = g.Vertices.Where(v => OnLineSegment(g.Vertices[e.Item1], g.Vertices[e.Item2], v)).ToList();
+                var between = g.Vertices.Where(v => OnLineSegment(g.Vertices[e.Item1], g.Vertices[e.Item2], v)).Where(v => v != g.Vertices[e.Item1] && v != g.Vertices[e.Item2]).ToList();
 
+                var thickness = 10;
                 if (between.Count == 0)
                 {
-                    g.AddEdge(g.Vertices[e.Item1], g.Vertices[e.Item2], Edge.Orientations.None, 1, 5);
+                    g.AddEdge(g.Vertices[e.Item1], g.Vertices[e.Item2], Edge.Orientations.None, 1, thickness);
                 }
                 else
                 {
-                  /*  for (int i = 0; i < between.Count; i++)
+                    for (int i = 0; i < between.Count; i++)
                     {
                         var ee = g.GetEdge(between[i], g.Vertices[e.Item1]);
                         if (ee != null)
-                            ee.Thickness = 5;
+                            ee.Thickness = thickness;
 
                         ee = g.GetEdge(between[i], g.Vertices[e.Item2]);
                         if (ee != null)
-                            ee.Thickness = 5;
+                            ee.Thickness = thickness;
 
                         for (int j = i + 1; j < between.Count; j++)
                         {
                             ee = g.GetEdge(between[i], between[j]);
                             if (ee != null)
-                                ee.Thickness = 5;
+                                ee.Thickness = thickness;
                         }
-                    }*/
+                    }
                 }
             }
         }
 
         static bool OnLineSegment(Vertex a1, Vertex a2, Vertex v)
         {
-            return CrossProduct(v, a1, a2) != 0 && a1.X <= v.X && v.X <= a2.X && a1.Y <= v.Y && v.Y <= a2.Y;
+            return Math.Abs(CrossProduct(v, a1, a2)) < MinDelta && (a1.X <= v.X && v.X <= a2.X || a2.X <= v.X && v.X <= a1.X) && (a1.Y <= v.Y && v.Y <= a2.Y || a2.Y <= v.Y && v.Y <= a1.Y);
         }
      
         static double CrossProduct(Vertex v1, Vertex v2, Vertex v3)
