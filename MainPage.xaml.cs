@@ -96,13 +96,13 @@ namespace WebGraphs
             _mainMenu.DoMaxFractionalClique += _mainMenu_DoMaxFractionalClique;
             _mainMenu.DoSolveLP += _mainMenu_DoSolveLP;
             _mainMenu.DoSixFoldWay += _mainMenu_DoSixFoldWay;
+            _mainMenu.DoTiling += _mainMenu_DoTiling;
 
             _propertyGrid.SomethingChanged += _propertyGrid_SomethingChanged;
 
             DoAutoLoad();
         }
 
-     
    
         void DoAutoLoad()
         {
@@ -839,6 +839,19 @@ trash can button.
             ShowText("total: " + e.Count + Environment.NewLine + string.Join(Environment.NewLine, e));
         }
 
+        void _mainMenu_DoTiling()
+        {
+            var blob = AlgorithmBlob.Create(SelectedTabCanvas);
+            var p = blob.UIGraph.Vertices.Select(v => new Vector(v.X, v.Y)).ToList();
+
+            foreach (var X in blob.AlgorithmGraph.EnumerateMaximalIndependentSets())
+            {
+                SpindleAnalyzer.DoTiling(blob.UIGraph, p, X);
+                break;
+            }
+
+            SelectedTabCanvas.Invalidate();
+        }
 
         void _mainMenu_DoBasesAndTopsWeighting()
         {

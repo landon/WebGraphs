@@ -76,6 +76,7 @@ namespace WebGraphs
         public event Action DoMaxFractionalClique;
         public event Action DoSolveLP;
         public event Action DoSixFoldWay;
+        public event Action DoTiling;
 
         public MenuBar()
         {
@@ -290,12 +291,16 @@ namespace WebGraphs
                 case "6-fold way":
                     A(DoSixFoldWay);
                     break;
+                case "do tiling":
+                    A(DoTiling);
+                    break;
             }
         }
         static void A(Action a)
         {
-            if (a != null)
-                a();
+            var b = a;
+            if (b != null)
+                b();
         }
     }
 }

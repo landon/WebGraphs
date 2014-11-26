@@ -162,6 +162,7 @@
                     <local:SuperMenuItem Header="6-fold way" Click="MenuItemClick"/>
                     <local:SuperMenuItem Header="max fractional clique" Click="MenuItemClick"/>
                     <local:SuperMenuItem Header="generate LP" Click="MenuItemClick"/>
+                    <local:SuperMenuItem Header="do tiling" Click="MenuItemClick"/>
                 </menu:ContextMenu>
             </menu:ContextMenuService.ContextMenu>
         </Button>

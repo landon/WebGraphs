@@ -23,6 +23,76 @@ namespace WebGraphs.Analysis
             DR
         }
 
+        public static void DoTiling(Graphs.Graph g, List<Vector> p, List<int> set)
+        {
+            if (g.Edges.Count <= 0)
+                return;
+
+            var r = new Vector(g.Edges[0].V1.X, g.Edges[0].V1.Y).Distance(new Vector(g.Edges[0].V2.X, g.Edges[0].V2.Y));
+
+            var edgesToAdd = new List<Tuple<int, int>>();
+            for (int i = 0; i < set.Count; i++)
+            {
+                for (int j = i + 1; j < set.Count; j++)
+                {
+                    if (p[set[i]].Distance(p[set[j]]) < 3 * r)
+                    {
+                        edgesToAdd.Add(new Tuple<int, int>(set[i], set[j]));
+                    }
+                }
+            }
+
+            foreach (var e in edgesToAdd)
+            {
+                var vs = new List<int>() {e.Item1, e.Item2};
+                var nonIncident = edgesToAdd.Where(ea => !vs.Contains(ea.Item1) && !vs.Contains(ea.Item2)).ToList();
+
+                if (nonIncident.Any(ea => SegmentsIntersect(g.Vertices[e.Item1], g.Vertices[e.Item2], g.Vertices[ea.Item1], g.Vertices[ea.Item2])))
+                    continue;
+
+                var between = g.Vertices.Where(v => OnLineSegment(g.Vertices[e.Item1], g.Vertices[e.Item2], v)).ToList();
+
+                if (between.Count == 0)
+                {
+                    g.AddEdge(g.Vertices[e.Item1], g.Vertices[e.Item2], Edge.Orientations.None, 1, 5);
+                }
+                else
+                {
+                  /*  for (int i = 0; i < between.Count; i++)
+                    {
+                        var ee = g.GetEdge(between[i], g.Vertices[e.Item1]);
+                        if (ee != null)
+                            ee.Thickness = 5;
+
+                        ee = g.GetEdge(between[i], g.Vertices[e.Item2]);
+                        if (ee != null)
+                            ee.Thickness = 5;
+
+                        for (int j = i + 1; j < between.Count; j++)
+                        {
+                            ee = g.GetEdge(between[i], between[j]);
+                            if (ee != null)
+                                ee.Thickness = 5;
+                        }
+                    }*/
+                }
+            }
+        }
+
+        static bool OnLineSegment(Vertex a1, Vertex a2, Vertex v)
+        {
+            return CrossProduct(v, a1, a2) != 0 && a1.X <= v.X && v.X <= a2.X && a1.Y <= v.Y && v.Y <= a2.Y;
+        }
+     
+        static double CrossProduct(Vertex v1, Vertex v2, Vertex v3)
+        {
+            return (v2.X - v1.X) * (v3.Y - v1.Y) - (v3.X - v1.X) * (v2.Y - v1.Y);
+        }
+        static bool SegmentsIntersect(Vertex a1, Vertex a2, Vertex b1, Vertex b2)
+        {
+            return CrossProduct(a1, a2, b1) * CrossProduct(a1, a2, b2) < 0 && CrossProduct(b1, b2, a1) * CrossProduct(b1, b2, a2) < 0;
+        }
+
         public static Graphs.Graph BuildSerendipitousEdgeGraph(AlgorithmBlob blob, List<Vector> p, List<List<int>> diamonds, out Graphs.Graph rotatedGraph)
         {
             var dim = GraphicsLayer.ARGB.FromFractional(0.5, 0.5, 0.5, 0.5);
