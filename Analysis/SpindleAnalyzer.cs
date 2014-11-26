@@ -36,7 +36,7 @@ namespace WebGraphs.Analysis
                 g.Vertices[set[i]].Padding = 0.02f;
                 for (int j = i + 1; j < set.Count; j++)
                 {
-                    if (p[set[i]].Distance(p[set[j]]) < 3 * r)
+                    if (p[set[i]].Distance(p[set[j]]) < 3 * r - MinDelta)
                     {
                         edgesToAdd.Add(new Tuple<int, int>(set[i], set[j]));
                     }
@@ -53,7 +53,7 @@ namespace WebGraphs.Analysis
 
                 var between = g.Vertices.Where(v => OnLineSegment(g.Vertices[e.Item1], g.Vertices[e.Item2], v)).Where(v => v != g.Vertices[e.Item1] && v != g.Vertices[e.Item2]).ToList();
 
-                var thickness = 10;
+                var thickness = 6;
                 if (between.Count == 0)
                 {
                     g.AddEdge(g.Vertices[e.Item1], g.Vertices[e.Item2], Edge.Orientations.None, 1, thickness);
@@ -69,13 +69,6 @@ namespace WebGraphs.Analysis
                         ee = g.GetEdge(between[i], g.Vertices[e.Item2]);
                         if (ee != null)
                             ee.Thickness = thickness;
-
-                        for (int j = i + 1; j < between.Count; j++)
-                        {
-                            ee = g.GetEdge(between[i], between[j]);
-                            if (ee != null)
-                                ee.Thickness = thickness;
-                        }
                     }
                 }
             }

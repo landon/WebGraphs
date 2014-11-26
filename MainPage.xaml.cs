@@ -197,7 +197,7 @@ namespace WebGraphs
             AddTab(null, FindUnusedName());
         }
 
-        void AddTab(Graphs.Graph g, string name, bool snapToGrid = true)
+        TabCanvas AddTab(Graphs.Graph g, string name, bool snapToGrid = true)
         {
             var item = new TabItem();
             item.Header = name;
@@ -215,6 +215,8 @@ namespace WebGraphs
             item.Tag = tabCanvas;
 
             _tabControl.SelectedItem = item;
+
+            return tabCanvas;
         }
 
         string FindUnusedName()
@@ -850,7 +852,7 @@ trash can button.
                 var g = blob.UIGraph.Clone();
                 SpindleAnalyzer.DoTiling(g, p, X);
 
-                AddTab(g, i.ToString(), snapToGrid: false);
+                var tc = AddTab(g, i.ToString(), snapToGrid: false);
 
                 i++;
 
