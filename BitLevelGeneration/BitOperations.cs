@@ -175,7 +175,7 @@ namespace BitLevelGeneration
             return DeBruijnLookup[((UInt64)m * DeBruijnMultiplier) >> 58];
         }
 
-        public static int PopulationCountSparse(this long b)
+        public static int PopulationCount(this long b)
         {
             int q = 0;
             while (b > 0)
@@ -186,7 +186,7 @@ namespace BitLevelGeneration
             return q;
         }
 
-        public static int PopulationCount(this long x)
+        public static int PopulationCountDense(this long x)
         {
             x = x - ((x >> 1) & 0x5555555555555555L);
             x = (x & 0x3333333333333333L) + ((x >> 2) & 0x3333333333333333L);
