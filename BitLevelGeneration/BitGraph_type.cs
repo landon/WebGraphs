@@ -73,9 +73,6 @@ namespace BitLevelGeneration
                 list.Add(R);
             else
             {
-                var PC = P;
-                var XC = X;
-
                 var u = TomitaPivot(P, X);
                 var q = P & ((1L << u) | _neighborhood[u]);
 
@@ -85,11 +82,11 @@ namespace BitLevelGeneration
                     var v = bit.Extract();
                     var non = ~(bit | _neighborhood[v]);
 
-                    BronKerbosch(PC & non, R | bit, XC & non, list);
+                    BronKerbosch(P & non, R | bit, X & non, list);
 
                     q ^= bit;
-                    PC ^= bit;
-                    XC |= bit;
+                    P ^= bit;
+                    X |= bit;
                 }
             }
         }
