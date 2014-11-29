@@ -6,12 +6,12 @@ using System.Linq;
 using System.Text;
 
 <#
-	Generate("long", 64, "L");
-	Generate("uint", 32, "U");
+	Generate("long", 64, "L", "-q");
+	Generate("uint", 32, "U", "(~q + 1)");
 #>
 
 <#+
-void Generate(string T, int bits, string literal)
+void Generate(string T, int bits, string literal, string twosComplement)
 {
 #>
 
@@ -91,7 +91,7 @@ namespace BitLevelGeneration
 
                 while (q != 0)
                 {
-                    var bit = q & (~q + 1);
+                    var bit = q & <#=twosComplement#>;
                     var v = bit.Extract();
                     var non = ~(bit | _neighborhood[v]);
 
@@ -112,7 +112,7 @@ namespace BitLevelGeneration
 
             while (q != 0)
             {
-                var bit = q & (~q + 1);
+                var bit = q & <#=twosComplement#>;
                 var u = bit.Extract();
 
                 var n = (~((1<#=literal#> << u) | _neighborhood[u]) & P).PopulationCount();

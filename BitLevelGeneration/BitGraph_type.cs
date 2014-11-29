@@ -102,7 +102,7 @@ namespace BitLevelGeneration
 
             while (q != 0)
             {
-                var bit = q & (~q + 1);
+                var bit = q & -q;
                 var u = bit.Extract();
 
                 var n = (~((1L << u) | _neighborhood[u]) & P).PopulationCount();
