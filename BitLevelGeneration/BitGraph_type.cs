@@ -38,6 +38,12 @@ namespace BitLevelGeneration
             }
         }
 
+		public BitGraph_long(int n, long[] neighborhood)
+        {
+			_vertices = Enumerable.Range(0, n).ToArray();
+			_neighborhood = neighborhood;
+		}
+
         public int N { get { return _vertices.Length; } }
         public IEnumerable<int> Vertices { get { return _vertices; } }
 
@@ -147,6 +153,12 @@ namespace BitLevelGeneration
                 }
             }
         }
+
+		public BitGraph_uint(int n, uint[] neighborhood)
+        {
+			_vertices = Enumerable.Range(0, n).ToArray();
+			_neighborhood = neighborhood;
+		}
 
         public int N { get { return _vertices.Length; } }
         public IEnumerable<int> Vertices { get { return _vertices; } }

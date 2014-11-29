@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using Choosability;
 using System.Collections;
+using BitLevelGeneration;
 
 namespace WebGraphs.Analysis
 {
@@ -275,76 +276,23 @@ namespace WebGraphs.Analysis
             var bases = directionDiamonds.IndicesWhere(d => independentSet.Contains(d[0])).ToList();
             var tops = directionDiamonds.IndicesWhere(d => independentSet.Contains(d[1])).ToList();
 
-            var H = BuildSingleDirectionGraph(p, directionDiamonds);
-            var lists = Enumerable.Repeat(7L, H.N).ToList();
-
-            for (int i = 0; i < lists.Count; i++)
-            {
-                if (bases.Contains(i))
-                    lists[i] &= 1;
-                if (tops.Contains(i))
-                    lists[i] &= 6;
-            }
-
-           /* var colorableCount = 0;
-            var nonZeroes = H.Vertices.Where(v => lists[v] != 0).ToList();
-            while (true)
-            {
-                var c = nonZeroes.Count;
-                nonZeroes = nonZeroes.Where(v => lists[v] != 0).ToList();
-
-                var done = c == nonZeroes.Count;
-                var onesOnly = nonZeroes.Where(v => lists[v] == 1).ToList();
-                foreach (var w in onesOnly)
-                {
-                    var N = H.Neighbors[w].Intersection(nonZeroes).Where(v => (lists[v] & 1) != 0).ToList();
-                    if (N.Count <= 1 || N.Count == 2 && H[N[0], N[1]])
-                    {
-                        colorableCount++;
-                        lists[w] = 0;
-                        foreach (var v in N)
-                            lists[v] &= 6;
-
-                        done = false;
-                        break;
-                    }
-                }
-
-                if (done)
-                    break;
-            }*/
-
-            var nonZeroes = H.Vertices.Where(v => lists[v] != 0).ToList();
-            var vc = nonZeroes.ToList();
+            var H = BuildSingleDirectionBitGraph(p, directionDiamonds);
+            var red = H.Vertices.Except(tops).ToInt64();
+            var blueGreen = H.Vertices.Except(bases).ToInt64();
 
             var colorableCount = 0;
-            for (int i = 0; i < 5; i++)
+            foreach (var R in H.MaximalIndependentSubsets(red))
             {
-                colorableCount = Math.Max(colorableCount, H.GreedyColor(lists, vc));
-                if (colorableCount >= vc.Count)
-                    break;
+                var Vb = blueGreen & ~R;
 
-                vc.Shuffle();
-            }
-
-            for (int size = nonZeroes.Count; size > colorableCount; size--)
-            {
-                var done = false;
-                foreach (var set in nonZeroes.EnumerateSublists(size))
+                foreach (var B in H.MaximalIndependentSubsets(Vb))
                 {
-                    if (H.IsChoosable(lists, set))
-                    {
-                        colorableCount = size;
-                        done = true;
-                        break;
-                    }
+                    var Vg = Vb & ~B;
+
+                    var count = H.MaximalIndependentSubsets(Vg).Max(G => BitUsage_long.PopulationCount(G | R | B));
+                    colorableCount = Math.Max(colorableCount, count);
                 }
-
-                if (done)
-                    break;
             }
-
-            var ratio = (double)colorableCount / H.N;
 
             return H.N - colorableCount;
         }
@@ -369,6 +317,32 @@ namespace WebGraphs.Analysis
             }
 
             return new Choosability.Graph(a);
+        }
+
+        static BitGraph_long BuildSingleDirectionBitGraph(List<Vector> p, List<List<int>> diamonds)
+        {
+            var a = new bool[diamonds.Count, diamonds.Count];
+            var r = p[diamonds[0][0]].Distance(p[diamonds[0][2]]);
+
+            var neighborhood = new long[diamonds.Count];
+            for (int i = 0; i < diamonds.Count; i++)
+            {
+                var iBit = 1L << i;
+                for (int j = i + 1; j < diamonds.Count; j++)
+                {
+                    var jBit = 1L << i;
+
+                    var distance = p[diamonds[i][0]].Distance(p[diamonds[j][0]]);
+                    var offset = Math.Abs(distance - r);
+                    if (offset < MinDelta)
+                    {
+                        neighborhood[i] |= jBit;
+                        neighborhood[j] |= iBit;
+                    }
+                }
+            }
+
+            return new BitGraph_long(diamonds.Count, neighborhood);
         }
 
         public static List<string> FindSerendipitousEdges(AlgorithmBlob blob, List<Vector> p, List<List<int>> diamonds, out List<string> identifications)

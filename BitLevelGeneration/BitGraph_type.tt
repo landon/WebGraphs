@@ -17,7 +17,7 @@ void Generate(string T, int bits, string literal)
 
 namespace BitLevelGeneration
 {
-    public class BitGraph_<#=T#> : IGraph
+    public class BitGraph_<#=T#> : IGraph_<#=T#>
     {
         int[] _vertices;
         <#=T#>[] _neighborhood;
@@ -47,6 +47,12 @@ namespace BitLevelGeneration
                 }
             }
         }
+
+		public BitGraph_<#=T#>(int n, <#=T#>[] neighborhood)
+        {
+			_vertices = Enumerable.Range(0, n).ToArray();
+			_neighborhood = neighborhood;
+		}
 
         public int N { get { return _vertices.Length; } }
         public IEnumerable<int> Vertices { get { return _vertices; } }

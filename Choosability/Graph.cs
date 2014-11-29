@@ -932,6 +932,11 @@ namespace Choosability
             return _independentSets.Value.First(I => I.IntersectionCount(subgraph) == i);
         }
 
+        public IEnumerable<List<int>> EnumerateMaximalIndependentSets(List<int> set)
+        {
+            return EnumerateBronKerbosch(set, new List<int>(), new List<int>());
+        }
+
         public IEnumerable<List<int>> EnumerateMaximalIndependentSets()
         {
             return EnumerateBronKerbosch(Vertices, new List<int>(), new List<int>());
