@@ -306,7 +306,8 @@ namespace WebGraphs.Analysis
                     var Vg = Vb & ~B;
 
                     var missed = H.MaximalIndependentSubsets(Vg).Min(G => BitUsage_long.PopulationCount(all ^ (G | R | B)));
-                    minimumMissed = Math.Min(minimumMissed, missed);
+                    if (missed < minimumMissed)
+                        minimumMissed = missed;
                 }
             }
 

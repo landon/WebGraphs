@@ -96,7 +96,7 @@ namespace BitLevelGeneration
 
         int TomitaPivot(long P, long X)
         {
-            var max = -1;
+            var min = int.MaxValue;
             var best = -1;
             var q = P | X;
 
@@ -104,11 +104,11 @@ namespace BitLevelGeneration
             {
                 var bit = q & -q;
                 var u = bit.Extract();
-
-                var n = (~((1L << u) | _neighborhood[u]) & P).PopulationCount();
-                if (n > max)
+				
+				var n = ((bit | _neighborhood[u]) & P).PopulationCount();
+                if (n < min)
                 {
-                    max = n;
+                    min = n;
                     best = u;
                 }
 
@@ -212,7 +212,7 @@ namespace BitLevelGeneration
 
         int TomitaPivot(uint P, uint X)
         {
-            var max = -1;
+            var min = int.MaxValue;
             var best = -1;
             var q = P | X;
 
@@ -220,11 +220,11 @@ namespace BitLevelGeneration
             {
                 var bit = q & (~q + 1);
                 var u = bit.Extract();
-
-                var n = (~((1U << u) | _neighborhood[u]) & P).PopulationCount();
-                if (n > max)
+				
+				var n = ((bit | _neighborhood[u]) & P).PopulationCount();
+                if (n < min)
                 {
-                    max = n;
+                    min = n;
                     best = u;
                 }
 

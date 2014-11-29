@@ -52,12 +52,18 @@ namespace WebGraphs
 
         public static IEnumerable<string> GetFileNames(string searchPattern = null)
         {
-            using (var store = IsolatedStorageFile.GetUserStoreForApplication())
+            try
             {
-                if (searchPattern == null)
-                    return store.GetFileNames();
-                return store.GetFileNames(searchPattern);
+                using (var store = IsolatedStorageFile.GetUserStoreForApplication())
+                {
+                    if (searchPattern == null)
+                        return store.GetFileNames();
+                    return store.GetFileNames(searchPattern);
+                }
             }
+            catch { }
+
+            return new List<string>();
         }
     }
 }
