@@ -81,7 +81,7 @@ namespace BitLevelGeneration
 
                 while (q != 0)
                 {
-                    var bit = q & (~q + 1);
+                    var bit = q & -q;
                     var v = bit.Extract();
                     var non = ~(bit | _neighborhood[v]);
 

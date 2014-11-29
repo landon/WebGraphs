@@ -192,15 +192,24 @@ namespace WebGraphs.Analysis
             heaviestIndependentSet = new List<int>();
             var maxWeight = 0.0;
 
+            var DU = diamonds.Where(d => ClassifyDiamond(p, d) == DiamondType.U).ToList();
+            var HU = BuildSingleDirectionBitGraph(p, DU);
+
+            var DDL = diamonds.Where(d => ClassifyDiamond(p, d) == DiamondType.DL).ToList();
+            var HDL = BuildSingleDirectionBitGraph(p, DDL);
+
+            var DDR = diamonds.Where(d => ClassifyDiamond(p, d) == DiamondType.DR).ToList();
+            var HDR = BuildSingleDirectionBitGraph(p, DDR);
+
             foreach (var X in blob.AlgorithmGraph.EnumerateMaximalIndependentSets())
             {
                 var weight = X.Sum(v => w[v]) + diamonds.Count;
                 if (weight <= maxWeight) continue;
-                weight -= ComputeLostSpindles(p, diamonds, X, DiamondType.U);
+                weight -= ComputeLostSpindles(X, HU, DU);
                 if (weight <= maxWeight) continue;
-                weight -= ComputeLostSpindles(p, diamonds, X, DiamondType.DL);
+                weight -= ComputeLostSpindles(X, HDL, DDL);
                 if (weight <= maxWeight) continue;
-                weight -= ComputeLostSpindles(p, diamonds, X, DiamondType.DR);
+                weight -= ComputeLostSpindles(X, HDR, DDR);
 
                 if (weight > maxWeight)
                 {
@@ -218,9 +227,9 @@ namespace WebGraphs.Analysis
             return string.Join(" + ", blob.AlgorithmGraph.Vertices.GroupBy(v => w[v]).OrderBy(x => x.Key).Select(x => (x.Count() > 1 ? x.Count().ToString() : "") + x.Key)) + " + " + spindle + "s";
         }
 
-        static string GeneratePrettyConstraint(List<int> X, List<Vector> p, List<List<int>> diamonds, List<string> w)
+        static string GeneratePrettyConstraint(List<int> X, List<string> w, int diamondCount, BitGraph_long HU, BitGraph_long HDL, BitGraph_long HDR, List<List<int>> DU, List<List<int>> DDL, List<List<int>> DDR)
         {
-            var spindleCount = ComputeSpindleCount(X, p, diamonds);
+            var spindleCount = ComputeSpindleCount(X, diamondCount, HU, HDL, HDR, DU, DDL, DDR);
             return string.Join(" + ", X.GroupBy(v => w[v]).OrderBy(x => x.Key).Select(x => (x.Count() > 1 ? x.Count().ToString() : "") + x.Key)) + " + " + spindleCount + "s <= 1";
         }
 
@@ -229,20 +238,29 @@ namespace WebGraphs.Analysis
             var spindle = 3 * diamonds.Count;
             var variables = w.Distinct().OrderBy(x => x).ToList();
 
+            var DU = diamonds.Where(d => ClassifyDiamond(p, d) == DiamondType.U).ToList();
+            var HU = BuildSingleDirectionBitGraph(p, DU);
+
+            var DDL = diamonds.Where(d => ClassifyDiamond(p, d) == DiamondType.DL).ToList();
+            var HDL = BuildSingleDirectionBitGraph(p, DDL);
+
+            var DDR = diamonds.Where(d => ClassifyDiamond(p, d) == DiamondType.DR).ToList();
+            var HDR = BuildSingleDirectionBitGraph(p, DDR);
+
             var sb = new StringBuilder();
             sb.AppendLine("maximize");
             sb.AppendLine(string.Join(" + ", blob.AlgorithmGraph.Vertices.GroupBy(v => w[v]).OrderBy(x => x.Key).Select(x => (x.Count() > 1 ? x.Count().ToString() : "") + x.Key)) + " + " + spindle + "s");
 
             sb.AppendLine();
             sb.AppendLine("subject to");
-            sb.AppendLine(string.Join(Environment.NewLine, blob.AlgorithmGraph.EnumerateMaximalIndependentSets().Select(X => GeneratePrettyConstraint(X, p, diamonds, w)).Distinct()));
+            sb.AppendLine(string.Join(Environment.NewLine, blob.AlgorithmGraph.EnumerateMaximalIndependentSets().Select(X => GeneratePrettyConstraint(X, w, diamonds.Count, HU, HDL, HDR, DU, DDL, DDR)).Distinct()));
 
             sb.AppendLine();
             sb.AppendLine("bounds");
             foreach (var v in variables)
-                sb.AppendLine(v + " >= 0");
+                sb.AppendLine(v + " > 0");
 
-            sb.AppendLine("s >= 0");
+            sb.AppendLine("s > 0");
 
             sb.AppendLine();
             sb.AppendLine("generals");
@@ -260,27 +278,25 @@ namespace WebGraphs.Analysis
             return subset.Count(i => x == w[i]);
         }
 
-        private static int ComputeSpindleCount(List<int> X, List<Vector> p, List<List<int>> diamonds)
+        private static int ComputeSpindleCount(List<int> X, int diamondCount, BitGraph_long HU, BitGraph_long HDL, BitGraph_long HDR, List<List<int>> DU, List<List<int>> DDL, List<List<int>> DDR)
         {
-            var lostSpindlesU = ComputeLostSpindles(p, diamonds, X, DiamondType.U);
-            var lostSpindlesDL = ComputeLostSpindles(p, diamonds, X, DiamondType.DL);
-            var lostSpindlesDR = ComputeLostSpindles(p, diamonds, X, DiamondType.DR);
+            var lostSpindlesU = ComputeLostSpindles(X, HU, DU);
+            var lostSpindlesDL = ComputeLostSpindles(X, HDL, DDL);
+            var lostSpindlesDR = ComputeLostSpindles(X, HDR, DDR);
 
-            return diamonds.Count - lostSpindlesU - lostSpindlesDL - lostSpindlesDR;
+            return diamondCount - lostSpindlesU - lostSpindlesDL - lostSpindlesDR;
         }
 
-        public static int ComputeLostSpindles(List<Vector> p, List<List<int>> diamonds, List<int> independentSet, DiamondType direction)
+        public static int ComputeLostSpindles(List<int> independentSet, BitGraph_long H, List<List<int>> directionDiamonds)
         {
-            var directionDiamonds = diamonds.Where(d => ClassifyDiamond(p, d) == direction).ToList();
+            var all = (1L << H.N) - 1;
+            var bases = directionDiamonds.IndicesWhere(d => independentSet.Contains(d[0])).ToInt64();
+            var tops = directionDiamonds.IndicesWhere(d => independentSet.Contains(d[1])).ToInt64();
 
-            var bases = directionDiamonds.IndicesWhere(d => independentSet.Contains(d[0])).ToList();
-            var tops = directionDiamonds.IndicesWhere(d => independentSet.Contains(d[1])).ToList();
+            var red = all ^ tops;
+            var blueGreen = all ^ bases;
 
-            var H = BuildSingleDirectionBitGraph(p, directionDiamonds);
-            var red = H.Vertices.Except(tops).ToInt64();
-            var blueGreen = H.Vertices.Except(bases).ToInt64();
-
-            var colorableCount = 0;
+            var minimumMissed = H.N;
             foreach (var R in H.MaximalIndependentSubsets(red))
             {
                 var Vb = blueGreen & ~R;
@@ -289,12 +305,12 @@ namespace WebGraphs.Analysis
                 {
                     var Vg = Vb & ~B;
 
-                    var count = H.MaximalIndependentSubsets(Vg).Max(G => BitUsage_long.PopulationCount(G | R | B));
-                    colorableCount = Math.Max(colorableCount, count);
+                    var missed = H.MaximalIndependentSubsets(Vg).Min(G => BitUsage_long.PopulationCount(all ^ (G | R | B)));
+                    minimumMissed = Math.Min(minimumMissed, missed);
                 }
             }
 
-            return H.N - colorableCount;
+            return minimumMissed;
         }
 
         static Choosability.Graph BuildSingleDirectionGraph(List<Vector> p, List<List<int>> diamonds)
@@ -330,7 +346,7 @@ namespace WebGraphs.Analysis
                 var iBit = 1L << i;
                 for (int j = i + 1; j < diamonds.Count; j++)
                 {
-                    var jBit = 1L << i;
+                    var jBit = 1L << j;
 
                     var distance = p[diamonds[i][0]].Distance(p[diamonds[j][0]]);
                     var offset = Math.Abs(distance - r);
