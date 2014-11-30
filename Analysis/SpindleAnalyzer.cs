@@ -298,18 +298,15 @@ namespace WebGraphs.Analysis
 
             var minimumMissed = H.N;
 
-            var rr = H.MaximalIndependentSubsets(red);
-            var rrr = MaximalndependentSetSearching.GenerateMaximalIndependentSubsets(H, red);
-
-            foreach (var R in H.MaximalIndependentSubsets(red))
+            foreach (var R in MaximalndependentSetSearching.GenerateMaximalIndependentSubsets(H, red))
             {
                 var Vb = blueGreen & ~R;
 
-                foreach (var B in H.MaximalIndependentSubsets(Vb))
+                foreach (var B in MaximalndependentSetSearching.GenerateMaximalIndependentSubsets(H, Vb))
                 {
                     var Vg = Vb & ~B;
 
-                    var missed = H.MaximalIndependentSubsets(Vg).Min(G => BitUsage_long.PopulationCount(all ^ (G | R | B)));
+                    var missed = MaximalndependentSetSearching.GenerateMaximalIndependentSubsets(H, Vg).Min(G => BitUsage_long.PopulationCount(all ^ (G | R | B)));
                     if (missed < minimumMissed)
                         minimumMissed = missed;
                 }

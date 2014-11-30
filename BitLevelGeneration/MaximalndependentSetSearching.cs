@@ -83,9 +83,33 @@ namespace BitLevelGeneration
                     }
                     else
                     {
-                        var X = g.NeighborsInSet(v, earlier);
                         var mp = m & ~N;
-                        var q = X & ~N;
+                        var mpp = mp | bit;
+                        var q = N;
+                        var l = earlier & ~mpp;
+
+                        while (q != 0)
+                        {
+                            var b = q & -q;
+                            var w = b.Extract();
+
+                            var qq = g.NeighborsInSet(w, l);
+                            while (qq != 0)
+                            {
+                                var bb = qq & -qq;
+                                var z = bb.Extract();
+
+                                if (g.NeighborsInSet(z, mpp) == 0)
+                                    goto skip;
+
+                                qq ^= bb;
+                            }
+
+                            q ^= b;
+                        }
+
+                        var X = g.NeighborsInSet(v, earlier);
+                        q = X & ~N;
 
                         while (q != 0)
                         {
@@ -111,7 +135,7 @@ namespace BitLevelGeneration
                                     continue;
 
                                 var mm = mp | Z;
-                                var l = earlier & ~mm;
+                                l = earlier & ~mm;
                                 q = N & ~Z;
 
                                 while (q != 0)
