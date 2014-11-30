@@ -13,6 +13,7 @@ namespace WebGraphs.Analysis
     public static class SpindleAnalyzer
     {
         const double MinDelta = 0.001;
+        public static int MaxLoss { get; private set; }
 
         public enum DiamondType
         {
@@ -235,6 +236,8 @@ namespace WebGraphs.Analysis
 
         public static string GenerateGLPKCode(AlgorithmBlob blob, List<Vector> p, List<List<int>> diamonds, List<string> w)
         {
+            MaxLoss = 0;
+
             var spindle = 3 * diamonds.Count;
             var variables = w.Distinct().OrderBy(x => x).ToList();
 
@@ -296,23 +299,85 @@ namespace WebGraphs.Analysis
             var red = all ^ tops;
             var blueGreen = all ^ bases;
 
-            var minimumMissed = H.N;
-
-            foreach (var R in MaximalndependentSetSearching.GenerateMaximalIndependentSubsets(H, red))
-            {
-                var Vb = blueGreen & ~R;
-
-                foreach (var B in MaximalndependentSetSearching.GenerateMaximalIndependentSubsets(H, Vb))
+            var tuples = H.MaximalIndependentSubsets(red).Select(R =>
                 {
-                    var Vg = Vb & ~B;
+                    var leftover = blueGreen & ~R;
+                    return new Tuple<long, long, int, int>(R, leftover, BitUsage_long.PopulationCount(R), BitUsage_long.PopulationCount(leftover));
+                }).OrderByDescending(t => t.Item3 + t.Item4).ToList();
 
-                    var missed = MaximalndependentSetSearching.GenerateMaximalIndependentSubsets(H, Vg).Min(G => BitUsage_long.PopulationCount(all ^ (G | R | B)));
-                    if (missed < minimumMissed)
-                        minimumMissed = missed;
+
+            var best = 0;
+            var loss = 0;
+            while (true)
+            {
+                var done = true;
+                foreach (var tuple in tuples)
+                {
+                    if (tuple.Item3 + tuple.Item4 - loss <= best)
+                        break;
+
+                    done = false;
+
+                    var set = tuple.Item2;
+                    var nset = ~set;
+                    var k = tuple.Item4 - loss;
+
+                    long subset;
+
+                    if (loss == 0)
+                    {
+                        subset = set;
+                    }
+                    else
+                    {
+                        subset = 0L;
+                        var q = set;
+                        for (int j = 0; j < k; j++)
+                        {
+                            var bit = q & -q;
+                            subset |= bit;
+                            q ^= bit;
+                        }
+                    }
+
+                    while (true)
+                    {
+                        if (GraphChoosability_long.IsSubsetTwoColorable(H, subset))
+                        {
+                            best = tuple.Item3 + tuple.Item4 - loss;
+                            if (loss > MaxLoss)
+                                MaxLoss = loss;
+
+                            break;
+                        }
+
+                        var u = subset & -subset;
+                        var v = ((subset | nset) + u) & set;
+                        if (v == 0)
+                            break;
+                        var y = v ^ subset;
+                        var t = BitUsage_long.PopulationCount(y) - 2;
+
+                        subset = 0L;
+                        var q = set;
+                        for (int j = 0; j < t; j++)
+                        {
+                            var bit = q & -q;
+                            subset |= bit;
+                            q ^= bit;
+                        }
+
+                        subset |= v;
+                    }
                 }
+
+                if (done)
+                    break;
+
+                loss++;
             }
 
-            return minimumMissed;
+            return H.N - best;
         }
 
         static Choosability.Graph BuildSingleDirectionGraph(List<Vector> p, List<List<int>> diamonds)

@@ -45,7 +45,7 @@ namespace WebGraphs
             _layoutRoot.Children.Clear();
         }
 
-        public void AddChild(FrameworkElement c)
+        public FrameworkElement AddChild(FrameworkElement c)
         {
             var tt = c as TextBox;
             if (tt != null)
@@ -57,14 +57,18 @@ namespace WebGraphs
             }
 
             _layoutRoot.Children.Add(c);
+
+            return c;
         }
 
         public void Dispose()
         {
             _layoutRoot.Children.Remove(_progressIndicator);
-            Title = "results";
+            Title = ResultTitle ?? "results";
             HasCloseButton = true;
         }
+
+        public string ResultTitle { get; set; }
     }
 }
 

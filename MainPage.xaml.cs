@@ -932,6 +932,7 @@ trash can button.
                     });
 
                 resultWindow.AddChild(new TextBox() { Text = code });
+                resultWindow.ResultTitle = "Max loss: " + SpindleAnalyzer.MaxLoss;
             }
         }
 

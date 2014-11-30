@@ -275,5 +275,48 @@ namespace BitLevelGeneration
                     break;
             }
         }
+
+        public static bool IsSubsetTwoColorable(BitGraph_long g, long set)
+        {
+            var c = new int[64];
+            var q = new Queue<int>();
+
+            var leftover = set;
+
+            while (leftover != 0)
+            {
+                var r = leftover.LeastSignificantBit();
+                q.Enqueue(r);
+                c[r] = 1;
+
+                while (q.Count > 0)
+                {
+                    var v = q.Dequeue();
+                    var n = g.NeighborsInSet(v, set);
+
+                    while (n != 0)
+                    {
+                        var bit = n & -n;
+                        var w = bit.Extract();
+
+                        if (c[w] == 0)
+                        {
+                            q.Enqueue(w);
+                            c[w] = 3 - c[v];
+                        }
+                        else if (c[w] != 3 - c[v])
+                        {
+                            return false;
+                        }
+
+                        n ^= bit;
+                    }
+
+                    leftover ^= (1L << v);
+                }
+            }
+
+            return true;
+        }
     }
 }

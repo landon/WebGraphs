@@ -64,6 +64,7 @@
     </Compile>
     <Compile Include="IGraph.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Threading\ThreadLocal.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assignments_type.tt">
