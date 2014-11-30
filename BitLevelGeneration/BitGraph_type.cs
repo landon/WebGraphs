@@ -51,6 +51,7 @@ namespace BitLevelGeneration
         {
             return set.TrueForAllBitIndices(i => (_neighborhood[i] & set) == 0);
         }
+
         public int Degree(int v)
         {
             return _neighborhood[v].PopulationCount();
@@ -59,7 +60,10 @@ namespace BitLevelGeneration
         {
             return (_neighborhood[v] & set).PopulationCount();
         }
-
+		public long NeighborsInSet(int v, long set)
+        {
+            return _neighborhood[v] & set;
+        }
         public IEnumerable<long> MaximalIndependentSubsets(long set)
         {
             var list = new List<long>(8);
@@ -164,6 +168,7 @@ namespace BitLevelGeneration
         {
             return set.TrueForAllBitIndices(i => (_neighborhood[i] & set) == 0);
         }
+
         public int Degree(int v)
         {
             return _neighborhood[v].PopulationCount();
@@ -172,7 +177,10 @@ namespace BitLevelGeneration
         {
             return (_neighborhood[v] & set).PopulationCount();
         }
-
+		public uint NeighborsInSet(int v, uint set)
+        {
+            return _neighborhood[v] & set;
+        }
         public IEnumerable<uint> MaximalIndependentSubsets(uint set)
         {
             var list = new List<uint>(8);
@@ -186,9 +194,6 @@ namespace BitLevelGeneration
                 list.Add(R);
             else
             {
-                var PC = P;
-                var XC = X;
-
                 var u = TomitaPivot(P, X);
                 var q = P & ((1U << u) | _neighborhood[u]);
 
@@ -198,11 +203,11 @@ namespace BitLevelGeneration
                     var v = bit.Extract();
                     var non = ~(bit | _neighborhood[v]);
 
-                    BronKerbosch(PC & non, R | bit, XC & non, list);
+                    BronKerbosch(P & non, R | bit, X & non, list);
 
                     q ^= bit;
-                    PC ^= bit;
-                    XC |= bit;
+                    P ^= bit;
+                    X |= bit;
                 }
             }
         }

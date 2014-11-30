@@ -55,6 +55,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>BitVectors.tt</DependentUpon>
     </Compile>
+    <Compile Include="MaximalndependentSetSearching.cs" />
     <Compile Include="GraphChoosability.cs" />
     <Compile Include="HashedAssignment.cs">
       <AutoGen>True</AutoGen>

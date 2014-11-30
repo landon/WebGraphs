@@ -297,6 +297,10 @@ namespace WebGraphs.Analysis
             var blueGreen = all ^ bases;
 
             var minimumMissed = H.N;
+
+            var rr = H.MaximalIndependentSubsets(red);
+            var rrr = MaximalndependentSetSearching.GenerateMaximalIndependentSubsets(H, red);
+
             foreach (var R in H.MaximalIndependentSubsets(red))
             {
                 var Vb = blueGreen & ~R;
