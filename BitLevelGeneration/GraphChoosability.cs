@@ -278,20 +278,21 @@ namespace BitLevelGeneration
 
         public static bool IsSubsetTwoColorable(BitGraph_long g, long set)
         {
-            var c = new int[64];
-            var q = new Queue<int>();
+            var c = new int[g.N];
+            var q = new int[g.N];
 
             var leftover = set;
-
+            var s = 0;
             while (leftover != 0)
             {
                 var r = leftover.LeastSignificantBit();
-                q.Enqueue(r);
+                q[s] = r;
                 c[r] = 1;
+                var e = s;
 
-                while (q.Count > 0)
+                while (s <= e)
                 {
-                    var v = q.Dequeue();
+                    var v = q[s++];
                     var n = g.NeighborsInSet(v, set);
 
                     while (n != 0)
@@ -301,7 +302,7 @@ namespace BitLevelGeneration
 
                         if (c[w] == 0)
                         {
-                            q.Enqueue(w);
+                            q[++e] = w;
                             c[w] = 3 - c[v];
                         }
                         else if (c[w] != 3 - c[v])
