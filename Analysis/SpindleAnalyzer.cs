@@ -7,13 +7,13 @@ using System.Text;
 using Choosability;
 using System.Collections;
 using BitLevelGeneration;
+using System.Threading.Tasks;
 
 namespace WebGraphs.Analysis
 {
     public static class SpindleAnalyzer
     {
         const double MinDelta = 0.001;
-        public static int MaxLoss { get; private set; }
 
         public enum DiamondType
         {
@@ -236,8 +236,6 @@ namespace WebGraphs.Analysis
 
         public static string GenerateGLPKCode(AlgorithmBlob blob, List<Vector> p, List<List<int>> diamonds, List<string> w)
         {
-            MaxLoss = 0;
-
             var spindle = 3 * diamonds.Count;
             var variables = w.Distinct().OrderBy(x => x).ToList();
 
@@ -256,7 +254,17 @@ namespace WebGraphs.Analysis
 
             sb.AppendLine();
             sb.AppendLine("subject to");
-            sb.AppendLine(string.Join(Environment.NewLine, blob.AlgorithmGraph.EnumerateMaximalIndependentSets().Select(X => GeneratePrettyConstraint(X, w, diamonds.Count, HU, HDL, HDR, DU, DDL, DDR)).Distinct()));
+
+            var constraints = new HashSet<string>();
+
+            Task.WaitAll(blob.AlgorithmGraph.EnumerateMaximalIndependentSets().Select(Y => Task.Factory.StartNew((X) => 
+            {
+                var constraint = GeneratePrettyConstraint((List<int>)X, w, diamonds.Count, HU, HDL, HDR, DU, DDL, DDR);
+                lock (constraints)
+                    constraints.Add(constraint);
+            }, Y)).ToArray());
+
+            sb.AppendLine(string.Join(Environment.NewLine, constraints));
 
             sb.AppendLine();
             sb.AppendLine("bounds");
@@ -345,9 +353,6 @@ namespace WebGraphs.Analysis
                         if (GraphChoosability_long.IsSubsetTwoColorable(H, subset))
                         {
                             best = tuple.Item3 + tuple.Item4 - loss;
-                            if (loss > MaxLoss)
-                                MaxLoss = loss;
-
                             break;
                         }
 
