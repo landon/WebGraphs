@@ -163,6 +163,7 @@
                     <local:SuperMenuItem Header="max fractional clique" Click="MenuItemClick"/>
                     <local:SuperMenuItem Header="generate LP" Click="MenuItemClick"/>
                     <local:SuperMenuItem Header="do tiling" Click="MenuItemClick"/>
+                    <local:SuperMenuItem Header="spin" Click="MenuItemClick"/>
                 </menu:ContextMenu>
             </menu:ContextMenuService.ContextMenu>
         </Button>

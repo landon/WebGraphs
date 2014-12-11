@@ -24,6 +24,16 @@ namespace Graphs
         {
         }
 
+        public Vertex(Vector v)
+            : this(v, "")
+        {
+        }
+
+        public Vertex(Vector v, string label)
+            : this(v.X, v.Y, label)
+        {
+        }
+
         public Vertex(double x, double y, string label)
         {
             _Location = new Vector(x, y);

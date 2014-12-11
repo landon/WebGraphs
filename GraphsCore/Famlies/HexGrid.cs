@@ -27,7 +27,7 @@ namespace GraphsCore.Famlies
 
         List<Graphs.Vertex> AddLine(List<Graphs.Vertex> vertices, List<Graphs.Edge> edges, List<Graphs.Vertex> previousLine, int n, double r)
         {
-            var x = 0.1;
+            var x = 0.15;
             var y = 0.05;
 
             if (previousLine != null)

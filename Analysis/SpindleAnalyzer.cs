@@ -510,9 +510,13 @@ namespace WebGraphs.Analysis
             var diamonds = new List<List<int>>();
 
             var d = Choosability.Graphs.Diamond;
+            var seq = new[] { 2, 2, 3, 3 };
 
             foreach (var X in blob.AlgorithmGraph.Vertices.EnumerateSublists(4))
             {
+                if (!X.Select(v => blob.AlgorithmGraph.DegreeInSubgraph(v, X)).OrderBy(q => q).SequenceEqual(seq))
+                    continue;
+
                 if (blob.AlgorithmGraph.InducedSubgraph(X).ContainsInduced(d))
                 {
                     var Y = X.OrderBy(x => blob.AlgorithmGraph.DegreeInSubgraph(x, X)).ToList();
@@ -555,7 +559,7 @@ namespace WebGraphs.Analysis
                 return diamond.Select(v => Rotate(p[diamond[0]], p[v], clockwise:true)).ToList();
         }
 
-        static Vector Rotate(Vector center, Vector v, bool clockwise = false)
+        public static Vector Rotate(Vector center, Vector v, bool clockwise = false)
         {
             double cos = 5.0 / 6.0;
             double sin = Math.Sqrt(11) / 6.0;
@@ -568,7 +572,7 @@ namespace WebGraphs.Analysis
             return new Vector(x, y);
         }
 
-        static DiamondType ClassifyDiamond(List<Vector> p, List<int> diamond)
+        public static DiamondType ClassifyDiamond(List<Vector> p, List<int> diamond)
         {
             var b = p[diamond[0]];
             var t = p[diamond[1]];
@@ -596,6 +600,12 @@ namespace WebGraphs.Analysis
         static bool Equalish(double a, double b)
         {
             return Math.Abs(a - b) < MinDelta;
+        }
+
+        public static List<Vector> RotateDiamondsLayout(Choosability.Graph g, List<Vector> layout = null, object data = null)
+        {
+            var dd = data as Tuple<List<Vector>, List<SpindleAnalyzer.DiamondType>>;
+            return layout.Select((v, i) => Rotate(dd.Item1[i], v, !(dd.Item2[i] == DiamondType.U || dd.Item2[i] == DiamondType.DR || dd.Item2[i] == DiamondType.DL))).ToList();
         }
     }
 }

@@ -77,6 +77,7 @@ namespace WebGraphs
         public event Action DoSolveLP;
         public event Action DoSixFoldWay;
         public event Action DoTiling;
+        public event Action DoSpin;
 
         public MenuBar()
         {
@@ -293,6 +294,9 @@ namespace WebGraphs
                     break;
                 case "do tiling":
                     A(DoTiling);
+                    break;
+                case "spin":
+                    A(DoSpin);
                     break;
             }
         }

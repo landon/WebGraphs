@@ -12,7 +12,7 @@ namespace GraphsCore
 {
     public static class Layout
     {
-        public delegate List<Graphs.Vector> Algorithm(Choosability.Graph g, List<Graphs.Vector> layout = null);
+        public delegate List<Graphs.Vector> Algorithm(Choosability.Graph g, List<Graphs.Vector> layout = null, object data = null);
 
         public static Supergraph CreateSatsumaGraph(this Choosability.Graph g)
         {
@@ -41,7 +41,7 @@ namespace GraphsCore
             return satsumaGraph;
         }
 
-        public static List<Graphs.Vector> GetSpringsLayout(this Choosability.Graph g, List<Graphs.Vector> layout = null)
+        public static List<Graphs.Vector> GetSpringsLayout(this Choosability.Graph g, List<Graphs.Vector> layout = null, object data = null)
         {
             return GetSpringsLayout(g, 0);
         }
@@ -71,7 +71,7 @@ namespace GraphsCore
             return satsumaGraph.Nodes().Select(n => new Graphs.Vector(0.1 + 0.7 * (layout.NodePositions[n].X - minX) / width, 0.1 + 0.7 * (layout.NodePositions[n].Y - minY) / height)).ToList();
         }
 
-        public static List<Graphs.Vector> GetLaplacianLayout(this Choosability.Graph g, List<Graphs.Vector> layout = null)
+        public static List<Graphs.Vector> GetLaplacianLayout(this Choosability.Graph g, List<Graphs.Vector> layout = null, object data = null)
         {
             var D = Matrix.Build.Diagonal(g.N, g.N, v => g.Degree(v));
             var A = Matrix.Build.Dense(g.N, g.N, (v, w) => g[v, w] ? 1 : 0);
@@ -84,7 +84,7 @@ namespace GraphsCore
             return GetEigenVectorLayout(x, y);
         }
 
-        public static List<Graphs.Vector> GetWalkMatrixLayout(this Choosability.Graph g, List<Graphs.Vector> layout = null)
+        public static List<Graphs.Vector> GetWalkMatrixLayout(this Choosability.Graph g, List<Graphs.Vector> layout = null, object data = null)
         {
             var D = Matrix.Build.Diagonal(g.N, g.N, v => g.Degree(v));
             var A = Matrix.Build.Dense(g.N, g.N, (v, w) => g[v, w] ? 1 : 0);
@@ -130,7 +130,7 @@ namespace GraphsCore
             return Enumerable.Range(0, x.Count).Select(v => new Graphs.Vector(0.1 + 0.7 * (x[v] - minX) / width, 0.1 + 0.7 * (y[v] - minY) / height)).ToList();
         }
 
-        public static List<Graphs.Vector> GetUnitDistanceLayout(this Choosability.Graph g, List<Graphs.Vector> layout = null)
+        public static List<Graphs.Vector> GetUnitDistanceLayout(this Choosability.Graph g, List<Graphs.Vector> layout = null, object data = null)
         {
             var modifiedLayout = layout.ToList();
 

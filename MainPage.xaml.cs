@@ -97,12 +97,14 @@ namespace WebGraphs
             _mainMenu.DoSolveLP += _mainMenu_DoSolveLP;
             _mainMenu.DoSixFoldWay += _mainMenu_DoSixFoldWay;
             _mainMenu.DoTiling += _mainMenu_DoTiling;
+            _mainMenu.DoSpin += _mainMenu_DoSpin;
 
             _propertyGrid.SomethingChanged += _propertyGrid_SomethingChanged;
 
             DoAutoLoad();
         }
 
+   
    
         void DoAutoLoad()
         {
@@ -197,7 +199,7 @@ namespace WebGraphs
             AddTab(null, FindUnusedName());
         }
 
-        TabCanvas AddTab(Graphs.Graph g, string name, bool snapToGrid = true)
+        TabCanvas AddTab(Graphs.Graph g, string name, bool snapToGrid = true, Action onLoaded = null)
         {
             var item = new TabItem();
             item.Header = name;
@@ -212,6 +214,7 @@ namespace WebGraphs
             gc.DrawGrid = snapToGrid;
             var tabCanvas = new TabCanvas(canvas, gc, _propertyGrid, item);
             tabCanvas.Title = name;
+            tabCanvas.Canvas.Loaded += delegate { if (onLoaded != null) onLoaded();};
             item.Tag = tabCanvas;
 
             _tabControl.SelectedItem = item;
@@ -935,6 +938,81 @@ trash can button.
             }
         }
 
+        async void _mainMenu_DoSpin()
+        {
+            if (SelectedTabCanvas == null)
+                return;
+
+            var blob = AlgorithmBlob.Create(SelectedTabCanvas);
+            var p = blob.UIGraph.Vertices.Select(v => new Vector(v.X, v.Y)).ToList();
+
+            var diamonds = await Task.Factory.StartNew<List<List<int>>>(() => SpindleAnalyzer.FindAllDiamonds(blob, p));
+
+            var centers = diamonds.SelectMany(d => new[] { p[d[0]], p[d[0]], p[d[0]], p[d[0]] }).ToList();
+            var types = diamonds.SelectMany(d =>
+                {
+                    var type = SpindleAnalyzer.ClassifyDiamond(p, d);
+                    return new[] { type, type, type, type };
+                }).ToList();
+            var locations = diamonds.SelectMany(d => new[] { p[d[0]], p[d[1]], p[d[2]], p[d[3]] }).ToList();
+
+            var vertices = locations.Select(l => new Vertex(l) { Padding = 0.005f }).ToList();
+            var edges = new List<Edge>();
+            for (int i = 0; i <= vertices.Count - 4; i += 4)
+            {
+                edges.Add(new Edge(vertices[i], vertices[i + 2]));
+                edges.Add(new Edge(vertices[i], vertices[i + 3]));
+                edges.Add(new Edge(vertices[i + 1], vertices[i + 2]));
+                edges.Add(new Edge(vertices[i + 1], vertices[i + 3]));
+                edges.Add(new Edge(vertices[i + 2], vertices[i + 3]));
+            }
+
+            _maxSpinEdge = 0;
+            var g = new Graphs.Graph(vertices, edges);
+            AddTab(g, "diamonds", false, () =>
+                {
+                    DoSpin(new Tuple<List<Vector>, List<SpindleAnalyzer.DiamondType>>(centers, types), locations);
+                });
+        }
+
+        int _maxSpinEdge;
+        void DoSpin(Tuple<List<Vector>, List<SpindleAnalyzer.DiamondType>> data, List<Vector> locations)
+        {
+            var blob = AlgorithmBlob.Create(SelectedTabCanvas);
+
+            var layoutAnimation = new LayoutAnimation(blob, () =>
+            {
+                SelectedTabCanvas.GraphCanvas.Invalidate();
+            }
+             , async () =>
+             {
+                 var current = blob.UIGraph.Vertices.Select(v => new Vector(v.X, v.Y)).ToList();
+
+                 int edgeCount = 0;
+
+                 var r = current[0].Distance(current[1]);
+
+                 for (int i = 0; i < current.Count; i++)
+                 {
+                     for (int j = i + 1; j < current.Count; j++)
+                     {
+                         if (Math.Abs(current[i].Distance(current[j]) - r) < 0.001)
+                             edgeCount++;
+                     }
+                 }
+                 (_tabControl.SelectedItem as TabItem).Header = edgeCount.ToString();
+
+                 if (edgeCount > _maxSpinEdge)
+                 {
+                     _maxSpinEdge = edgeCount;
+                    // await Task.Factory.StartNew(() => Thread.Sleep(5000));
+                 }
+                 DoSpin(data, current);
+
+             }, (Layout.Algorithm)SpindleAnalyzer.RotateDiamondsLayout, locations, data);
+        }
+
+
         void ClearLabels()
         {
             var tabCanvas = SelectedTabCanvas;
@@ -1462,7 +1540,7 @@ trash can button.
         }
 
 
-        void DoLayout(Layout.Algorithm algorithm, List<Vector> layout = null)
+        void DoLayout(Layout.Algorithm algorithm, List<Vector> layout = null, object data = null)
         {
             var blob = AlgorithmBlob.Create(SelectedTabCanvas);
             if (blob == null)
@@ -1480,7 +1558,7 @@ trash can button.
                  blob.UIGraph.ParametersDirty = true;
                  SelectedTabCanvas.GraphCanvas.GraphChanged();
                  SelectedTabCanvas.GraphCanvas.Invalidate();
-             }, algorithm, layout);
+             }, algorithm, layout, data);
         }
 
         int ParseDegreeDependentString(string p, int degree)
