@@ -287,8 +287,8 @@ namespace Graphs
 
         public Graph Clone()
         {
-            var s = Serialize();
-            var g = Deserialize(s);
+            var s = GraphsCore.CompactSerializer.Serialize(this);
+            var g = GraphsCore.CompactSerializer.Deserialize(s);
             if (g != null)
                 g.ParametersDirty = true;
             return g;
@@ -409,7 +409,7 @@ namespace Graphs
         {
             return AddEdge(v1, v2, Edge.Orientations.None, multiplicity);
         }
-        public bool AddEdge(Vertex v1, Vertex v2, Edge.Orientations orientation, int multiplicity = 1, float thickness = 2)
+        public bool AddEdge(Vertex v1, Vertex v2, Edge.Orientations orientation, int multiplicity = 1, float thickness = 2, string style = "")
         {
             if (v1 == v2)
             {
@@ -424,6 +424,7 @@ namespace Graphs
                     var edge = new Edge(v1, v2, orientation);
                     edge.Multiplicity = multiplicity;
                     edge.Thickness = thickness;
+                    edge.Style = style;
                     _edges.Add(edge);
                     ParametersDirty = true;
 
@@ -503,7 +504,7 @@ namespace Graphs
                 {
                     Edge e;
                     if (EdgeExists(v1, v2, out e))
-                        induced.AddEdge(v1, v2, e.Orientation != Edge.Orientations.None ? Edge.Orientations.Forward : Edge.Orientations.None, e.Multiplicity, e.Thickness);
+                        induced.AddEdge(v1, v2, e.Orientation != Edge.Orientations.None ? Edge.Orientations.Forward : Edge.Orientations.None, e.Multiplicity, e.Thickness, e.Style);
                 }
             }
 
@@ -516,7 +517,12 @@ namespace Graphs
                 AddVertex(v);
 
             foreach (var e in g.Edges)
-                AddEdge(e.V1, e.V2, e.Orientation, Math.Max(1, e.Multiplicity), e.Thickness);
+                AddEdge(e);
+        }
+
+        void AddEdge(Edge e)
+        {
+            AddEdge(e.V1, e.V2, e.Orientation, Math.Max(1, e.Multiplicity), e.Thickness, e.Style);
         }
 
         public List<Vertex> FindNeighbors(Vertex v)

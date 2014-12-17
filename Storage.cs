@@ -17,51 +17,68 @@ namespace WebGraphs
 {
     public static class Storage
     {
+        static object _token = new object();
         public static void Save(Graph g, string name)
         {
-            try
+            /*try
             {
-                using (var store = IsolatedStorageFile.GetUserStoreForApplication())
-                using (var file = store.CreateFile(name))
-                using (var sw = new StreamWriter(file))
-                    sw.Write(g.Serialize());
+                lock (_token)
+                {
+                    using (var store = IsolatedStorageFile.GetUserStoreForApplication())
+                    using (var file = store.CreateFile(name))
+                    using (var sw = new StreamWriter(file))
+                        sw.Write(g.Serialize());
+                }
             }
-            catch { }
+            catch (Exception ex) 
+            { 
+            }*/
         }
 
         public static void Delete(string name)
         {
-            using (var store = IsolatedStorageFile.GetUserStoreForApplication())
+           /* lock (_token)
             {
-                try
+                using (var store = IsolatedStorageFile.GetUserStoreForApplication())
                 {
-                    if (store.FileExists(name))
-                        store.DeleteFile(name);
+                    try
+                    {
+                        if (store.FileExists(name))
+                            store.DeleteFile(name);
+                    }
+                    catch { }
                 }
-                catch { }
-            }
+            }*/
         }
 
         public static Graph Load(string name)
         {
-            using (var store = IsolatedStorageFile.GetUserStoreForApplication())
-            using (var file = store.OpenFile(name, FileMode.Open))
-            using (var sr = new StreamReader(file))
-                return Graph.Deserialize(sr.ReadToEnd());
+          /*  lock (_token)
+            {
+                using (var store = IsolatedStorageFile.GetUserStoreForApplication())
+                using (var file = store.OpenFile(name, FileMode.Open))
+                using (var sr = new StreamReader(file))
+                    return Graph.Deserialize(sr.ReadToEnd());
+            }*/
+
+            return null;
         }
 
         public static IEnumerable<string> GetFileNames(string searchPattern = null)
         {
-            try
+           /* try
             {
-                using (var store = IsolatedStorageFile.GetUserStoreForApplication())
+                lock (_token)
                 {
-                    if (searchPattern == null)
-                        return store.GetFileNames();
-                    return store.GetFileNames(searchPattern);
+                    using (var store = IsolatedStorageFile.GetUserStoreForApplication())
+                    {
+                        if (searchPattern == null)
+                            return store.GetFileNames();
+                        return store.GetFileNames(searchPattern);
+                    }
                 }
             }
-            catch { }
+            catch { }*/
 
             return new List<string>();
         }

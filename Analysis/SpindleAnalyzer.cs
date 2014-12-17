@@ -36,6 +36,8 @@ namespace WebGraphs.Analysis
             for (int i = 0; i < set.Count; i++)
             {
                 g.Vertices[set[i]].Padding = 0.02f;
+                g.Vertices[set[i]].Style = "fill=black!30!red, text=black!30!red";
+                g.Vertices[set[i]].Label = "X";
                 for (int j = i + 1; j < set.Count; j++)
                 {
                     if (p[set[i]].Distance(p[set[j]]) < 3 * r - MinDelta)
@@ -58,7 +60,7 @@ namespace WebGraphs.Analysis
                 var thickness = 6;
                 if (between.Count == 0)
                 {
-                    g.AddEdge(g.Vertices[e.Item1], g.Vertices[e.Item2], Edge.Orientations.None, 1, thickness);
+                    g.AddEdge(g.Vertices[e.Item1], g.Vertices[e.Item2], Edge.Orientations.None, 1, thickness, "black!30!green, line width=3");
                 }
                 else
                 {
@@ -66,11 +68,17 @@ namespace WebGraphs.Analysis
                     {
                         var ee = g.GetEdge(between[i], g.Vertices[e.Item1]);
                         if (ee != null)
+                        {
+                            ee.Style = "black!30!green, line width=3";
                             ee.Thickness = thickness;
+                        }
 
                         ee = g.GetEdge(between[i], g.Vertices[e.Item2]);
                         if (ee != null)
+                        {
                             ee.Thickness = thickness;
+                            ee.Style = "black!30!green, line width=3";
+                        }
                     }
                 }
             }

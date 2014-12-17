@@ -68,10 +68,56 @@ namespace Graphs
 
             var sb = new StringBuilder();
             sb.AppendLine("\\begin{tikzpicture}[scale = " + scale + "]");
-            sb.AppendLine(string.Format(@"\tikzstyle{{VertexStyle}}=[shape = circle,	
-								 minimum size = 6pt,
-								 inner sep = 1.2pt,{0}
-                                 draw]", noLabels ? "fill," : ""));
+            sb.AppendLine(@"\tikzstyle{VertexStyle} = []");
+            sb.AppendLine(@"\tikzstyle{EdgeStyle} = []");
+            sb.AppendLine(string.Format(@"\tikzstyle{{labeledStyle}}=[shape = circle, minimum size = 6pt, inner sep = 1.2pt, draw]"));
+            sb.AppendLine(string.Format(@"\tikzstyle{{unlabeledStyle}}=[shape = circle, minimum size = 6pt, inner sep = 1.2pt, draw, fill]"));
+
+            var vertexStyleLookup = new Dictionary<string, string>();
+            var edgeStyleLookup = new Dictionary<string, string>();
+            
+            var vertexStyles = graph.Vertices.Where(v => !string.IsNullOrWhiteSpace(v.Style)).Select(v => v.Style.Trim()).Distinct().ToList();
+            var edgeStyles = graph.Edges.Where(e => !string.IsNullOrWhiteSpace(e.Style)).Select(e => e.Style.Trim()).Distinct().ToList();
+
+            foreach (var style in vertexStyles)
+            {
+                string id = style;
+                if (!style.StartsWith("_"))
+                {
+                    id = Guid.NewGuid().ToString().ToLower();
+                    var s = @"\tikzstyle{" + id + @"}=[";
+                    if (!style.Contains("shape"))
+                        s += "shape = circle,";
+                    if (!style.Contains("minimum size"))
+                        s += "minimum size = 6pt,";
+                    if (!style.Contains("inner sep"))
+                        s += "inner sep = 1.2pt,";
+
+                    s += "draw,";
+                    s += style;
+                    s = s.TrimEnd(',') + "]";
+
+                    sb.AppendLine(s);
+                }
+
+                vertexStyleLookup[style] = id;
+            }
+
+            foreach (var style in edgeStyles)
+            {
+                string id = style;
+                if (!style.StartsWith("_"))
+                {
+                    id = Guid.NewGuid().ToString().ToLower();
+                    var s = @"\tikzstyle{" + id + @"}=[";
+                    s += style;
+                    s = s.TrimEnd(',') + "]";
+
+                    sb.AppendLine(s);
+                }
+
+                edgeStyleLookup[style] = id;
+            }
 
             var vertexNameMap = new Dictionary<Vertex, string>();
 
@@ -86,9 +132,9 @@ namespace Graphs
                 double y = 1.0 - v.Y;
 
                 if (string.IsNullOrEmpty(v.Style))
-                    sb.AppendLine(string.Format(@"\Vertex[x = {0}, y = {1}, L = \tiny {{{2}}}]{{{3}}}", x, y, Mathify(v.Label), vertexName));
+                    sb.AppendLine(string.Format(@"\Vertex[style = {4}, x = {0}, y = {1}, L = \tiny {{{2}}}]{{{3}}}", x, y, Mathify(v.Label), vertexName, string.IsNullOrEmpty(v.Label) ? "unlabeledStyle" : "labeledStyle"));
                 else
-                    sb.AppendLine(string.Format(@"\Vertex[style = {{{4}}}, x = {0}, y = {1}, L = \tiny {{{2}}}]{{{3}}}", x, y, Mathify(v.Label), vertexName, v.Style));
+                    sb.AppendLine(string.Format(@"\Vertex[style = {4}, x = {0}, y = {1}, L = \tiny {{{2}}}]{{{3}}}", x, y, Mathify(v.Label), vertexName, vertexStyleLookup[v.Style.Trim()]));
 
                 vertexCount++;
             }
@@ -98,7 +144,7 @@ namespace Graphs
                 if (string.IsNullOrEmpty(e.Style))
                     sb.AppendLine(string.Format(@"\Edge[]({0})({1})", vertexNameMap[e.V1], vertexNameMap[e.V2]));
                 else
-                    sb.AppendLine(string.Format(@"\Edge[style = {{{2}}}]({0})({1})", vertexNameMap[e.V1], vertexNameMap[e.V2], e.Style));
+                    sb.AppendLine(string.Format(@"\Edge[style = {2}]({0})({1})", vertexNameMap[e.V1], vertexNameMap[e.V2], edgeStyleLookup[e.Style.Trim()]));
             }
 
             sb.AppendLine(@"\end{tikzpicture}");

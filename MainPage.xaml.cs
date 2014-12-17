@@ -850,8 +850,16 @@ trash can button.
             var p = blob.UIGraph.Vertices.Select(v => new Vector(v.X, v.Y)).ToList();
 
             int i = 0;
+            int j = 0;
             foreach (var X in blob.AlgorithmGraph.EnumerateMaximalIndependentSets())
             {
+                if (j < 5000)
+                {
+                    j++; 
+                    continue;
+                }
+                j = 0;
+
                 var g = blob.UIGraph.Clone();
                 SpindleAnalyzer.DoTiling(g, p, X);
 
@@ -978,6 +986,8 @@ trash can button.
         int _maxSpinEdge;
         void DoSpin(Tuple<List<Vector>, List<SpindleAnalyzer.DiamondType>> data, List<Vector> locations)
         {
+            const double Delta = 0.001;
+
             var blob = AlgorithmBlob.Create(SelectedTabCanvas);
 
             var layoutAnimation = new LayoutAnimation(blob, () =>
@@ -988,25 +998,42 @@ trash can button.
              {
                  var current = blob.UIGraph.Vertices.Select(v => new Vector(v.X, v.Y)).ToList();
 
+                 var overlap = false;
                  int edgeCount = 0;
+                 int sameCount = 0;
+                 var r = current[0].Distance(current[2]);
 
-                 var r = current[0].Distance(current[1]);
-
-                 for (int i = 0; i < current.Count; i++)
+                 for (int i = 0; i < current.Count && !overlap; i++)
                  {
                      for (int j = i + 1; j < current.Count; j++)
                      {
-                         if (Math.Abs(current[i].Distance(current[j]) - r) < 0.001)
-                             edgeCount++;
+                         if ((i % 4 != 0 || j % 4 != 0) && Math.Abs(current[i].Distance(current[j])) < Delta)
+                         {
+                             overlap = true;
+                             break;
+                         }
+
+                         if (Math.Abs(current[i].Distance(current[j]) - r) < Delta)
+                         {
+                             if (data.Item2[i] == data.Item2[j])
+                                 sameCount++;
+                             else
+                                 edgeCount++;
+                         }
                      }
                  }
-                 (_tabControl.SelectedItem as TabItem).Header = edgeCount.ToString();
+                 if (overlap)
+                     (_tabControl.SelectedItem as TabItem).Header = "overlap!";
+                 else
+                     (_tabControl.SelectedItem as TabItem).Header = sameCount + " + " + edgeCount + " = " + (sameCount + edgeCount);
 
-                 if (edgeCount > _maxSpinEdge)
+                 if (!overlap && edgeCount > _maxSpinEdge)
                  {
                      _maxSpinEdge = edgeCount;
-                    // await Task.Factory.StartNew(() => Thread.Sleep(5000));
+                     await Task.Factory.StartNew(() => Thread.Sleep(1000));
                  }
+                 else
+                     await Task.Factory.StartNew(() => Thread.Sleep(100));
                  DoSpin(data, current);
 
              }, (Layout.Algorithm)SpindleAnalyzer.RotateDiamondsLayout, locations, data);
