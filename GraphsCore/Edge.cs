@@ -259,6 +259,9 @@ namespace Graphs
             }
             set
             {
+                if (value == null)
+                    return;
+
                 if (value.StartsWith("+") && !string.IsNullOrEmpty(_Style))
                     _Style += ", " + value.TrimStart('+');
                 else
