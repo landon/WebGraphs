@@ -20,11 +20,11 @@ namespace Console
             var template = new Template(G.Vertices.Select(v => potSize + G.Degree(v) - uiG.Vertices[v].Label.TryParseInt().Value).ToList());
             DrawGraph(G, @"C:\game trees\G.pdf");
 
-           /* for (int i = 0; i < uiG.Edges.Count; i++)
+            for (int i = 0; i < uiG.Edges.Count; i++)
             {
                 System.Console.WriteLine("Doing edge " + i + "...");
                 DoEdgeAlls(uiG, potSize, G, template, i);
-            }*/
+            }
         }
 
         static void DoEdgeAlls(Graphs.Graph uiG, int potSize, Choosability.Graph G, Template template, int i)

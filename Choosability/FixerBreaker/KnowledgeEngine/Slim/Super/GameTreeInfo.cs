@@ -17,7 +17,6 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
                 Response = fixerResponse,
                 SwapVertices = fixerResponse.ToSet()
             });
-
         }
     }
 

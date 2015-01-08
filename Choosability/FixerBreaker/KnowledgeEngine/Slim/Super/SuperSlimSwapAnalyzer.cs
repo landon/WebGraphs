@@ -57,13 +57,17 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
 
                         if (!winningSwapExists)
                         {
+                            if (StoreTreeInfo)
+                                info.Clear();
                             winningSwapAlwaysExists = false;
                             break;
                         }
                     }
 
                     if (winningSwapAlwaysExists)
+                    {
                         return true;
+                    }
                 }
             }
 
