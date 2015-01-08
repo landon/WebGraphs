@@ -72,6 +72,8 @@
     <Compile Include="FixerBreaker\Chronicle\ChronicledBranch.cs" />
     <Compile Include="FixerBreaker\KnowledgeEngine\IMind.cs" />
     <Compile Include="FixerBreaker\KnowledgeEngine\Slim\SortedIntList.cs" />
+    <Compile Include="FixerBreaker\KnowledgeEngine\Slim\Super\GameTree.cs" />
+    <Compile Include="FixerBreaker\KnowledgeEngine\Slim\Super\GameTreeInfo.cs" />
     <Compile Include="FixerBreaker\KnowledgeEngine\Slim\Super\Hashing.cs" />
     <Compile Include="FixerBreaker\KnowledgeEngine\Slim\Super\SuperSlimBoard.cs" />
     <Compile Include="FixerBreaker\KnowledgeEngine\Slim\Super\SuperSlimColoringAnalyzer.cs" />

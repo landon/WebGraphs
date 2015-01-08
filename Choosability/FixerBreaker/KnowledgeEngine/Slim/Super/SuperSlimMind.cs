@@ -26,6 +26,9 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
         public bool OnlyNearlyColorable { get; set; }
         public int MissingEdgeIndex { get; set; }
 
+        public List<SuperSlimBoard> NonColorableBoards { get; private set; }
+        public List<SuperSlimBoard> DeepestBoards { get; private set; }
+
         public SuperSlimMind(Graph g)
         {
             _graph = g;
@@ -141,11 +144,16 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
 
             BoardCounts.Add(_remainingBoards.Count);
 
+            NonColorableBoards = _remainingBoards.ToList();
+
+            var wonBoards = new List<SuperSlimBoard>();
             while (_remainingBoards.Count > 0)
             {
                 winLength++;
 
                 var count = _remainingBoards.Count;
+                if (count > 0)
+                    DeepestBoards = _remainingBoards.ToList();
 
                 for (int i = _remainingBoards.Count - 1; i >= 0; i--)
                 {
@@ -153,7 +161,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
                     if (_swapAnalyzer.Analyze(b, _wonBoards))
                     {
                         _remainingBoards.RemoveAt(i);
-                        _wonBoards.Add(b);
+                        wonBoards.Add(b);
 
                         if (progress != null)
                         {
@@ -166,6 +174,9 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
                         }
                     }
                 }
+
+                foreach (var b in wonBoards)
+                    _wonBoards.Add(b);
 
                 BoardCounts.Add(_remainingBoards.Count);
                 if (_remainingBoards.Count == count)
@@ -274,6 +285,34 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
             var stacks = b.Stacks.Value;
 
             return stacks[v1] & stacks[v2];
+        }
+
+        public GameTree BuildGameTree(SuperSlimBoard board)
+        {
+            var seenBoards =  new HashSet<SuperSlimBoard>();
+            return BuildGameTree(board, seenBoards);
+        }
+
+        public GameTree BuildGameTree(SuperSlimBoard board, HashSet<SuperSlimBoard> seenBoards)
+        {
+            seenBoards.Add(board);
+            var tree = new GameTree() { Board = board };
+            tree.IsColorable = _coloringAnalyzer.Analyze(board);
+
+            if (tree.IsColorable)
+                return tree;
+
+            foreach (var bc in _swapAnalyzer.TreeInfo[board])
+            {
+                var childBoard = new SuperSlimBoard(board._trace, bc.Alpha, bc.Beta, bc.Response, board._stackCount);
+                if (seenBoards.Contains(childBoard))
+                    continue;
+
+                var childTree = BuildGameTree(childBoard, seenBoards);
+                tree.AddChild(childTree, bc);
+            }
+
+            return tree;
         }
     }
 }

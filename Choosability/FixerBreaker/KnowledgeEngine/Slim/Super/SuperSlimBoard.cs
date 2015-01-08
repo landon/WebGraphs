@@ -20,18 +20,10 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
             _stackCount = stackCount;
             _hashCode = Hashing.Hash(_trace, _length);
 
-            Stacks = new Lazy<long[]>(() =>
-                {
-                    var s = new long[stackCount];
-                    var traceBits = _trace.Select(t => t.ToSet()).ToList();
-                    for (int c = 0; c < traceBits.Count; c++)
-                        foreach (var i in traceBits[c])
-                            s[i] |= 1L << c;
-                    return s;
-                });
+            MakeLazyStacks();
         }
 
-        public SuperSlimBoard(ulong[] trace, int i, int j, ulong swap)
+        public SuperSlimBoard(ulong[] trace, int i, int j, ulong swap, int stackCount)
         {
             _trace = new ulong[trace.Length];
             _length = 0;
@@ -57,7 +49,23 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
                 }
             }
 
+            _stackCount = stackCount;
+            MakeLazyStacks();
+
             _hashCode = Hashing.Hash(_trace, _length);
+        }
+
+        void MakeLazyStacks()
+        {
+            Stacks = new Lazy<long[]>(() =>
+            {
+                var s = new long[_stackCount];
+                var traceBits = _trace.Select(t => t.ToSet()).ToList();
+                for (int c = 0; c < traceBits.Count; c++)
+                    foreach (var i in traceBits[c])
+                        s[i] |= 1L << c;
+                return s;
+            });
         }
 
         public override bool Equals(object obj)
@@ -80,6 +88,11 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
         public override int GetHashCode()
         {
             return _hashCode;
+        }
+
+        public override string ToString()
+        {
+            return string.Join("|", Stacks.Value.Select(l => string.Join("", l.ToSet())));
         }
     }
 }

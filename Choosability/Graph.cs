@@ -512,14 +512,19 @@ namespace Choosability
             foreach (int v in _vertices)
             {
                 int colorIndex = colorRanges.Select((r, i) => new { range = r, index = i }).First(p => p.range.Contains(v)).index % DotColors.Count;
-                sb.AppendLine(string.Format(@"{0} [label = """", style = filled, color = ""{1}""];", v, DotColors[colorIndex]));
+                sb.AppendLine(string.Format(@"{0} [label = ""{2}"", style = filled, color = ""{1}""];", v, DotColors[colorIndex], v + 1));
             }
 
+            int k = 0;
             for (int i = 0; i < N; i++)
                 for (int j = i + 1; j < N; j++)
                 {
                     if (G._adjacent[i, j])
-                        sb.AppendLine(string.Format("{0} -- {1}", i, j));
+                    {
+                        sb.AppendLine(string.Format("{0} -- {1} [label = \"{2}\"]", i, j, k));
+
+                        k++;
+                    }
                 }
             sb.AppendLine("}");
 

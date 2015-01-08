@@ -7,16 +7,28 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
 {
     public class SuperSlimSwapAnalyzer
     {
+        bool StoreTreeInfo { get; set; }
+        public Dictionary<SuperSlimBoard, GameTreeInfo> TreeInfo { get; private set; }
+
         ulong[] _fixerResponses;
         int _fixerResponseCount;
 
-        public SuperSlimSwapAnalyzer(int n)
+        public SuperSlimSwapAnalyzer(int n, bool storeTreeInfo = true)
         {
             _fixerResponses = new ulong[1 << ((n + 1) >> 1)];
+            StoreTreeInfo = storeTreeInfo;
+            if (StoreTreeInfo)
+                TreeInfo = new Dictionary<SuperSlimBoard, GameTreeInfo>();
         }
 
         public bool Analyze(SuperSlimBoard board, HashSet<SuperSlimBoard> wonBoards)
         {
+            GameTreeInfo info = null;
+            if (StoreTreeInfo)
+            {
+                info = new GameTreeInfo();
+                TreeInfo[board] = info;
+            }
             for (int i = 0; i < board._length; i++)
             {
                 for (int j = i + 1; j < board._length; j++)
@@ -33,10 +45,12 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
                         GetFixerResponses(breakerChoice);
                         for (int k = 1; k < _fixerResponseCount; k++)
                         {
-                            var childBoard = new SuperSlimBoard(board._trace, i, j, _fixerResponses[k]);
+                            var childBoard = new SuperSlimBoard(board._trace, i, j, _fixerResponses[k], board._stackCount);
                             if (wonBoards.Contains(childBoard))
                             {
                                 winningSwapExists = true;
+                                if (StoreTreeInfo)
+                                    info.Add(breakerChoice, i, j, _fixerResponses[k]);
                                 break;
                             }
                         }

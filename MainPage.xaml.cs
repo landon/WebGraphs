@@ -27,6 +27,7 @@ using Choosability.IndependenceRatio;
 using GraphsCore.Famlies;
 using WebGraphs.Analysis;
 using System.Text;
+using Choosability.FixerBreaker.KnowledgeEngine.Slim.Super;
 
 namespace WebGraphs
 {

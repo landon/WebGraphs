@@ -24,6 +24,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GraphsCore", "GraphsCore\Gr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebGraphs.Web", "WebGraphs.Web\WebGraphs.Web.csproj", "{F2BAAE84-001A-4488-BE5B-4ADDE373D00E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Console", "Console\Console.csproj", "{2B46DE5E-8497-4C04-86E1-EBCDE7CD7368}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -74,6 +76,12 @@ Global
 		{F2BAAE84-001A-4488-BE5B-4ADDE373D00E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F2BAAE84-001A-4488-BE5B-4ADDE373D00E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F2BAAE84-001A-4488-BE5B-4ADDE373D00E}.Release|x86.ActiveCfg = Release|Any CPU
+		{2B46DE5E-8497-4C04-86E1-EBCDE7CD7368}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2B46DE5E-8497-4C04-86E1-EBCDE7CD7368}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2B46DE5E-8497-4C04-86E1-EBCDE7CD7368}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{2B46DE5E-8497-4C04-86E1-EBCDE7CD7368}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2B46DE5E-8497-4C04-86E1-EBCDE7CD7368}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2B46DE5E-8497-4C04-86E1-EBCDE7CD7368}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
