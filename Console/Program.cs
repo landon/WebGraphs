@@ -13,15 +13,16 @@ namespace Console
     {
         static void Main(string[] args)
         {
-            var uiG = GraphsCore.CompactSerializer.Deserialize("webgraph:7U,on!)ijt!!O>gcj+(]!Ajde)5%LN!!+kU1a/M&A,lWd!!FaD%qGY@1]RY-E#3$b!Aa]Z!!*'#!6>-?!WW6$a8c2A!s&DC!!!*$!<C1@!!EB)!6>-?");
+            var uiG = GraphsCore.CompactSerializer.Deserialize("webgraph:7q2N!!.4bH!!#8TL^4tHcj+(]!Ajde)5%L+#;Z?:+U+G?.0H.u!7W\\+T(jdSOoSI=(IJEI,o%*C0GP6+!!*'#!6>-?!X'&:\":t\\=&-W.La9FI4#6Y&-!!%NLa8c2");
             var potSize = uiG.Vertices.Max(v => int.Parse(v.Label));
 
             var G = new Choosability.Graph(uiG.GetEdgeWeights());
             var template = new Template(G.Vertices.Select(v => potSize + G.Degree(v) - uiG.Vertices[v].Label.TryParseInt().Value).ToList());
             DrawGraph(G, @"C:\game trees\G.pdf");
 
-            for (int i = 0; i < uiG.Edges.Count; i++)
+           // for (int i = 0; i < uiG.Edges.Count; i++)
             {
+                int i = 4;
                 System.Console.WriteLine("Doing edge " + i + "...");
                 DoEdgeAlls(uiG, potSize, G, template, i);
             }
@@ -34,7 +35,10 @@ namespace Console
             mind.OnlyNearlyColorable = true;
             mind.MissingEdgeIndex = i;
 
-            Directory.CreateDirectory(@"C:\game trees\alls\" + i);
+            var root = @"C:\game trees\alls2\" + i;
+
+                
+            Directory.CreateDirectory(root);
 
             var win = mind.Analyze(template, null);
             if (win)
@@ -43,7 +47,7 @@ namespace Console
                 foreach (var board in mind.NonColorableBoards)
                 {
                     var tree = mind.BuildGameTree(board);
-                    DrawTree(tree, @"C:\game trees\alls\" + i + @"\" + i + " depth " + tree.GetDepth() + " board " + j + ".pdf");
+                    DrawTree(tree, root + @"\" + i + " depth " + tree.GetDepth() + " board " + j + ".pdf");
                     j++;
                 }
             }
