@@ -42,6 +42,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DotRenderer.cs" />
+    <Compile Include="FindChoosables.cs" />
+    <Compile Include="FixerBreakerTrees.cs" />
+    <Compile Include="GraphViz.cs" />
+    <Compile Include="LocalGraphExtensions.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
