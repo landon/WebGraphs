@@ -66,8 +66,15 @@ namespace GraphsCore
         {
             var isDirected = s.Contains("-1");
 
-            var w = s.Trim().Split(' ').Select(x => int.Parse(x)).ToList();
-            var h = new Choosability.Graph(w);
+            var parts = s.Split(' ');
+            var edgeWeights = parts.Where(p => !p.StartsWith("[")).Select(x => int.Parse(x)).ToList();
+
+            List<int> vertexWeights = null;
+            var vwp = parts.FirstOrDefault(p => p.StartsWith("["));
+            if (vwp != null)
+                vertexWeights = vwp.Trim('[').Trim(']').Split(',').Select(x => int.Parse(x)).ToList();
+
+            var h = new Choosability.Graph(edgeWeights, vertexWeights);
 
             return new Graphs.Graph(h, h.GetSpringsLayout(12), isDirected);
         }

@@ -294,7 +294,7 @@ namespace Graphs
             else if (s.Trim().Split(' ').All(x =>
                 {
                     int d;
-                    return int.TryParse(x, out d);
+                    return x.StartsWith("[") || int.TryParse(x, out d);
                 }))
             {
                 try

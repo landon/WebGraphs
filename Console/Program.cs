@@ -13,7 +13,7 @@ namespace Console
     {
         static void Main(string[] args)
         {
-            FindChoosables.Go();
+            FindFixerBreaker.Go();
             System.Console.WriteLine("Done.");
         }
     }

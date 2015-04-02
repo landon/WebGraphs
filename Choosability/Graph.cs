@@ -43,6 +43,7 @@ namespace Choosability
             private set;
         }
 
+        public List<int> VertexWeight { get; set; }
         public List<List<int>> Neighbors { get { return _neighbors.Value; } }
         public List<List<int>> ComplementNeighbors { get { return _complementNeighbors.Value; } }
         public List<List<int>> OutNeighbors { get { return _outNeighbors.Value; } }
@@ -80,9 +81,10 @@ namespace Choosability
             return new Graph(edgeWeights);
         }
 
-        public Graph(List<int> edgeWeights)
+        public Graph(List<int> edgeWeights, List<int> vertexWeight = null)
         {
             N = (int)((1 + Math.Sqrt(1 + 8 * edgeWeights.Count)) / 2);
+            VertexWeight = vertexWeight;
 
             _vertices = Enumerable.Range(0, N).ToList();
             _adjacent = new bool[N, N];
@@ -110,10 +112,11 @@ namespace Choosability
 
             Initialize();
         }
-        public Graph(bool[,] adjacent)
+        public Graph(bool[,] adjacent, List<int> vertexWeight = null)
         {
             _adjacent = adjacent;
             N = _adjacent.GetUpperBound(0) + 1;
+            VertexWeight = vertexWeight;
 
             _vertices = Enumerable.Range(0, N).ToList();
             Directed = new bool[N, N];
@@ -142,6 +145,7 @@ namespace Choosability
             SetupNeighbors();
             InitializeLazyLoaders();
         }
+
         void SetupNeighbors()
         {
             _neighbors = new Lazy<List<List<int>>>(() =>
@@ -336,9 +340,20 @@ namespace Choosability
                 for (int j = 0; j < N; j++)
                     adjacent[p[i], p[j]] = _adjacent[i, j];
 
-            return new Graph(adjacent);
+            List<int> vertexWeight = null;
+            if (VertexWeight != null)
+            {
+                vertexWeight = new List<int>();
+                var pp = p.Inverse();
+
+                foreach (var v in _vertices)
+                    vertexWeight.Add(VertexWeight[pp[v]]);
+            }
+
+            return new Graph(adjacent, vertexWeight);
         }
-        public static bool Isomorphic(Graph A, Graph B)
+
+        static bool MaybeIsomorphic(Graph A, Graph B)
         {
             if (A.N != B.N) return false;
             if (A.E != B.E) return false;
@@ -353,6 +368,13 @@ namespace Choosability
             B.TransitivePartition.Refine(B.NodeInvariantTwo.Value, 3);
 
             if (!A.TransitivePartition.Equals(B.TransitivePartition))
+                return false;
+
+            return true;
+        }
+        public static bool Isomorphic(Graph A, Graph B)
+        {
+            if (!MaybeIsomorphic(A, B))
                 return false;
 
             foreach (var p in Permutation.EnumerateAll(A.N))
@@ -371,6 +393,36 @@ namespace Choosability
                 return 0;
             }
         }
+
+        public bool ContainsInducedWithoutLargerWeight(Graph A)
+        {
+            if (VertexWeight == null || A.VertexWeight == null)
+                return ContainsInduced(A);
+
+            if (N < A.N) return false;
+
+            var vertexSets = _vertexSubsets.Value;
+            foreach (var vertices in vertexSets)
+            {
+                var C = InducedSubgraph(vertices);
+
+                if (MaybeIsomorphic(A, C))
+                {
+                    foreach (var p in Permutation.EnumerateAll(C.N))
+                    {
+                        var D = C.PermuteVertices(p);
+                        if (D == A)
+                        {
+                            if (A.Vertices.All(v => A.VertexWeight[v] >= D.VertexWeight[v]))
+                                return true;
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+
         public bool ContainsInduced(Graph A)
         {
             if (N < A.N) return false;
@@ -420,7 +472,17 @@ namespace Choosability
 
         public Graph InducedSubgraph(List<int> subgraph)
         {
-            return new Graph(GetEdgeWeights(subgraph));
+            List<int> vertexWeight = null;
+            if (VertexWeight != null)
+            {
+                vertexWeight = new List<int>(subgraph.Count);
+                foreach (var v in subgraph)
+                {
+                    vertexWeight.Add(VertexWeight[v]);
+                }
+            }
+
+            return new Graph(GetEdgeWeights(subgraph), vertexWeight);
         }
         public List<int> GetEdgeWeights(List<int> subgraph)
         {

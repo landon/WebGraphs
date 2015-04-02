@@ -43,7 +43,9 @@
   <ItemGroup>
     <Compile Include="DotRenderer.cs" />
     <Compile Include="FindChoosables.cs" />
+    <Compile Include="FindFixerBreaker.cs" />
     <Compile Include="FixerBreakerTrees.cs" />
+    <Compile Include="GraphEnumerator.cs" />
     <Compile Include="GraphViz.cs" />
     <Compile Include="LocalGraphExtensions.cs" />
     <Compile Include="Program.cs" />
