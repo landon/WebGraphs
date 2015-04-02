@@ -323,6 +323,7 @@ namespace Choosability
 
             return true;
         }
+
         public static bool operator ==(Graph A, Graph B)
         {
             return (object)A == null && (object)B == null ||
@@ -394,28 +395,31 @@ namespace Choosability
             }
         }
 
-        public bool ContainsInducedWithoutLargerWeight(Graph A)
+        public bool ContainsWithoutLargerWeight(Graph A)
         {
             if (VertexWeight == null || A.VertexWeight == null)
-                return ContainsInduced(A);
+                return false;
 
             if (N < A.N) return false;
 
             var vertexSets = _vertexSubsets.Value;
             foreach (var vertices in vertexSets)
             {
-                var C = InducedSubgraph(vertices);
+                if (vertices.Count <= 0)
+                    continue;
 
-                if (MaybeIsomorphic(A, C))
+                if (A.E > EdgesOn(vertices))
+                    continue;
+
+                var C = InducedSubgraph(vertices);
+                
+                foreach (var p in Permutation.EnumerateAll(C.N))
                 {
-                    foreach (var p in Permutation.EnumerateAll(C.N))
+                    var D = C.PermuteVertices(p);
+                    if (A.IsSpanningSubgraphOf(D))
                     {
-                        var D = C.PermuteVertices(p);
-                        if (D == A)
-                        {
-                            if (A.Vertices.All(v => A.VertexWeight[v] >= D.VertexWeight[v]))
-                                return true;
-                        }
+                        if (A.Vertices.All(v => A.VertexWeight[v] >= D.VertexWeight[v]))
+                            return true;
                     }
                 }
             }
@@ -461,6 +465,17 @@ namespace Choosability
 
             if (done)
                 yield return initialVertices;
+        }
+
+        public bool IsSpanningSubgraphOf(Graph A)
+        {
+            if (N != A.N) return false;
+
+            for (int i = 0; i < N; i++)
+                for (int j = i + 1; j < N; j++)
+                    if (_adjacent[i, j] && !A[i, j]) return false;
+
+            return true;
         }
         #endregion
 

@@ -10,7 +10,7 @@ namespace Console
 {
     public static class FindFixerBreaker
     {
-        const int Delta = 4;
+        const int Delta = 3;
         const int MaxVertices = 8;
         const bool NearColorings = false;
         static readonly string WinnersFile = (NearColorings ? "near colorings " : "") + "FixerBreaker winners Delta=" + Delta + ".txt";

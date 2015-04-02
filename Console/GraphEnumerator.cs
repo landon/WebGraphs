@@ -146,10 +146,15 @@ namespace Console
                         {
                             foreach (var gg in secondaryEnumerator(g))
                             {
-                                if (PreviousWinners.All(h => !gg.ContainsInducedWithoutLargerWeight(h)))
+                                if (PreviousWinners.All(h => !gg.ContainsWithoutLargerWeight(h)))
                                     yield return gg;
                                 else
-                                    System.Console.WriteLine("skipping supergraph " + gg.ToGraph6());
+                                {
+                                    if (gg.VertexWeight != null)
+                                        System.Console.WriteLine("skipping supergraph " + gg.ToGraph6() + " with degrees [" + string.Join(",", gg.VertexWeight) + "]");
+                                    else
+                                        System.Console.WriteLine("skipping supergraph " + gg.ToGraph6());
+                                }
                             }
                         }
                         else
