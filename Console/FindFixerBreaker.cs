@@ -11,12 +11,13 @@ namespace Console
     public static class FindFixerBreaker
     {
         const int Delta = 4;
+        const int MaxVertices = 8;
         const bool NearColorings = false;
         static readonly string WinnersFile = (NearColorings ? "near colorings " : "") + "FixerBreaker winners Delta=" + Delta + ".txt";
 
         public static void Go()
         {
-            using (var graphIO = new GraphEnumerator(WinnersFile, 2, 8))
+            using (var graphIO = new GraphEnumerator(WinnersFile, 2, MaxVertices))
             {
                 foreach (var g in graphIO.EnumerateGraph6File(EnumerateWeightings))
                 {
@@ -50,7 +51,7 @@ namespace Console
             if (g.MaxDegree > Delta)
                 yield break;
 
-            foreach (var weighting in g.Vertices.Select(v => Enumerable.Range(g.Degree(v), Delta + 1 - g.Degree(v))).CartesianProduct())
+            foreach (var weighting in g.Vertices.Select(v => Enumerable.Range(g.Degree(v), Delta + 1 - g.Degree(v)).Reverse()).CartesianProduct())
             {
                 var gg = g.Clone();
                 gg.VertexWeight = weighting.ToList();
