@@ -10,21 +10,23 @@ namespace Console
 {
     public static class FindFixerBreaker
     {
-        const int Delta = 3;
-        const int MaxVertices = 8;
+        const int Delta = 4;
+        const int MaxVertices = 10;
         const bool NearColorings = false;
-        static readonly string WinnersFile = (NearColorings ? "near colorings " : "") + "FixerBreaker winners Delta=" + Delta + ".txt";
+        const bool TreesOnly = true;
+        static readonly string WinnersFile = (TreesOnly ? "trees only " : "") + (NearColorings ? "near colorings " : "") + "FixerBreaker winners Delta=" + Delta + ".txt";
 
         public static void Go()
         {
             using (var graphIO = new GraphEnumerator(WinnersFile, 2, MaxVertices))
             {
-                foreach (var g in graphIO.EnumerateGraph6File(EnumerateWeightings))
+                foreach (var g in graphIO.EnumerateGraph6File(Filter, EnumerateWeightings))
                 {
                     System.Console.Write("checking " + g.ToGraph6() + " with degrees [" + string.Join(",", g.VertexWeight) + "] ...");
 
                     var mind = new Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.SuperSlimMind(g);
                     mind.MaxPot = Delta;
+                    mind.OnlyNearlyColorable = NearColorings;
 
                     var template = new Template(g.VertexWeight.Select((ambientDegree, v) => Delta - (ambientDegree - g.Degree(v))).ToList());
                     var win = mind.Analyze(template, null);
@@ -44,6 +46,14 @@ namespace Console
                     }
                 }
             }
+        }
+
+        static bool Filter(Choosability.Graph g)
+        {
+            if (TreesOnly)
+                return g.E == g.N - 1;
+
+            return true;
         }
 
         static IEnumerable<Choosability.Graph> EnumerateWeightings(Choosability.Graph g)

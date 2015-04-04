@@ -38,6 +38,8 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
             _swapAnalyzer = new SuperSlimSwapAnalyzer(g.N);
             _wonBoards = new HashSet<SuperSlimBoard>();
             _remainingBoards = new List<SuperSlimBoard>();
+
+            MissingEdgeIndex = -1;
         }
 
         public bool Analyze(Template template, Action<Tuple<string, int>> progress)

@@ -103,7 +103,7 @@ namespace Console
             WriteGraph(Writer, output);
         }
 
-        public IEnumerable<Graph> EnumerateGraph6File(Func<Graph, IEnumerable<Graph>> secondaryEnumerator = null)
+        public IEnumerable<Graph> EnumerateGraph6File(Func<Graph, bool> filter = null, Func<Graph, IEnumerable<Graph>> secondaryEnumerator = null)
         {
             var min = MinVertices;
             string lastGraph6 = null;
@@ -142,29 +142,31 @@ namespace Console
 
                         var ew = line.GetEdgeWeights();
                         var g = new Graph(ew);
-                        if (secondaryEnumerator != null)
+                        if (filter(g))
                         {
-                            foreach (var gg in secondaryEnumerator(g))
+                            if (secondaryEnumerator != null)
                             {
-                                if (PreviousWinners.All(h => !gg.ContainsWithoutLargerWeight(h)))
-                                    yield return gg;
-                                else
+                                foreach (var gg in secondaryEnumerator(g))
                                 {
-                                    if (gg.VertexWeight != null)
-                                        System.Console.WriteLine("skipping supergraph " + gg.ToGraph6() + " with degrees [" + string.Join(",", gg.VertexWeight) + "]");
+                                    if (PreviousWinners.All(h => !gg.ContainsWithoutLargerWeight(h)))
+                                        yield return gg;
                                     else
-                                        System.Console.WriteLine("skipping supergraph " + gg.ToGraph6());
+                                    {
+                                        if (gg.VertexWeight != null)
+                                            System.Console.WriteLine("skipping supergraph " + gg.ToGraph6() + " with degrees [" + string.Join(",", gg.VertexWeight) + "]");
+                                        else
+                                            System.Console.WriteLine("skipping supergraph " + gg.ToGraph6());
+                                    }
                                 }
                             }
-                        }
-                        else
-                        {
-                            if (PreviousWinners.All(h => !g.ContainsInduced(h)))
-                                yield return g;
                             else
-                                System.Console.WriteLine("skipping supergraph " + g.ToGraph6());
+                            {
+                                if (PreviousWinners.All(h => !g.ContainsInduced(h)))
+                                    yield return g;
+                                else
+                                    System.Console.WriteLine("skipping supergraph " + g.ToGraph6());
+                            }
                         }
-                        
 
                         using (var sw = new StreamWriter(LastTriedFile))
                             sw.WriteLine(ew.ToGraph6());
