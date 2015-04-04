@@ -11,16 +11,17 @@ namespace Console
     public static class FindFixerBreaker
     {
         const int Delta = 4;
-        const int MaxVertices = 10;
+        const int MaxVertices = 20;
         const bool NearColorings = false;
         const bool TreesOnly = true;
         static readonly string WinnersFile = (TreesOnly ? "trees only " : "") + (NearColorings ? "near colorings " : "") + "FixerBreaker winners Delta=" + Delta + ".txt";
 
         public static void Go()
         {
-            using (var graphIO = new GraphEnumerator(WinnersFile, 2, MaxVertices))
+            using (var graphEnumerator = new GraphEnumerator(WinnersFile, 2, MaxVertices))
             {
-                foreach (var g in graphIO.EnumerateGraph6File(Filter, EnumerateWeightings))
+                graphEnumerator.TreesOnly = TreesOnly;
+                foreach (var g in graphEnumerator.EnumerateGraph6File(Filter, EnumerateWeightings))
                 {
                     System.Console.Write("checking " + g.ToGraph6() + " with degrees [" + string.Join(",", g.VertexWeight) + "] ...");
 
@@ -36,7 +37,7 @@ namespace Console
                         System.Console.ForegroundColor = ConsoleColor.Blue;
                         System.Console.WriteLine(" fixer wins");
                         System.Console.ForegroundColor = ConsoleColor.White;
-                        graphIO.AddWinner(g);
+                        graphEnumerator.AddWinner(g);
                     }
                     else
                     {
@@ -50,9 +51,6 @@ namespace Console
 
         static bool Filter(Choosability.Graph g)
         {
-            if (TreesOnly)
-                return g.E == g.N - 1;
-
             return true;
         }
 

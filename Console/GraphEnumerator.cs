@@ -12,7 +12,9 @@ namespace Console
 {
     public class GraphEnumerator : IDisposable
     {
-        const string Graph6FileRoot = @"C:\Graph6\graph";
+        const string Graph6Root = @"C:\Graph6\";
+        static readonly string Graph6GraphFileRoot = Graph6Root + "graph";
+        static readonly string Graph6TreeFileRoot = Graph6Root + @"trees\trees";
 
         StreamWriter Writer { get; set; }
         string WinnersFile { get; set; }
@@ -21,6 +23,8 @@ namespace Console
         int MaxVertices { get; set; }
         List<Graph> PreviousWinners { get; set; }
         Graph Last { get; set; }
+        public bool TreesOnly { get; set; }
+        string FileRoot { get { return TreesOnly ? Graph6TreeFileRoot : Graph6GraphFileRoot; } }
 
         public GraphEnumerator(string winnersFile, int minVertices, int maxVertices)
         {
@@ -118,7 +122,7 @@ namespace Console
             for (int N = min; N <= MaxVertices; N++)
             {
                 System.Console.WriteLine("Checking " + N + " vertex graphs...");
-                var file = Graph6FileRoot + N + ".txt";
+                var file = FileRoot + N + ".g6";
                 if (!File.Exists(file))
                 {
                     System.Console.WriteLine(file + " does not exist, skipping.");
