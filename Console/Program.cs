@@ -13,7 +13,7 @@ namespace Console
     {
         static void Main(string[] args)
         {
-            FindFixerBreaker.Go();
+            FixerBreakerTrees.Go();
             System.Console.WriteLine("Done.");
         }
     }

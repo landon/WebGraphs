@@ -12,7 +12,7 @@ namespace Console
     {
         const int Delta = 4;
         const int MaxVertices = 20;
-        const bool NearColorings = false;
+        const bool NearColorings = true;
         const bool TreesOnly = true;
         static readonly string WinnersFile = (TreesOnly ? "trees only " : "") + (NearColorings ? "near colorings " : "") + "FixerBreaker winners Delta=" + Delta + ".txt";
 

@@ -28,6 +28,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
 
         public List<SuperSlimBoard> NonColorableBoards { get; private set; }
         public List<SuperSlimBoard> DeepestBoards { get; private set; }
+        public Dictionary<int, List<SuperSlimBoard>> BoardsOfDepth { get; private set; }
 
         public SuperSlimMind(Graph g)
         {
@@ -83,6 +84,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
             var totalBoards = _remainingBoards.Count;
             var lastP = -1;
 
+            BoardsOfDepth = new Dictionary<int, List<SuperSlimBoard>>();
             BoardCounts = new List<int>();
             BoardCounts.Add(_remainingBoards.Count);
 
@@ -106,6 +108,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
                 }
             }
 
+            BoardsOfDepth[winLength] = _wonBoards.ToList();
             BoardCounts.Add(_remainingBoards.Count);
 
             var nonSuperabundantBoards = new List<SuperSlimBoard>();
@@ -145,12 +148,11 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
             }
 
             BoardCounts.Add(_remainingBoards.Count);
-
             NonColorableBoards = _remainingBoards.ToList();
 
-            var wonBoards = new List<SuperSlimBoard>();
             while (_remainingBoards.Count > 0)
             {
+                var wonBoards = new List<SuperSlimBoard>();
                 winLength++;
 
                 var count = _remainingBoards.Count;
@@ -176,11 +178,13 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
                         }
                     }
                 }
-
+                
                 foreach (var b in wonBoards)
                     _wonBoards.Add(b);
 
+                BoardsOfDepth[winLength] = wonBoards;
                 BoardCounts.Add(_remainingBoards.Count);
+
                 if (_remainingBoards.Count == count)
                 {
                     if (OnlyNearlyColorable && MissingEdgeIndex >= 0)

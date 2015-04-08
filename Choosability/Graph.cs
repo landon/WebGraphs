@@ -395,7 +395,7 @@ namespace Choosability
             }
         }
 
-        public bool ContainsWithoutLargerWeight(Graph A)
+        public bool ContainsConnectedWithoutLargerWeight(Graph A)
         {
             if (VertexWeight == null || A.VertexWeight == null)
                 return false;
@@ -405,13 +405,14 @@ namespace Choosability
             var vertexSets = _vertexSubsets.Value;
             foreach (var vertices in vertexSets)
             {
-                if (vertices.Count <= 0)
-                    continue;
+                var e = EdgesOn(vertices);
 
-                if (A.E > EdgesOn(vertices))
+                if (e < vertices.Count - 1 || e < A.E)
                     continue;
 
                 var C = InducedSubgraph(vertices);
+                if (e == vertices.Count - 1 && !MaybeIsomorphic(A, C))
+                    continue;
                 
                 foreach (var p in Permutation.EnumerateAll(C.N))
                 {

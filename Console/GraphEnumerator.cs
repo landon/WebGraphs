@@ -152,7 +152,7 @@ namespace Console
                             {
                                 foreach (var gg in secondaryEnumerator(g))
                                 {
-                                    if (PreviousWinners.All(h => !gg.ContainsWithoutLargerWeight(h)))
+                                    if (PreviousWinners.All(h => !gg.ContainsConnectedWithoutLargerWeight(h)))
                                         yield return gg;
                                     else
                                     {
