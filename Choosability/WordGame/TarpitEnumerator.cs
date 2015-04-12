@@ -23,7 +23,19 @@ namespace Choosability.WordGame
 
         public bool IsPermutationClosed(List<string> S)
         {
-            return EnumerateAlphabetPermutations(S).Select(T => string.Join(",", T)).Distinct().Count() == 1;
+            return EnumerateAlphabetPermutations(S).Select(T => string.Join(",", T.OrderBy(s => s))).Distinct().Count() == 1;
+        }
+
+        public List<string> RemovePermutationRedundancies(List<string> S)
+        {
+            var hash = new HashSet<string>();
+            var permutedLists = EnumerateAlphabetPermutations(S).ToList();
+            for (int i = 0; i < S.Count; i++)
+            {
+                hash.Add(permutedLists.Select(l => l[i]).OrderBy(s => s).First());
+            }
+
+            return hash.ToList();
         }
 
         public IEnumerable<List<string>> EnumerateMinimalTarpits()
@@ -34,25 +46,25 @@ namespace Choosability.WordGame
 
         IEnumerable<List<string>> EnumerateMinimalTarpitsIn(List<string> S, HashSet<string> seen)
         {
-            if (S.Count <= 0)
-                yield break;
-
-            var key = GenerateSimpleKey(S);
-            if (seen.Contains(key))
-                yield break;
-            seen.Add(key);
-
-            var properlyContainsTarpit = false;
+            var excluded = false;
             foreach (var T in S.Select(w => S.Except(new[] { w }).ToList()))
             {
-                foreach (var TP in EnumerateMinimalTarpitsIn(RunEscape(T), seen))
-                {
-                    properlyContainsTarpit = true;
+                var W = RunEscape(T);
+                if (W.Count <= 0)
+                    continue;
+
+                excluded = true;
+
+                var key = GenerateSimpleKey(W);
+                if (seen.Contains(key))
+                    continue;
+
+                seen.Add(key);
+                foreach (var TP in EnumerateMinimalTarpitsIn(W, seen))
                     yield return TP;
-                }
             }
 
-            if (!properlyContainsTarpit)
+            if (!excluded)
                 yield return S.OrderBy(s => s).ToList();
         }
 
@@ -73,10 +85,6 @@ namespace Choosability.WordGame
         {
             return string.Join(",", S.OrderBy(s => s));
         }
-        string GeneratePermutedKey(List<string> S)
-        {
-            return EnumerateAlphabetPermutations(S).Select(T => string.Join(",", T)).OrderBy(s => s).First();
-        }
 
         IEnumerable<List<string>> EnumerateAlphabetPermutations(List<string> S)
         {
@@ -84,7 +92,7 @@ namespace Choosability.WordGame
             foreach (var permutation in Permutation.EnumerateAll(3))
             {
                 var p = permutation.Apply(_alphabet);
-                yield return uppered.Select(s => s.Replace('X', p[0]).Replace('Y', p[1]).Replace('Z', p[2])).OrderBy(s => s).ToList();
+                yield return uppered.Select(s => s.Replace('X', p[0]).Replace('Y', p[1]).Replace('Z', p[2])).ToList();
             }
         }
     }

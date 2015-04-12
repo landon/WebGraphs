@@ -9,7 +9,8 @@ namespace Console
 {
     public static class FindTarpits
     {
-        const int Length = 6;
+        const int Length = 4;
+        const bool RemovePermutationRedundancy = true;
 
         public static void Go()
         {
@@ -19,10 +20,12 @@ namespace Console
             var count = 0;
             foreach (var tarpit in tarpitEnumerator.EnumerateMinimalTarpits())
             {
-                System.Console.ForegroundColor = ConsoleColor.White;
                 var isClosed = tarpitEnumerator.IsPermutationClosed(tarpit);
-               
-                System.Console.Write("{" + string.Join(",", tarpit) + "}");
+
+                if (RemovePermutationRedundancy)
+                    System.Console.Write("{" + string.Join(",", tarpitEnumerator.RemovePermutationRedundancies(tarpit)) + "}");
+                else
+                    System.Console.Write("{" + string.Join(",", tarpit) + "}");
                
                 if (isClosed)
                     System.Console.ForegroundColor = ConsoleColor.Blue;
@@ -30,7 +33,7 @@ namespace Console
                     System.Console.ForegroundColor = ConsoleColor.Red;
 
                 System.Console.WriteLine(isClosed ? " (closed)" : " (not closed)");
-            
+                System.Console.ForegroundColor = ConsoleColor.White;
                 System.Console.WriteLine();
                 count++;
             }

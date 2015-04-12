@@ -26,6 +26,9 @@ namespace Choosability.WordGame
                     var goodChoiceExists = false;
                     foreach (var choice in Enumerable.Range(0, partition.Count).ToList().GenerateSublists())
                     {
+                        if (choice.Count <= 0)
+                            continue;
+
                         var ww = MakeMove(w, partition, choice, swappers);
                         if (S.Contains(ww))
                         {
