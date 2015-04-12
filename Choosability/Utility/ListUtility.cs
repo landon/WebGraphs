@@ -103,6 +103,15 @@ namespace Choosability.Utility
                 return union;
             }
 
+            public static List<T> Union(List<T> A, T b)
+            {
+                var union = new List<T>(A);
+                if (!union.Contains(b))
+                    union.Add(b);
+
+                return union;
+            }
+
             public static List<T> MultiSetIntersection(IEnumerable<T> A, IEnumerable<T> B)
             {
                 if (A == null || B == null)
@@ -480,6 +489,11 @@ namespace Choosability.Utility
         public static List<T> Union<T>(this List<T> A, List<T> B)
         {
             return ListUtilityGeneric<T>.Union(A, B);
+        }
+
+        public static List<T> Union<T>(this List<T> A, T b)
+        {
+            return ListUtilityGeneric<T>.Union(A, b);
         }
 
         public static bool Equal<T>(this List<T> A, List<T> B)

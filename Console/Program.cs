@@ -13,8 +13,11 @@ namespace Console
     {
         static void Main(string[] args)
         {
-            FixerBreakerTrees.Go();
-            System.Console.WriteLine("Done.");
+            FindTarpits.Go();
+            //FixerBreakerTrees.Go();
+            System.Console.WriteLine();
+            System.Console.WriteLine("done.");
+            System.Console.ReadKey();
         }
     }
 }
