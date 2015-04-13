@@ -1,4 +1,5 @@
-﻿using Choosability.WordGame;
+﻿using Choosability;
+using Choosability.WordGame;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,27 +19,45 @@ namespace Console
 
             var tarpitEnumerator = new TarpitEnumerator(Length);
             var count = 0;
+
+            var tarpitCores = new List<List<string>>();
             foreach (var tarpit in tarpitEnumerator.EnumerateMinimalTarpits())
             {
                 var isClosed = tarpitEnumerator.IsPermutationClosed(tarpit);
+                var core = tarpitEnumerator.RemovePermutationRedundancies(tarpit);
 
                 if (RemovePermutationRedundancy)
-                    System.Console.Write("{" + string.Join(",", tarpitEnumerator.RemovePermutationRedundancies(tarpit)) + "}");
+                    System.Console.Write("{" + string.Join(",", core) + "}");
                 else
                     System.Console.Write("{" + string.Join(",", tarpit) + "}");
-               
-                if (isClosed)
-                    System.Console.ForegroundColor = ConsoleColor.Blue;
-                else
-                    System.Console.ForegroundColor = ConsoleColor.Red;
 
-                System.Console.WriteLine(isClosed ? " (closed)" : " (not closed)");
+                if (!isClosed)
+                {
+                    System.Console.ForegroundColor = ConsoleColor.Red;
+                    System.Console.WriteLine(" (not closed)");
+                }
+                else
+                    System.Console.WriteLine();
+
                 System.Console.ForegroundColor = ConsoleColor.White;
                 System.Console.WriteLine();
                 count++;
+
+                tarpitCores.Add(core);
             }
 
-            System.Console.Write("found " + count + " things");
+            System.Console.Write("found " + count + " tarpits");
+            System.Console.WriteLine();
+            System.Console.WriteLine("computing transversal hypergraph...");
+            System.Console.WriteLine();
+
+            var H = new Hypergraph<string>(tarpitCores);
+            var transversals = H.Tr();
+
+            foreach (var t in transversals.E)
+            {
+                System.Console.WriteLine("{" + string.Join(",", t) + "}");
+            }
         }
     }
 }

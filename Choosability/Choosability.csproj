@@ -79,6 +79,7 @@
     <Compile Include="FixerBreaker\KnowledgeEngine\Slim\Super\SuperSlimColoringAnalyzer.cs" />
     <Compile Include="FixerBreaker\KnowledgeEngine\Slim\Super\SuperSlimMind.cs" />
     <Compile Include="FixerBreaker\KnowledgeEngine\Slim\Super\SuperSlimSwapAnalyzer.cs" />
+    <Compile Include="Hypergraph.cs" />
     <Compile Include="IndependenceRatio\MinorFinder.cs" />
     <Compile Include="OneFactorizationsOfCompleteGraph.cs" />
     <Compile Include="DataStructures\UnionFind.cs" />
