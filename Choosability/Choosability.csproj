@@ -136,7 +136,12 @@
     <Compile Include="Utility\SafeCollection.cs" />
     <Compile Include="Utility\ThreadLocal.cs" />
     <Compile Include="WordGame\AccessibilityChecker.cs" />
+    <Compile Include="WordGame\Optimized\FastWord.cs" />
     <Compile Include="WordGame\TarpitEnumerator.cs" />
+    <Compile Include="WordGame\Optimized\FastAccessibilityChecker.cs" />
+    <Compile Include="WordGame\Optimized\FastTarpitEnumerator.cs" />
+    <Compile Include="WordGame\Optimized\FastWordGenerator.cs" />
+    <Compile Include="WordGame\ReferenceTarpitEnumerator.cs" />
     <Compile Include="WordGame\WordEnumerator.cs" />
   </ItemGroup>
   <ItemGroup>
