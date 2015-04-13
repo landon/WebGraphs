@@ -12,13 +12,13 @@ namespace Console
     public static class FindTarpits
     {
         const int Length = 5;
-        
         static StreamWriter _sw;
 
         public static void Go()
         {
-            using(_sw =  new StreamWriter("tarpits" + Length + ".txt"))
+            using (_sw = new StreamWriter("tarpits" + Length + ".txt"))
             {
+                _sw.AutoFlush = true;
                 System.Console.ForegroundColor = ConsoleColor.White;
 
                 var tarpitEnumerator = new TarpitEnumerator(Length);
@@ -30,7 +30,7 @@ namespace Console
                     var isClosed = tarpitEnumerator.IsPermutationClosed(tarpit);
                     var core = tarpitEnumerator.RemovePermutationRedundancies(tarpit);
 
-                    Write("{" + string.Join(",", tarpit) + "}  :  ");    
+                    Write("{" + string.Join(",", tarpit) + "}  :  ");
                     Write("{" + string.Join(",", core) + "}");
 
                     if (!isClosed)
