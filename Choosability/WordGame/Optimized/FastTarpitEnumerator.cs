@@ -44,20 +44,26 @@ namespace Choosability.WordGame.Optimized
         IEnumerable<List<FastWord>> EnumerateMinimalTarpitsFastIn(List<FastWord> S, HashSet<List<FastWord>> seen)
         {
             var excluded = false;
-            foreach (var T in S.Select(w => S.Except(new[] { w }).ToList()))
+            for (int i = 0; i < S.Count; i++)
             {
+                var T = S.Except(new[] { S[i] }).ToList();
+
                 var W = RunEscape(T);
                 if (W.Count <= 0)
                     continue;
 
                 excluded = true;
 
+                if (S.Take(i).Any(w => !W.Contains(w)))
+                    continue;
+
                 if (seen.Contains(W))
                     continue;
-                seen.Add(W);
 
                 foreach (var TP in EnumerateMinimalTarpitsFastIn(W, seen))
                     yield return TP;
+
+                seen.Add(W);
             }
 
             if (!excluded)
