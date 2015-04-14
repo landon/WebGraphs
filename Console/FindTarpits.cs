@@ -13,8 +13,6 @@ namespace Console
     public static class FindTarpits
     {
         static int Length = 5;
-        static bool Fast = true;
-
         static StreamWriter _sw;
 
         public static void Go()
@@ -24,37 +22,33 @@ namespace Console
                 _sw.AutoFlush = true;
                 System.Console.ForegroundColor = ConsoleColor.White;
 
-                TarpitEnumerator tarpitEnumerator;
-                if (Fast)
-                    tarpitEnumerator = new FastTarpitEnumerator(Length);
-                else
-                    tarpitEnumerator = new ReferenceTarpitEnumerator(Length);
+                var tarpitEnumerator = new FastTarpitEnumerator(Length);
 
                 var count = 0;
-
                 var tarpitCores = new List<List<string>>();
-                foreach (var tarpit in tarpitEnumerator.EnumerateMinimalTarpits())
-                {
-                    var isClosed = TarpitEnumerator.IsPermutationClosed(tarpit);
-                    var core = TarpitEnumerator.RemovePermutationRedundancies(tarpit);
 
-                    Write("{" + string.Join(",", tarpit) + "}  :  ");
-                    Write("{" + string.Join(",", core) + "}");
-
-                    if (false && !isClosed)
+                tarpitEnumerator.GenerateMinimalTarpits(tarpit =>
                     {
-                        System.Console.ForegroundColor = ConsoleColor.Red;
-                        WriteLine(" (not closed)");
-                    }
-                    else
+                        var isClosed = TarpitEnumerator.IsPermutationClosed(tarpit);
+                        var core = TarpitEnumerator.RemovePermutationRedundancies(tarpit);
+
+                        Write("{" + string.Join(",", tarpit) + "}  :  ");
+                        Write("{" + string.Join(",", core) + "}");
+
+                        if (false && !isClosed)
+                        {
+                            System.Console.ForegroundColor = ConsoleColor.Red;
+                            WriteLine(" (not closed)");
+                        }
+                        else
+                            WriteLine();
+
+                        System.Console.ForegroundColor = ConsoleColor.White;
                         WriteLine();
+                        count++;
 
-                    System.Console.ForegroundColor = ConsoleColor.White;
-                    WriteLine();
-                    count++;
-
-                    tarpitCores.Add(core);
-                }
+                        tarpitCores.Add(core);
+                    });
 
                 Write("found " + count + " tarpits");
                 WriteLine();

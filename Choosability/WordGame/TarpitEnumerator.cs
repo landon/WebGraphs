@@ -38,5 +38,6 @@ namespace Choosability.WordGame
         }
 
         public abstract IEnumerable<List<string>> EnumerateMinimalTarpits();
+        public virtual void GenerateMinimalTarpits(Action<List<string>> foundTarpit) { }
     }
 }

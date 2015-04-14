@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Choosability.Utility;
 
 namespace Choosability.WordGame.Optimized
 {
@@ -16,61 +17,71 @@ namespace Choosability.WordGame.Optimized
             _accessibilityChecker = new FastAccessibilityChecker(n);
         }
 
-        public override IEnumerable<List<string>> EnumerateMinimalTarpits()
+        public override void GenerateMinimalTarpits(Action<List<string>> foundTarpit)
         {
-            return EnumerateMinimalTarpitsFast().Select(list => list.Select(Wordify).ToList());
+            GenerateMinimalTarpitsFast(l => foundTarpit(l.Select(s => Wordify(s)).ToList()));
         }
 
-        public IEnumerable<List<FastWord>> EnumerateMinimalTarpitsFast()
+        public void GenerateMinimalTarpitsFast(Action<List<FastWord>> foundTarpit)
         {
-            var seen = new HashSet<List<FastWord>>(new SortedListComparer());
-            return EnumerateMinimalTarpitsFastIn(_words, seen);
+            GenerateMinimalTarpitsFastIn(_words, new List<FastWord>(), foundTarpit);
         }
 
-        string Wordify(FastWord b)
-        {
-            return string.Join("", b.Stacks.Value.Select(s =>
-                {
-                    switch (s)
-                    {
-                        case 1: return 'x';
-                        case 2: return 'y';
-                        case 4: return 'z';
-                        default: return '?';
-                    }
-                }));
-        }
-
-        IEnumerable<List<FastWord>> EnumerateMinimalTarpitsFastIn(List<FastWord> S, HashSet<List<FastWord>> seen)
+        void GenerateMinimalTarpitsFastIn(List<FastWord> S, List<FastWord> mustHaves, Action<List<FastWord>> foundTarpit)
         {
             var excluded = false;
-            for (int i = 0; i < S.Count; i++)
+
+            var extendedMustHaves = mustHaves.ToList();
+            var T = S.Except(mustHaves).ToList();
+
+            foreach (var w in T)
             {
-                var T = S.Except(new[] { S[i] }).ToList();
+                var W = RunEscape(S.Except(new[] { w }), extendedMustHaves);
 
-                var W = RunEscape(T);
-                if (W.Count <= 0)
-                    continue;
+                if (W != null && W.Count > 0)
+                {
+                    excluded = true;
+                    GenerateMinimalTarpitsFastIn(W, extendedMustHaves, foundTarpit);
+                }
 
-                excluded = true;
-
-                if (S.Take(i).Any(w => !W.Contains(w)))
-                    continue;
-
-                if (seen.Contains(W))
-                    continue;
-
-                foreach (var TP in EnumerateMinimalTarpitsFastIn(W, seen))
-                    yield return TP;
-
-                seen.Add(W);
+                extendedMustHaves.Add(w);    
             }
 
             if (!excluded)
-                yield return S.ToList();
+            {
+                foreach (var w in mustHaves)
+                {
+                    var W = RunEscape(S.Except(new[] { w }));
+                    if (W.Count > 0)
+                    {
+                        excluded = true;
+                        break;
+                    }
+                }
+
+                if (!excluded)
+                    foundTarpit(S);
+            }
         }
 
-        List<FastWord> RunEscape(List<FastWord> S)
+        List<FastWord> RunEscape(IEnumerable<FastWord> S, List<FastWord> mustHaves)
+        {
+            var T = S.ToList();
+            while (true)
+            {
+                var R = new HashSet<FastWord>(_words.Except(T));
+
+                if (mustHaves.Any(w => _accessibilityChecker.IsAccessible(w, R)))
+                    return null;
+
+                if (T.RemoveAll(w => !mustHaves.Contains(w) && _accessibilityChecker.IsAccessible(w, R)) <= 0)
+                    break;
+            }
+
+            return T;
+        }
+
+        List<FastWord> RunEscape(IEnumerable<FastWord> S)
         {
             var T = S.ToList();
             while (true)
@@ -82,6 +93,59 @@ namespace Choosability.WordGame.Optimized
 
             return T;
         }
+
+        string Wordify(FastWord b)
+        {
+            return string.Join("", b.Stacks.Value.Select(s =>
+            {
+                switch (s)
+                {
+                    case 1: return 'x';
+                    case 2: return 'y';
+                    case 4: return 'z';
+                    default: return '?';
+                }
+            }));
+        }
+
+        #region enunmerable way
+        public override IEnumerable<List<string>> EnumerateMinimalTarpits()
+        {
+            return EnumerateMinimalTarpitsFast().Select(list => list.Select(Wordify).ToList());
+        }
+
+        public IEnumerable<List<FastWord>> EnumerateMinimalTarpitsFast()
+        {
+            var explored = new HashSet<List<FastWord>>(new SortedListComparer());
+            return EnumerateMinimalTarpitsFastIn(_words, explored, new List<FastWord>());
+        }
+
+        IEnumerable<List<FastWord>> EnumerateMinimalTarpitsFastIn(List<FastWord> S, HashSet<List<FastWord>> explored, List<FastWord> mustHaves)
+        {
+            var excluded = false;
+
+            foreach (var w in S)
+            {
+                var W = RunEscape(S.Except(new[] { w }));
+                if (W.Count <= 0)
+                    continue;
+
+                excluded = true;
+
+                if (mustHaves.SubsetEqual(W) && !explored.Contains(W))
+                {
+                    foreach (var TP in EnumerateMinimalTarpitsFastIn(W, explored, mustHaves.ToList()))
+                        yield return TP;
+                }
+
+                explored.Add(W);
+                mustHaves.Add(w);
+            }
+
+            if (!excluded)
+                yield return S.ToList();
+        } 
+        #endregion
 
         class SortedListComparer : IEqualityComparer<List<FastWord>>
         {
