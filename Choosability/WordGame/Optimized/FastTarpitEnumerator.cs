@@ -10,6 +10,7 @@ namespace Choosability.WordGame.Optimized
     {
         List<FastWord> _words;
         FastAccessibilityChecker _accessibilityChecker;
+        static readonly List<FastWord> EmptyList = new List<FastWord>();
 
         public FastTarpitEnumerator(int n)
         {
@@ -67,14 +68,23 @@ namespace Choosability.WordGame.Optimized
         List<FastWord> RunEscape(IEnumerable<FastWord> S, List<FastWord> mustHaves)
         {
             var T = S.ToList();
+            var R = new HashSet<FastWord>(_words.Except(T));
             while (true)
             {
-                var R = new HashSet<FastWord>(_words.Except(T));
-
                 if (mustHaves.Any(w => _accessibilityChecker.IsAccessible(w, R)))
                     return null;
 
-                if (T.RemoveAll(w => !mustHaves.Contains(w) && _accessibilityChecker.IsAccessible(w, R)) <= 0)
+                var escapers = T.Except(mustHaves)
+                                .Where(w => _accessibilityChecker.IsAccessible(w, R))
+                                .ToList();
+
+                foreach (var w in escapers)
+                {
+                    T.Remove(w);
+                    R.Add(w);
+                }
+
+                if (escapers.Count <= 0)
                     break;
             }
 
@@ -83,15 +93,7 @@ namespace Choosability.WordGame.Optimized
 
         List<FastWord> RunEscape(IEnumerable<FastWord> S)
         {
-            var T = S.ToList();
-            while (true)
-            {
-                var R = new HashSet<FastWord>(_words.Except(T));
-                if (T.RemoveAll(w => _accessibilityChecker.IsAccessible(w, R)) <= 0)
-                    break;
-            }
-
-            return T;
+            return RunEscape(S, EmptyList);
         }
 
         string Wordify(FastWord b)
