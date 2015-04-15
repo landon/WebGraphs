@@ -8,7 +8,6 @@ namespace Choosability.WordGame.Optimized
 {
     public class FastWord
     {
-        public Lazy<long[]> Stacks { get; private set; }
         public ulong[] _trace;
         public int _length;
         public int _stackCount;
@@ -20,8 +19,6 @@ namespace Choosability.WordGame.Optimized
             _length = _trace.Length;
             _stackCount = stackCount;
             _hashCode = Hashing.Hash(_trace, _length);
-
-            MakeLazyStacks();
         }
 
         public FastWord(ulong[] trace, int i, int j, ulong swap, int stackCount)
@@ -48,22 +45,8 @@ namespace Choosability.WordGame.Optimized
             }
 
             _stackCount = stackCount;
-            MakeLazyStacks();
 
             _hashCode = Hashing.Hash(_trace, _length);
-        }
-
-        void MakeLazyStacks()
-        {
-            Stacks = new Lazy<long[]>(() =>
-            {
-                var s = new long[_stackCount];
-                var traceBits = _trace.Select(t => t.ToSet()).ToList();
-                for (int c = 0; c < traceBits.Count; c++)
-                    foreach (var i in traceBits[c])
-                        s[i] |= 1L << c;
-                return s;
-            });
         }
 
         public override bool Equals(object obj)
@@ -86,11 +69,6 @@ namespace Choosability.WordGame.Optimized
         public override int GetHashCode()
         {
             return _hashCode;
-        }
-
-        public override string ToString()
-        {
-            return string.Join("|", Stacks.Value.Select(l => string.Join("", l.ToSet())));
         }
     }
 }

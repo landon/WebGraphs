@@ -10,6 +10,7 @@ namespace Choosability.WordGame.Optimized
     {
         ulong[] _fixerResponses;
         int _fixerResponseCount;
+        Dictionary<int, List<List<ulong>>> _breakerChoicesCache = new Dictionary<int, List<List<ulong>>>();
 
         public FastAccessibilityChecker(int n)
         {
@@ -77,26 +78,33 @@ namespace Choosability.WordGame.Optimized
             }
         }
 
+        
         List<List<ulong>> GetBreakerChoices(ulong swappable)
         {
-            var bits = swappable.GetBits();
-            var count = bits.Count();
-            var partitions = Choosability.FixerBreaker.Chronicle.BranchGenerator.GetPartitions(count);
-
-            var choices = new List<List<ulong>>(partitions.Count);
-            foreach (var partition in partitions)
+            var count = swappable.PopulationCount();
+            List<List<ulong>> choices;
+            if (!_breakerChoicesCache.TryGetValue(count, out choices))
             {
-                var choice = new List<ulong>(partition.Count);
-                choices.Add(choice);
+                var partitions = Choosability.FixerBreaker.Chronicle.BranchGenerator.GetPartitions(count);
 
-                foreach (var part in partition)
+                choices = new List<List<ulong>>(partitions.Count);
+                var bits = swappable.GetBits();
+                foreach (var partition in partitions)
                 {
-                    var x = 0UL;
-                    foreach (var i in part)
-                        x |= bits[i];
+                    var choice = new List<ulong>(partition.Count);
+                    choices.Add(choice);
 
-                    choice.Add(x);
+                    foreach (var part in partition)
+                    {
+                        var x = 0UL;
+                        foreach (var i in part)
+                            x |= bits[i];
+
+                        choice.Add(x);
+                    }
                 }
+
+                _breakerChoicesCache[count] = choices;
             }
 
             return choices;

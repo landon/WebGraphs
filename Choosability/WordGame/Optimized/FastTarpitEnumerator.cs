@@ -96,7 +96,13 @@ namespace Choosability.WordGame.Optimized
 
         string Wordify(FastWord b)
         {
-            return string.Join("", b.Stacks.Value.Select(s =>
+            var st = new long[b._stackCount];
+            var traceBits = b._trace.Select(t => t.ToSet()).ToList();
+            for (int c = 0; c < traceBits.Count; c++)
+                foreach (var i in traceBits[c])
+                    st[i] |= 1L << c;
+
+            return string.Join("", st.Select(s =>
             {
                 switch (s)
                 {
