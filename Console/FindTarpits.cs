@@ -12,7 +12,7 @@ namespace Console
 {
     public static class FindTarpits
     {
-        static int Length = 5;
+        static int Length = 4;
         static StreamWriter _sw;
 
         public static void Go()

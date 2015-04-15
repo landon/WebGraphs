@@ -45,7 +45,6 @@ namespace Choosability.WordGame.Optimized
             }
 
             _stackCount = stackCount;
-
             _hashCode = Hashing.Hash(_trace, _length);
         }
 

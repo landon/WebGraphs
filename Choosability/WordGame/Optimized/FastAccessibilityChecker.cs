@@ -10,7 +10,7 @@ namespace Choosability.WordGame.Optimized
     {
         ulong[] _fixerResponses;
         int _fixerResponseCount;
-        Dictionary<int, List<List<ulong>>> _breakerChoicesCache = new Dictionary<int, List<List<ulong>>>();
+        Dictionary<ulong, List<List<ulong>>> _breakerChoicesCache = new Dictionary<ulong, List<List<ulong>>>();
 
         public FastAccessibilityChecker(int n)
         {
@@ -51,9 +51,7 @@ namespace Choosability.WordGame.Optimized
                     }
 
                     if (winningSwapAlwaysExists)
-                    {
                         return true;
-                    }
                 }
             }
 
@@ -77,18 +75,16 @@ namespace Choosability.WordGame.Optimized
                 subset++;
             }
         }
-
         
         List<List<ulong>> GetBreakerChoices(ulong swappable)
         {
-            var count = swappable.PopulationCount();
             List<List<ulong>> choices;
-            if (!_breakerChoicesCache.TryGetValue(count, out choices))
+            if (!_breakerChoicesCache.TryGetValue(swappable, out choices))
             {
-                var partitions = Choosability.FixerBreaker.Chronicle.BranchGenerator.GetPartitions(count);
-
-                choices = new List<List<ulong>>(partitions.Count);
                 var bits = swappable.GetBits();
+                var partitions = Choosability.FixerBreaker.Chronicle.BranchGenerator.GetPartitions(bits.Count);
+                choices = new List<List<ulong>>(partitions.Count);
+                
                 foreach (var partition in partitions)
                 {
                     var choice = new List<ulong>(partition.Count);
@@ -104,7 +100,7 @@ namespace Choosability.WordGame.Optimized
                     }
                 }
 
-                _breakerChoicesCache[count] = choices;
+                _breakerChoicesCache[swappable] = choices;
             }
 
             return choices;
