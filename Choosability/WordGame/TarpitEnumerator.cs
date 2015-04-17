@@ -27,6 +27,18 @@ namespace Choosability.WordGame
             return hash.ToList();
         }
 
+        public static List<string> ReorderAlphabetByOccurenceRate(List<string> S)
+        {
+            return S.Select(s =>
+            {
+                var chars = s.ToCharArray();
+                var p = Alphabet.Select(c => new { C = c, Rate = chars.Count(cc => cc == c) }).OrderByDescending(d => d.Rate).ToList();
+
+                return s.Replace(p[0].C, 'X').Replace(p[1].C, 'Y').Replace(p[2].C, 'Z').ToLower();
+                
+            }).ToList();
+        }
+
         public static IEnumerable<List<string>> EnumerateAlphabetPermutations(List<string> S)
         {
             var uppered = S.Select(s => s.ToUpper()).ToList();
