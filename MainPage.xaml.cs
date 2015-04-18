@@ -1662,7 +1662,7 @@ trash can button.
 
             var mind = new Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.SuperSlimMind(G);
             mind.MaxPot = potSize;
-            mind.OnlyConsiderNearlyColorableBoards = true;
+            mind.OnlyConsiderNearlyColorableBoards = onlyNearColorings;
             mind.MissingEdgeIndex = missingEdgeIndex;
             
             using (var resultWindow = new ResultWindow(true))
@@ -1734,7 +1734,7 @@ trash can button.
                     {
                         if (mind.HasNonSuperabundantBoardThatIsNearlyColorable)
                         {
-                            return "Breaker wins since there is a non-superabundant nearly colorable board";
+                            return "Breaker wins since there is a non-superabundant board.";
                         }
                         else
                         {
