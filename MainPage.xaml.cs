@@ -1662,7 +1662,7 @@ trash can button.
 
             var mind = new Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.SuperSlimMind(G);
             mind.MaxPot = potSize;
-            mind.OnlyNearlyColorable = true;
+            mind.OnlyConsiderNearlyColorableBoards = true;
             mind.MissingEdgeIndex = missingEdgeIndex;
             
             using (var resultWindow = new ResultWindow(true))

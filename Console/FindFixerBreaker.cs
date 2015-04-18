@@ -10,10 +10,10 @@ namespace Console
 {
     public static class FindFixerBreaker
     {
-        const int Delta = 4;
+        const int Delta = 3;
         const int MaxVertices = 20;
         const bool NearColorings = true;
-        const bool TreesOnly = true;
+        const bool TreesOnly = false;
         static readonly string WinnersFile = (TreesOnly ? "trees only " : "") + (NearColorings ? "near colorings " : "") + "FixerBreaker winners Delta=" + Delta + ".txt";
 
         public static void Go()
@@ -27,7 +27,7 @@ namespace Console
 
                     var mind = new Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.SuperSlimMind(g);
                     mind.MaxPot = Delta;
-                    mind.OnlyNearlyColorable = NearColorings;
+                    mind.OnlyConsiderNearlyColorableBoards = NearColorings;
 
                     var template = new Template(g.VertexWeight.Select((ambientDegree, v) => Delta - (ambientDegree - g.Degree(v))).ToList());
                     var win = mind.Analyze(template, null);

@@ -12,6 +12,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
 
         ulong[] _fixerResponses;
         int _fixerResponseCount;
+        Dictionary<ulong, List<List<ulong>>> _breakerChoicesCache = new Dictionary<ulong, List<List<ulong>>>();
 
         public SuperSlimSwapAnalyzer(int n, bool storeTreeInfo = true)
         {
@@ -94,25 +95,29 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
 
         List<List<ulong>> GetBreakerChoices(ulong swappable)
         {
-            // TODO: do this all in bit land
-            var bits = swappable.GetBits();
-            var count = bits.Count();
-            var partitions = Choosability.FixerBreaker.Chronicle.BranchGenerator.GetPartitions(count);
-
-            var choices = new List<List<ulong>>(partitions.Count);
-            foreach (var partition in partitions)
+            List<List<ulong>> choices;
+            if (!_breakerChoicesCache.TryGetValue(swappable, out choices))
             {
-                var choice = new List<ulong>(partition.Count);
-                choices.Add(choice);
+                var bits = swappable.GetBits();
+                var partitions = Choosability.FixerBreaker.Chronicle.BranchGenerator.GetPartitions(bits.Count);
+                choices = new List<List<ulong>>(partitions.Count);
 
-                foreach (var part in partition)
+                foreach (var partition in partitions)
                 {
-                    var x = 0UL;
-                    foreach (var i in part)
-                        x |= bits[i];
+                    var choice = new List<ulong>(partition.Count);
+                    choices.Add(choice);
 
-                    choice.Add(x);
+                    foreach (var part in partition)
+                    {
+                        var x = 0UL;
+                        foreach (var i in part)
+                            x |= bits[i];
+
+                        choice.Add(x);
+                    }
                 }
+
+                _breakerChoicesCache[swappable] = choices;
             }
 
             return choices;

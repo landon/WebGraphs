@@ -23,7 +23,8 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
         public int TotalPositions { get { return _totalPositions; } }
         public SuperSlimBoard BreakerWonBoard { get; private set; }
         public List<int> BoardCounts { get; private set; }
-        public bool OnlyNearlyColorable { get; set; }
+        public bool OnlyConsiderNearlyColorableBoards { get; set; }
+        public bool ExcludeNonNearlyColorableNonSuperabundantBoards { get; set; }
         public int MissingEdgeIndex { get; set; }
 
         public List<SuperSlimBoard> NonColorableBoards { get; private set; }
@@ -58,7 +59,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
             for (int colorCount = minimumColorCount; colorCount <= maximumColorCount; colorCount++)
             {
                 GenerateAllBoards(template, colorCount, progress);
-                if (OnlyNearlyColorable)
+                if (OnlyConsiderNearlyColorableBoards)
                 {
                     if (MissingEdgeIndex >= 0)
                         _remainingBoards.RemoveAll(b => !NearlyColorableForEdge(b, MissingEdgeIndex));
@@ -118,7 +119,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
                 var b = _remainingBoards[i];
                 if (!IsSuperabundant(b))
                 {
-                    if (OnlyNearlyColorable && MissingEdgeIndex >= 0)
+                    if (OnlyConsiderNearlyColorableBoards && MissingEdgeIndex >= 0)
                     {
                         HasNonSuperabundantBoardThatIsNearlyColorable = true;
                         BreakerWonBoard = b;
@@ -140,11 +141,14 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
                 }
             }
 
-            if (nonSuperabundantBoards.Count > 0 && ExistsNearlyColorableBoardForEachEdge(nonSuperabundantBoards))
+            if (nonSuperabundantBoards.Count > 0)
             {
-                HasNonSuperabundantBoardThatIsNearlyColorable = true;
-                BreakerWonBoard = nonSuperabundantBoards[0];
-                return false;
+                if (!OnlyConsiderNearlyColorableBoards && !ExcludeNonNearlyColorableNonSuperabundantBoards || ExistsNearlyColorableBoardForEachEdge(nonSuperabundantBoards))
+                {
+                    HasNonSuperabundantBoardThatIsNearlyColorable = true;
+                    BreakerWonBoard = nonSuperabundantBoards[0];
+                    return false;
+                }
             }
 
             BoardCounts.Add(_remainingBoards.Count);
@@ -187,7 +191,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
 
                 if (_remainingBoards.Count == count)
                 {
-                    if (OnlyNearlyColorable && MissingEdgeIndex >= 0)
+                    if (OnlyConsiderNearlyColorableBoards && MissingEdgeIndex >= 0)
                     {
                         FixerWonAllNearlyColorableBoards = false;
                         BreakerWonBoard = _remainingBoards[0];

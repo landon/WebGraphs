@@ -119,7 +119,7 @@ namespace Console
         {
             var mind = new Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.SuperSlimMind(G);
             mind.MaxPot = potSize;
-            mind.OnlyNearlyColorable = true;
+            mind.OnlyConsiderNearlyColorableBoards = true;
             mind.MissingEdgeIndex = i;
 
             var root = @"C:\game trees\alls2\" + i;
@@ -145,7 +145,7 @@ namespace Console
             {
                 var mind = new Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.SuperSlimMind(G);
                 mind.MaxPot = potSize;
-                mind.OnlyNearlyColorable = true;
+                mind.OnlyConsiderNearlyColorableBoards = true;
                 mind.MissingEdgeIndex = i;
 
                 var win = mind.Analyze(template, null);
