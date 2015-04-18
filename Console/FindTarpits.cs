@@ -14,7 +14,6 @@ namespace Console
     public static class FindTarpits
     {
         static int Length = 4;
-        static int BoxifyTries = 1;
         static StreamWriter _sw;
 
         public static void Go()
@@ -61,24 +60,13 @@ namespace Console
                 }
                 WriteLine();
 
-                
-                List<List<List<string>>> boxes = null;
-                var minBoxes = int.MaxValue;
+               var chunks = Boxification.SplitMultiway(ordered);
+               foreach (var chunk in chunks)
+                   WriteLine(Boxification.ToMultiChunkString(chunk));
 
-                for (int i = 0; i < BoxifyTries; i++)
-                {
-                    var bs = Boxification.PrefixBoxify(ordered);
-                    if (bs.Count < minBoxes)
-                    {
-                        boxes = bs;
-                        minBoxes = bs.Count;
-                    }
-
-                    ordered.Shuffle();
-                }
-
-                foreach (var box in boxes)
-                    WriteLine(Boxification.ToBoxString(box));
+               // var chunks = Boxification.Split(ordered);
+               //foreach (var chunk in chunks)
+               //    WriteLine(Boxification.ToChunkString(chunk));
             }
         }
 
