@@ -46,7 +46,7 @@ namespace Choosability
                         var H = G.AttachNewVertex(neighborSet);
 
                         if (currentLevel.Any(W => Graph.Isomorphic(H, W))) continue;
-                        if (excluded.Any(W => H.ContainsInduced(W, H.N - 1))) continue;
+                        if (excluded.Any(W => H.ContainsInduced(W))) continue;
 
                         currentLevel.Add(H);
                         yield return H;

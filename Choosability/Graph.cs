@@ -378,10 +378,7 @@ namespace Choosability
             if (!MaybeIsomorphic(A, B))
                 return false;
 
-            foreach (var p in Permutation.EnumerateAll(A.N))
-                if (A.PermuteVertices(p) == B) return true;
-
-            return false;
+            return A.Contains(B, induced: true);
         }
         public class IsomorphismComparer : IEqualityComparer<Graph>
         {
@@ -395,34 +392,41 @@ namespace Choosability
             }
         }
 
-        public bool ContainsConnectedWithoutLargerWeight(Graph A)
+        public bool Contains(Graph A, bool induced)
         {
-            if (VertexWeight == null || A.VertexWeight == null)
-                return false;
+            return Contains(A, induced, (_, __, ___, ____) => true);
+        }
 
+        public bool Contains(Graph A, bool induced, Func<Graph, Graph, int, int, bool> condition)
+        {
             if (N < A.N) return false;
 
-            var vertexSets = _vertexSubsets.Value;
-            foreach (var vertices in vertexSets)
+            var tau = new List<int>();
+            return Contains(A, induced, condition, new int[A.N], tau, 0);
+        }
+
+        bool Contains(Graph A, bool induced, Func<Graph, Graph, int, int, bool> condition, int[] tau, List<int> placed, int v)
+        {
+            if (v == A.N)
+                return true;
+
+            var images = placed.Select(u => tau[u]).OrderBy(t => t).ToList();
+            var requiredNeighbors = A.Neighbors[v].IntersectionSorted(placed).Select(u => tau[u]).OrderBy(t => t).ToList();
+            var candidates = Vertices.Except(images)
+                                     .Where(w => A.Degree(v) <= Degree(w))
+                                     .Where(w => induced ? requiredNeighbors.SequenceEqual(Neighbors[w].IntersectionSorted(images))
+                                                         : requiredNeighbors.SubsetEqualSorted(Neighbors[w]))
+                                     .Where(w => condition(this, A, w, v));
+
+            foreach (var candidate in candidates)
             {
-                var e = EdgesOn(vertices);
+                tau[v] = candidate;
+                placed.Add(v);
 
-                if (e < vertices.Count - 1 || e < A.E)
-                    continue;
+                if (Contains(A, induced, condition, tau, placed, v + 1))
+                    return true;
 
-                var C = InducedSubgraph(vertices);
-                if (e == vertices.Count - 1 && !MaybeIsomorphic(A, C))
-                    continue;
-                
-                foreach (var p in Permutation.EnumerateAll(C.N))
-                {
-                    var D = C.PermuteVertices(p);
-                    if (A.IsSpanningSubgraphOf(D))
-                    {
-                        if (A.Vertices.All(v => A.VertexWeight[v] >= D.VertexWeight[v]))
-                            return true;
-                    }
-                }
+                placed.RemoveAt(placed.Count - 1);
             }
 
             return false;
@@ -430,19 +434,14 @@ namespace Choosability
 
         public bool ContainsInduced(Graph A)
         {
-            if (N < A.N) return false;
-
-            var vertexSets = _vertexSubsets.Value;
-            foreach (var vertices in vertexSets)
-                if (Graph.Isomorphic(InducedSubgraph(vertices), A)) return true;
-
-            return false;
+            return Contains(A, induced: true);
         }
-        public bool ContainsInduced(Graph A, int involvedVertex)
+
+        public bool ContainsInducedOld(Graph A)
         {
             if (N < A.N) return false;
 
-            var vertexSets = _vertexSubsets.Value.Where(vs => vs.Contains(involvedVertex));
+            var vertexSets = _vertexSubsets.Value;
 
             foreach (var vertices in vertexSets)
                 if (Graph.Isomorphic(InducedSubgraph(vertices), A)) return true;

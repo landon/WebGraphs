@@ -146,18 +146,22 @@ namespace Console
 
                         var ew = line.GetEdgeWeights();
                         var g = new Graph(ew);
-                        if (filter(g))
+                        if (filter == null || filter(g))
                         {
                             if (secondaryEnumerator != null)
                             {
                                 foreach (var gg in secondaryEnumerator(g))
                                 {
-                                    if (PreviousWinners.All(h => !gg.ContainsConnectedWithoutLargerWeight(h)))
+                                    if (PreviousWinners.All(h => !gg.Contains(h, false, WeightCondition)))
+                                    {
                                         yield return gg;
+                                    }
                                     else
                                     {
                                         if (gg.VertexWeight != null)
+                                        {
                                             System.Console.WriteLine("skipping supergraph " + gg.ToGraph6() + " with degrees [" + string.Join(",", gg.VertexWeight) + "]");
+                                        }
                                         else
                                             System.Console.WriteLine("skipping supergraph " + gg.ToGraph6());
                                     }
@@ -179,6 +183,11 @@ namespace Console
 
             next: ;
             }
+        }
+
+        static bool WeightCondition(Graph self, Graph A, int selfV, int av)
+        {
+            return A.VertexWeight[av] >= self.VertexWeight[selfV];
         }
 
         static void WriteGraph(StreamWriter sw, Graph g)

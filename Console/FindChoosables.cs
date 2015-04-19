@@ -17,9 +17,9 @@ namespace Console
         const int MaxVertices = 9;
 
         const bool Offline = false;
-        const bool AT = true;
-        const int MaxIndependenceNumber = 2;
-        const int Fold = 1;
+        const bool AT = false;
+        const int MaxIndependenceNumber = int.MaxValue;
+        const int Fold = 2;
         
         const int MaxDegree = int.MaxValue;
         const bool DiamondFreeOnly = false;

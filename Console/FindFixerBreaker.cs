@@ -12,8 +12,9 @@ namespace Console
     {
         const int Delta = 3;
         const int MaxVertices = 20;
-        const bool NearColorings = true;
-        const bool TreesOnly = false;
+        const bool TreesOnly = true;
+        
+        const bool NearColorings = false;
         static readonly string WinnersFile = (TreesOnly ? "trees only " : "") + (NearColorings ? "near colorings " : "") + "FixerBreaker winners Delta=" + Delta + ".txt";
 
         public static void Go()
@@ -38,6 +39,7 @@ namespace Console
                         System.Console.WriteLine(" fixer wins");
                         System.Console.ForegroundColor = ConsoleColor.White;
                         graphEnumerator.AddWinner(g);
+                        _wonWeightings.Add(g.VertexWeight);
                     }
                     else
                     {
@@ -54,15 +56,21 @@ namespace Console
             return true;
         }
 
+        static List<List<int>> _wonWeightings;
         static IEnumerable<Choosability.Graph> EnumerateWeightings(Choosability.Graph g)
         {
             if (g.MaxDegree > Delta)
                 yield break;
 
+            _wonWeightings = new List<List<int>>();
             foreach (var weighting in g.Vertices.Select(v => Enumerable.Range(g.Degree(v), Delta + 1 - g.Degree(v)).Reverse()).CartesianProduct())
             {
+                var www = weighting.ToList();
+                if (_wonWeightings.Any(ww => ww.Zip(www, (a, b) => a - b).Min() >= 0))
+                    continue;
+
                 var gg = g.Clone();
-                gg.VertexWeight = weighting.ToList();
+                gg.VertexWeight = www;
                 yield return gg;
             }
         }
