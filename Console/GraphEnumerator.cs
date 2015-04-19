@@ -63,9 +63,31 @@ namespace Console
                 System.Console.WriteLine("last tried graph: " + Last.GetEdgeWeights().ToGraph6());
         }
 
+        public static IEnumerable<Graph> EnumerateGraphFile(string path)
+        {
+            using (var sr = new StreamReader(path))
+            {
+                while (true)
+                {
+                    var line = sr.ReadLine();
+                    if (line == null)
+                        break;
+
+                    var parts = line.Split(' ');
+                    var edgeWeights = parts.Where(p => !p.StartsWith("[")).Select(x => int.Parse(x)).ToList();
+
+                    List<int> vertexWeights = null;
+                    var vwp = parts.FirstOrDefault(p => p.StartsWith("["));
+                    if (vwp != null)
+                        vertexWeights = vwp.Trim('[').Trim(']').Split(',').Select(x => int.Parse(x)).ToList();
+
+                    yield return new Graph(edgeWeights, vertexWeights);
+                }
+            }
+        }
+
         List<Graph> LoadPreviousWinners()
         {
-            var winners = new List<Graph>();
             try
             {
                 try
@@ -74,30 +96,11 @@ namespace Console
                 }
                 catch { }
 
-                using (var sr = new StreamReader("previous " + WinnersFile))
-                {
-                    while (true)
-                    {
-                        var line = sr.ReadLine();
-                        if (line == null)
-                            break;
-
-                        var parts = line.Split(' ');
-                        var edgeWeights = parts.Where(p => !p.StartsWith("[")).Select(x => int.Parse(x)).ToList();
-
-                        List<int> vertexWeights = null;
-                        var vwp = parts.FirstOrDefault(p => p.StartsWith("["));
-                        if (vwp != null)
-                            vertexWeights = vwp.Trim('[').Trim(']').Split(',').Select(x => int.Parse(x)).ToList();
-
-                        var g = new Graph(edgeWeights, vertexWeights);
-                        winners.Add(g);
-                    }
-                }
+                return EnumerateGraphFile("previous " + WinnersFile).ToList();
             }
             catch { }
 
-            return winners;
+            return new List<Graph>();
         }
 
         public void AddWinner(Graph g, Graph output = null)

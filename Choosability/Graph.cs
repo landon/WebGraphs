@@ -991,6 +991,8 @@ namespace Choosability
         }
         public bool IsCliqueNumberAtLeast(int k)
         {
+            if (k > _vertices.Count)
+                return false;
             foreach (var set in ListUtility.EnumerateSublists(_vertices, k))
             {
                 if (IsClique(set))

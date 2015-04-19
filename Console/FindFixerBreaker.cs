@@ -10,12 +10,13 @@ namespace Console
 {
     public static class FindFixerBreaker
     {
-        const int Delta = 3;
-        const int MaxVertices = 20;
-        const bool TreesOnly = true;
+        static int Delta = 5;
+        static int MaxVertices = 20;
+        static bool TreesOnly = false;
+        static bool TriangleFree = false;
         
         const bool NearColorings = false;
-        static readonly string WinnersFile = (TreesOnly ? "trees only " : "") + (NearColorings ? "near colorings " : "") + "FixerBreaker winners Delta=" + Delta + ".txt";
+        static readonly string WinnersFile = (TriangleFree ? "triangle-free " : "") + (TreesOnly ? "trees only " : "") + (NearColorings ? "near colorings " : "") + "FixerBreaker winners Delta=" + Delta + ".txt";
 
         public static void Go()
         {
@@ -40,6 +41,8 @@ namespace Console
                         System.Console.ForegroundColor = ConsoleColor.White;
                         graphEnumerator.AddWinner(g);
                         _wonWeightings.Add(g.VertexWeight);
+
+                        g.ToDot();
                     }
                     else
                     {
@@ -53,6 +56,11 @@ namespace Console
 
         static bool Filter(Choosability.Graph g)
         {
+            if (TriangleFree)
+            {
+                return g.Vertices.All(v => g.IsIndependent(g.Neighbors[v]));
+            }
+
             return true;
         }
 

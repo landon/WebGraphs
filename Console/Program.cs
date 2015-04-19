@@ -13,12 +13,15 @@ namespace Console
     {
         static void Main(string[] args)
         {
-           // FindTarpits.Go();
+            var maker = new GraphPictureMaker(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\triangle-free FixerBreaker winners Delta=3.txt");
+            maker.DrawAll(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\neatotest", DotRenderType.png);
+            
+            // FindTarpits.Go();
             //FindFixerBreaker.Go();
-            FindChoosables.Go();
+            //FindChoosables.Go();
             System.Console.WriteLine();
             System.Console.WriteLine("done.");
-            System.Console.ReadKey();
+         //   System.Console.ReadKey();
         }
     }
 }
