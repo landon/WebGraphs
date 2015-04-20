@@ -10,7 +10,7 @@ namespace Console
 {
     public class GraphPictureMaker
     {
-        static readonly DotRenderer Renderer = new DotRenderer(@"C:\Program Files\Graphviz2.36\bin\neato.exe");
+        static readonly DotRenderer Renderer = new DotRenderer(@"C:\Program Files\Graphviz2.36\bin\dot.exe");
         static readonly List<string> DotColors = new List<string>() { "cadetblue", "brown", "dodgerblue", "turquoise", "orchid", "blue", "red", "green", 
                                                                       "yellow", "cyan",
                                                                       "limegreen",  "pink", 
@@ -39,6 +39,21 @@ namespace Console
             }
         }
 
+        public void GenerateAllDots(string outputDirectory)
+        {
+            Directory.CreateDirectory(outputDirectory);
+
+            foreach (var g in _graphs)
+            {
+                var name = string.Join("", g.GetEdgeWeights());
+                if (g.VertexWeight != null)
+                    name += "[" + string.Join(",", g.VertexWeight) + "]";
+
+                using(var sw = new StreamWriter(Path.Combine(outputDirectory, name) + ".dot"))
+                    sw.Write(ToDot(g));
+            }
+        }
+
         void Draw(Graph g, string path, DotRenderType renderType = DotRenderType.png)
         {
             Renderer.Render(ToDot(g), path, renderType);
@@ -50,7 +65,9 @@ namespace Console
 
             sb.AppendLine("graph G {");
             sb.AppendLine("overlap = false;");
-            sb.AppendLine("node[fontsize=36, style=bold, color=black; shape=circle, penwidth=3];");
+            sb.AppendLine("splines=true;");
+            sb.AppendLine("sep=0.2;");
+            sb.AppendLine("node[fontsize=20, style=bold, color=black; shape=circle, penwidth=1];");
             sb.AppendLine("edge[style=bold, color=black, penwidth=4];");
 
             foreach (int v in g.Vertices)

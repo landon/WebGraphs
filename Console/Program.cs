@@ -13,11 +13,14 @@ namespace Console
     {
         static void Main(string[] args)
         {
-            var maker = new GraphPictureMaker(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\triangle-free FixerBreaker winners Delta=3.txt");
-            maker.DrawAll(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\neatotest", DotRenderType.png);
+            //var sss = string.Join(",", Directory.EnumerateFiles(@"C:\Users\landon\Dropbox\Public\Web\GraphData\Fixable\Delta3TriangleFree", "*.dot").Select(f => "'Delta3TriangleFree/" + Path.GetFileName(f) + "'"));
+            
+            //var maker = new GraphPictureMaker(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\triangle-free FixerBreaker winners Delta=3.txt");
+            //maker.DrawAll(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\savingdots", DotRenderType.png);
+            //maker.GenerateAllDots(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\savingdots");
             
             // FindTarpits.Go();
-            //FindFixerBreaker.Go();
+            FindFixerBreaker.Go();
             //FindChoosables.Go();
             System.Console.WriteLine();
             System.Console.WriteLine("done.");

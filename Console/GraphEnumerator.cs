@@ -13,8 +13,9 @@ namespace Console
     public class GraphEnumerator : IDisposable
     {
         const string Graph6Root = @"C:\Graph6\";
-        static readonly string Graph6GraphFileRoot = Graph6Root + "graph";
-        static readonly string Graph6TreeFileRoot = Graph6Root + @"trees\trees";
+        public static readonly string GraphFileRoot = Graph6Root + "graph";
+        public static readonly string TreeFileRoot = Graph6Root + @"trees\trees";
+        public static readonly string TreePlusEdgeFileRoot = Graph6Root + @"treesplusedge\treesplusedge";
 
         StreamWriter Writer { get; set; }
         string WinnersFile { get; set; }
@@ -23,11 +24,11 @@ namespace Console
         int MaxVertices { get; set; }
         List<Graph> PreviousWinners { get; set; }
         Graph Last { get; set; }
-        public bool TreesOnly { get; set; }
-        string FileRoot { get { return TreesOnly ? Graph6TreeFileRoot : Graph6GraphFileRoot; } }
+        public string FileRoot { get; set; }
 
         public GraphEnumerator(string winnersFile, int minVertices, int maxVertices)
         {
+            FileRoot = GraphFileRoot;
             WinnersFile = winnersFile;
             MinVertices = minVertices;
             MaxVertices = maxVertices;

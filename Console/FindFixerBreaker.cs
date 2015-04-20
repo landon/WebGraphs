@@ -10,19 +10,24 @@ namespace Console
 {
     public static class FindFixerBreaker
     {
-        static int Delta = 5;
+        static int Delta = 3;
         static int MaxVertices = 20;
         static bool TreesOnly = false;
         static bool TriangleFree = false;
+        static bool TreesOrTreesPlusEdgeOnly = true;
         
         const bool NearColorings = false;
-        static readonly string WinnersFile = (TriangleFree ? "triangle-free " : "") + (TreesOnly ? "trees only " : "") + (NearColorings ? "near colorings " : "") + "FixerBreaker winners Delta=" + Delta + ".txt";
+        static readonly string WinnersFile = (TreesOrTreesPlusEdgeOnly ? "trees or trees plus edge only " : "") + (TriangleFree ? "triangle-free " : "") + (TreesOnly ? "trees only " : "") + (NearColorings ? "near colorings " : "") + "FixerBreaker winners Delta=" + Delta + ".txt";
 
         public static void Go()
         {
             using (var graphEnumerator = new GraphEnumerator(WinnersFile, 2, MaxVertices))
             {
-                graphEnumerator.TreesOnly = TreesOnly;
+                if (TreesOnly)
+                    graphEnumerator.FileRoot = GraphEnumerator.TreeFileRoot;
+                else if (TreesOrTreesPlusEdgeOnly)
+                    graphEnumerator.FileRoot = GraphEnumerator.TreePlusEdgeFileRoot;
+
                 foreach (var g in graphEnumerator.EnumerateGraph6File(Filter, EnumerateWeightings))
                 {
                     System.Console.Write("checking " + g.ToGraph6() + " with degrees [" + string.Join(",", g.VertexWeight) + "] ...");
