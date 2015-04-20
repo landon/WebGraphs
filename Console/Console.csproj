@@ -50,9 +50,15 @@
     <Compile Include="GraphEnumerator.cs" />
     <Compile Include="GraphViz.cs" />
     <Compile Include="LocalGraphExtensions.cs" />
+    <Compile Include="MakePictures.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="GraphPictureMaker.cs" />
+    <Compile Include="Resource.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resource.resx</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -74,6 +80,21 @@
       <Project>{079b33e9-0150-412b-b94f-08aa0170e580}</Project>
       <Name>GraphsCore</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resource.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resource.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\index.html.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\_index.html_.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\index.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

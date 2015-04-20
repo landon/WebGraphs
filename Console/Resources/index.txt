@@ -1,0 +1,110 @@
+<html>
+  <head>    
+    <title>fixable graphs</title>
+    <style>
+	html, body {
+ height: 100%;
+ padding:0;
+ margin: 0;
+}
+
+table {
+  height:100%;
+  width:100%;
+  background: aliceblue;}
+
+
+.containerDiv {
+   float:left;
+   width:200px;
+   height:200px;
+   border:1px solid;
+}
+
+.imageDiv {
+   position:relative;
+   z-index: -1000;
+   width:175px;
+   height:175px;
+   margin:10px 20px;
+   -webkit-transition: all 1s ease 0s;
+   -moz-transition: all 1s ease 0s;
+   -ms-transition: all 1s ease 0s;
+   -o-transition: all 1s ease 0s;
+   transition: all 1s ease 0s;
+}
+
+.containerDiv:hover .imageDiv{
+   position:relative;
+   z-index: 1000;
+   width:600px;
+   height:600px;    
+   background-color: rgb(125,125,125);
+   border-radius: 50px;
+   -webkit-transition: all 1s ease 0.5s;
+   -moz-transition: all 1s ease 0.5s;
+   -ms-transition: all 1s ease 0.5s;
+   -o-transition: all 1s ease 0.5s;
+   transition: all 1s ease 0.5s;
+}
+
+    </style>
+  </head>
+  <body>
+	<div id="output"></div>
+	<script>
+		var imageDivs = [];
+		var columns = 10;
+		var graphs =   [__FILL_THIS_SLOT__]
+
+		function getFile(url, onReceived) {
+			var request = new XMLHttpRequest();
+			request.open('GET', url, true);
+
+			request.onload = function() {
+			  if (request.status >= 200 && request.status < 400) {
+				onReceived(request.responseText);
+			  } else {
+			  }
+			};
+
+			request.onerror = function() {
+			};
+
+			request.send();
+		}
+	
+		window.onload = function () {	
+			var outputDiv = document.getElementById("output");
+			for (var k = 0; k < graphs.length; k++) {
+			   var containerDiv = document.createElement('div');
+			   var imageDiv = document.createElement('div');
+			   
+			   containerDiv.className="containerDiv";
+			   imageDiv.className="imageDiv";
+
+			   containerDiv.appendChild(imageDiv);
+			   outputDiv.appendChild(containerDiv);
+		       imageDivs.push(imageDiv);			   
+			}
+
+			redraw();
+		}
+		
+		function redraw() {
+			var tt = 0;
+			var repeater = function () {
+				getFile(graphs[tt], (function(x) {
+										return function(svg) {
+												imageDivs[x].innerHTML = svg;
+											};
+									})(tt));
+				tt++;
+				if (tt < graphs.length) 
+					setTimeout(repeater, 1);
+			};
+			repeater();
+		}
+	</script>
+  </body>
+</html>

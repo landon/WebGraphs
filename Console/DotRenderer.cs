@@ -28,7 +28,7 @@ namespace Console
             _dotPath = dotPath;
         }
 
-        public void Render(string dot, string fileName, DotRenderType renderType)
+        public string Render(string dot, string fileName, DotRenderType renderType)
         {
             var root = Path.GetDirectoryName(fileName);
             Directory.CreateDirectory(root);
@@ -49,6 +49,8 @@ namespace Console
             process.StartInfo = info;
             process.Start();
             process.WaitForExit();
+
+            return fileName;
         }
 
         public void Render(Graph graph, Dictionary<int, GameTree> treeLookup, string fileName, DotRenderType renderType, bool drawCached)

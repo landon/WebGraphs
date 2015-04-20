@@ -10,11 +10,11 @@ namespace Console
 {
     public static class FindFixerBreaker
     {
-        static int Delta = 3;
+        static int Delta = 5;
         static int MaxVertices = 20;
-        static bool TreesOnly = false;
+        static bool TreesOnly = true;
         static bool TriangleFree = false;
-        static bool TreesOrTreesPlusEdgeOnly = true;
+        static bool TreesOrTreesPlusEdgeOnly = false;
         
         const bool NearColorings = false;
         static readonly string WinnersFile = (TreesOrTreesPlusEdgeOnly ? "trees or trees plus edge only " : "") + (TriangleFree ? "triangle-free " : "") + (TreesOnly ? "trees only " : "") + (NearColorings ? "near colorings " : "") + "FixerBreaker winners Delta=" + Delta + ".txt";
@@ -24,7 +24,7 @@ namespace Console
             using (var graphEnumerator = new GraphEnumerator(WinnersFile, 2, MaxVertices))
             {
                 if (TreesOnly)
-                    graphEnumerator.FileRoot = GraphEnumerator.TreeFileRoot;
+                    graphEnumerator.FileRoot = @"C:\Users\landon\Google Drive\research\Graph6\degree5trees\geng";
                 else if (TreesOrTreesPlusEdgeOnly)
                     graphEnumerator.FileRoot = GraphEnumerator.TreePlusEdgeFileRoot;
 
