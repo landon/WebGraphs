@@ -13,13 +13,9 @@ namespace Console
     {
         static void Main(string[] args)
         {
-            FindFixerBreaker.Go();
-            //MakePictures.Go();
-            //var maker = new GraphPictureMaker(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\trees or trees plus edge only FixerBreaker winners Delta=3.txt");
-            //maker.DrawAllAndMakeWebpage(@"C:\Users\landon\Dropbox\Public\Web\GraphData\Fixable\Delta3TreeOrTreePlusEdge");
-            //var sss = string.Join(",", Directory.EnumerateFiles(@"C:\Users\landon\Dropbox\Public\Web\GraphData\Fixable\Delta3TriangleFree", "*.dot").Select(f => "'" + Path.GetFileName(f) + "'"));
-            //maker.GenerateAllDots(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\savingdots");
-            
+           // FindFixerBreaker.Go();
+            MakePictures.Go();
+           
             // FindTarpits.Go();
            // FindFixerBreaker.Go();
             //FindChoosables.Go();

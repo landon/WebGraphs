@@ -12,9 +12,9 @@ namespace Console
     {
         static int Delta = 5;
         static int MaxVertices = 20;
-        static bool TreesOnly = true;
+        static bool TreesOnly = false;
         static bool TriangleFree = false;
-        static bool TreesOrTreesPlusEdgeOnly = false;
+        static bool TreesOrTreesPlusEdgeOnly = true;
         
         const bool NearColorings = false;
         static readonly string WinnersFile = (TreesOrTreesPlusEdgeOnly ? "trees or trees plus edge only " : "") + (TriangleFree ? "triangle-free " : "") + (TreesOnly ? "trees only " : "") + (NearColorings ? "near colorings " : "") + "FixerBreaker winners Delta=" + Delta + ".txt";
@@ -26,7 +26,7 @@ namespace Console
                 if (TreesOnly)
                     graphEnumerator.FileRoot = @"C:\Users\landon\Google Drive\research\Graph6\degree5trees\geng";
                 else if (TreesOrTreesPlusEdgeOnly)
-                    graphEnumerator.FileRoot = GraphEnumerator.TreePlusEdgeFileRoot;
+                    graphEnumerator.FileRoot = @"C:\Users\landon\Google Drive\research\Graph6\degree5treesplusedge\geng";
 
                 foreach (var g in graphEnumerator.EnumerateGraph6File(Filter, EnumerateWeightings))
                 {
