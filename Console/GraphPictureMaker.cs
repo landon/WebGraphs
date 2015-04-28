@@ -18,6 +18,9 @@ namespace Console
 
         IEnumerable<Graph> _graphs;
 
+        public bool Directed { get; set; }
+        public bool ShowFactors { get; set; }
+
         public GraphPictureMaker(string graphFile) : this(GraphEnumerator.EnumerateGraphFile(graphFile)) { }
         public GraphPictureMaker(params Graph[] graphs) : this((IEnumerable<Graph>)graphs) { }
         public GraphPictureMaker(IEnumerable<Graph> graphs)
@@ -39,7 +42,7 @@ namespace Console
             Directory.CreateDirectory(outputDirectory);
             foreach (var g in _graphs)
             {
-                var name = string.Join("", g.GetEdgeWeights());
+                var name = string.Join("", g.GetEdgeWeights().Select(ew => Math.Abs(ew)));
                 if (g.VertexWeight != null)
                     name += "[" + string.Join(",", g.VertexWeight) + "]";
 
@@ -63,13 +66,13 @@ namespace Console
                     name += "[" + string.Join(",", g.VertexWeight) + "]";
 
                 using(var sw = new StreamWriter(Path.Combine(outputDirectory, name) + ".dot"))
-                    sw.Write(ToDot(g));
+                    sw.Write(ToDot(g, Directed, ShowFactors));
             }
         }
 
         string Draw(Graph g, string path, DotRenderType renderType = DotRenderType.png)
         {
-            var imageFile = Renderer.Render(ToDot(g), path, renderType);
+            var imageFile = Renderer.Render(ToDot(g, Directed, ShowFactors), path, renderType);
          
             if (renderType == DotRenderType.svg)
                 FixSvg(imageFile);
@@ -98,23 +101,42 @@ namespace Console
             }
         }
 
-        static string ToDot(Graph g)
+        static string ToDot(Graph g, bool directed = false, bool showFactors = false)
         {
+            if (showFactors)
+                return g.ToDotWithFactors();
+
             var sb = new StringBuilder();
 
-            sb.AppendLine("graph G {");
+            if (directed)
+                sb.AppendLine("digraph G {");
+            else
+                sb.AppendLine("graph G {");
             sb.AppendLine("overlap = false;");
             sb.AppendLine("splines=true;");
-            sb.AppendLine("sep=0.2;");
+            sb.AppendLine("sep=0.3;");
             sb.AppendLine("node[fontsize=20, style=bold, color=black; shape=circle, penwidth=1];");
-            sb.AppendLine("edge[style=bold, color=black, penwidth=4];");
+            sb.AppendLine("edge[style=bold, color=black, penwidth=2];");
 
             foreach (int v in g.Vertices)
             {
-                int colorIndex = g.VertexWeight == null ? 0 : g.VertexWeight[v] - 2;
+                int colorIndex;
+                var label = "";
+                if (directed)
+                {
+                    label = g.InDegree(v).ToString();
+                    colorIndex = g.InDegree(v);
+                }
+                else
+                {
+                    label = g.VertexWeight == null ? "" : g.VertexWeight[v].ToString();
+                    colorIndex = g.VertexWeight == null ? 2 : g.VertexWeight[v];
+                }
+                colorIndex -= 2;
                 if (colorIndex < 0)
                     colorIndex += 13;
-                sb.AppendLine(string.Format(@"{0} [label = ""{2}"", style = filled, fillcolor = ""{1}""];", v, DotColors[colorIndex], g.VertexWeight == null ? "" : g.VertexWeight[v].ToString()));
+
+                sb.AppendLine(string.Format(@"{0} [label = ""{2}"", style = filled, fillcolor = ""{1}""];", v, DotColors[colorIndex % DotColors.Count], label));
             }
 
             for (int i = 0; i < g.N; i++)
@@ -122,7 +144,15 @@ namespace Console
                 {
                     if (g[i, j])
                     {
-                        sb.AppendLine(string.Format("{0} -- {1}", i, j));
+                        if (directed)
+                        {
+                            if (g.Directed[i,j])
+                                sb.AppendLine(string.Format("{0} -> {1}", i, j));
+                            else
+                                sb.AppendLine(string.Format("{1} -> {0}", i, j));
+                        }
+                        else
+                            sb.AppendLine(string.Format("{0} -- {1}", i, j));
                     }
                 }
 

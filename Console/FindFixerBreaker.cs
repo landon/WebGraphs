@@ -10,7 +10,7 @@ namespace Console
 {
     public static class FindFixerBreaker
     {
-        static int Delta = 5;
+        static int Delta = 3;
         static int MaxVertices = 20;
         static bool TreesOnly = false;
         static bool TriangleFree = false;
@@ -26,7 +26,9 @@ namespace Console
                 if (TreesOnly)
                     graphEnumerator.FileRoot = @"C:\Users\landon\Google Drive\research\Graph6\degree5trees\geng";
                 else if (TreesOrTreesPlusEdgeOnly)
-                    graphEnumerator.FileRoot = @"C:\Users\landon\Google Drive\research\Graph6\degree5treesplusedge\geng";
+                    graphEnumerator.FileRoot = GraphEnumerator.TreePlusEdgeFileRoot;
+                else
+                    graphEnumerator.FileRoot = @"C:\Users\landon\Google Drive\research\Graph6\degree3treeplustwoedges\geng";
 
                 foreach (var g in graphEnumerator.EnumerateGraph6File(Filter, EnumerateWeightings))
                 {
@@ -47,7 +49,7 @@ namespace Console
                         graphEnumerator.AddWinner(g);
                         _wonWeightings.Add(g.VertexWeight);
 
-                        g.ToDot();
+                        g.ToDotWithFactors();
                     }
                     else
                     {

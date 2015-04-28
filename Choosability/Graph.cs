@@ -559,17 +559,17 @@ namespace Choosability
             return w;
         }
 
-        static readonly List<string> DotColors = new List<string>() { "blue", "red", "green", 
-                                                                      "orchid", "yellow", "cyan", "turquoise", 
-                                                                      "cadetblue", "limegreen", "brown", "pink", 
-                                                                      "orange", "dodgerblue", "goldenrod", "aquamarine", "black", };
+        static readonly List<string> DotColors = new List<string>() { "cadetblue", "brown", "dodgerblue", "turquoise", "orchid", "blue", "red", "green", 
+                                                                      "yellow", "cyan",
+                                                                      "limegreen",  "pink", 
+                                                                      "orange",  "goldenrod", "aquamarine", "black", };
 
         static readonly List<string> TikzColors = new List<string>() { "blue", "red", "green", 
                                                                       "Orchid", "yellow", "cyan", "Turquoise", 
                                                                       "CadetBlue", "LimeGreen", "brown", "pink", 
                                                                       "orange", "Cerulean", "Goldenrod", "Aquamarine", "black", };
 
-        public string ToDot()
+        public string ToDotWithFactors()
         {
             var sb = new StringBuilder();
 
@@ -586,10 +586,16 @@ namespace Choosability
             }
 
             sb.AppendLine("graph G {");
+            sb.AppendLine("overlap = false;");
+            sb.AppendLine("splines=true;");
+            sb.AppendLine("sep=0.3;");
+            sb.AppendLine("node[fontsize=20, style=bold, color=black; shape=circle, penwidth=1];");
+            sb.AppendLine("edge[style=bold, color=black, penwidth=2];");
             foreach (int v in _vertices)
             {
                 int colorIndex = colorRanges.Select((r, i) => new { range = r, index = i }).First(p => p.range.Contains(v)).index % DotColors.Count;
-                sb.AppendLine(string.Format(@"{0} [label = ""{2}"", style = filled, color = ""{1}""];", v, DotColors[colorIndex], v + 1));
+                var label = "";
+                sb.AppendLine(string.Format(@"{0} [label = ""{2}"", style = filled, fillcolor = ""{1}""];", v, DotColors[colorIndex], label));
             }
 
             int k = 0;
@@ -598,7 +604,7 @@ namespace Choosability
                 {
                     if (G._adjacent[i, j])
                     {
-                        sb.AppendLine(string.Format("{0} -- {1} [label = \"{2}\"]", i, j, k));
+                        sb.AppendLine(string.Format("{0} -- {1}", i, j, k));
 
                         k++;
                     }

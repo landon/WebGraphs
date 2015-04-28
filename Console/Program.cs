@@ -13,15 +13,16 @@ namespace Console
     {
         static void Main(string[] args)
         {
-           // FindFixerBreaker.Go();
-            MakePictures.Go();
+            SuperAbundanceFinder.Go();
+            //FindFixerBreaker.Go();
+            //MakePictures.Go();
            
             // FindTarpits.Go();
            // FindFixerBreaker.Go();
             //FindChoosables.Go();
             System.Console.WriteLine();
             System.Console.WriteLine("done.");
-         //   System.Console.ReadKey();
+            System.Console.ReadKey();
         }
     }
 }

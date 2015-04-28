@@ -20,7 +20,7 @@ namespace Console
         public static void DrawGraph(Choosability.Graph g, string path)
         {
             var renderer = new DotRenderer(@"C:\Program Files\Graphviz2.36\bin\dot.exe");
-            renderer.Render(g.ToDot(), path, DotRenderType.pdf);
+            renderer.Render(g.ToDotWithFactors(), path, DotRenderType.pdf);
         }
     }
 }

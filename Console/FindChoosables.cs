@@ -13,8 +13,8 @@ namespace Console
 {
     public static class FindChoosables
     {
-        const int MinVertices = 4;
-        const int MaxVertices = 9;
+        const int MinVertices = 3;
+        const int MaxVertices = 8;
 
         const bool Offline = false;
         const bool AT = false;
