@@ -14,13 +14,13 @@ namespace Console
             var renderer = new DotRenderer(@"C:\Program Files\Graphviz2.36\bin\dot.exe");
 
             var vv = tree.BuildGraph();
-            renderer.Render(vv.Item1, vv.Item2, path, DotRenderType.pdf, true);
+            renderer.Render(vv.Item1, vv.Item2, path, DotRenderType.png, true);
         }
 
         public static void DrawGraph(Choosability.Graph g, string path)
         {
             var renderer = new DotRenderer(@"C:\Program Files\Graphviz2.36\bin\dot.exe");
-            renderer.Render(g.ToDotWithFactors(), path, DotRenderType.pdf);
+            renderer.Render(g.ToDotWithFactors(), path, DotRenderType.png);
         }
     }
 }

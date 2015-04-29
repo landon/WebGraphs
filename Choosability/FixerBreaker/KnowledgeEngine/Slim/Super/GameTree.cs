@@ -9,6 +9,9 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
     {
         public SuperSlimBoard Board { get; set; }
         public bool IsColorable { get; set; }
+        public bool IsSuperabundant { get; set; }
+        public int GameTreeIndex { get; set; }
+        public int SameAsIndex { get; set; }
         public BreakerChoiceInfo Info {get; set;}
 
         public void AddChild(GameTree tree, BreakerChoiceInfo info)

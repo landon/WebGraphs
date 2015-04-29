@@ -11,7 +11,7 @@ namespace Console
     public static class SuperAbundanceFinder
     {
         static int MaxVertices = 20;
-        static int MaxDegree = 3;
+        static int MaxDegree = 2;
         static bool TreesOnly = true;
         static readonly string WinnersFile = (MaxDegree != int.MaxValue ? "max degree " + MaxDegree : "") + (TreesOnly ? "trees only " : "") + "superabundance.txt";
 

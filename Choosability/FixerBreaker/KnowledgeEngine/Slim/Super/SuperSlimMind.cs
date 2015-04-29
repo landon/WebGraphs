@@ -30,6 +30,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
         public bool SuperabundantOnly { get; set; }
 
         public List<SuperSlimBoard> NonColorableBoards { get; private set; }
+        public List<SuperSlimBoard> BreakerWonBoards { get; private set; }
         public List<SuperSlimBoard> DeepestBoards { get; private set; }
         public Dictionary<int, List<SuperSlimBoard>> BoardsOfDepth { get; private set; }
 
@@ -46,12 +47,14 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
             MissingEdgeIndex = -1;
         }
 
-        public bool Analyze(Template template, Action<Tuple<string, int>> progress)
+        public bool Analyze(Template template, Action<Tuple<string, int>> progress = null)
         {
             _wonBoards.Clear();
             _remainingBoards.Clear();
             BoardCountsList = new List<List<int>>();
             BreakerWonBoard = null;
+            NonColorableBoards = new List<SuperSlimBoard>();
+            BreakerWonBoards = new List<SuperSlimBoard>();
 
             FixerWonAllNearlyColorableBoards = true;
 
@@ -157,7 +160,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
             }
 
             BoardCounts.Add(_remainingBoards.Count);
-            NonColorableBoards = _remainingBoards.ToList();
+            NonColorableBoards.AddRange(_remainingBoards);
 
             while (_remainingBoards.Count > 0)
             {
@@ -196,6 +199,8 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
 
                 if (_remainingBoards.Count == count)
                 {
+                    BreakerWonBoards.AddRange(_remainingBoards);
+
                     if (BreakerWonBoard == null)
                         BreakerWonBoard = _remainingBoards[0];
 
@@ -304,28 +309,46 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
             return stacks[v1] & stacks[v2];
         }
 
-        public GameTree BuildGameTree(SuperSlimBoard board)
+        int _gameTreeIndex;
+        public GameTree BuildGameTree(SuperSlimBoard board, bool win = true)
         {
-            var seenBoards =  new HashSet<SuperSlimBoard>();
-            return BuildGameTree(board, seenBoards);
+            var seenBoards =  new Dictionary<SuperSlimBoard, int>();
+            _gameTreeIndex = 1;
+            return BuildGameTree(board, seenBoards, win);
         }
 
-        public GameTree BuildGameTree(SuperSlimBoard board, HashSet<SuperSlimBoard> seenBoards)
+        GameTree BuildGameTree(SuperSlimBoard board, Dictionary<SuperSlimBoard, int> seenBoards, bool win = true)
         {
-            seenBoards.Add(board);
+            seenBoards[board] = _gameTreeIndex;
             var tree = new GameTree() { Board = board };
             tree.IsColorable = _coloringAnalyzer.Analyze(board);
+            tree.IsSuperabundant = IsSuperabundant(board);
+            tree.GameTreeIndex = _gameTreeIndex;
+            _gameTreeIndex++;
 
             if (tree.IsColorable)
                 return tree;
 
-            foreach (var bc in _swapAnalyzer.TreeInfo[board])
+            if (!tree.IsSuperabundant)
+                return tree;
+
+            var treeInfo = win ? _swapAnalyzer.WinTreeInfo[board] : _swapAnalyzer.LossTreeInfo[board];
+            foreach (var bc in treeInfo)
             {
                 var childBoard = new SuperSlimBoard(board._trace, bc.Alpha, bc.Beta, bc.Response, board._stackCount);
-                if (seenBoards.Contains(childBoard))
+                int index;
+                if (seenBoards.TryGetValue(childBoard, out index))
+                {
+                    var ct = new GameTree() { Board = childBoard };
+                    ct.IsColorable = _coloringAnalyzer.Analyze(childBoard);
+                    ct.IsSuperabundant = IsSuperabundant(board);
+                    ct.GameTreeIndex = _gameTreeIndex++;
+                    ct.SameAsIndex = index;
+                    tree.AddChild(ct, bc);
                     continue;
+                }
 
-                var childTree = BuildGameTree(childBoard, seenBoards);
+                var childTree = BuildGameTree(childBoard, seenBoards, win);
                 tree.AddChild(childTree, bc);
             }
 

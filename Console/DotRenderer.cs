@@ -69,9 +69,16 @@ namespace Console
             {
                 var tree = treeLookup[v];
 
+                var infoLabel = "";
+                if (tree.IsColorable)
+                    infoLabel = "colorable";
+                else if (!tree.IsSuperabundant)
+                    infoLabel = "not superabundant";
+                else if (tree.SameAsIndex > 0)
+                    infoLabel = "same as " + tree.SameAsIndex;
                 var sbb = new StringBuilder();
                 sbb.AppendLine(@"<<table cellpadding='3' cellborder='0' cellspacing='0' border='0'>");
-                sbb.AppendLine(string.Format(@"<tr><td></td><td></td><td></td><td></td><td></td></tr><tr rowspan='2'><td colspan='5'><FONT POINT-SIZE='18'>{0}</FONT></td></tr><tr><td colspan='5'>{1}</td></tr>", tree.Board, tree.IsColorable ? "colorable" : ""));
+                sbb.AppendLine(string.Format(@"<tr><td colspan='5' align='left' bgcolor='black'><font color='white'>{2}</font></td></tr><tr><td></td><td></td><td></td><td></td><td></td></tr><tr rowspan='2'><td colspan='5'><FONT POINT-SIZE='18'>{0}</FONT></td></tr><tr><td colspan='5'>{1}</td></tr>", tree.Board, infoLabel, tree.GameTreeIndex));
                 sbb.AppendLine("</table>>");
 
                 sb.AppendLine(string.Format("{0} [label = {2}, color = \"{1}\"];", v, "black", sbb.ToString()));

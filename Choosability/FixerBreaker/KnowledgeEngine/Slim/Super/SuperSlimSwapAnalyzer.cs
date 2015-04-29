@@ -8,7 +8,8 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
     public class SuperSlimSwapAnalyzer
     {
         bool StoreTreeInfo { get; set; }
-        public Dictionary<SuperSlimBoard, GameTreeInfo> TreeInfo { get; private set; }
+        public Dictionary<SuperSlimBoard, GameTreeInfo> WinTreeInfo { get; private set; }
+        public Dictionary<SuperSlimBoard, GameTreeInfo> LossTreeInfo { get; private set; }
 
         ulong[] _fixerResponses;
         int _fixerResponseCount;
@@ -19,17 +20,25 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
             _fixerResponses = new ulong[1 << ((n + 1) >> 1)];
             StoreTreeInfo = storeTreeInfo;
             if (StoreTreeInfo)
-                TreeInfo = new Dictionary<SuperSlimBoard, GameTreeInfo>();
+            {
+                WinTreeInfo = new Dictionary<SuperSlimBoard, GameTreeInfo>();
+                LossTreeInfo = new Dictionary<SuperSlimBoard, GameTreeInfo>();
+            }
         }
 
         public bool Analyze(SuperSlimBoard board, HashSet<SuperSlimBoard> wonBoards)
         {
-            GameTreeInfo info = null;
+            GameTreeInfo winInfo = null;
+            GameTreeInfo lossInfo = null;
             if (StoreTreeInfo)
             {
-                info = new GameTreeInfo();
-                TreeInfo[board] = info;
+                winInfo = new GameTreeInfo();
+                WinTreeInfo[board] = winInfo;
+
+                lossInfo = new GameTreeInfo();
+                LossTreeInfo[board] = lossInfo;
             }
+
             for (int i = 0; i < board._length; i++)
             {
                 for (int j = i + 1; j < board._length; j++)
@@ -51,24 +60,32 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
                             {
                                 winningSwapExists = true;
                                 if (StoreTreeInfo)
-                                    info.Add(breakerChoice, i, j, _fixerResponses[k]);
+                                    winInfo.Add(breakerChoice, i, j, _fixerResponses[k]);
                                 break;
+                            }
+                            else
+                            {
+                                if (StoreTreeInfo)
+                                    lossInfo.Add(breakerChoice, i, j, _fixerResponses[k]);
                             }
                         }
 
                         if (!winningSwapExists)
                         {
                             if (StoreTreeInfo)
-                                info.Clear();
+                                winInfo.Clear();
                             winningSwapAlwaysExists = false;
                             break;
+                        }
+                        else
+                        {
+                           // if (StoreTreeInfo)
+                           //     lossInfo.Clear();
                         }
                     }
 
                     if (winningSwapAlwaysExists)
-                    {
                         return true;
-                    }
                 }
             }
 

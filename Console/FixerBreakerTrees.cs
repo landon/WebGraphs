@@ -15,6 +15,42 @@ namespace Console
     {
         public static void Go()
         {
+            var root = @"C:\game trees\C5\all";
+            Directory.CreateDirectory(root);
+
+            var g = Choosability.Graphs.C(5);
+            var sizes = Enumerable.Repeat(3, 5).ToList();
+
+            var mind = new Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.SuperSlimMind(g);
+            mind.MaxPot = int.MaxValue;
+            mind.SuperabundantOnly = true;
+            //mind.OnlyConsiderNearlyColorableBoards = true;
+
+            int j = 0;
+            var win = mind.Analyze(new Template(sizes));
+
+            if (win)
+            {
+                foreach (var board in mind.NonColorableBoards)
+                {
+                    var tree = mind.BuildGameTree(board, win);
+                    GraphViz.DrawTree(tree, root + @"\" + " depth " + tree.GetDepth() + " board " + j + ".png");
+                    j++;
+                }
+            }
+            else
+            {
+                foreach (var board in mind.BreakerWonBoards)
+                {
+                    var tree = mind.BuildGameTree(board, win);
+                    GraphViz.DrawTree(tree, root + @"\" + " depth " + tree.GetDepth() + " board " + j + ".png");
+                    j++;
+                }
+            }
+        }
+
+        public static void SimplifyProgol()
+        {
             var uiG = GraphsCore.CompactSerializer.Deserialize("webgraph:7qDZ#!.4bH!!#7iTa6#\\kQ>>q!Aa_K&&\\cA#CI8Z%m^FU!5o1r=u$([)hhIgOoV/V%gAPP'h.nj%te%A!!`K(\"9AMD!!!!''Z^Lma8lGYaE.spA.ShC!!%NS!<C1@!!");
             //var uiG = GraphsCore.CompactSerializer.Deserialize("webgraph:7sY.8!3?/#!!!QsP7)=G\\-lgI!Aa^(,DG#K*L%.'#B1Ju(I89]+eobcPS&Q*1&rRk!71itL#5QE'bbO&<IH8?<IIO]KASHb$31&0!<C1@!!!9=a9iU%1_g\"@!<s7Z#o(IV&-<(Ma9&.K\",%3g#lt%I!!!");
             var potSize = uiG.Vertices.Max(v => int.Parse(v.Label));
@@ -123,7 +159,6 @@ namespace Console
             mind.MissingEdgeIndex = i;
 
             var root = @"C:\game trees\alls2\" + i;
-
             Directory.CreateDirectory(root);
 
             var win = mind.Analyze(template, null);
