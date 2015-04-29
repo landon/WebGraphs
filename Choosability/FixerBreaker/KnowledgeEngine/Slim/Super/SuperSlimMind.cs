@@ -51,6 +51,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
             _wonBoards.Clear();
             _remainingBoards.Clear();
             BoardCountsList = new List<List<int>>();
+            BreakerWonBoard = null;
 
             FixerWonAllNearlyColorableBoards = true;
 
@@ -195,10 +196,12 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
 
                 if (_remainingBoards.Count == count)
                 {
+                    if (BreakerWonBoard == null)
+                        BreakerWonBoard = _remainingBoards[0];
+
                     if (OnlyConsiderNearlyColorableBoards && MissingEdgeIndex >= 0)
                     {
                         FixerWonAllNearlyColorableBoards = false;
-                        BreakerWonBoard = _remainingBoards[0];
                     }
                     else if (ExistsNearlyColorableBoardForEachEdge(_remainingBoards))
                     {

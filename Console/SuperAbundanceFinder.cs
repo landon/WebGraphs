@@ -11,8 +11,9 @@ namespace Console
     public static class SuperAbundanceFinder
     {
         static int MaxVertices = 20;
+        static int MaxDegree = 3;
         static bool TreesOnly = true;
-        static readonly string WinnersFile = (TreesOnly ? "trees only " : "") + "superabundance.txt";
+        static readonly string WinnersFile = (MaxDegree != int.MaxValue ? "max degree " + MaxDegree : "") + (TreesOnly ? "trees only " : "") + "superabundance.txt";
 
         public static void Go()
         {
@@ -21,6 +22,7 @@ namespace Console
                 if (TreesOnly)
                     graphEnumerator.FileRoot = GraphEnumerator.TreeFileRoot;
                 graphEnumerator.WeightCondition = GraphEnumerator.WeightConditionFalse;
+                
                 foreach (var g in graphEnumerator.EnumerateGraph6File(Filter, EnumerateWeightings))
                 {
                     System.Console.Write("checking " + g.ToGraph6() + " with degrees [" + string.Join(",", g.VertexWeight) + "] ...");
@@ -51,6 +53,9 @@ namespace Console
 
         static bool Filter(Choosability.Graph g)
         {
+            if (g.MaxDegree > MaxDegree)
+                return false;
+
             return true;
         }
 

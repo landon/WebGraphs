@@ -22,14 +22,16 @@ namespace Console
             //MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\AT winners1.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\BorodinKostochka\AT", directed: true);
             //MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\winners2.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\BorodinKostochka\2fold", directed: false, showFactors:true);
             //MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\offline winners1.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\BorodinKostochka\Offline", directed: false, showFactors: true);
-            MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\winners.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\BorodinKostochka\Online", directed: false, showFactors: true);
+            //MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\winners.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\BorodinKostochka\Online", directed: false, showFactors: true);
+            MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Another\trees only superabundance.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\superabundance\trees", directed: false, showFactors: false);
+            //MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Debug\superabundance.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\superabundance\all", directed: false, showFactors: false);
         }
 
         static void MakeWebpage(string graphPath, string outputPath, bool directed = false, bool showFactors = false)
         {
             var maker = new GraphPictureMaker(graphPath);
             maker.Directed = directed;
-            maker.ShowFactors = true;
+            maker.ShowFactors = showFactors;
             maker.DrawAllAndMakeWebpage(outputPath);
         }
     }
