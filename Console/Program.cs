@@ -13,8 +13,8 @@ namespace Console
     {
         static void Main(string[] args)
         {
-            FixerBreakerTrees.Go();
-            //SuperAbundanceFinder.Go();
+            //FixerBreakerTrees.Go();
+            SuperAbundanceFinder.Go();
             //FindFixerBreaker.Go();
             //MakePictures.Go();
            

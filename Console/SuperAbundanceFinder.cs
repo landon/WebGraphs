@@ -11,9 +11,10 @@ namespace Console
     public static class SuperAbundanceFinder
     {
         static int MaxVertices = 20;
-        static int MaxDegree = 2;
-        static bool TreesOnly = true;
-        static readonly string WinnersFile = (MaxDegree != int.MaxValue ? "max degree " + MaxDegree : "") + (TreesOnly ? "trees only " : "") + "superabundance.txt";
+        static int MaxDegree = int.MaxValue;
+        static bool CheckNearColorings = true;
+        static bool TreesOnly = false;
+        static readonly string WinnersFile = (CheckNearColorings ? "no near colorings lost " : "") + (MaxDegree != int.MaxValue ? "max degree " + MaxDegree : "") + (TreesOnly ? "trees only " : "") + "superabundance.txt";
 
         public static void Go()
         {
@@ -22,7 +23,7 @@ namespace Console
                 if (TreesOnly)
                     graphEnumerator.FileRoot = GraphEnumerator.TreeFileRoot;
                 graphEnumerator.WeightCondition = GraphEnumerator.WeightConditionFalse;
-                
+
                 foreach (var g in graphEnumerator.EnumerateGraph6File(Filter, EnumerateWeightings))
                 {
                     System.Console.Write("checking " + g.ToGraph6() + " with degrees [" + string.Join(",", g.VertexWeight) + "] ...");
@@ -40,13 +41,23 @@ namespace Console
                         System.Console.WriteLine(" fixer wins");
                         System.Console.ForegroundColor = ConsoleColor.White;
                         graphEnumerator.AddWinner(g);
+                        continue;
                     }
-                    else
+                    else if (CheckNearColorings)
                     {
-                        System.Console.ForegroundColor = ConsoleColor.Red;
-                        System.Console.WriteLine(" breaker wins");
-                        System.Console.ForegroundColor = ConsoleColor.White;
+                        if (mind.BreakerWonBoards.All(bb => !mind.NearlyColorableForSomeEdge(bb)))
+                        {
+                            System.Console.ForegroundColor = ConsoleColor.Green;
+                            System.Console.WriteLine(" fixer wins all nearly colorable boards");
+                            System.Console.ForegroundColor = ConsoleColor.White;
+                            graphEnumerator.AddWinner(g);
+                            continue;
+                        }
                     }
+                 
+                    System.Console.ForegroundColor = ConsoleColor.Red;
+                    System.Console.WriteLine(" breaker wins");
+                    System.Console.ForegroundColor = ConsoleColor.White;
                 }
             }
         }

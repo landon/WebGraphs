@@ -234,7 +234,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
             return Enumerable.Range(0, _lineGraph.N).All(e => boards.Any(b => NearlyColorableForEdge(b, e)));
         }
 
-        bool NearlyColorableForSomeEdge(SuperSlimBoard board)
+        public bool NearlyColorableForSomeEdge(SuperSlimBoard board)
         {
             return Enumerable.Range(0, _lineGraph.N).Any(e => NearlyColorableForEdge(board, e));
         }
