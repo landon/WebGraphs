@@ -78,6 +78,7 @@ namespace WebGraphs
         public event Action DoSixFoldWay;
         public event Action DoTiling;
         public event Action DoSpin;
+        public event Action DoSuperabundantOnly;
 
         public MenuBar()
         {
@@ -297,6 +298,9 @@ namespace WebGraphs
                     break;
                 case "spin":
                     A(DoSpin);
+                    break;
+                case "analyze superabundant only":
+                    A(DoSuperabundantOnly);
                     break;
             }
         }

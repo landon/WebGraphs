@@ -25,6 +25,7 @@ namespace Console
         List<Graph> PreviousWinners { get; set; }
         Graph Last { get; set; }
         public string FileRoot { get; set; }
+        public Func<Graph, Graph, int, int, bool> WeightCondition = WeightConditionDown;
 
         public GraphEnumerator(string winnersFile, int minVertices, int maxVertices)
         {
@@ -189,9 +190,19 @@ namespace Console
             }
         }
 
-        static bool WeightCondition(Graph self, Graph A, int selfV, int av)
+        public static bool WeightConditionDown(Graph self, Graph A, int selfV, int av)
         {
             return A.VertexWeight[av] >= self.VertexWeight[selfV];
+        }
+
+        public static bool WeightConditionUp(Graph self, Graph A, int selfV, int av)
+        {
+            return A.VertexWeight[av] <= self.VertexWeight[selfV];
+        }
+
+        public static bool WeightConditionFalse(Graph self, Graph A, int selfV, int av)
+        {
+            return false;
         }
 
         static void WriteGraph(StreamWriter sw, Graph g)

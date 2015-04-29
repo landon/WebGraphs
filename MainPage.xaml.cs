@@ -99,14 +99,13 @@ namespace WebGraphs
             _mainMenu.DoSixFoldWay += _mainMenu_DoSixFoldWay;
             _mainMenu.DoTiling += _mainMenu_DoTiling;
             _mainMenu.DoSpin += _mainMenu_DoSpin;
+            _mainMenu.DoSuperabundantOnly += AnalyzeSuperabundantOnly;
 
             _propertyGrid.SomethingChanged += _propertyGrid_SomethingChanged;
 
             DoAutoLoad();
         }
 
-   
-   
         void DoAutoLoad()
         {
             try
@@ -1614,6 +1613,11 @@ trash can button.
         {
         }
 
+        void AnalyzeSuperabundantOnly()
+        {
+            AnalyzeFixerBreaker(false, -1, true);
+        }
+
         void AnalyzeOnlyNearColoringsForSelectedEdge()
         {
             var blob = AlgorithmBlob.Create(SelectedTabCanvas);
@@ -1642,26 +1646,39 @@ trash can button.
             AnalyzeFixerBreaker(false);
         }
 
-        async void AnalyzeFixerBreaker(bool onlyNearColorings, int missingEdgeIndex = -1)
+        async void AnalyzeFixerBreaker(bool onlyNearColorings, int missingEdgeIndex = -1, bool superAbundantOnly = false)
         {
             var blob = AlgorithmBlob.Create(SelectedTabCanvas);
             if (blob == null)
                 return;
 
-            int potSize;
-            try
+            int potSize = int.MaxValue;
+            if (!superAbundantOnly)
             {
-                potSize = blob.UIGraph.Vertices.Max(v => v.Label.TryParseInt().Value);
+                try
+                {
+                    potSize = blob.UIGraph.Vertices.Max(v => v.Label.TryParseInt().Value);
+                }
+                catch
+                {
+                    return;
+                }
             }
-            catch
-            {
-                return;
-            }
+
             var G = blob.AlgorithmGraph;
-            var template = new Template(G.Vertices.Select(v => potSize + G.Degree(v) - blob.UIGraph.Vertices[v].Label.TryParseInt().Value).ToList());
+            Template template; 
+            if (superAbundantOnly)
+            {
+                template = new Template(G.Vertices.Select(v => blob.UIGraph.Vertices[v].Label.TryParseInt().Value).ToList());
+            }
+            else
+            {
+                template = new Template(G.Vertices.Select(v => potSize + G.Degree(v) - blob.UIGraph.Vertices[v].Label.TryParseInt().Value).ToList());
+            }
 
             var mind = new Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.SuperSlimMind(G);
             mind.MaxPot = potSize;
+            mind.SuperabundantOnly = superAbundantOnly;
             mind.OnlyConsiderNearlyColorableBoards = onlyNearColorings;
             mind.MissingEdgeIndex = missingEdgeIndex;
             
@@ -1675,79 +1692,24 @@ trash can button.
 
                     var win = mind.Analyze(template, resultWindow.OnProgress);
 
-                    if (onlyNearColorings)
+                    if (superAbundantOnly)
                     {
-                        if (missingEdgeIndex >= 0)
-                        {
-                            if (mind.HasNonSuperabundantBoardThatIsNearlyColorable)
-                            {
-                                return "Breaker wins since there is a non-superabundant nearly colorable board";
-                            }
-                            else
-                            {
-                                var stats = mind.BoardCounts[0] + " nearly colorable boards for selected edge\n" + (mind.BoardCounts[0] - mind.BoardCounts[1]) + " colorable boards\n" + (mind.BoardCounts[1] - mind.BoardCounts[2]) + " non-superabundant boards\n";
-                                for (int i = 3; i < mind.BoardCounts.Count - 1; i++)
-                                    stats += (mind.BoardCounts[i - 1] - mind.BoardCounts[i]) + " depth " + (i - 2) + " boards\n";
+                        var stats = GetStats(mind.BoardCountsList.OrderByDescending(bc => bc.Count).First());
+                        if (win)
+                            return "Fixer wins\n\n" + stats;
 
-                                var finalDifference = mind.BoardCounts[mind.BoardCounts.Count - 2] - mind.BoardCounts[mind.BoardCounts.Count - 1];
-                                if (finalDifference == 0)
-                                    stats += mind.BoardCounts[mind.BoardCounts.Count - 1] + " lost boards";
-                                else
-                                    stats += finalDifference + " depth " + (mind.BoardCounts.Count - 3) + " boards\n";
-
-                                if (win)
-                                    return "Fixer wins\n\n" + stats;
-                                if (mind.FixerWonAllNearlyColorableBoards)
-                                    return "Fixer wins on all nearly colorable boards (for some edge)\n\n" + stats;
-
-                                return "Breaker wins\n\n" + stats;
-                            }
-                        }
-                        else
-                        {
-                            if (mind.HasNonSuperabundantBoardThatIsNearlyColorable)
-                            {
-                                return "Breaker wins since there is a non-superabundant nearly colorable board";
-                            }
-                            else
-                            {
-                                var stats = mind.BoardCounts[0] + " nearly colorable boards\n" + (mind.BoardCounts[0] - mind.BoardCounts[1]) + " colorable boards\n" + (mind.BoardCounts[1] - mind.BoardCounts[2]) + " non-superabundant boards\n";
-                                for (int i = 3; i < mind.BoardCounts.Count - 1; i++)
-                                    stats += (mind.BoardCounts[i - 1] - mind.BoardCounts[i]) + " depth " + (i - 2) + " boards\n";
-
-                                var finalDifference = mind.BoardCounts[mind.BoardCounts.Count - 2] - mind.BoardCounts[mind.BoardCounts.Count - 1];
-                                if (finalDifference == 0)
-                                    stats += mind.BoardCounts[mind.BoardCounts.Count - 1] + " lost boards";
-                                else
-                                    stats += finalDifference + " depth " + (mind.BoardCounts.Count - 3) + " boards\n";
-
-                                if (win)
-                                    return "Fixer wins\n\n" + stats;
-                                if (mind.FixerWonAllNearlyColorableBoards)
-                                    return "Fixer wins on all nearly colorable boards (for some edge)\n\n" + stats;
-
-                                return "Breaker wins\n\n" + stats;
-                            }
-                        }
+                        return "Breaker wins\n\n" + stats;
                     }
                     else
                     {
+                        var stats = GetStats(mind.BoardCounts);
+
                         if (mind.HasNonSuperabundantBoardThatIsNearlyColorable)
                         {
-                            return "Breaker wins since there is a non-superabundant board.";
+                            return "Breaker wins since there is a non-superabundant nearly colorable board";
                         }
                         else
                         {
-                            var stats = mind.BoardCounts[0] + " total boards\n" + (mind.BoardCounts[0] - mind.BoardCounts[1]) + " colorable boards\n" + (mind.BoardCounts[1] - mind.BoardCounts[2]) + " non-superabundant boards (none nearly colorable)\n";
-                            for (int i = 3; i < mind.BoardCounts.Count - 1; i++)
-                                stats += (mind.BoardCounts[i - 1] - mind.BoardCounts[i]) + " depth " + (i - 2) + " boards\n";
-
-                            var finalDifference = mind.BoardCounts[mind.BoardCounts.Count - 2] - mind.BoardCounts[mind.BoardCounts.Count - 1];
-                            if (finalDifference == 0)
-                                stats += mind.BoardCounts[mind.BoardCounts.Count - 1] + " lost boards";
-                            else
-                                stats += finalDifference + " depth " + (mind.BoardCounts.Count - 3) + " boards\n";
-
                             if (win)
                                 return "Fixer wins\n\n" + stats;
                             if (mind.FixerWonAllNearlyColorableBoards)
@@ -1773,6 +1735,23 @@ trash can button.
                     AddTab(gr, ((TabItem)_tabControl.SelectedItem).Header + " (Breaker win)");
                 }
             }
+        }
+
+        static string GetStats(List<int> boardCounts)
+        {
+            if (boardCounts == null)
+                return "";
+
+            var stats = boardCounts[0] + " total boards\n" + (boardCounts[0] - boardCounts[1]) + " colorable boards\n" + (boardCounts[1] - boardCounts[2]) + " non-superabundant boards (none nearly colorable)\n";
+            for (int i = 3; i < boardCounts.Count - 1; i++)
+                stats += (boardCounts[i - 1] - boardCounts[i]) + " depth " + (i - 2) + " boards\n";
+
+            var finalDifference = boardCounts[boardCounts.Count - 2] - boardCounts[boardCounts.Count - 1];
+            if (finalDifference == 0)
+                stats += boardCounts[boardCounts.Count - 1] + " lost boards";
+            else
+                stats += finalDifference + " depth " + (boardCounts.Count - 3) + " boards\n";
+            return stats;
         }
 
         void OnThoughtProgress(ThoughtProgress p, VisualizationWindow w, GraphCanvas graphCanvas)

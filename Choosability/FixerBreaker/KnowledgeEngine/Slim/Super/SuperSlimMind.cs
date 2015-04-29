@@ -23,6 +23,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
         public int TotalPositions { get { return _totalPositions; } }
         public SuperSlimBoard BreakerWonBoard { get; private set; }
         public List<int> BoardCounts { get; private set; }
+        public List<List<int>> BoardCountsList { get; private set; }
         public bool OnlyConsiderNearlyColorableBoards { get; set; }
         public bool ExcludeNonNearlyColorableNonSuperabundantBoards { get; set; }
         public int MissingEdgeIndex { get; set; }
@@ -49,6 +50,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
         {
             _wonBoards.Clear();
             _remainingBoards.Clear();
+            BoardCountsList = new List<List<int>>();
 
             FixerWonAllNearlyColorableBoards = true;
 
@@ -88,6 +90,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
 
             BoardsOfDepth = new Dictionary<int, List<SuperSlimBoard>>();
             BoardCounts = new List<int>();
+            BoardCountsList.Add(BoardCounts);
             BoardCounts.Add(_remainingBoards.Count);
 
             for (int i = _remainingBoards.Count - 1; i >= 0; i--)

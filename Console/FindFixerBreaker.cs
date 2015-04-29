@@ -48,8 +48,6 @@ namespace Console
                         System.Console.ForegroundColor = ConsoleColor.White;
                         graphEnumerator.AddWinner(g);
                         _wonWeightings.Add(g.VertexWeight);
-
-                        g.ToDotWithFactors();
                     }
                     else
                     {

@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Choosability.Utility;
+using Choosability.FixerBreaker.KnowledgeEngine;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,21 +10,62 @@ namespace Console
 {
     public static class SuperAbundanceFinder
     {
+        static int MaxVertices = 20;
+        static bool TreesOnly = true;
+        static readonly string WinnersFile = (TreesOnly ? "trees only " : "") + "superabundance.txt";
+
         public static void Go()
         {
-            var g = Choosability.Graphs.P(5);
-            var mind = new Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.SuperSlimMind(g);
-            mind.SuperabundantOnly = true;
-            mind.MaxPot = int.MaxValue;
+            using (var graphEnumerator = new GraphEnumerator(WinnersFile, 2, MaxVertices))
+            {
+                if (TreesOnly)
+                    graphEnumerator.FileRoot = GraphEnumerator.TreeFileRoot;
+                graphEnumerator.WeightCondition = GraphEnumerator.WeightConditionFalse;
+                foreach (var g in graphEnumerator.EnumerateGraph6File(Filter, EnumerateWeightings))
+                {
+                    System.Console.Write("checking " + g.ToGraph6() + " with degrees [" + string.Join(",", g.VertexWeight) + "] ...");
 
-            var sizes = g.Vertices.Select(v => g.Degree(v)).ToList();
-            sizes[0] = 2;
-            sizes[2] = 3;
-            sizes[3] = 2;
-            sizes[4] = 2;
-            var win = mind.Analyze(new Choosability.FixerBreaker.KnowledgeEngine.Template(sizes), null);
+                    var mind = new Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.SuperSlimMind(g);
+                    mind.MaxPot = int.MaxValue;
+                    mind.SuperabundantOnly = true;
 
-            System.Console.WriteLine("win: " + win);
+                    var template = new Template(g.VertexWeight);
+                    var win = mind.Analyze(template, null);
+
+                    if (win)
+                    {
+                        System.Console.ForegroundColor = ConsoleColor.Blue;
+                        System.Console.WriteLine(" fixer wins");
+                        System.Console.ForegroundColor = ConsoleColor.White;
+                        graphEnumerator.AddWinner(g);
+                    }
+                    else
+                    {
+                        System.Console.ForegroundColor = ConsoleColor.Red;
+                        System.Console.WriteLine(" breaker wins");
+                        System.Console.ForegroundColor = ConsoleColor.White;
+                    }
+                }
+            }
+        }
+
+        static bool Filter(Choosability.Graph g)
+        {
+            return true;
+        }
+
+        static IEnumerable<Choosability.Graph> EnumerateWeightings(Choosability.Graph g)
+        {
+            foreach (var weighting in g.Vertices.Select(v => Enumerable.Range(g.Degree(v), 2)).CartesianProduct())
+            {
+                var www = weighting.ToList();
+                if (weighting.Any(w => w <= 1))
+                    continue;
+
+                var gg = g.Clone();
+                gg.VertexWeight = www;
+                yield return gg;
+            }
         }
     }
 }
