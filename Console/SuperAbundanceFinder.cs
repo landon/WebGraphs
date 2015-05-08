@@ -11,9 +11,9 @@ namespace Console
     public static class SuperAbundanceFinder
     {
         static int MaxVertices = 20;
-        static int MaxDegree = int.MaxValue;
-        static bool CheckNearColorings = true;
-        static bool TreesOnly = false;
+        static int MaxDegree = 2;
+        static bool CheckNearColorings = false;
+        static bool TreesOnly = true;
         static readonly string WinnersFile = (CheckNearColorings ? "no near colorings lost " : "") + (MaxDegree != int.MaxValue ? "max degree " + MaxDegree : "") + (TreesOnly ? "trees only " : "") + "superabundance.txt";
 
         public static void Go()
@@ -21,7 +21,7 @@ namespace Console
             using (var graphEnumerator = new GraphEnumerator(WinnersFile, 2, MaxVertices))
             {
                 if (TreesOnly)
-                    graphEnumerator.FileRoot = GraphEnumerator.TreeFileRoot;
+                    graphEnumerator.FileRoot = @"C:\Users\landon\Google Drive\research\Graph6\trees\trees";
                 graphEnumerator.WeightCondition = GraphEnumerator.WeightConditionFalse;
 
                 foreach (var g in graphEnumerator.EnumerateGraph6File(Filter, EnumerateWeightings))
