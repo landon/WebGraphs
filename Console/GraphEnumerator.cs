@@ -19,7 +19,6 @@ namespace Console
 
         StreamWriter Writer { get; set; }
         string WinnersFile { get; set; }
-        string LastTriedFile { get { return "last tried " + WinnersFile; } }
         int MinVertices { get; set; }
         int MaxVertices { get; set; }
         List<Graph> PreviousWinners { get; set; }
@@ -36,7 +35,7 @@ namespace Console
 
             Initialize();
         }
-
+        
         void Initialize()
         {
             System.Console.ForegroundColor = ConsoleColor.White;
@@ -52,16 +51,7 @@ namespace Console
                 Last = g;
             }
 
-            if (File.Exists(LastTriedFile))
-            {
-                using (var sr = new StreamReader(LastTriedFile))
-                {
-                    var ew = sr.ReadToEnd().GetEdgeWeights();
-                    Last = new Graph(ew);
-                    System.Console.WriteLine("last tried graph: " + ew.ToGraph6());
-                }
-            }
-            else if (Last != null)
+          if (Last != null)
                 System.Console.WriteLine("last tried graph: " + Last.GetEdgeWeights().ToGraph6());
         }
 
@@ -180,14 +170,16 @@ namespace Console
                                     System.Console.WriteLine("skipping supergraph " + g.ToGraph6());
                             }
                         }
-
-                        using (var sw = new StreamWriter(LastTriedFile))
-                            sw.WriteLine(ew.ToGraph6());
                     }
                 }
 
             next: ;
             }
+        }
+
+        public static bool WeightConditionEqual(Graph self, Graph A, int selfV, int av)
+        {
+            return A.VertexWeight[av] == self.VertexWeight[selfV];
         }
 
         public static bool WeightConditionDown(Graph self, Graph A, int selfV, int av)

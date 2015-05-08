@@ -12,26 +12,27 @@ namespace Console
     {
         static int Delta = 3;
         static int MaxVertices = 20;
-        static bool TreesOnly = true;
+        static bool TreesOnly = false;
         static bool TriangleFree = false;
         static bool TreesOrTreesPlusEdgeOnly = false;
         static bool Planar = false;
+        static bool LowGirth = true;
         
         const bool NearColorings = false;
-        static readonly string WinnersFile = (Planar ? "planar " : "") + (TreesOrTreesPlusEdgeOnly ? "trees or trees plus edge only " : "") + (TriangleFree ? "triangle-free " : "") + (TreesOnly ? "trees only " : "") + (NearColorings ? "near colorings " : "") + "FixerBreaker winners Delta=" + Delta + ".txt";
+        static readonly string WinnersFile = (LowGirth ? "low girth " : "") + (Planar ? "planar " : "") + (TreesOrTreesPlusEdgeOnly ? "trees or trees plus edge only " : "") + (TriangleFree ? "triangle-free " : "") + (TreesOnly ? "trees only " : "") + (NearColorings ? "near colorings " : "") + "FixerBreaker winners Delta=" + Delta + ".txt";
 
         public static void Go()
         {
             using (var graphEnumerator = new GraphEnumerator(WinnersFile, 2, MaxVertices))
             {
                 if (TreesOnly)
-                    graphEnumerator.FileRoot = GraphEnumerator.TreeFileRoot;
+                    graphEnumerator.FileRoot = @"C:\Users\landon\Google Drive\research\Graph6\trees\trees";
                 else if (TreesOrTreesPlusEdgeOnly)
                     graphEnumerator.FileRoot = GraphEnumerator.TreePlusEdgeFileRoot;
                 else if (Planar)
                     graphEnumerator.FileRoot = @"C:\Users\landon\Google Drive\research\Graph6\planar\planar_conn.";
                 else
-                    graphEnumerator.FileRoot = GraphEnumerator.GraphFileRoot;
+                    graphEnumerator.FileRoot = @"C:\Users\landon\Google Drive\research\Graph6\graph";
 
                 foreach (var g in graphEnumerator.EnumerateGraph6File(Filter, EnumerateWeightings))
                 {
@@ -61,13 +62,12 @@ namespace Console
                 }
             }
         }
-
+        static Graphs.Graph Bad = GraphsCore.CompactSerializer.Deserialize(@"webgraph:7pc5r!-8,?!!!RbO9]_@`!KrS!Aa^X)b'O@(T\'7#K=Df)3b_!#;Q9E+%,fY!!GP:JVXt.p]gd!!W`;B!!!!''?C1S'Z^@ja9<6u!X'1X!sAW)a8c2?!.Y%");
+        static Choosability.Graph BadG = new Choosability.Graph(Bad.GetEdgeWeights(), Bad.Vertices.Select(v => int.Parse(v.Label)).ToList());
         static bool Filter(Choosability.Graph g)
         {
             if (TriangleFree)
-            {
                 return g.Vertices.All(v => g.IsIndependent(g.Neighbors[v]));
-            }
 
             return true;
         }
@@ -87,6 +87,13 @@ namespace Console
 
                 var gg = g.Clone();
                 gg.VertexWeight = www;
+
+                if (LowGirth)
+                {
+                    if (!gg.Contains(BadG, false, GraphEnumerator.WeightConditionEqual))
+                        continue;
+                }
+
                 yield return gg;
             }
         }
