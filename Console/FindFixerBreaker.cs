@@ -12,23 +12,26 @@ namespace Console
     {
         static int Delta = 3;
         static int MaxVertices = 20;
-        static bool TreesOnly = false;
+        static bool TreesOnly = true;
         static bool TriangleFree = false;
-        static bool TreesOrTreesPlusEdgeOnly = true;
+        static bool TreesOrTreesPlusEdgeOnly = false;
+        static bool Planar = false;
         
         const bool NearColorings = false;
-        static readonly string WinnersFile = (TreesOrTreesPlusEdgeOnly ? "trees or trees plus edge only " : "") + (TriangleFree ? "triangle-free " : "") + (TreesOnly ? "trees only " : "") + (NearColorings ? "near colorings " : "") + "FixerBreaker winners Delta=" + Delta + ".txt";
+        static readonly string WinnersFile = (Planar ? "planar " : "") + (TreesOrTreesPlusEdgeOnly ? "trees or trees plus edge only " : "") + (TriangleFree ? "triangle-free " : "") + (TreesOnly ? "trees only " : "") + (NearColorings ? "near colorings " : "") + "FixerBreaker winners Delta=" + Delta + ".txt";
 
         public static void Go()
         {
             using (var graphEnumerator = new GraphEnumerator(WinnersFile, 2, MaxVertices))
             {
                 if (TreesOnly)
-                    graphEnumerator.FileRoot = @"C:\Users\landon\Google Drive\research\Graph6\degree5trees\geng";
+                    graphEnumerator.FileRoot = GraphEnumerator.TreeFileRoot;
                 else if (TreesOrTreesPlusEdgeOnly)
                     graphEnumerator.FileRoot = GraphEnumerator.TreePlusEdgeFileRoot;
+                else if (Planar)
+                    graphEnumerator.FileRoot = @"C:\Users\landon\Google Drive\research\Graph6\planar\planar_conn.";
                 else
-                    graphEnumerator.FileRoot = @"C:\Users\landon\Google Drive\research\Graph6\degree3treeplustwoedges\geng";
+                    graphEnumerator.FileRoot = GraphEnumerator.GraphFileRoot;
 
                 foreach (var g in graphEnumerator.EnumerateGraph6File(Filter, EnumerateWeightings))
                 {

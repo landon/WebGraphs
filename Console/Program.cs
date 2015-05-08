@@ -14,8 +14,8 @@ namespace Console
         static void Main(string[] args)
         {
             //FixerBreakerTrees.Go();
-            SuperAbundanceFinder.Go();
-            //FindFixerBreaker.Go();
+            //SuperAbundanceFinder.Go();
+            FindFixerBreaker.Go();
             //MakePictures.Go();
            
             // FindTarpits.Go();
