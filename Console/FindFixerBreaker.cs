@@ -19,7 +19,7 @@ namespace Console
         static bool LowGirth = true;
         
         const bool NearColorings = false;
-        static readonly string WinnersFile = (LowGirth ? "low girth " : "") + (Planar ? "planar " : "") + (TreesOrTreesPlusEdgeOnly ? "trees or trees plus edge only " : "") + (TriangleFree ? "triangle-free " : "") + (TreesOnly ? "trees only " : "") + (NearColorings ? "near colorings " : "") + "FixerBreaker winners Delta=" + Delta + ".txt";
+        static readonly string WinnersFile = (LowGirth ? "low girth induced " : "") + (Planar ? "planar " : "") + (TreesOrTreesPlusEdgeOnly ? "trees or trees plus edge only " : "") + (TriangleFree ? "triangle-free " : "") + (TreesOnly ? "trees only " : "") + (NearColorings ? "near colorings " : "") + "FixerBreaker winners Delta=" + Delta + ".txt";
 
         public static void Go()
         {
@@ -90,7 +90,7 @@ namespace Console
 
                 if (LowGirth)
                 {
-                    if (!gg.Contains(BadG, false, GraphEnumerator.WeightConditionEqual))
+                    if (!gg.Contains(BadG, true, GraphEnumerator.WeightConditionEqual))
                         continue;
                 }
 

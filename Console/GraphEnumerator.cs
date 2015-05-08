@@ -62,7 +62,7 @@ namespace Console
                 while (true)
                 {
                     var line = sr.ReadLine();
-                    if (line == null)
+                    if (string.IsNullOrWhiteSpace(line))
                         break;
 
                     var parts = line.Split(' ');
@@ -91,7 +91,7 @@ namespace Console
                 return EnumerateGraphFile("previous " + WinnersFile).ToList();
             }
             catch { }
-
+            
             return new List<Graph>();
         }
 
