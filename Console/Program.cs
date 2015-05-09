@@ -15,8 +15,8 @@ namespace Console
         {
             //FixerBreakerTrees.Go();
             //SuperAbundanceFinder.Go();
-            FindFixerBreaker.Go();
-            //MakePictures.Go();
+            //FindFixerBreaker.Go();
+            MakePictures.Go();
            
            //  FindTarpits.Go();
            // FindFixerBreaker.Go();

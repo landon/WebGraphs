@@ -23,13 +23,18 @@ namespace Console
             //MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\winners2.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\BorodinKostochka\2fold", directed: false, showFactors:true);
             //MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\offline winners1.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\BorodinKostochka\Offline", directed: false, showFactors: true);
             //MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\winners.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\BorodinKostochka\Online", directed: false, showFactors: true);
-            MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\trees only FixerBreaker winners Delta=6.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\Fixable\trees6", directed: false, showFactors: false);
+            MakeWebpage(new GraphPictureMaker(GraphEnumerator.EnumerateEntireGraph6File(@"C:\Users\landon\Google Drive\research\Graph6\class2.g6").Where(g => g.MaxDegree == 3 && g.MinDegree >= 2)), @"C:\Users\landon\Dropbox\Public\Web\GraphData\Fixable\Delta3class2", directed: false, showFactors: false);
             //MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Debug\superabundance.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\superabundance\all", directed: false, showFactors: false);
         }
 
         static void MakeWebpage(string graphPath, string outputPath, bool directed = false, bool showFactors = false)
         {
             var maker = new GraphPictureMaker(graphPath);
+            MakeWebpage(maker, outputPath, directed, showFactors);
+        }
+
+        static void MakeWebpage(GraphPictureMaker maker, string outputPath, bool directed = false, bool showFactors = false)
+        {
             maker.Directed = directed;
             maker.ShowFactors = showFactors;
             maker.DrawAllAndMakeWebpage(outputPath);

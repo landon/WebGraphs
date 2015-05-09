@@ -1742,6 +1742,9 @@ trash can button.
             if (boardCounts == null)
                 return "";
 
+            if (boardCounts.Count <= 2)
+                return boardCounts[0] + " total boards\n" + (boardCounts[0] - boardCounts[1]) + " colorable boards\n";
+
             var stats = boardCounts[0] + " total boards\n" + (boardCounts[0] - boardCounts[1]) + " colorable boards\n" + (boardCounts[1] - boardCounts[2]) + " non-superabundant boards (none nearly colorable)\n";
             for (int i = 3; i < boardCounts.Count - 1; i++)
                 stats += (boardCounts[i - 1] - boardCounts[i]) + " depth " + (i - 2) + " boards\n";

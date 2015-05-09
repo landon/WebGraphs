@@ -151,8 +151,15 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
 
             if (nonSuperabundantBoards.Count > 0 && !SuperabundantOnly)
             {
-                if (!OnlyConsiderNearlyColorableBoards && !ExcludeNonNearlyColorableNonSuperabundantBoards || ExistsNearlyColorableBoardForEachEdge(nonSuperabundantBoards))
+                if (!OnlyConsiderNearlyColorableBoards && !ExcludeNonNearlyColorableNonSuperabundantBoards)
                 {
+                    FixerWonAllNearlyColorableBoards = false;
+                    BreakerWonBoard = nonSuperabundantBoards[0];
+                    return false;
+                }
+                else if (ExistsNearlyColorableBoardForEachEdge(nonSuperabundantBoards))
+                {
+                    FixerWonAllNearlyColorableBoards = false;
                     HasNonSuperabundantBoardThatIsNearlyColorable = true;
                     BreakerWonBoard = nonSuperabundantBoards[0];
                     return false;

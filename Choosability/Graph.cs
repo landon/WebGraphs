@@ -860,7 +860,7 @@ namespace Choosability
         {
             get
             {
-                int min = 0;
+                int min = int.MaxValue;
                 for (int i = 0; i < N; i++)
                     min = Math.Min(min, Degree(i));
 
