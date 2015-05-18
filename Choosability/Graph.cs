@@ -594,7 +594,7 @@ namespace Choosability
             foreach (int v in _vertices)
             {
                 int colorIndex = colorRanges.Select((r, i) => new { range = r, index = i }).First(p => p.range.Contains(v)).index % DotColors.Count;
-                var label = "";
+                var label = v.ToString();
                 sb.AppendLine(string.Format(@"{0} [label = ""{2}"", style = filled, fillcolor = ""{1}""];", v, DotColors[colorIndex], label));
             }
 
@@ -938,6 +938,28 @@ namespace Choosability
                     if (_adjacent[A[i], A[j]]) edges++;
 
             return edges;
+        }
+
+        public List<int> EdgeIndicesOn(List<int> A)
+        {
+            var edgeIndices = new List<int>();
+
+            int k = 0;
+            for (int i = 0; i < N; i++)
+            {
+                for (int j = i + 1; j < N; j++)
+                {
+                    if (_adjacent[i, j])
+                    {
+                        if (A.Contains(i) && A.Contains(j))
+                            edgeIndices.Add(k);
+
+                        k++;
+                    }
+                }
+            }
+
+            return edgeIndices;
         }
         public int EdgesBetween(List<int> A, List<int> B)
         {

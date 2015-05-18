@@ -12,11 +12,11 @@ namespace Console
     {
         static int Delta = 3;
         static int MaxVertices = 20;
-        static bool TreesOnly = false;
+        static bool TreesOnly = true;
         static bool TriangleFree = false;
         static bool TreesOrTreesPlusEdgeOnly = false;
         static bool Planar = false;
-        static bool LowGirth = true;
+        static bool LowGirth = false;
         
         const bool NearColorings = false;
         static readonly string WinnersFile = (LowGirth ? "low girth induced " : "") + (Planar ? "planar " : "") + (TreesOrTreesPlusEdgeOnly ? "trees or trees plus edge only " : "") + (TriangleFree ? "triangle-free " : "") + (TreesOnly ? "trees only " : "") + (NearColorings ? "near colorings " : "") + "FixerBreaker winners Delta=" + Delta + ".txt";

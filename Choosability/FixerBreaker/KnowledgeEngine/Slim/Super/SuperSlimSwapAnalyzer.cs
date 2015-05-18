@@ -15,9 +15,9 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
         int _fixerResponseCount;
         Dictionary<ulong, List<List<ulong>>> _breakerChoicesCache = new Dictionary<ulong, List<List<ulong>>>();
 
-        public SuperSlimSwapAnalyzer(int n, bool storeTreeInfo = true)
+        public SuperSlimSwapAnalyzer(int n, bool storeTreeInfo = false)
         {
-            _fixerResponses = new ulong[1 << ((n + 1) >> 1)];
+            _fixerResponses = new ulong[8192];
             StoreTreeInfo = storeTreeInfo;
             if (StoreTreeInfo)
             {
@@ -77,11 +77,6 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
                             winningSwapAlwaysExists = false;
                             break;
                         }
-                        else
-                        {
-                           // if (StoreTreeInfo)
-                           //     lossInfo.Clear();
-                        }
                     }
 
                     if (winningSwapAlwaysExists)
@@ -95,6 +90,11 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
         void GetFixerResponses(List<ulong> possibleMoves)
         {
             _fixerResponseCount = 1 << possibleMoves.Count;
+            var tableLength = _fixerResponses.Length;
+            while (tableLength <= _fixerResponseCount)
+                tableLength *= 2;
+            if (tableLength > _fixerResponses.Length)
+                _fixerResponses = new ulong[tableLength];
 
             var subset = 1;
             while (subset < _fixerResponseCount)

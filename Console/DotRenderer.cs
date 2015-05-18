@@ -68,6 +68,14 @@ namespace Console
             foreach (int v in g.Vertices)
             {
                 var tree = treeLookup[v];
+                var shadow = "  ";
+                if (tree.MatchingAbundanceShadow != null)
+                {
+                    var rr = tree.MatchingAbundanceShadow.Select(xx => xx.ToString()).ToList();
+                    shadow = string.Join(",", rr);
+                    if (string.IsNullOrEmpty(shadow))
+                        shadow = "  ";
+                }
 
                 var infoLabel = "";
                 if (tree.IsColorable)
@@ -78,7 +86,8 @@ namespace Console
                     infoLabel = "same as " + tree.SameAsIndex;
                 var sbb = new StringBuilder();
                 sbb.AppendLine(@"<<table cellpadding='3' cellborder='0' cellspacing='0' border='0'>");
-                sbb.AppendLine(string.Format(@"<tr><td colspan='5' align='left' bgcolor='black'><font color='white'>{2}</font></td></tr><tr><td></td><td></td><td></td><td></td><td></td></tr><tr rowspan='2'><td colspan='5'><FONT POINT-SIZE='18'>{0}</FONT></td></tr><tr><td colspan='5'>{1}</td></tr>", tree.Board, infoLabel, tree.GameTreeIndex));
+                sbb.AppendLine(string.Format(@"<tr><td colspan='2' align='left' bgcolor='black'><font color='white'>{2}</font></td><td colspan='3' align='right' bgcolor='black'><font color='white'>{3}</font></td></tr><tr><td></td><td></td><td></td><td></td><td></td></tr><tr rowspan='2'><td colspan='5'><FONT POINT-SIZE='18'>{0}</FONT></td></tr><tr><td colspan='5'>{1}</td></tr>", 
+                    tree.Board, infoLabel, tree.GameTreeIndex, shadow));
                 sbb.AppendLine("</table>>");
 
                 sb.AppendLine(string.Format("{0} [label = {2}, color = \"{1}\"];", v, "black", sbb.ToString()));

@@ -15,19 +15,22 @@ namespace Console
     {
         public static void Go()
         {
-            var root = @"C:\game trees\C5\all";
+            var root = @"C:\game trees\biggertree\invariant1";
             Directory.CreateDirectory(root);
 
-            var g = Choosability.Graphs.C(5);
-            var sizes = Enumerable.Repeat(3, 5).ToList();
+         //   var uiG = GraphsCore.CompactSerializer.Deserialize("webgraph:7p5lm!.4bH!!#8TV?g9C\\-lgI!AXXW)k[^-#;Z?F*sJ5a,6aYM-O65sh^B_'h`q79;LfjChZj,^!!*)@!!!'$'Z^@ja9NC\"!sTF[\">gYm\"T\\VE!!!");
+            var uiG = GraphsCore.CompactSerializer.Deserialize("webgraph:7s+e3!3?/#!!#:+U^KF0PS%F+!AXX?+05o;#;\\Xf`!Jd9-mM7W`P)m27JKt(6hiE-#!f!b-mM`?paS`-&1>N4<IG2S!<<-#a8c2A!>NTW'Z^Ila9)SZa98IB!.Zm;#6Y^]#ZM?A<\"KBC!<C1@!!");
+            var potSize = uiG.Vertices.Max(v => int.Parse(v.Label));
+            var g = new Choosability.Graph(uiG.GetEdgeWeights());
+            var template = new Template(g.Vertices.Select(v => potSize + g.Degree(v) - uiG.Vertices[v].Label.TryParseInt().Value).ToList());
 
-            var mind = new Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.SuperSlimMind(g);
-            mind.MaxPot = int.MaxValue;
-            mind.SuperabundantOnly = true;
-            //mind.OnlyConsiderNearlyColorableBoards = true;
+            GraphViz.DrawGraph(g, root + @"\G.pdf");
+
+            var mind = new Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.SuperSlimMind(g, storeTreeInfo: true);
+            mind.MaxPot = potSize;
 
             int j = 0;
-            var win = mind.Analyze(new Template(sizes));
+            var win = mind.Analyze(template);
 
             if (win)
             {

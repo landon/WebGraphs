@@ -34,13 +34,13 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
         public List<SuperSlimBoard> DeepestBoards { get; private set; }
         public Dictionary<int, List<SuperSlimBoard>> BoardsOfDepth { get; private set; }
 
-        public SuperSlimMind(Graph g)
+        public SuperSlimMind(Graph g, bool storeTreeInfo = false)
         {
             _graph = g;
             BuildLineGraph();
 
             _coloringAnalyzer = new SuperSlimColoringAnalyzer(_lineGraph, GetEdgeColorList);
-            _swapAnalyzer = new SuperSlimSwapAnalyzer(g.N);
+            _swapAnalyzer = new SuperSlimSwapAnalyzer(g.N, storeTreeInfo);
             _wonBoards = new HashSet<SuperSlimBoard>();
             _remainingBoards = new List<SuperSlimBoard>();
 
@@ -272,6 +272,38 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
             return true;
         }
 
+        List<int> ComputeMatchingAbundanceShadow(SuperSlimBoard b)
+        {
+            var shadow = new List<int>();
+
+            ulong subset = 0;
+            while (subset < (1UL << b._stackCount))
+            {
+                int e;
+                if (!IsMatchingAbundant(b, subset, out e))
+                    shadow.Add(e);
+                subset++;
+            }
+
+            shadow.Sort();
+
+            return shadow;
+        }
+
+        bool IsMatchingAbundant(SuperSlimBoard b, ulong subset, out int e)
+        {
+            e = _graph.EdgesOn(subset.ToSet());
+
+            int total = 0;
+            for (int i = 0; i < b._length; i++)
+            {
+                var vc = (subset & b._trace[i]).ToSet();
+                total += _lineGraph.IndependenceNumber(_graph.EdgeIndicesOn(vc));
+            }
+
+            return total >= e;
+        }
+
         void GenerateAllBoards(Template template, int colorCount, Action<Tuple<string, int>> progress = null)
         {
             if (progress != null)
@@ -328,6 +360,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
         {
             seenBoards[board] = _gameTreeIndex;
             var tree = new GameTree() { Board = board };
+           // tree.MatchingAbundanceShadow = ComputeMatchingAbundanceShadow(board);
             tree.IsColorable = _coloringAnalyzer.Analyze(board);
             tree.IsSuperabundant = IsSuperabundant(board);
             tree.GameTreeIndex = _gameTreeIndex;

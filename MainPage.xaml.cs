@@ -1690,33 +1690,39 @@ trash can button.
                     if (Enumerable.Range(0, G.N).Any(i => template.Sizes[i] < G.Degree(i)))
                         return "some list is too small";
 
-                    var win = mind.Analyze(template, resultWindow.OnProgress);
-
-                    if (superAbundantOnly)
+                    try
                     {
-                        var stats = GetStats(mind.BoardCountsList.OrderByDescending(bc => bc.Count).First());
-                        if (win)
-                            return "Fixer wins\n\n" + stats;
-
-                        return "Breaker wins\n\n" + stats;
-                    }
-                    else
-                    {
-                        var stats = GetStats(mind.BoardCounts);
-
-                        if (mind.HasNonSuperabundantBoardThatIsNearlyColorable)
+                        var win = mind.Analyze(template, resultWindow.OnProgress);
+                        if (superAbundantOnly)
                         {
-                            return "Breaker wins since there is a non-superabundant nearly colorable board";
-                        }
-                        else
-                        {
+                            var stats = GetStats(mind.BoardCountsList.OrderByDescending(bc => bc.Count).First());
                             if (win)
                                 return "Fixer wins\n\n" + stats;
-                            if (mind.FixerWonAllNearlyColorableBoards)
-                                return "Fixer wins on all nearly colorable boards (for some edge)\n\n" + stats;
 
                             return "Breaker wins\n\n" + stats;
                         }
+                        else
+                        {
+                            var stats = GetStats(mind.BoardCounts);
+
+                            if (mind.HasNonSuperabundantBoardThatIsNearlyColorable)
+                            {
+                                return "Breaker wins since there is a non-superabundant nearly colorable board";
+                            }
+                            else
+                            {
+                                if (win)
+                                    return "Fixer wins\n\n" + stats;
+                                if (mind.FixerWonAllNearlyColorableBoards)
+                                    return "Fixer wins on all nearly colorable boards (for some edge)\n\n" + stats;
+
+                                return "Breaker wins\n\n" + stats;
+                            }
+                        }
+                    }
+                    catch (Exception ex) 
+                    {
+                        return ex.Message;
                     }
                 });
 
