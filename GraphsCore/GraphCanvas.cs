@@ -240,8 +240,35 @@ namespace Graphs
             }
 
             Invalidate();
-
             GraphChanged();
+        }
+
+        public void DoReverseSelected()
+        {
+            if (_graph.SelectedEdges.Count > 0)
+            {
+                var removed = new List<Edge>();
+                foreach (var e in _graph.SelectedEdges)
+                {
+                    removed.Add(e);
+                    _graph.RemoveEdge(e.V1, e.V2);
+                }
+
+                foreach (var e in removed)
+                {
+                    var oo = e.Orientation;
+                    if (oo == Edge.Orientations.Forward)
+                        oo = Edge.Orientations.Backward;
+                    else if (oo == Edge.Orientations.Backward)
+                        oo = Edge.Orientations.Forward;
+
+                    _graph.AddEdge(e.V2, e.V1, oo, e.Multiplicity, e.Thickness, e.Style, e.Label);
+                }
+
+
+                Invalidate();
+                GraphChanged();
+            }
         }
 
         public void DoCut()

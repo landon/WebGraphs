@@ -497,6 +497,8 @@ namespace WebGraphs
                 case Key.Q:
                     break;
                 case Key.R:
+                    if (Keyboard.Modifiers == ModifierKeys.Control)
+                        ReverseSelectedEdges();
                     break;
                 case Key.Right:
                     break;
@@ -1039,6 +1041,17 @@ trash can button.
              }, (Layout.Algorithm)SpindleAnalyzer.RotateDiamondsLayout, locations, data);
         }
 
+
+        void ReverseSelectedEdges()
+        {
+            var tabCanvas = SelectedTabCanvas;
+            if (tabCanvas == null)
+                return;
+
+            tabCanvas.GraphCanvas.DoReverseSelected();
+
+            FocusSelectedTab();
+        }
 
         void ClearLabels()
         {

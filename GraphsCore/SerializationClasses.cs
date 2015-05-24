@@ -57,6 +57,8 @@ namespace Graphs
         public int Multiplicity;
         [DataMember]
         public string Style;
+        [DataMember]
+        public string Label;
 
         public SerializationEdge() { }
         public SerializationEdge(Edge e, List<Vertex> vertices)
@@ -67,6 +69,7 @@ namespace Graphs
             Thickness = e.Thickness;
             Multiplicity = e.Multiplicity;
             Style = e.Style ?? "";
+            Label = e.Label ?? "";
 
             if (Style == "")
             {

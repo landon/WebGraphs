@@ -140,10 +140,25 @@ namespace WebGraphs
             text.FontFamily = new FontFamily(font.Name);
             text.FontSize = 1.3 * font.Size;
             text.Foreground = GetBrush(argb);
+            text.FontWeight = FontWeights.ExtraBold;
             text.Measure(new Size(double.MaxValue, double.MaxValue));
 
             Canvas.SetLeft(text, bounds.Left + bounds.Width / 2 - text.ActualWidth / 2);
-            Canvas.SetTop(text, bounds.Top + +bounds.Height / 2 - text.ActualHeight / 2);
+            Canvas.SetTop(text, bounds.Top + bounds.Height / 2 - text.ActualHeight / 2);
+        }
+
+        public void DrawRotatedString(string s, Font font, ARGB argb, Box bounds, double angle)
+        {
+            var text = Create<TextBlock>();
+            text.Text = s;
+            text.FontFamily = new FontFamily(font.Name);
+            text.FontSize = 1.3 * font.Size;
+            text.Foreground = GetBrush(argb);
+            text.Measure(new Size(double.MaxValue, double.MaxValue));
+            text.RenderTransform = new RotateTransform() { Angle = angle, CenterX = bounds.Width / 2, CenterY = bounds.Y / 2 };
+
+            Canvas.SetLeft(text, bounds.Left + bounds.Width / 2 - text.ActualWidth / 2);
+            Canvas.SetTop(text, bounds.Top + bounds.Height / 2 - text.ActualHeight / 2);
         }
 
         public Box MeasureString(string s, Font font)

@@ -416,7 +416,7 @@ namespace Graphs
         {
             return AddEdge(v1, v2, Edge.Orientations.None, multiplicity);
         }
-        public bool AddEdge(Vertex v1, Vertex v2, Edge.Orientations orientation, int multiplicity = 1, float thickness = 3, string style = "")
+        public bool AddEdge(Vertex v1, Vertex v2, Edge.Orientations orientation, int multiplicity = 1, float thickness = 3, string style = "", string label = "")
         {
             if (v1 == v2)
             {
@@ -432,6 +432,7 @@ namespace Graphs
                     edge.Multiplicity = multiplicity;
                     edge.Thickness = thickness;
                     edge.Style = style;
+                    edge.Label = label;
                     _edges.Add(edge);
                     ParametersDirty = true;
 
@@ -511,7 +512,7 @@ namespace Graphs
                 {
                     Edge e;
                     if (EdgeExists(v1, v2, out e))
-                        induced.AddEdge(v1, v2, e.Orientation != Edge.Orientations.None ? Edge.Orientations.Forward : Edge.Orientations.None, e.Multiplicity, e.Thickness, e.Style);
+                        induced.AddEdge(v1, v2, e.Orientation != Edge.Orientations.None ? Edge.Orientations.Forward : Edge.Orientations.None, e.Multiplicity, e.Thickness, e.Style, e.Label);
                 }
             }
 
@@ -529,7 +530,7 @@ namespace Graphs
 
         void AddEdge(Edge e)
         {
-            AddEdge(e.V1, e.V2, e.Orientation, Math.Max(1, e.Multiplicity), e.Thickness, e.Style);
+            AddEdge(e.V1, e.V2, e.Orientation, Math.Max(1, e.Multiplicity), e.Thickness, e.Style, e.Label);
         }
 
         public List<Vertex> FindNeighbors(Vertex v)

@@ -100,6 +100,10 @@ namespace WebGraphs
             _canvas.Children.Add(text);
         }
 
+        public void DrawRotatedString(string s, Font font, ARGB argb, Box bounds, double angle)
+        {
+        }
+
         public Box MeasureString(string s, Font font)
         {
             var text = new TextBlock() { Text = s, FontFamily = new FontFamily(font.Name), FontSize = 1.3 * font.Size };

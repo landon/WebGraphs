@@ -15,6 +15,7 @@ namespace GraphicsLayer
         void DrawEllipse(ARGB argb, Box bounds, double width = 1);
         void FillEllipse(ARGB color, Box bounds);
         void DrawString(string s, Font font, ARGB argb, Box bounds);
+        void DrawRotatedString(string s, Font font, ARGB argb, Box bounds, double angle);
         Box MeasureString(string s, Font font);
     }
 }

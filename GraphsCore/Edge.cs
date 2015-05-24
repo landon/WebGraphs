@@ -11,6 +11,9 @@ namespace Graphs
 {
     public class Edge : GraphicsLayer.IPaintable, IHittable
     {
+        static readonly GraphicsLayer.Font LabelFont = new GraphicsLayer.Font("Times New Roman", 18);
+        static readonly GraphicsLayer.ARGB LabelBrushColor = new GraphicsLayer.ARGB(120, 0, 0, 255);
+
         public enum Orientations
         {
             None,
@@ -38,6 +41,7 @@ namespace Graphs
             Thickness = e.Thickness;
             Multiplicity = e.Multiplicity;
             Style = e.Style;
+            Label = e.Label;
         }
 
         public void Paint(GraphicsLayer.IGraphics g, int width, int height)
@@ -54,6 +58,9 @@ namespace Graphs
                 var cos = (_V2.X - _V1.X) / Math.Sqrt((_V2.X - _V1.X) * (_V2.X - _V1.X) + (_V2.Y - _V1.Y) * (_V2.Y - _V1.Y));
                 cos = Math.Min(Math.Max(cos, -1), 1);
 
+                var sin = (_V2.Y - _V1.Y) / Math.Sqrt((_V2.X - _V1.X) * (_V2.X - _V1.X) + (_V2.Y - _V1.Y) * (_V2.Y - _V1.Y));
+                sin = Math.Min(Math.Max(sin, -1), 1);
+
                 var angle = Math.Acos(cos);
                 if (_V1.Y > _V2.Y)
                     angle = -angle;
@@ -64,6 +71,9 @@ namespace Graphs
                 var angleStep = Math.PI / 2.0 / _Multiplicity;
                 var evenModifier = (_Multiplicity % 2 == 0) ? 0.5 : 0;
 
+                GraphicsLayer.Box topStart = new GraphicsLayer.Box();
+                GraphicsLayer.Box topFinish = new GraphicsLayer.Box();
+                var first = true;
                 for (int i = -(_Multiplicity - 1) / 2; i < Math.Ceiling((_Multiplicity + 1) / 2.0); i++)
                 {
                     var startAngle = angle + angleStep * (i - evenModifier);
@@ -72,7 +82,14 @@ namespace Graphs
                     var start = LocalToGlobal(_V1.Location + Utility.PolarToRectangular(maxRadius1 + 0.01, startAngle), width, height);
                     var finish = LocalToGlobal(_V2.Location - Utility.PolarToRectangular(maxRadius2 + 0.01, finishAngle), width, height);
 
-                    g.DrawLine(_penColor, start, finish, _Thickness);
+                    if (first)
+                    {
+                        first = false;
+                        topStart = start;
+                        topFinish = finish;
+                    }
+
+                    g.DrawLine(_penColor, start, finish, _thickness);
                 }
 
                 if (_Orientation != Orientations.None)
@@ -96,6 +113,14 @@ namespace Graphs
                     }
 
                     g.FillPolygon(new GraphicsLayer.ARGB(0, 0, 0), points);
+                }
+
+                var label = Label;
+                if (!string.IsNullOrEmpty(label))
+                {
+                    var box = g.MeasureString(label, LabelFont);
+                    var bounds = new GraphicsLayer.Box(topStart.X + (topFinish.X - topStart.X) / 2 - box.Width / 2 - 0.75 * box.Width * sin, topStart.Y + (topFinish.Y - topStart.Y) / 2 - box.Height / 2 + 0.75 * box.Height * cos, box.Width, box.Height);
+                    g.DrawString(label, LabelFont, LabelBrushColor, bounds);
                 }
             }
         }
@@ -197,11 +222,11 @@ namespace Graphs
         {
             get
             {
-                return _Thickness;
+                return _thickness;
             }
             set
             {
-                _Thickness = value;
+                _thickness = value;
             }
         }
 
@@ -255,29 +280,43 @@ namespace Graphs
         {
             get
             {
-                return _Style;
+                return _style;
             }
             set
             {
                 if (value == null)
                     return;
 
-                if (value.StartsWith("+") && !string.IsNullOrEmpty(_Style))
-                    _Style += ", " + value.TrimStart('+');
+                var style = value;
+                if (style.Contains("~~|~|~~"))
+                {
+                    var parts = style.Split(new string[] { "~~|~|~~" }, StringSplitOptions.None);
+                    if (parts.Length >= 2)
+                    {
+                        style = parts[0];
+                        Label = parts[1];
+                    }
+                }
+
+                if (style.StartsWith("+") && !string.IsNullOrEmpty(_style))
+                    _style += ", " + style.TrimStart('+');
                 else
-                    _Style = value.TrimStart('+');
+                    _style = style.TrimStart('+');
             }
         }
 
+        [Browsable(true)]
+        public string Label { get; set; }
+   
         Vertex _V1;
         Vertex _V2;
         Orientations _Orientation;
-        float _Thickness = 4;
+        float _thickness = 4;
         GraphicsLayer.ARGB _Color = new GraphicsLayer.ARGB(0, 0, 0);
         GraphicsLayer.ARGB _penColor = new GraphicsLayer.ARGB(0, 0, 0);
         bool _IsSelected;
         int _Multiplicity;
-        string _Style;
+        string _style;
     }
 }
 
