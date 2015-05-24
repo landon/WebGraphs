@@ -569,7 +569,7 @@ namespace Choosability
                                                                       "CadetBlue", "LimeGreen", "brown", "pink", 
                                                                       "orange", "Cerulean", "Goldenrod", "Aquamarine", "black", };
 
-        public string ToDotWithFactors()
+        public string ToDotWithFactors(bool labelEdges = false)
         {
             var sb = new StringBuilder();
 
@@ -604,7 +604,10 @@ namespace Choosability
                 {
                     if (G._adjacent[i, j])
                     {
-                        sb.AppendLine(string.Format("{0} -- {1}", i, j, k));
+                        if (labelEdges)
+                            sb.AppendLine(string.Format(@"{0} -- {1} [label = ""{2}""]", i, j, k));
+                        else
+                            sb.AppendLine(string.Format("{0} -- {1}", i, j));
 
                         k++;
                     }

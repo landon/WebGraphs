@@ -416,7 +416,7 @@ namespace Graphs
         {
             return AddEdge(v1, v2, Edge.Orientations.None, multiplicity);
         }
-        public bool AddEdge(Vertex v1, Vertex v2, Edge.Orientations orientation, int multiplicity = 1, float thickness = 2, string style = "")
+        public bool AddEdge(Vertex v1, Vertex v2, Edge.Orientations orientation, int multiplicity = 1, float thickness = 3, string style = "")
         {
             if (v1 == v2)
             {

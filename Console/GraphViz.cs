@@ -17,10 +17,10 @@ namespace Console
             renderer.Render(vv.Item1, vv.Item2, path, DotRenderType.png, true);
         }
 
-        public static void DrawGraph(Choosability.Graph g, string path)
+        public static void DrawGraph(Choosability.Graph g, string path, bool labelEdges = false)
         {
             var renderer = new DotRenderer(@"C:\Program Files (x86)\Graphviz2.38\bin\dot.exe");
-            renderer.Render(g.ToDotWithFactors(), path, DotRenderType.png);
+            renderer.Render(g.ToDotWithFactors(labelEdges), path, DotRenderType.png);
         }
     }
 }

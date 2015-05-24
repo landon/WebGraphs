@@ -30,7 +30,7 @@ namespace Choosability.FixerBreaker
 
         public int GetDepth()
         {
-            var depth = 1;
+            var depth = 0;
             foreach (var child in Children)
                 depth = Math.Max(depth, child.GetDepth() + 1);
 

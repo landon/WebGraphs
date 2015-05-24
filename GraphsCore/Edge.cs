@@ -272,7 +272,7 @@ namespace Graphs
         Vertex _V1;
         Vertex _V2;
         Orientations _Orientation;
-        float _Thickness = 2;
+        float _Thickness = 4;
         GraphicsLayer.ARGB _Color = new GraphicsLayer.ARGB(0, 0, 0);
         GraphicsLayer.ARGB _penColor = new GraphicsLayer.ARGB(0, 0, 0);
         bool _IsSelected;

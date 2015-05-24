@@ -15,19 +15,22 @@ namespace Console
     {
         public static void Go()
         {
-            var root = @"C:\game trees\biggertree\invariant1";
+            var root = @"C:\game trees\smalltree\edge0";
             Directory.CreateDirectory(root);
 
          //   var uiG = GraphsCore.CompactSerializer.Deserialize("webgraph:7p5lm!.4bH!!#8TV?g9C\\-lgI!AXXW)k[^-#;Z?F*sJ5a,6aYM-O65sh^B_'h`q79;LfjChZj,^!!*)@!!!'$'Z^@ja9NC\"!sTF[\">gYm\"T\\VE!!!");
-            var uiG = GraphsCore.CompactSerializer.Deserialize("webgraph:7s+e3!3?/#!!#:+U^KF0PS%F+!AXX?+05o;#;\\Xf`!Jd9-mM7W`P)m27JKt(6hiE-#!f!b-mM`?paS`-&1>N4<IG2S!<<-#a8c2A!>NTW'Z^Ila9)SZa98IB!.Zm;#6Y^]#ZM?A<\"KBC!<C1@!!");
+          //  var uiG = GraphsCore.CompactSerializer.Deserialize("webgraph:7s+e3!3?/#!!#:+U^KF0PS%F+!AXX?+05o;#;\\Xf`!Jd9-mM7W`P)m27JKt(6hiE-#!f!b-mM`?paS`-&1>N4<IG2S!<<-#a8c2A!>NTW'Z^Ila9)SZa98IB!.Zm;#6Y^]#ZM?A<\"KBC!<C1@!!");
+            var uiG = GraphsCore.CompactSerializer.Deserialize("webgraph:7qM`$!.4bH!!!R&a9[/.`!KrS!Aa_K%n$+I!*C1-pbPd:TFX<n1&s-S7JJ\\_\"eHt>8?!.J7JQ4#6hiD:#64`)!<=YO!!!'6/-5ne/-I40\"U#Ji#\"0\"-!!!\"L\"p\"]T!<<");
             var potSize = uiG.Vertices.Max(v => int.Parse(v.Label));
             var g = new Choosability.Graph(uiG.GetEdgeWeights());
             var template = new Template(g.Vertices.Select(v => potSize + g.Degree(v) - uiG.Vertices[v].Label.TryParseInt().Value).ToList());
 
-            GraphViz.DrawGraph(g, root + @"\G.pdf");
+            GraphViz.DrawGraph(g, root + @"\G.pdf", true);
 
             var mind = new Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.SuperSlimMind(g, storeTreeInfo: true);
             mind.MaxPot = potSize;
+            mind.OnlyConsiderNearlyColorableBoards = true;
+            mind.MissingEdgeIndex = 0;
 
             int j = 0;
             var win = mind.Analyze(template);
