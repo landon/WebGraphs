@@ -30,6 +30,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
         public bool SuperabundantOnly { get; set; }
 
         public List<SuperSlimBoard> NonColorableBoards { get; private set; }
+        public List<SuperSlimBoard> ColorableBoards { get; private set; }
         public List<SuperSlimBoard> BreakerWonBoards { get; private set; }
         public List<SuperSlimBoard> DeepestBoards { get; private set; }
         public Dictionary<int, List<SuperSlimBoard>> BoardsOfDepth { get; private set; }
@@ -54,6 +55,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
             BoardCountsList = new List<List<int>>();
             BreakerWonBoard = null;
             NonColorableBoards = new List<SuperSlimBoard>();
+            ColorableBoards = new List<SuperSlimBoard>();
             BreakerWonBoards = new List<SuperSlimBoard>();
 
             FixerWonAllNearlyColorableBoards = true;
@@ -104,6 +106,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
                 {
                     _remainingBoards.RemoveAt(i);
                     _wonBoards.Add(b);
+                    ColorableBoards.Add(b);
                 }
 
                 if (progress != null)
@@ -348,6 +351,11 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
             return stacks[v1] & stacks[v2];
         }
 
+        public GameTreeInfo GetWinTreeInfo(SuperSlimBoard board)
+        {
+            return _swapAnalyzer.WinTreeInfo[board];
+        }
+
         int _gameTreeIndex;
         public GameTree BuildGameTree(SuperSlimBoard board, bool win = true)
         {
@@ -360,9 +368,8 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
         {
             seenBoards[board] = _gameTreeIndex;
             var tree = new GameTree() { Board = board };
-           // tree.MatchingAbundanceShadow = ComputeMatchingAbundanceShadow(board);
             tree.IsColorable = _coloringAnalyzer.Analyze(board);
-            tree.IsSuperabundant = IsSuperabundant(board);
+            tree.IsSuperabundant = win || IsSuperabundant(board);
             tree.GameTreeIndex = _gameTreeIndex;
             _gameTreeIndex++;
 
@@ -381,7 +388,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
                 {
                     var ct = new GameTree() { Board = childBoard };
                     ct.IsColorable = _coloringAnalyzer.Analyze(childBoard);
-                    ct.IsSuperabundant = IsSuperabundant(board);
+                    ct.IsSuperabundant = win || IsSuperabundant(board);
                     ct.GameTreeIndex = _gameTreeIndex++;
                     ct.SameAsIndex = index;
                     tree.AddChild(ct, bc);

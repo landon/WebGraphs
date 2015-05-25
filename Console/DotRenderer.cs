@@ -69,13 +69,6 @@ namespace Console
             {
                 var tree = treeLookup[v];
                 var shadow = "  ";
-                if (tree.MatchingAbundanceShadow != null)
-                {
-                    var rr = tree.MatchingAbundanceShadow.Select(xx => xx.ToString()).ToList();
-                    shadow = string.Join(",", rr);
-                    if (string.IsNullOrEmpty(shadow))
-                        shadow = "  ";
-                }
 
                 var infoLabel = "";
                 if (tree.IsColorable)

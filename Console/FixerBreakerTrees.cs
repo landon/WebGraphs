@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs;
 
 namespace Console
 {
@@ -15,7 +16,41 @@ namespace Console
     {
         public static void Go()
         {
-            var root = @"C:\game trees\smalltree\edge0";
+            WriteProof();
+        }
+
+        public static void WriteProof()
+        {
+          //  var uiG = GraphsCore.CompactSerializer.Deserialize("webgraph:7qM`$!.4bH!!!R&a9[/.`!KrS!Aa_K%n$+I!*C1-pbPd:TFX<n1&s-S7JJ\\_\"eHt>8?!.J7JQ4#6hiD:#64`)!<=YO!!!'6/-5ne/-I40\"U#Ji#\"0\"-!!!\"L\"p\"]T!<<"); //small tree aka fig1 left
+       //     var uiG = GraphsCore.CompactSerializer.Deserialize("webgraph:7oB<e!-S>B!!#8TJd$*0\\-lgI!AXY2';,k%#;Z?^)[2gP(C-Of'0ujY!!N?&!.ZPL!<E0O!=+(&I\"$HlIKBKg/-?eA!uhdS2\\:FcIXV"); // fig1 middle
+
+         //   var uiG = GraphsCore.CompactSerializer.Deserialize("webgraph:7qDZ#!2KSp!!#7s_?WaT\\-lgI!Aa^d)5%L-#>?-AShqSoSn&^p'0ujY!)+Du>Qb&\"e2/>6>R(6/!<E0O!=+(&I\"$HlIK0Hg/-6b%!s0Al\"<.mU.hDa^!.Y84&:T\"UIK"); // fig1 right
+
+            var uiG = GraphsCore.CompactSerializer.Deserialize("webgraph:8!X,T!$D:B!!&)lOptM4\\-lgI!Aa^@+,/T#,DG#?+.s-1#;Q9])[2f],6a[K$V?KmJ;)mR%u&ns'8>>R$O*,X'*Xu#%gAPD(XNCQ#;Z>g!!*'#!6>-?Uf-F^IXZZnI\"$MF!ZK,^!?0#^$P3Il&-`@Xa9[/)$6$tl\"rbPjHP\"$p#ljsUL^OUs(<CrPIXV"); // big tree
+            
+            
+            var potSize = uiG.Vertices.Max(v => int.Parse(v.Label));
+            var g = new Choosability.Graph(uiG.GetEdgeWeights());
+            var template = new Template(g.Vertices.Select(v => potSize + g.Degree(v) - uiG.Vertices[v].Label.TryParseInt().Value).ToList());
+
+            var mind = new Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.SuperSlimMind(g, storeTreeInfo: true);
+            mind.MaxPot = potSize;
+         //   mind.MissingEdgeIndex = 0;
+         //   mind.OnlyConsiderNearlyColorableBoards = true;
+
+            int j = 0;
+            var win = mind.Analyze(template);
+
+            if (win)
+            {
+                var pb = new ProofBuilder(mind);
+                var proof = pb.WriteProof();
+            }
+        }
+
+        public static void BuildTreePictures()
+        {
+            var root = @"C:\game trees\smalltree\fixable";
             Directory.CreateDirectory(root);
 
          //   var uiG = GraphsCore.CompactSerializer.Deserialize("webgraph:7p5lm!.4bH!!#8TV?g9C\\-lgI!AXXW)k[^-#;Z?F*sJ5a,6aYM-O65sh^B_'h`q79;LfjChZj,^!!*)@!!!'$'Z^@ja9NC\"!sTF[\">gYm\"T\\VE!!!");
@@ -29,8 +64,8 @@ namespace Console
 
             var mind = new Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.SuperSlimMind(g, storeTreeInfo: true);
             mind.MaxPot = potSize;
-            mind.OnlyConsiderNearlyColorableBoards = true;
-            mind.MissingEdgeIndex = 0;
+          //  mind.OnlyConsiderNearlyColorableBoards = true;
+          //  mind.MissingEdgeIndex = 0;
 
             int j = 0;
             var win = mind.Analyze(template);

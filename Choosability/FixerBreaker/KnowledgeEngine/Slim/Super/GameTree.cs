@@ -13,7 +13,6 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
         public int GameTreeIndex { get; set; }
         public int SameAsIndex { get; set; }
         public BreakerChoiceInfo Info {get; set;}
-        public List<int> MatchingAbundanceShadow { get; set; }
 
         public void AddChild(GameTree tree, BreakerChoiceInfo info)
         {
