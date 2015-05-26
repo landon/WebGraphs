@@ -142,9 +142,9 @@ namespace Graphs
             foreach (var e in graph.Edges)
             {
                 if (string.IsNullOrEmpty(e.Style))
-                    sb.AppendLine(string.Format(@"\Edge[]({0})({1})", vertexNameMap[e.V1], vertexNameMap[e.V2]));
+                    sb.AppendLine(string.Format(@"\Edge[label = \tiny {{{2}}}, labelstyle={{auto=right, fill=none}}]({0})({1})", vertexNameMap[e.V1], vertexNameMap[e.V2], Mathify(e.Label)));
                 else
-                    sb.AppendLine(string.Format(@"\Edge[style = {2}]({0})({1})", vertexNameMap[e.V1], vertexNameMap[e.V2], edgeStyleLookup[e.Style.Trim()]));
+                    sb.AppendLine(string.Format(@"\Edge[style = {2}, label = \tiny {{{3}}}, labelstyle={{auto=right, fill=none}}]({0})({1})", vertexNameMap[e.V1], vertexNameMap[e.V2], edgeStyleLookup[e.Style.Trim()], Mathify(e.Label)));
             }
 
             sb.AppendLine(@"\end{tikzpicture}");

@@ -28,6 +28,7 @@ using GraphsCore.Famlies;
 using WebGraphs.Analysis;
 using System.Text;
 using Choosability.FixerBreaker.KnowledgeEngine.Slim.Super;
+using Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs;
 
 namespace WebGraphs
 {
@@ -100,6 +101,8 @@ namespace WebGraphs
             _mainMenu.DoTiling += _mainMenu_DoTiling;
             _mainMenu.DoSpin += _mainMenu_DoSpin;
             _mainMenu.DoSuperabundantOnly += AnalyzeSuperabundantOnly;
+            _mainMenu.DoGenerateProof += _mainMenu_DoGenerateProof;
+            _mainMenu.DoGenerateProofSelectedEdge += _mainMenu_DoGenerateProofSelectedEdge;
 
             _propertyGrid.SomethingChanged += _propertyGrid_SomethingChanged;
 
@@ -1626,12 +1629,7 @@ trash can button.
         {
         }
 
-        void AnalyzeSuperabundantOnly()
-        {
-            AnalyzeFixerBreaker(false, -1, true);
-        }
-
-        void AnalyzeOnlyNearColoringsForSelectedEdge()
+        async void _mainMenu_DoGenerateProofSelectedEdge()
         {
             var blob = AlgorithmBlob.Create(SelectedTabCanvas);
             if (blob == null)
@@ -1648,22 +1646,53 @@ trash can button.
                 return;
             }
 
-            AnalyzeFixerBreaker(true, blob.SelectedEdgeIndices.First());
-        }
-        void AnalyzeOnlyNearColorings()
-        {
-            AnalyzeFixerBreaker(true);
-        }
-        void AnalyzeFixerBreaker()
-        {
-            AnalyzeFixerBreaker(false);
+            await AnalyzeFixerBreaker(true, blob.SelectedEdgeIndices.First(), false, true);
         }
 
-        async void AnalyzeFixerBreaker(bool onlyNearColorings, int missingEdgeIndex = -1, bool superAbundantOnly = false)
+        async void _mainMenu_DoGenerateProof()
+        {
+            await AnalyzeFixerBreaker(false, -1, false, true);
+        }
+
+        async void AnalyzeSuperabundantOnly()
+        {
+            await AnalyzeFixerBreaker(false, -1, true);
+        }
+
+        async void AnalyzeOnlyNearColoringsForSelectedEdge()
         {
             var blob = AlgorithmBlob.Create(SelectedTabCanvas);
             if (blob == null)
                 return;
+
+            if (blob.SelectedEdgeIndices.Count <= 0)
+            {
+                MessageBox.Show("no edges selected");
+                return;
+            }
+            if (blob.SelectedEdgeIndices.Count >= 2)
+            {
+                MessageBox.Show("too many edges selected");
+                return;
+            }
+
+            await AnalyzeFixerBreaker(true, blob.SelectedEdgeIndices.First());
+        }
+        async void AnalyzeOnlyNearColorings()
+        {
+            await AnalyzeFixerBreaker(true);
+        }
+        async void AnalyzeFixerBreaker()
+        {
+            await AnalyzeFixerBreaker(false);
+        }
+
+        async Task<string> AnalyzeFixerBreaker(bool onlyNearColorings, int missingEdgeIndex = -1, bool superAbundantOnly = false, bool generateProof = false)
+        {
+            var proof = "";
+            var blob = AlgorithmBlob.Create(SelectedTabCanvas);
+            if (blob == null)
+                return proof;
 
             int potSize = int.MaxValue;
             if (!superAbundantOnly)
@@ -1674,7 +1703,7 @@ trash can button.
                 }
                 catch
                 {
-                    return;
+                    return proof;
                 }
             }
 
@@ -1689,7 +1718,7 @@ trash can button.
                 template = new Template(G.Vertices.Select(v => potSize + G.Degree(v) - blob.UIGraph.Vertices[v].Label.TryParseInt().Value).ToList());
             }
 
-            var mind = new Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.SuperSlimMind(G);
+            var mind = new Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.SuperSlimMind(G, generateProof);
             mind.MaxPot = potSize;
             mind.SuperabundantOnly = superAbundantOnly;
             mind.OnlyConsiderNearlyColorableBoards = onlyNearColorings;
@@ -1724,12 +1753,32 @@ trash can button.
                             }
                             else
                             {
-                                if (win)
-                                    return "Fixer wins\n\n" + stats;
-                                if (mind.FixerWonAllNearlyColorableBoards)
-                                    return "Fixer wins on all nearly colorable boards (for some edge)\n\n" + stats;
+                                if (generateProof)
+                                {
+                                    var sb = new StringBuilder();
+                                    if (win)
+                                        sb.AppendLine("Fixer wins\n\n" + stats);
+                                    else if (mind.FixerWonAllNearlyColorableBoards)
+                                        sb.AppendLine("Fixer wins on all nearly colorable boards (for some edge)\n\n" + stats);
+                                    else
+                                        sb.AppendLine("Breaker wins\n\n" + stats);
 
-                                return "Breaker wins\n\n" + stats;
+                                    sb.AppendLine();
+                                    sb.AppendLine();
+                                    var pb = new ProofBuilder(mind);
+                                    sb.AppendLine(pb.WriteProof());
+
+                                    return sb.ToString();
+                                }
+                                else
+                                {
+                                    if (win)
+                                        return "Fixer wins\n\n" + stats;
+                                    if (mind.FixerWonAllNearlyColorableBoards)
+                                        return "Fixer wins on all nearly colorable boards (for some edge)\n\n" + stats;
+
+                                    return "Breaker wins\n\n" + stats;
+                                }
                             }
                         }
                     }
@@ -1741,7 +1790,7 @@ trash can button.
 
                 resultWindow.ClearChildren();
 
-                var t = new TextBlock();
+                var t = new TextBox();
                 t.Text = result;
                 resultWindow.AddChild(t);
 
@@ -1754,6 +1803,8 @@ trash can button.
                     AddTab(gr, ((TabItem)_tabControl.SelectedItem).Header + " (Breaker win)");
                 }
             }
+
+            return proof;
         }
 
         static string GetStats(List<int> boardCounts)

@@ -26,8 +26,9 @@ namespace Console
 
          //   var uiG = GraphsCore.CompactSerializer.Deserialize("webgraph:7qDZ#!2KSp!!#7s_?WaT\\-lgI!Aa^d)5%L-#>?-AShqSoSn&^p'0ujY!)+Du>Qb&\"e2/>6>R(6/!<E0O!=+(&I\"$HlIK0Hg/-6b%!s0Al\"<.mU.hDa^!.Y84&:T\"UIK"); // fig1 right
 
-            var uiG = GraphsCore.CompactSerializer.Deserialize("webgraph:8!X,T!$D:B!!&)lOptM4\\-lgI!Aa^@+,/T#,DG#?+.s-1#;Q9])[2f],6a[K$V?KmJ;)mR%u&ns'8>>R$O*,X'*Xu#%gAPD(XNCQ#;Z>g!!*'#!6>-?Uf-F^IXZZnI\"$MF!ZK,^!?0#^$P3Il&-`@Xa9[/)$6$tl\"rbPjHP\"$p#ljsUL^OUs(<CrPIXV"); // big tree
+          //  var uiG = GraphsCore.CompactSerializer.Deserialize("webgraph:8!X,T!$D:B!!&)lOptM4\\-lgI!Aa^@+,/T#,DG#?+.s-1#;Q9])[2f],6a[K$V?KmJ;)mR%u&ns'8>>R$O*,X'*Xu#%gAPD(XNCQ#;Z>g!!*'#!6>-?Uf-F^IXZZnI\"$MF!ZK,^!?0#^$P3Il&-`@Xa9[/)$6$tl\"rbPjHP\"$p#ljsUL^OUs(<CrPIXV"); // big tree
             
+            var uiG = GraphsCore.CompactSerializer.Deserialize("webgraph:7RI.U!'1)[!!@T`X:8\\?!AXXc)8lhl!!+kU9HC2DA,lWc!!3-$!!*'N!=+(&I\"$HlIK9KN!%\\-UIXZZnI\"$M"); // val
             
             var potSize = uiG.Vertices.Max(v => int.Parse(v.Label));
             var g = new Choosability.Graph(uiG.GetEdgeWeights());

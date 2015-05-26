@@ -53,7 +53,7 @@ namespace WebGraphs
                 tt.HorizontalScrollBarVisibility = ScrollBarVisibility.Auto;
                 tt.VerticalScrollBarVisibility = ScrollBarVisibility.Auto;
                 tt.IsReadOnly = true;
-                tt.Height = 250;
+                tt.Height = 450;
             }
 
             _layoutRoot.Children.Add(c);

@@ -79,6 +79,8 @@ namespace WebGraphs
         public event Action DoTiling;
         public event Action DoSpin;
         public event Action DoSuperabundantOnly;
+        public event Action DoGenerateProof;
+        public event Action DoGenerateProofSelectedEdge;
 
         public MenuBar()
         {
@@ -301,6 +303,12 @@ namespace WebGraphs
                     break;
                 case "analyze superabundant only":
                     A(DoSuperabundantOnly);
+                    break;
+                case "generate proof":
+                    A(DoGenerateProof);
+                    break;
+                case "generate proof only near colorings for selected edge":
+                    A(DoGenerateProofSelectedEdge);
                     break;
             }
         }
