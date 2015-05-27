@@ -10,12 +10,12 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
         public SuperSlimMind Mind { get; private set; }
         public List<SuperSlimBoard> Boards { get; private set; }
 
-        public int Depth { get; private set; }
+        public int CaseNumber { get; private set; }
 
-        public ProofCase(SuperSlimMind mind, int depth, List<SuperSlimBoard> boards = null)
+        public ProofCase(SuperSlimMind mind, int caseNumber, List<SuperSlimBoard> boards = null)
         {
             Mind = mind;
-            Depth = depth;
+            CaseNumber = caseNumber;
             Boards = boards;
             if (Boards == null)
                 Boards = new List<SuperSlimBoard>();

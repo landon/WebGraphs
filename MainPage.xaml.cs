@@ -1732,6 +1732,9 @@ trash can button.
                     if (Enumerable.Range(0, G.N).Any(i => template.Sizes[i] < G.Degree(i)))
                         return "some list is too small";
 
+                    if (G.MaxDegree > potSize)
+                        return "this graph has max degree " + G.MaxDegree + ", so can't be embedded in a graph of max degree " + potSize;
+
                     try
                     {
                         var win = mind.Analyze(template, resultWindow.OnProgress);
@@ -1757,15 +1760,15 @@ trash can button.
                                 {
                                     var sb = new StringBuilder();
                                     if (win)
-                                        sb.AppendLine("Fixer wins\n\n" + stats);
+                                        sb.AppendLine("Fixer wins\n\n");
                                     else if (mind.FixerWonAllNearlyColorableBoards)
-                                        sb.AppendLine("Fixer wins on all nearly colorable boards (for some edge)\n\n" + stats);
+                                        sb.AppendLine("Fixer wins on all nearly colorable boards (for some edge)\n\n");
                                     else
-                                        sb.AppendLine("Breaker wins\n\n" + stats);
+                                        sb.AppendLine("Breaker wins\n\n");
 
                                     sb.AppendLine();
                                     sb.AppendLine();
-                                    var pb = new ProofBuilder(mind);
+                                    var pb = new CompactProofBuilder(mind);
                                     sb.AppendLine(pb.WriteProof());
 
                                     return sb.ToString();

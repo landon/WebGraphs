@@ -61,6 +61,11 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
             return "";
         }
 
+        public static int GetXYZIndex(this int i, SuperSlimBoard b)
+        {
+            return b.Stacks.Value.Take(i + 1).Count(ss => ss.PopulationCount() == 2) - 1;
+        }
+
         public static string GetArticle(this string letter)
         {
             switch (letter)
@@ -76,7 +81,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
             return "";
         }
 
-        public static string Listify<T>(this IEnumerable<T> strings)
+        public static string Listify<T>(this IEnumerable<T> strings, string connector = "and")
         {
             var ll = strings.ToList();
             if (ll.Count <= 0)
@@ -84,7 +89,38 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
             if (ll.Count == 1)
                 return ll[0].ToString();
 
-            return string.Join(", ", ll.Take(ll.Count - 1)) + " and " + ll.Last();
+            return string.Join(", ", ll.Take(ll.Count - 1)) + " " + connector + " " + ll.Last();
+        }
+
+        public static string Wordify(this int n)
+        {
+            switch (n)
+            {
+                case 0:
+                    return "first";
+                case 1:
+                    return "second";
+                case 2:
+                    return "third";
+                case 3:
+                    return "fourth";
+                case 4:
+                    return "fifth";
+                case 5:
+                    return "sixth";
+                case 6:
+                    return "seventh";
+                case 7:
+                    return "eighth";
+                case 8:
+                    return "ninth";
+                case 9:
+                    return "tenth";
+                case 10:
+                    return "eleventh";
+            }
+
+            return (n + 1) + "-th";
         }
     }
 }

@@ -7,7 +7,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
 {
     public class SuperSlimSwapAnalyzer
     {
-        bool StoreTreeInfo { get; set; }
+        bool ProofFindingMode { get; set; }
         public Dictionary<SuperSlimBoard, GameTreeInfo> WinTreeInfo { get; private set; }
         public Dictionary<SuperSlimBoard, GameTreeInfo> LossTreeInfo { get; private set; }
 
@@ -15,11 +15,11 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
         int _fixerResponseCount;
         Dictionary<ulong, List<List<ulong>>> _breakerChoicesCache = new Dictionary<ulong, List<List<ulong>>>();
 
-        public SuperSlimSwapAnalyzer(int n, bool storeTreeInfo = false)
+        public SuperSlimSwapAnalyzer(int n, bool proofFindingMode = false)
         {
             _fixerResponses = new ulong[8192];
-            StoreTreeInfo = storeTreeInfo;
-            if (StoreTreeInfo)
+            ProofFindingMode = proofFindingMode;
+            if (ProofFindingMode)
             {
                 WinTreeInfo = new Dictionary<SuperSlimBoard, GameTreeInfo>();
                 LossTreeInfo = new Dictionary<SuperSlimBoard, GameTreeInfo>();
@@ -28,17 +28,6 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
 
         public bool Analyze(SuperSlimBoard board, HashSet<SuperSlimBoard> wonBoards)
         {
-            GameTreeInfo winInfo = null;
-            GameTreeInfo lossInfo = null;
-            if (StoreTreeInfo)
-            {
-                winInfo = new GameTreeInfo();
-                WinTreeInfo[board] = winInfo;
-
-                lossInfo = new GameTreeInfo();
-                LossTreeInfo[board] = lossInfo;
-            }
-
             for (int i = 0; i < board._length; i++)
             {
                 for (int j = i + 1; j < board._length; j++)
@@ -59,21 +48,12 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
                             if (wonBoards.Contains(childBoard))
                             {
                                 winningSwapExists = true;
-                                if (StoreTreeInfo)
-                                    winInfo.Add(breakerChoice, i, j, _fixerResponses[k]);
                                 break;
-                            }
-                            else
-                            {
-                                if (StoreTreeInfo)
-                                    lossInfo.Add(breakerChoice, i, j, _fixerResponses[k]);
                             }
                         }
 
                         if (!winningSwapExists)
                         {
-                            if (StoreTreeInfo)
-                                winInfo.Clear();
                             winningSwapAlwaysExists = false;
                             break;
                         }
@@ -82,6 +62,80 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
                     if (winningSwapAlwaysExists)
                         return true;
                 }
+            }
+
+            return false;
+        }
+
+        public bool AnalyzeForProof(SuperSlimBoard board, HashSet<SuperSlimBoard> wonBoards, bool singletonOnly = false)
+        {
+            var lossInfo = new GameTreeInfo();
+            LossTreeInfo[board] = lossInfo;
+
+            var winInfos = new GameTreeInfo[board._length, board._length];
+            GameTreeInfo bestWinInfo = null;
+            var minWinSwaps = int.MaxValue;
+
+            for (int i = 0; i < board._length; i++)
+            {
+                for (int j = i + 1; j < board._length; j++)
+                {
+                    winInfos[i, j] = new GameTreeInfo();
+
+                    var x = board._trace[i];
+                    var y = board._trace[j];
+                    var swappable = x ^ y;
+
+                    var winSwaps = 0;
+                    var winningSwapAlwaysExists = true;
+                    foreach (var breakerChoice in GetBreakerChoices(swappable))
+                    {
+                        var winningSwapExists = false;
+
+                        GetFixerResponses(breakerChoice);
+                        var responses = Enumerable.Range(1, _fixerResponseCount - 1).Select(k => _fixerResponses[k]).OrderBy(fr => fr.PopulationCount());
+                        foreach (var response in responses)
+                        {
+                            if (singletonOnly && response.PopulationCount() > 1)
+                                continue;
+
+                            var childBoard = new SuperSlimBoard(board._trace, i, j, response, board._stackCount);
+                            if (wonBoards.Contains(childBoard))
+                            {
+                                winningSwapExists = true;
+                                winInfos[i,j].Add(breakerChoice, i, j, response);
+                                winSwaps += response.PopulationCount();
+                                break;
+                            }
+                            else
+                            {
+                                lossInfo.Add(breakerChoice, i, j, response);
+                            }
+                        }
+
+                        if (!winningSwapExists)
+                        {
+                            winInfos[i, j].Clear();
+                            winningSwapAlwaysExists = false;
+                            break;
+                        }
+                    }
+
+                    if (winningSwapAlwaysExists)
+                    {
+                        if (winSwaps < minWinSwaps)
+                        {
+                            bestWinInfo = winInfos[i, j];
+                            minWinSwaps = winSwaps;
+                        }
+                    }
+                }
+            }
+
+            if (bestWinInfo != null)
+            {
+                WinTreeInfo[board] = bestWinInfo;
+                return true;
             }
 
             return false;

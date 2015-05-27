@@ -20,27 +20,49 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
         {
             Cases = new List<ProofCase>();
 
+            var caseNumber = 0;
+
             var colorableCase = new ProofCase(Mind, 0, Mind.ColorableBoards);
             Cases.Add(colorableCase);
+            caseNumber++;
 
-            var depthToCase = new Dictionary<int, ProofCase>();
-            foreach (var board in Mind.NonColorableBoards)
+            var remainingBoards = Mind.NonColorableBoards.ToList();
+            var wonBoards = Mind.ColorableBoards.ToList();
+            while (remainingBoards.Count > 0)
             {
-                var tree = Mind.BuildGameTree(board);
-                var depth = tree.GetDepth();
+                var proofCase = new ProofCase(Mind, caseNumber);
+                Cases.Add(proofCase);
 
-                ProofCase proofCase;
-                if (!depthToCase.TryGetValue(depth, out proofCase))
+                var addedBoards = new List<SuperSlimBoard>();
+                foreach (var board in remainingBoards)
                 {
-                    proofCase = new ProofCase(Mind, depth);
-                    depthToCase[depth] = proofCase;
-                    Cases.Add(proofCase);
+                    var treeInfo = Mind.GetWinTreeInfo(board);
+
+                    if (treeInfo.All(bc => wonBoards.Contains(new SuperSlimBoard(board._trace, bc.Alpha, bc.Beta, bc.Response, board._stackCount))))
+                        addedBoards.Add(board);
                 }
 
-                proofCase.AddBoard(board);
-            }
+                foreach (var board in addedBoards)
+                {
+                    proofCase.AddBoard(board);
+                    wonBoards.Add(board);
+                    remainingBoards.Remove(board);
+                }
 
-            Cases.Sort((c1, c2) => c1.Depth.CompareTo(c2.Depth));
+                caseNumber++;
+            }
+        }
+
+        protected int GetHandledCaseNumber(SuperSlimBoard b, BreakerChoiceInfo bc)
+        {
+            var childBoard = new SuperSlimBoard(b._trace, bc.Alpha, bc.Beta, bc.Response, b._stackCount);
+            return Cases.IndicesWhere(cc => cc.Boards.Contains(childBoard)).First() + 1;
+        }
+
+        protected string GetChildBoardName(SuperSlimBoard b, BreakerChoiceInfo bc)
+        {
+            var childBoard = new SuperSlimBoard(b._trace, bc.Alpha, bc.Beta, bc.Response, b._stackCount);
+            return childBoard.ToXYZ();
         }
 
         public virtual string WriteProof()

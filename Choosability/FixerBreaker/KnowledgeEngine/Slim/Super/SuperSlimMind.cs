@@ -32,16 +32,17 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
         public List<SuperSlimBoard> NonColorableBoards { get; private set; }
         public List<SuperSlimBoard> ColorableBoards { get; private set; }
         public List<SuperSlimBoard> BreakerWonBoards { get; private set; }
-        public List<SuperSlimBoard> DeepestBoards { get; private set; }
         public Dictionary<int, List<SuperSlimBoard>> BoardsOfDepth { get; private set; }
+        public bool ProofFindingMode { get; private set; }
 
         public SuperSlimMind(Graph g, bool storeTreeInfo = false)
         {
             _graph = g;
+            ProofFindingMode = storeTreeInfo;
             BuildLineGraph();
 
             _coloringAnalyzer = new SuperSlimColoringAnalyzer(_lineGraph, GetEdgeColorList);
-            _swapAnalyzer = new SuperSlimSwapAnalyzer(g.N, storeTreeInfo);
+            _swapAnalyzer = new SuperSlimSwapAnalyzer(g.N, ProofFindingMode);
             _wonBoards = new HashSet<SuperSlimBoard>();
             _remainingBoards = new List<SuperSlimBoard>();
 
@@ -177,30 +178,45 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
                 var wonBoards = new List<SuperSlimBoard>();
                 winLength++;
 
+                var singletonOnly = ProofFindingMode;
                 var count = _remainingBoards.Count;
-                if (count > 0)
-                    DeepestBoards = _remainingBoards.ToList();
-
-                for (int i = _remainingBoards.Count - 1; i >= 0; i--)
+                while (true)
                 {
-                    var b = _remainingBoards[i];
-                    if (_swapAnalyzer.Analyze(b, _wonBoards))
+                    for (int i = _remainingBoards.Count - 1; i >= 0; i--)
                     {
-                        _remainingBoards.RemoveAt(i);
-                        wonBoards.Add(b);
+                        var b = _remainingBoards[i];
+                        var isWin = false;
+                        if (ProofFindingMode)
+                            isWin = _swapAnalyzer.AnalyzeForProof(b, _wonBoards, singletonOnly);
+                        else
+                            isWin = _swapAnalyzer.Analyze(b, _wonBoards);
 
-                        if (progress != null)
+                        if (isWin)
                         {
-                            var p = 100 * (totalBoards - _remainingBoards.Count) / totalBoards;
-                            if (p > lastP)
+                            _remainingBoards.RemoveAt(i);
+                            wonBoards.Add(b);
+
+                            if (progress != null)
                             {
-                                progress(new Tuple<string, int>(string.Format("Finding all {0} move wins...", winLength), p));
-                                lastP = p;
+                                var p = 100 * (totalBoards - _remainingBoards.Count) / totalBoards;
+                                if (p > lastP)
+                                {
+                                    progress(new Tuple<string, int>(string.Format("Finding all {0} move wins...", winLength), p));
+                                    lastP = p;
+                                }
                             }
+
+                            if (ProofFindingMode)
+                                break;
                         }
                     }
+
+                    if (singletonOnly && _remainingBoards.Count == count)
+                        singletonOnly = false;
+                    else
+                        break;
                 }
-                
+
                 foreach (var b in wonBoards)
                     _wonBoards.Add(b);
 

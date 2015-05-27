@@ -216,22 +216,5 @@ namespace Console
             }
         }
 
-        static void DoAllEdges(Graphs.Graph uiG, int potSize, Choosability.Graph G, Template template)
-        {
-            for (int i = 0; i < uiG.Edges.Count; i++)
-            {
-                var mind = new Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.SuperSlimMind(G);
-                mind.MaxPot = potSize;
-                mind.OnlyConsiderNearlyColorableBoards = true;
-                mind.MissingEdgeIndex = i;
-
-                var win = mind.Analyze(template, null);
-                if (win)
-                {
-                    var tree = mind.BuildGameTree(mind.DeepestBoards[0]);
-                    GraphViz.DrawTree(tree, @"C:\game trees\test" + i + ".pdf");
-                }
-            }
-        }
     }
 }

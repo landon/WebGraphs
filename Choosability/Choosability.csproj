@@ -84,6 +84,7 @@
     <Compile Include="FixerBreaker\KnowledgeEngine\Slim\Super\GameTree.cs" />
     <Compile Include="FixerBreaker\KnowledgeEngine\Slim\Super\GameTreeInfo.cs" />
     <Compile Include="FixerBreaker\KnowledgeEngine\Slim\Super\Hashing.cs" />
+    <Compile Include="FixerBreaker\KnowledgeEngine\Slim\Super\Proofs\CompactProofBuilder.cs" />
     <Compile Include="FixerBreaker\KnowledgeEngine\Slim\Super\Proofs\Extensions.cs" />
     <Compile Include="FixerBreaker\KnowledgeEngine\Slim\Super\Proofs\ProofBuilder.cs" />
     <Compile Include="FixerBreaker\KnowledgeEngine\Slim\Super\Proofs\ProofCase.cs" />
