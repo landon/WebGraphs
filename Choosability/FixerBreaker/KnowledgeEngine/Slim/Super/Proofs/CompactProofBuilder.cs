@@ -7,15 +7,29 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
 {
     public class CompactProofBuilder : ProofBuilder
     {
-        public CompactProofBuilder(SuperSlimMind mind)
+        string _tikz;
+
+        public CompactProofBuilder(SuperSlimMind mind, string tikz = "")
             : base(mind)
         {
+            _tikz = tikz;
         }
 
         public override string WriteProof()
         {
             var sb = new StringBuilder();
+            var figureID = "fig:" + Guid.NewGuid().ToString();
 
+            sb.AppendLine("\\begin{figure}");
+            sb.AppendLine("\\centering");
+            sb.AppendLine(_tikz);
+            sb.AppendLine("\\caption{Solid vertices have lists of size 3 and the labeled vertices have lists of size 2.}\\label{" + figureID + "}");
+            sb.AppendLine("\\end{figure}");
+
+            sb.AppendLine("\\begin{lem}");
+            sb.AppendLine("The graph in Figure \\ref{" + figureID + "} is reducible.");
+            sb.AppendLine("\\end{lem}");
+            
             var letters = new List<string>() { "X", "Y", "Z" };
             var stringLength = Mind.ColorableBoards[0].Stacks.Value.Count(ss => ss.PopulationCount() == 2);
             var rng = new Random(DateTime.Now.Millisecond);
@@ -23,7 +37,8 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
             for(int i = 0; i < stringLength; i++)
                 randomString += letters[rng.Next(3)];
 
-            sb.AppendLine("Let $X = \\{0,1\\}$, $Y = \\{0,2\\}$ and $Z = \\{1,2\\}$. Then with the vertex ordering in Figure ??, a string such as " + rng + ", ");
+            sb.Append("\\begin{proof}");
+            sb.AppendLine("Let $X = \\{0,1\\}$, $Y = \\{0,2\\}$ and $Z = \\{1,2\\}$. Then with the vertex ordering in Figure \\ref{" + figureID + "}, a string such as " + randomString + ", ");
             sb.AppendLine("represents a possible list assignment on $V(H)$ arising from a $3$-edge-coloring of $G-E(H)$.");
             sb.AppendLine("By an $X$-Kempe change, we mean flipping colors $0$ and $1$ on a two-colored path in $G-E(H)$.  We call such a path an $X$-path. ");
             sb.AppendLine("Any endpoint of an $X$-path in $H$ must end at a $Y$ or $Z$ vertex.  The meanings of $Y$-Kempe change, $Z$-Kempe change, $Y$-path and $Z$-path are analogous.");
@@ -92,7 +107,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
                                     var treeInfo = Mind.GetWinTreeInfo(b);
                                     var groups = treeInfo.GroupBy(ss => ss.SwapVertices[0]);
 
-                                    sb.Append("this is the " + groups.OrderBy(gg => gg.Key).Select(gg => gg.Key.GetXYZIndex(b).Wordify()).Listify("or") + " vertex, ");
+                                    sb.Append("this is the " + groups.OrderBy(gg => gg.Key).Select(gg => gg.Key.GetXYZIndex(b).Wordify()).Listify("or") + " vertex of $H$, ");
 
                                     sb.Append("then doing " + fixGroup.Key.GetArticle() + " " + fixGroup.Key + "-Kempe change there yields " + groups.OrderBy(gg => gg.Key).Select(gg => GetChildBoardName(b, gg.First())).Listify());
                                     if (treeInfo.Count > 1)
@@ -101,37 +116,64 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
                                         sb.AppendLine(", which we already handled.");
                                 }
                             }
-                            else
+                            else if (swapCountGroup.Key == 2)
                             {
                                 foreach (var b in swapCountGroup)
                                 {
                                     sb.AppendLine();
-                                    sb.Append("For " + b.ToXYZ() + ", ");
+                                    if (swapCountGroup.Count() == 1)
+                                        sb.Append("If ");
+                                    else
+                                        sb.Append("For " + b.ToXYZ() + ", if ");
 
                                     var treeInfo = Mind.GetWinTreeInfo(b);
-                                    var fixLetter = ((long)((1 << treeInfo.First().Alpha) | (1 << treeInfo.First().Beta))).ToXYZ();
-                                    others = letters.ToList();
-                                    others.Remove(fixLetter);
+                                    var leftover = treeInfo.ToList();
 
-                                    var singletonSwappers = treeInfo.Where(bc => bc.SwapVertices.Count == 1).ToList();
-                                    if (singletonSwappers.Count > 0)
+                                    var first = true;
+                                    while (leftover.Count > 0)
                                     {
-                                        sb.AppendLine("since there are an odd number of " + others[0] + "'s and " + others[1] + "'s, every partition must have a singleton. ");
+                                        var commonestSwapper = Enumerable.Range(0, b._stackCount).MaxIndex(v => leftover.Count(bc => bc.SwapVertices.Contains(v)));
+                                        var handledAll = leftover.Where(bc => bc.SwapVertices.Contains(commonestSwapper)).ToList();
+                                        var handled = handledAll.Distinct(bc => bc.SwapVertices.Count == 1 ? -1 : bc.SwapVertices.Except(commonestSwapper).First()).ToList();
 
-                                        var groups = singletonSwappers.GroupBy(ss => ss.SwapVertices[0]).ToList();
+                                        if (!first)
+                                            sb.Append("If ");
+                                        
+                                        first = false;
+                                        sb.Append("the " + fixGroup.Key + "-path starting at the " + commonestSwapper.GetXYZIndex(b).Wordify() + " vertex");
+                                        var single = handled.FirstOrDefault(bc => bc.SwapVertices.Count == 1);
+                                        if (single != null)
+                                            sb.Append(" doesn't end in $H$");
 
-                                        sb.Append("If this singleton is the " + groups.OrderBy(gg => gg.Key).Select(gg => gg.Key.GetXYZIndex(b).Wordify()).Listify("or") + " character, ");
-                                        sb.AppendLine("then swapping " + others[0] + " and " + others[1] + " there yields " + groups.OrderBy(gg => gg.Key).Select(gg => GetChildBoardName(b, gg.First())).Listify() + " respectively; ");
-                                        sb.AppendLine("each of these was already handled.");
-                                    }
+                                        if (handled.Where(bc => bc.SwapVertices.Count > 1).Count() > 0)
+                                        {
+                                            if (single != null)
+                                                sb.Append(" or");
 
-                                    foreach (var bc in treeInfo.Except(singletonSwappers))
-                                    {
-                                        var partitionId = b.ToPartitionId(bc.Partition);
-                                        sb.Append("If the partition is " + b.ToCompactedPartitionId(bc.Partition) + ", then swapping " + others[0] + " and " + others[1] + " at " + bc.SwapVertices.Select(v => partitionId[v]).Distinct().Listify());
-                                        sb.Append(" yields " + GetChildBoardName(b, bc) + " which we already handled.");
+                                            sb.Append(" ends at the " + handled.Where(bc => bc.SwapVertices.Count > 1).OrderBy(bc => bc.SwapVertices.Except(commonestSwapper).First()).Select(bc => bc.SwapVertices.Except(commonestSwapper).First().GetXYZIndex(b).Wordify()).Listify("or") + " vertex of $H$, ");
+                                            sb.Append("then doing " + fixGroup.Key.GetArticle() + " " + fixGroup.Key + "-Kempe change there yields " +
+                                                handled.OrderBy(bc => bc.SwapVertices.Count == 1 ? -1 : bc.SwapVertices.Except(commonestSwapper).First()).Select(bc => GetChildBoardName(b, bc)).Listify());
+                                        }
+                                        else if (single != null)
+                                        {
+                                            sb.Append(" then doing " + fixGroup.Key.GetArticle() + " " + fixGroup.Key + "-Kempe change there yields " + GetChildBoardName(b, single));
+                                        }
+
+                                        if (handled.Count > 1)
+                                            sb.AppendLine(" respectively, each of which we already handled.");
+                                        else
+                                            sb.AppendLine(", which we already handled.");
+
+                                        foreach (var bc in handledAll)
+                                            leftover.Remove(bc);
                                     }
                                 }
+                            }
+                            else
+                            {
+                                sb.AppendLine();
+                                sb.AppendLine("NEED TWO SWAPS, FIX ME!");
+                                sb.AppendLine();
                             }
                         }
                     }
@@ -140,6 +182,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
                 sb.AppendLine();
             }
 
+            sb.AppendLine("\\end{proof}");
             return sb.ToString();
         }
     }

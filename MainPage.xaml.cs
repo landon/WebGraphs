@@ -1759,16 +1759,23 @@ trash can button.
                                 if (generateProof)
                                 {
                                     var sb = new StringBuilder();
-                                    if (win)
-                                        sb.AppendLine("Fixer wins\n\n");
-                                    else if (mind.FixerWonAllNearlyColorableBoards)
-                                        sb.AppendLine("Fixer wins on all nearly colorable boards (for some edge)\n\n");
-                                    else
-                                        sb.AppendLine("Breaker wins\n\n");
+                                    var gg = blob.UIGraph.Clone();
+                                    int i = 1;
+                                    foreach (var vv in gg.Vertices)
+                                    {
+                                        if (template.Sizes[gg.Vertices.IndexOf(vv)] == potSize)
+                                        {
+                                            vv.Label = "";
+                                        }
+                                        else
+                                        {
+                                            vv.Label = "" + i;
+                                            i++;
+                                        }
+                                    }
 
-                                    sb.AppendLine();
-                                    sb.AppendLine();
-                                    var pb = new CompactProofBuilder(mind);
+                                    var tikz = TeXConverter.ToTikz(gg);
+                                    var pb = new CompactProofBuilder(mind, tikz);
                                     sb.AppendLine(pb.WriteProof());
 
                                     return sb.ToString();

@@ -122,5 +122,42 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
 
             return (n + 1) + "-th";
         }
+
+        public static IEnumerable<T> Except<T>(this IEnumerable<T> list, T t)
+        {
+            return list.Except(new[] { t });
+        }
+
+        public static int MaxIndex<T>(this IEnumerable<T> list, Func<T, int> value)
+        {
+            var maxIndex = -1;
+            var max = int.MinValue;
+            int i = 0;
+            foreach (var t in list)
+            {
+                var v = value(t);
+                if (v > max)
+                {
+                    max = v;
+                    maxIndex = i;
+                }
+
+                i++;
+            }
+
+            return maxIndex;
+        }
+
+        public static IEnumerable<T> Distinct<T, S>(this IEnumerable<T> list, Func<T, S> value)
+        {
+            var distinct = new List<T>();
+            foreach (var t in list)
+            {
+                if (!distinct.Any(tt => value(tt).Equals(value(t))))
+                    distinct.Add(t);
+            }
+
+            return distinct;
+        }
     }
 }
