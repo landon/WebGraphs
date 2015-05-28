@@ -182,19 +182,27 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
                 var count = _remainingBoards.Count;
                 while (true)
                 {
-                    for (int i = _remainingBoards.Count - 1; i >= 0; i--)
+                    if (ProofFindingMode)
                     {
-                        var b = _remainingBoards[i];
-                        var isWin = false;
-                        if (ProofFindingMode)
-                            isWin = _swapAnalyzer.AnalyzeForProof(b, _wonBoards, singletonOnly);
-                        else
-                            isWin = _swapAnalyzer.Analyze(b, _wonBoards);
-
-                        if (isWin)
+                        SuperSlimBoard bestWinBoard = null;
+                        int minWinSwaps = int.MaxValue;
+                        for (int i = _remainingBoards.Count - 1; i >= 0; i--)
                         {
-                            _remainingBoards.RemoveAt(i);
-                            wonBoards.Add(b);
+                            var b = _remainingBoards[i];
+                            if (_swapAnalyzer.AnalyzeForProof(b, _wonBoards, singletonOnly))
+                            {
+                                if (_swapAnalyzer.MinWinSwaps < minWinSwaps)
+                                {
+                                    minWinSwaps = _swapAnalyzer.MinWinSwaps;
+                                    bestWinBoard = b;
+                                }
+                            }
+                        }
+
+                        if (bestWinBoard != null)
+                        {
+                            _remainingBoards.Remove(bestWinBoard);
+                            wonBoards.Add(bestWinBoard);
 
                             if (progress != null)
                             {
@@ -205,11 +213,31 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
                                     lastP = p;
                                 }
                             }
-
-                            if (ProofFindingMode)
-                                break;
                         }
                     }
+                    else
+                    {
+                        for (int i = _remainingBoards.Count - 1; i >= 0; i--)
+                        {
+                            var b = _remainingBoards[i];
+                            if (_swapAnalyzer.Analyze(b, _wonBoards))
+                            {
+                                _remainingBoards.RemoveAt(i);
+                                wonBoards.Add(b);
+
+                                if (progress != null)
+                                {
+                                    var p = 100 * (totalBoards - _remainingBoards.Count) / totalBoards;
+                                    if (p > lastP)
+                                    {
+                                        progress(new Tuple<string, int>(string.Format("Finding all {0} move wins...", winLength), p));
+                                        lastP = p;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                  
 
                     if (singletonOnly && _remainingBoards.Count == count)
                         singletonOnly = false;

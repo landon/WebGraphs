@@ -7,6 +7,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
 {
     public class SuperSlimSwapAnalyzer
     {
+        public int MinWinSwaps { get; private set; }
         bool ProofFindingMode { get; set; }
         public Dictionary<SuperSlimBoard, GameTreeInfo> WinTreeInfo { get; private set; }
         public Dictionary<SuperSlimBoard, GameTreeInfo> LossTreeInfo { get; private set; }
@@ -134,6 +135,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
 
             if (bestWinInfo != null)
             {
+                MinWinSwaps = minWinSwaps;
                 WinTreeInfo[board] = bestWinInfo;
                 return true;
             }
