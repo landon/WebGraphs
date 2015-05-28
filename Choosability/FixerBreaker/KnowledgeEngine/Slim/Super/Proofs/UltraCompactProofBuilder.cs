@@ -1,19 +1,93 @@
-﻿using Choosability.Utility;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Choosability.Utility;
 
 namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
 {
-    public class CompactProofBuilder : ProofBuilder
+    public class UltraCompactProofBuilder : CompactProofBuilder
     {
-        protected string _tikz;
+        Dictionary<SuperSlimBoard, List<Tuple<Permutation, SuperSlimBoard>>> _permutationLinked;
 
-        public CompactProofBuilder(SuperSlimMind mind, string tikz = "")
-            : base(mind)
+        public UltraCompactProofBuilder(SuperSlimMind mind, string tikz = "")
+            : base(mind, tikz)
         {
-            _tikz = tikz;
+        }
+
+        protected override void ExtractCases()
+        {
+            Cases = new List<ProofCase>();
+
+            _permutationLinked = new Dictionary<SuperSlimBoard, List<Tuple<Permutation, SuperSlimBoard>>>();
+
+            var indices = Mind.ColorableBoards[0].Stacks.Value.IndicesWhere(stack => stack.PopulationCount() == 2).ToList();
+            var permutations = Permutation.EnumerateAll(indices.Count).ToList();
+
+            var caseNumber = 0;
+
+            var colorableCase = new ProofCase(Mind, 0, Mind.ColorableBoards);
+            Cases.Add(colorableCase);
+            caseNumber++;
+
+            var remainingBoards = Mind.NonColorableBoards.ToList();
+            var wonBoards = Mind.ColorableBoards.ToList();
+            while (remainingBoards.Count > 0)
+            {
+                var proofCase = new ProofCase(Mind, caseNumber);
+                Cases.Add(proofCase);
+
+                var addedRootBoards = new List<SuperSlimBoard>();
+                var addedBoards = new List<SuperSlimBoard>();
+                foreach (var board in remainingBoards)
+                {
+                    var treeInfo = Mind.GetWinTreeInfo(board);
+                    var childBoards = treeInfo.Select(bc => new SuperSlimBoard(board._trace, bc.Alpha, bc.Beta, bc.Response, board._stackCount)).ToList();
+
+                    if (childBoards.SubsetEqual(wonBoards))
+                    {
+                        addedRootBoards.Add(board);
+                        addedBoards.Add(board);
+                        _permutationLinked[board] = new List<Tuple<Permutation, SuperSlimBoard>>();
+
+                        foreach (var p in permutations)
+                        {
+                            var pb = board.Permute(p, indices);
+                            if (wonBoards.Contains(pb) || addedBoards.Contains(pb))
+                                continue;
+
+                            var closed = true;
+                            foreach (var cb in childBoards)
+                            {
+                                if (!wonBoards.Contains(cb.Permute(p, indices)))
+                                {
+                                    closed = false;
+                                    break;
+                                }
+                            }
+
+                            if (closed)
+                            {
+                                _permutationLinked[board].Add(new Tuple<Permutation, SuperSlimBoard>(p, pb));
+                                addedBoards.Add(pb);
+                            }
+                        }
+                    }
+                }
+
+                foreach (var board in addedRootBoards)
+                {
+                    proofCase.AddBoard(board);
+                }
+
+                foreach (var board in addedBoards)
+                {
+                    wonBoards.Add(board);
+                    remainingBoards.Remove(board);
+                }
+
+                caseNumber++;
+            }
         }
 
         public override string WriteProof()
@@ -30,12 +104,12 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
             sb.AppendLine("\\begin{lem}");
             sb.AppendLine("The graph in Figure \\ref{" + figureID + "} is reducible.");
             sb.AppendLine("\\end{lem}");
-            
+
             var letters = new List<string>() { "X", "Y", "Z" };
             var stringLength = Mind.ColorableBoards[0].Stacks.Value.Count(ss => ss.PopulationCount() == 2);
             var rng = new Random(DateTime.Now.Millisecond);
             var randomString = "";
-            for(int i = 0; i < stringLength; i++)
+            for (int i = 0; i < stringLength; i++)
                 randomString += letters[rng.Next(3)];
 
             sb.Append("\\begin{proof}");
@@ -47,52 +121,18 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
             sb.AppendLine();
 
             var wonBoards = new List<string>();
-            List<Permutation> perms = null;
             for (int caseNumber = 1; caseNumber <= Cases.Count; caseNumber++)
             {
                 var c = Cases[caseNumber - 1];
 
-                var boards = c.Boards.Where(bb => !ContainsXYZPermutation(wonBoards, bb.ToXYZ())).ToList();
-                if (boards.Count <= 0)
-                    continue;
-
-                if (caseNumber == 1)
-                    wonBoards.AddRange(boards.SelectMany(b => EnumerateXYZPermutations(b.ToXYZ())));
+                var boards = c.Boards;
+                string boardsXYZ;
+                if (caseNumber > 1)
+                    boardsXYZ = string.Join(", ", boards.SelectMany(b => new[] { b }.Union(_permutationLinked[b].Select(tup => tup.Item2))).Select(b => b.ToXYZ()));
                 else
-                {
-                    wonBoards.AddRange(boards.SelectMany(b => EnumerateXYZPermutations(b.ToXYZ())));
-                    wonBoards = wonBoards.Distinct().ToList();
-
-                    while (true)
-                    {
-                        var toAdd = new List<string>();
-                        foreach (var p in perms.Skip(1))
-                        {
-                            foreach (var s in wonBoards)
-                            {
-                                var tt = string.Join("", p.Apply(s.ToCharArray().ToList()));
-
-                                if (!wonBoards.Contains(tt))
-                                    toAdd.AddRange(EnumerateXYZPermutations(tt));
-                            }
-                        }
-
-                        if (toAdd.Count <= 0)
-                            break;
-
-                        wonBoards.AddRange(toAdd);
-                        wonBoards = wonBoards.Distinct().ToList();
-                    }
-                }
-
-                var permutations = ".";
-
-                perms = EnumeratePermutations(wonBoards).ToList();
-                permutations = perms.Count <= 1 ? "." : ", up to permutation by " + perms.Skip(1).Select(pp => pp.ToString()).Listify() + ".";
-
-                var boardsXYZ = string.Join(", ", boards.Select(b => b.ToXYZ()));
+                    boardsXYZ = string.Join(", ", boards.Select(b => b.ToXYZ()));
                 var countModifier = boards.Count > 1 ? "one of " : "";
-                sb.AppendLine(string.Format("\\case{{{0}}}{{$B$ is " + countModifier + boardsXYZ + permutations + "}}", caseNumber));
+                sb.AppendLine(string.Format("\\case{{{0}}}{{$B$ is " + countModifier + boardsXYZ + ".}}", caseNumber));
 
                 if (caseNumber == 1)
                 {
@@ -101,12 +141,12 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
                 else
                 {
                     var fixGroups = boards.GroupBy(b =>
-                        {
-                            var treeInfo = Mind.GetWinTreeInfo(b);
-                            var fixLetter = ((long)((1 << treeInfo.First().Alpha) | (1 << treeInfo.First().Beta))).ToXYZ();
+                    {
+                        var treeInfo = Mind.GetWinTreeInfo(b);
+                        var fixLetter = ((long)((1 << treeInfo.First().Alpha) | (1 << treeInfo.First().Beta))).ToXYZ();
 
-                            return fixLetter;
-                        });
+                        return fixLetter;
+                    });
 
                     foreach (var fixGroup in fixGroups)
                     {
@@ -155,6 +195,9 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
                                         sb.AppendLine(" respectively, each of which we already handled.");
                                     else
                                         sb.AppendLine(", which we already handled.");
+                                    
+                                    foreach(var tup in _permutationLinked[b])
+                                        sb.AppendLine("Since we already handled the permutation of all resulting boards by " + tup.Item1 + ", we have also handled " + tup.Item2.ToXYZ() + ".");
                                 }
                             }
                             else if (swapCountGroup.Key == 2)
@@ -179,7 +222,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
 
                                         if (!first)
                                             sb.Append("If ");
-                                        
+
                                         first = false;
                                         sb.Append("the " + fixGroup.Key + "-path starting at the " + commonestSwapper.GetXYZIndex(b).Wordify() + " vertex");
                                         var single = handled.FirstOrDefault(bc => bc.SwapVertices.Count == 1);
@@ -208,6 +251,9 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
                                         foreach (var bc in handledAll)
                                             leftover.Remove(bc);
                                     }
+
+                                    foreach (var tup in _permutationLinked[b])
+                                        sb.AppendLine("Since we already handled the permutation of all resulting boards by " + tup.Item1 + ", we have also handled " + tup.Item2.ToXYZ() + ".");
                                 }
                             }
                             else
@@ -225,43 +271,6 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
 
             sb.AppendLine("\\end{proof}");
             return sb.ToString();
-        }
-
-        IEnumerable<Permutation> EnumeratePermutations(List<string> list)
-        {
-            foreach (var p in Permutation.EnumerateAll(list[0].Length))
-            {
-                var closed = true;
-                foreach (var s in list)
-                {
-                    var t = string.Join("", p.Apply(s.ToCharArray().ToList()));
-                    if (!ContainsXYZPermutation(list, t))
-                    {
-                        closed = false;
-                        break;
-                    }
-                }
-
-                if (closed)
-                    yield return p;
-            }
-        }
-
-        bool ContainsXYZPermutation(List<string> list, string t)
-        {
-            return list.IntersectionCount(EnumerateXYZPermutations(t)) > 0;
-        }
-
-        IEnumerable<string> EnumerateXYZPermutations(string tt)
-        {
-            var xyz = new List<char>() { 'X', 'Y', 'Z' };
-            var lowers = tt.ToLower();
-
-            foreach (var p in Permutation.EnumerateAll(3))
-            {
-                var q = p.Apply(xyz);
-                yield return lowers.Replace('x', q[0]).Replace('y', q[1]).Replace('z', q[2]);
-            }
         }
     }
 }

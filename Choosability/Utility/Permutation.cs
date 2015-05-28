@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 
 namespace Choosability.Utility
 {
@@ -106,15 +107,7 @@ namespace Choosability.Utility
 
         public override string ToString()
         {
-            var sb = new StringBuilder();
-            sb.Append("( ");
-
-            foreach (int i in Sequence)
-                sb.Append(i + " ");
-
-            sb.Append(")");
-
-            return sb.ToString();
+            return "(" + string.Join(" ", Sequence.Select(i => i + 1)) + ")";
         }
 
         public override int GetHashCode()

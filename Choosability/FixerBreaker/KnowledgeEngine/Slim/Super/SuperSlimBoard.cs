@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Choosability.Utility;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -53,6 +54,33 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
             MakeLazyStacks();
 
             _hashCode = Hashing.Hash(_trace, _length);
+        }
+
+        public SuperSlimBoard Permute(Permutation p, List<int> indices)
+        {
+            var trace = new ulong[_trace.Length];
+
+            var permutedIndices = p.Apply(indices);
+            for (int i = 0; i < _trace.Length; i++)
+            {
+                var n = _trace[i];
+                var m = _trace[i];
+
+                for (int j = 0; j < indices.Count; j++)
+                    m &= ~(1UL << indices[j]);
+
+                for (int j = 0; j < indices.Count; j++)
+                {
+                    if ((n & (1UL << indices[j])) != 0)
+                        m |= (1UL << permutedIndices[j]);
+                }
+
+                trace[i] = m;
+            }
+
+            Array.Sort(trace);
+
+            return new SuperSlimBoard(trace, _stackCount);
         }
 
         void MakeLazyStacks()

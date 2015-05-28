@@ -8,7 +8,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
     public class ProofBuilder
     {
         public SuperSlimMind Mind { get; private set; }
-        public List<ProofCase> Cases { get; private set; }
+        public List<ProofCase> Cases { get; protected set; }
 
         public ProofBuilder(SuperSlimMind mind)
         {
@@ -16,7 +16,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
             ExtractCases();
         }
 
-        void ExtractCases()
+        protected virtual void ExtractCases()
         {
             Cases = new List<ProofCase>();
 
