@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Choosability.Utility;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -45,13 +46,53 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
             sb.AppendLine("Note that if there are an odd number of $Y$'s and $Z$'s, then at least one $X$-Kempe change has only one endpoint in $H$.");
             sb.AppendLine();
 
+            var wonBoards = new List<string>();
+            List<Permutation> perms = null;
             for (int caseNumber = 1; caseNumber <= Cases.Count; caseNumber++)
             {
                 var c = Cases[caseNumber - 1];
 
-                var boardsXYZ = string.Join(", ", c.Boards.Select(b => b.ToXYZ()));
-                var countModifier = c.Boards.Count > 1 ? "one of " : "";
-                sb.AppendLine(string.Format("\\case{{{0}}}{{$B$ is " + countModifier + boardsXYZ + ".}}", caseNumber));
+                var boards = c.Boards.Where(bb => !ContainsXYZPermutation(wonBoards, bb.ToXYZ())).ToList();
+                if (boards.Count <= 0)
+                    continue;
+
+                if (caseNumber == 1)
+                    wonBoards.AddRange(boards.SelectMany(b => EnumerateXYZPermutations(b.ToXYZ())));
+                else
+                {
+                    wonBoards.AddRange(boards.SelectMany(b => EnumerateXYZPermutations(b.ToXYZ())));
+                    wonBoards = wonBoards.Distinct().ToList();
+
+                    while (true)
+                    {
+                        var toAdd = new List<string>();
+                        foreach (var p in perms.Skip(1))
+                        {
+                            foreach (var s in wonBoards)
+                            {
+                                var tt = string.Join("", p.Apply(s.ToCharArray().ToList()));
+
+                                if (!wonBoards.Contains(tt))
+                                    toAdd.AddRange(EnumerateXYZPermutations(tt));
+                            }
+                        }
+
+                        if (toAdd.Count <= 0)
+                            break;
+
+                        wonBoards.AddRange(toAdd);
+                        wonBoards = wonBoards.Distinct().ToList();
+                    }
+                }
+
+                var permutations = ".";
+
+                perms = EnumeratePermutations(wonBoards).ToList();
+                permutations = perms.Count <= 1 ? "." : ", up to permutation by " + perms.Skip(1).Select(pp => pp.ToString()).Listify() + ".";
+
+                var boardsXYZ = string.Join(", ", boards.Select(b => b.ToXYZ()));
+                var countModifier = boards.Count > 1 ? "one of " : "";
+                sb.AppendLine(string.Format("\\case{{{0}}}{{$B$ is " + countModifier + boardsXYZ + permutations + "}}", caseNumber));
 
                 if (caseNumber == 1)
                 {
@@ -59,7 +100,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
                 }
                 else
                 {
-                    var fixGroups = c.Boards.GroupBy(b =>
+                    var fixGroups = boards.GroupBy(b =>
                         {
                             var treeInfo = Mind.GetWinTreeInfo(b);
                             var fixLetter = ((long)((1 << treeInfo.First().Alpha) | (1 << treeInfo.First().Beta))).ToXYZ();
@@ -184,6 +225,43 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
 
             sb.AppendLine("\\end{proof}");
             return sb.ToString();
+        }
+
+        IEnumerable<Permutation> EnumeratePermutations(List<string> list)
+        {
+            foreach (var p in Permutation.EnumerateAll(list[0].Length))
+            {
+                var closed = true;
+                foreach (var s in list)
+                {
+                    var t = string.Join("", p.Apply(s.ToCharArray().ToList()));
+                    if (!ContainsXYZPermutation(list, t))
+                    {
+                        closed = false;
+                        break;
+                    }
+                }
+
+                if (closed)
+                    yield return p;
+            }
+        }
+
+        bool ContainsXYZPermutation(List<string> list, string t)
+        {
+            return list.IntersectionCount(EnumerateXYZPermutations(t)) > 0;
+        }
+
+        IEnumerable<string> EnumerateXYZPermutations(string tt)
+        {
+            var xyz = new List<char>() { 'X', 'Y', 'Z' };
+            var lowers = tt.ToLower();
+
+            foreach (var p in Permutation.EnumerateAll(3))
+            {
+                var q = p.Apply(xyz);
+                yield return lowers.Replace('x', q[0]).Replace('y', q[1]).Replace('z', q[2]);
+            }
         }
     }
 }
