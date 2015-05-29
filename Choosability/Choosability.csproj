@@ -148,6 +148,7 @@
     <Compile Include="Utility\PartialOrders.cs" />
     <Compile Include="Utility\Permutation.cs" />
     <Compile Include="Utility\SafeCollection.cs" />
+    <Compile Include="Utility\SequenceGeneralizer.cs" />
     <Compile Include="Utility\ThreadLocal.cs" />
     <Compile Include="WordGame\AccessibilityChecker.cs" />
     <Compile Include="WordGame\Boxification.cs" />

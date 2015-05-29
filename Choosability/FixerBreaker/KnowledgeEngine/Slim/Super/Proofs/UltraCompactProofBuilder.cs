@@ -90,6 +90,16 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
             }
         }
 
+        protected override int GetHandledCaseNumber(SuperSlimBoard b, BreakerChoiceInfo bc)
+        {
+            var childBoard = new SuperSlimBoard(b._trace, bc.Alpha, bc.Beta, bc.Response, b._stackCount);
+            if (Cases[0].Boards.Contains(childBoard))
+                return 1;
+
+            return Cases.Skip(1).IndicesWhere(cc => cc.Boards.SelectMany(bb => new[] { bb }.Union(_permutationLinked[bb].Select(tup => tup.Item2))).Contains(childBoard)).First() + 1;
+        }
+
+
         public override string WriteProof()
         {
             var sb = new StringBuilder();
@@ -130,7 +140,20 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
                 if (caseNumber > 1)
                     boardsXYZ = string.Join(", ", boards.SelectMany(b => new[] { b }.Union(_permutationLinked[b].Select(tup => tup.Item2))).Select(b => b.ToXYZ()));
                 else
+                {
+                    var sg = new SequenceGeneralizer<int>(boards[0].ToXYZ().Length, new List<int> { 0, 1, 2 });
+                    var zot = boards.Select(b => b.To012()).ToList();
+                    var permutations = new List<List<int>>();
+                    foreach (var pp in Permutation.EnumerateAll(3))
+                        permutations.AddRange(zot.Select(ll => ll.Select(ii => pp[ii]).ToList()));
+
+                    var comparer = new SequenceGeneralizer<int>.VectorComparer();
+                    var examples = boards.Select(b => b.To012()).ToList();
+                    var nonExamples = Enumerable.Repeat(Enumerable.Range(0, 3), boards[0].ToXYZ().Length).CartesianProduct().Select(ll => ll.ToList()).Except(permutations.Distinct(comparer), comparer).ToList();
+
+                    var generalized = sg.Generalize(examples, nonExamples);
                     boardsXYZ = string.Join(", ", boards.Select(b => b.ToXYZ()));
+                }
                 var countModifier = boards.Count > 1 ? "one of " : "";
                 sb.AppendLine(string.Format("\\case{{{0}}}{{$B$ is " + countModifier + boardsXYZ + ".}}", caseNumber));
 
@@ -176,9 +199,12 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
 
                                     sb.Append("then doing " + fixGroup.Key.GetArticle() + " " + fixGroup.Key + "-Kempe change there yields " + groups.OrderBy(gg => gg.Key).Select(gg => GetChildBoardName(b, gg.First())).Listify());
                                     if (treeInfo.Count > 1)
-                                        sb.AppendLine(" respectively, each of which we already handled.");
+                                    {
+                                        var lll = treeInfo.Select(bc => GetHandledCaseNumber(b, bc)).Distinct().OrderBy(xx => xx).ToList();
+                                        sb.AppendLine(" respectively, which are handled by Case" + (lll.Count > 1 ? "s " : " ") + lll.Listify() + ".");
+                                    }
                                     else
-                                        sb.AppendLine(", which we already handled.");
+                                        sb.AppendLine(", which is handled by Case " + GetHandledCaseNumber(b, treeInfo.First()) + ".");
 
                                     if (_permutationLinked[b].Count > 0)
                                     {
@@ -228,9 +254,12 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
                                         }
 
                                         if (handled.Count > 1)
-                                            sb.AppendLine(" respectively, each of which we already handled.");
+                                        {
+                                            var lll = handled.Select(bc => GetHandledCaseNumber(b, bc)).Distinct().OrderBy(xx => xx).ToList();
+                                            sb.AppendLine(" respectively, which are handled by Case" + (lll.Count > 1 ? "s " : " ") + lll.Listify() + ".");
+                                        }
                                         else
-                                            sb.AppendLine(", which we already handled.");
+                                            sb.AppendLine(", which is handled by Case " + GetHandledCaseNumber(b, handled.First()) + ".");
 
                                         foreach (var bc in handledAll)
                                             leftover.Remove(bc);

@@ -53,7 +53,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
             }
         }
 
-        protected int GetHandledCaseNumber(SuperSlimBoard b, BreakerChoiceInfo bc)
+        protected virtual int GetHandledCaseNumber(SuperSlimBoard b, BreakerChoiceInfo bc)
         {
             var childBoard = new SuperSlimBoard(b._trace, bc.Alpha, bc.Beta, bc.Response, b._stackCount);
             return Cases.IndicesWhere(cc => cc.Boards.Contains(childBoard)).First() + 1;

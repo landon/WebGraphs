@@ -14,6 +14,11 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
             return string.Join("", board.Stacks.Value.Select(ToXYZ));
         }
 
+        public static List<int> To012(this SuperSlimBoard board)
+        {
+            return board.Stacks.Value.Select(To012).Where(x => x >= 0).ToList();
+        }
+
         public static string ToCompactedPartitionId(this SuperSlimBoard board, List<List<int>> partition)
         {
             var xyz = board.Stacks.Value.Select(ToXYZ).ToList();
@@ -59,6 +64,13 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
             }
 
             return "";
+        }
+
+        public static int To012(this long stack)
+        {
+            if (stack > 6)
+                return -1;
+            return ((int)stack / 2) - 1;
         }
 
         public static int GetXYZIndex(this int i, SuperSlimBoard b)
