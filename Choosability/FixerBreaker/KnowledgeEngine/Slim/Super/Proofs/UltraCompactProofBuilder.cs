@@ -152,32 +152,16 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
                     {
                         var others = letters.ToList();
                         others.Remove(fixGroup.Key);
-                        sb.AppendLine();
-                        sb.Append("For ");
-                        if (fixGroup.Count() > 1)
-                            sb.Append("each of ");
-                        sb.Append(fixGroup.Select(b => b.ToXYZ()).Listify());
-                        sb.Append(string.Format(", we do {0} {1}-Kempe change.", fixGroup.Key.GetArticle(), fixGroup.Key));
 
                         var swapCountGroups = fixGroup.GroupBy(b => Mind.GetWinTreeInfo(b).Max(ti => ti.SwapVertices.Count)).ToList();
                         foreach (var swapCountGroup in swapCountGroups)
                         {
                             if (swapCountGroup.Key == 1)
                             {
-                                if (swapCountGroups.Count == 1)
-                                {
-                                    if (swapCountGroups.First().Count() > 1)
-                                        sb.AppendLine(" Each of these have an odd number of " + others[0] + "'s and " + others[1] + "'s, so there is " + fixGroup.Key.GetArticle() + " " + fixGroup.Key + "-path with exactly one vertex in $H$.");
-                                    else
-                                        sb.AppendLine(" This has an odd number of " + others[0] + "'s and " + others[1] + "'s, so there is " + fixGroup.Key.GetArticle() + " " + fixGroup.Key + "-path with exactly one vertex in $H$.");
-                                }
+                                if (swapCountGroup.Count() > 1)
+                                    sb.AppendLine("Each of " + swapCountGroup.Select(b => b.ToXYZ()).Listify() + " have an odd number of " + others[0] + "'s and " + others[1] + "'s, so there is " + fixGroup.Key.GetArticle() + " " + fixGroup.Key + "-path with exactly one edge in $H$.");
                                 else
-                                {
-                                    if (swapCountGroup.Count() > 1)
-                                        sb.AppendLine(" Each of " + swapCountGroup.Select(b => b.ToXYZ()).Listify() + " have an odd number of " + others[0] + "'s and " + others[1] + "'s, so there is " + fixGroup.Key.GetArticle() + " " + fixGroup.Key + "-path with exactly one edge in $H$.");
-                                    else
-                                        sb.AppendLine(" Now " + swapCountGroup.Select(b => b.ToXYZ()).Listify() + " has an odd number of " + others[0] + "'s and " + others[1] + "'s, so there is " + fixGroup.Key.GetArticle() + " " + fixGroup.Key + "-path with exactly one edge in $H$.");
-                                }
+                                    sb.AppendLine("Since " + swapCountGroup.Select(b => b.ToXYZ()).Listify() + " has an odd number of " + others[0] + "'s and " + others[1] + "'s, there is " + fixGroup.Key.GetArticle() + " " + fixGroup.Key + "-path with exactly one edge in $H$.");
 
                                 foreach (var b in swapCountGroup)
                                 {
@@ -197,7 +181,10 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
                                         sb.AppendLine(", which we already handled.");
 
                                     if (_permutationLinked[b].Count > 0)
+                                    {
                                         sb.AppendLine("Since we already handled the permutation of all resulting boards by " + _permutationLinked[b].Select(ppp => ppp.Item1).Listify() + ", we have also handled " + _permutationLinked[b].Select(ppp => ppp.Item2.ToXYZ()).Listify() + ".");
+                                        sb.AppendLine();
+                                    }
                                 }
                             }
                             else if (swapCountGroup.Key == 2)
@@ -205,10 +192,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
                                 foreach (var b in swapCountGroup)
                                 {
                                     sb.AppendLine();
-                                    if (swapCountGroup.Count() == 1)
-                                        sb.Append("If ");
-                                    else
-                                        sb.Append("For " + b.ToXYZ() + ", if ");
+                                    sb.Append("For " + b.ToXYZ() + ", if ");
 
                                     var treeInfo = Mind.GetWinTreeInfo(b);
                                     var leftover = treeInfo.ToList();
@@ -253,7 +237,10 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
                                     }
 
                                     if (_permutationLinked[b].Count > 0)
+                                    {
                                         sb.AppendLine("Since we already handled the permutation of all resulting boards by " + _permutationLinked[b].Select(ppp => ppp.Item1).Listify() + ", we have also handled " + _permutationLinked[b].Select(ppp => ppp.Item2.ToXYZ()).Listify() + ".");
+                                        sb.AppendLine();
+                                    }
                                 }
                             }
                             else
