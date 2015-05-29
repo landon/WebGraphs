@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Choosability.Utility;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -170,6 +171,29 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
             }
 
             return distinct;
+        }
+
+        public static string ToTex(this SequenceGeneralizer<int>.Matcher matcher)
+        {
+            switch (matcher.Name)
+            {
+                case "*":
+                    return "A";
+                case "0":
+                    return "X";
+                case "1":
+                    return "Y";
+                case "2":
+                    return "Z";
+                case "!0":
+                    return "\\bar{{X}}";
+                case "!1":
+                    return "\\bar{{Y}}";
+                case "!2":
+                    return "\\bar{{Z}}";
+            }
+
+            return "?";
         }
     }
 }

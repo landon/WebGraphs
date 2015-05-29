@@ -58,9 +58,12 @@ namespace Choosability.Utility
             var remaining = examples.ToList();
             while (remaining.Count > 0)
             {
-                var best = possibles.OrderByDescending(pp => remaining.Count(r => IsMatch(r, pp))).First();
-                generalizations.Add(best);
+                var ordered = possibles.Select(pp => new {Vector = pp, Count = remaining.Count(r => IsMatch(r, pp))}).OrderByDescending(xx => xx.Count).ToList();
+                var maxers = ordered.TakeWhile(xx => xx.Count == ordered[0].Count).OrderByDescending(xx => xx.Vector.Count(x => _matchers[x].Name == "*"));
 
+                var best = maxers.First().Vector;
+                
+                generalizations.Add(best);
                 remaining.RemoveAll(r => IsMatch(r, best));
             }
 

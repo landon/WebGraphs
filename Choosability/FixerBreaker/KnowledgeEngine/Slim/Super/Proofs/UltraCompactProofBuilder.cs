@@ -130,32 +130,34 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
             sb.AppendLine("Note that if there are an odd number of $Y$'s and $Z$'s, then at least one $X$-Kempe change has only one endpoint in $H$.");
             sb.AppendLine();
 
-            var wonBoards = new List<string>();
+            var wonBoards = new List<SuperSlimBoard>();
             for (int caseNumber = 1; caseNumber <= Cases.Count; caseNumber++)
             {
                 var c = Cases[caseNumber - 1];
 
                 var boards = c.Boards;
-                string boardsXYZ;
+                List<SuperSlimBoard> thisClaimBoards;
                 if (caseNumber > 1)
-                    boardsXYZ = string.Join(", ", boards.SelectMany(b => new[] { b }.Union(_permutationLinked[b].Select(tup => tup.Item2))).Select(b => b.ToXYZ()));
+                    thisClaimBoards = boards.SelectMany(b => new[] { b }.Union(_permutationLinked[b].Select(tup => tup.Item2))).ToList();
                 else
-                {
-                    var sg = new SequenceGeneralizer<int>(boards[0].ToXYZ().Length, new List<int> { 0, 1, 2 });
-                    var zot = boards.Select(b => b.To012()).ToList();
-                    var permutations = new List<List<int>>();
-                    foreach (var pp in Permutation.EnumerateAll(3))
-                        permutations.AddRange(zot.Select(ll => ll.Select(ii => pp[ii]).ToList()));
+                    thisClaimBoards = boards;
 
-                    var comparer = new SequenceGeneralizer<int>.VectorComparer();
-                    var examples = boards.Select(b => b.To012()).ToList();
-                    var nonExamples = Enumerable.Repeat(Enumerable.Range(0, 3), boards[0].ToXYZ().Length).CartesianProduct().Select(ll => ll.ToList()).Except(permutations.Distinct(comparer), comparer).ToList();
+                wonBoards.AddRange(thisClaimBoards);
+                var sg = new SequenceGeneralizer<int>(wonBoards[0].ToXYZ().Length, new List<int> { 0, 1, 2 });
+                var zot = wonBoards.Select(b => b.To012()).ToList();
+                var permutations = new List<List<int>>();
+                foreach (var pp in Permutation.EnumerateAll(3))
+                    permutations.AddRange(zot.Select(ll => ll.Select(ii => pp[ii]).ToList()));
 
-                    var generalized = sg.Generalize(examples, nonExamples);
-                    boardsXYZ = string.Join(", ", boards.Select(b => b.ToXYZ()));
-                }
+                var comparer = new SequenceGeneralizer<int>.VectorComparer();
+                var examples = wonBoards.Select(b => b.To012()).ToList();
+                var nonExamples = Enumerable.Repeat(Enumerable.Range(0, 3), wonBoards[0].ToXYZ().Length).CartesianProduct().Select(ll => ll.ToList()).Except(permutations.Distinct(comparer), comparer).ToList();
+
+                var generalized = sg.Generalize(examples, nonExamples);
+                var boardsXYZ = generalized.Select(gg => "$" + string.Join("", gg.Select(_ => _.ToTex())) + "$").Listify("or");
+
                 var countModifier = boards.Count > 1 ? "one of " : "";
-                sb.AppendLine(string.Format("\\case{{{0}}}{{$B$ is " + countModifier + boardsXYZ + ".}}", caseNumber));
+                sb.AppendLine(string.Format("\\claim{{{0}}}{{We can win all boards of the form " + boardsXYZ + ".}}", caseNumber));
 
                 if (caseNumber == 1)
                 {
@@ -163,6 +165,9 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
                 }
                 else
                 {
+                    sb.AppendLine();
+                    sb.AppendLine("By Claim " + (caseNumber - 1) + " it will suffice to check " + thisClaimBoards.Select(bb => bb.ToXYZ()).Listify() + ".");
+                    sb.AppendLine();
                     var fixGroups = boards.GroupBy(b =>
                     {
                         var treeInfo = Mind.GetWinTreeInfo(b);
