@@ -195,9 +195,9 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
                                         sb.AppendLine(" respectively, each of which we already handled.");
                                     else
                                         sb.AppendLine(", which we already handled.");
-                                    
-                                    foreach(var tup in _permutationLinked[b])
-                                        sb.AppendLine("Since we already handled the permutation of all resulting boards by " + tup.Item1 + ", we have also handled " + tup.Item2.ToXYZ() + ".");
+
+                                    if (_permutationLinked[b].Count > 0)
+                                        sb.AppendLine("Since we already handled the permutation of all resulting boards by " + _permutationLinked[b].Select(ppp => ppp.Item1).Listify() + ", we have also handled " + _permutationLinked[b].Select(ppp => ppp.Item2.ToXYZ()).Listify() + ".");
                                 }
                             }
                             else if (swapCountGroup.Key == 2)
@@ -252,8 +252,8 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
                                             leftover.Remove(bc);
                                     }
 
-                                    foreach (var tup in _permutationLinked[b])
-                                        sb.AppendLine("Since we already handled the permutation of all resulting boards by " + tup.Item1 + ", we have also handled " + tup.Item2.ToXYZ() + ".");
+                                    if (_permutationLinked[b].Count > 0)
+                                        sb.AppendLine("Since we already handled the permutation of all resulting boards by " + _permutationLinked[b].Select(ppp => ppp.Item1).Listify() + ", we have also handled " + _permutationLinked[b].Select(ppp => ppp.Item2.ToXYZ()).Listify() + ".");
                                 }
                             }
                             else
