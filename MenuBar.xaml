@@ -150,8 +150,10 @@
                     <local:SuperMenuItem Header="analyze" Click="MenuItemClick"/>
                     <local:SuperMenuItem Header="analyze only near colorings" Click="MenuItemClick"/>
                     <local:SuperMenuItem Header="analyze only near colorings for selected edge" Click="MenuItemClick"/>
+                    <local:SuperMenuItem Header="analyze weakly fixable" Click="MenuItemClick"/>
                     <menu:Separator/>
                     <local:SuperMenuItem Header="analyze superabundant only" Click="MenuItemClick"/>
+                    <local:SuperMenuItem Header="analyze superabundant only weakly" Click="MenuItemClick"/>
                     <menu:Separator/>
                     <local:SuperMenuItem Header="generate proof" Click="MenuItemClick"/>
                     <local:SuperMenuItem Header="generate proof only near colorings for selected edge" Click="MenuItemClick"/>

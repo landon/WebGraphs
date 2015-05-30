@@ -41,8 +41,11 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
                 var addedBoards = new List<SuperSlimBoard>();
                 foreach (var board in remainingBoards)
                 {
+                    if (addedBoards.Contains(board))
+                        continue;
+
                     var treeInfo = Mind.GetWinTreeInfo(board);
-                    var childBoards = treeInfo.Select(bc => new SuperSlimBoard(board._trace, bc.Alpha, bc.Beta, bc.Response, board._stackCount)).ToList();
+                    var childBoards = treeInfo.Select(bc => new SuperSlimBoard(board._trace, bc.Alpha, bc.Beta, bc.Response, board._stackCount)).Distinct().ToList();
 
                     if (childBoards.SubsetEqual(wonBoards))
                     {
@@ -96,12 +99,26 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
             if (Cases[0].Boards.Contains(childBoard))
                 return 1;
 
-            return Cases.Skip(1).IndicesWhere(cc => cc.Boards.SelectMany(bb => new[] { bb }.Union(_permutationLinked[bb].Select(tup => tup.Item2))).Contains(childBoard)).First() + 1;
+            return Cases.Skip(1).IndicesWhere(cc => cc.Boards.SelectMany(bb => new[] { bb }.Union(_permutationLinked[bb].Select(tup => tup.Item2))).Contains(childBoard)).First() + 2;
         }
 
 
         public override string WriteProof()
         {
+            var length = Mind.ColorableBoards[0].ToXYZ().Length;
+            var allBoards = Mind.ColorableBoards.Union(Mind.NonColorableBoards).ToList();
+            
+            var comparer = new SequenceGeneralizer<int>.VectorComparer();
+            var sg = new SequenceGeneralizer<int>(length, new List<int> { 0, 1, 2 });
+
+            var zot2 = allBoards.Select(b => b.To012()).ToList();
+            var examples2 = allBoards.Select(b => b.To012()).ToList();
+
+            var nonExamples2 = Enumerable.Repeat(Enumerable.Range(0, 3), length).CartesianProduct().Select(ll => ll.ToList()).Except(zot2.Distinct(comparer), comparer).ToList();
+
+            var generalized2 = sg.Generalize(examples2, nonExamples2, false);
+            var allBoardsXYZ = generalized2.Select(gg => "$" + string.Join("", gg.Select(_ => _.ToTex())) + "$").Listify("or");
+
             var sb = new StringBuilder();
             var figureID = "fig:" + Guid.NewGuid().ToString();
 
@@ -130,6 +147,16 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
             sb.AppendLine("Note that if there are an odd number of $Y$'s and $Z$'s, then at least one $X$-Kempe change has only one endpoint in $H$.");
             sb.AppendLine();
 
+            if (Mind.OnlyConsiderNearlyColorableBoards)
+            {
+                sb.AppendLine("We need to handle all boards that are nearly colorable for edge $e$ up to permutations of $\\{X,Y,Z\\}$, so it will suffice to handle all boards of the form " + allBoardsXYZ + ".");
+            }
+            else
+            {
+                sb.AppendLine("We need to handle all boards up to permutations of $\\{X,Y,Z\\}$, so it will suffice to handle all boards of the form " + allBoardsXYZ + ".");
+            }
+
+            sb.AppendLine();
             var wonBoards = new List<SuperSlimBoard>();
             for (int caseNumber = 1; caseNumber <= Cases.Count; caseNumber++)
             {
@@ -143,30 +170,23 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
                     thisClaimBoards = boards;
 
                 wonBoards.AddRange(thisClaimBoards);
-                var sg = new SequenceGeneralizer<int>(wonBoards[0].ToXYZ().Length, new List<int> { 0, 1, 2 });
-                var zot = wonBoards.Select(b => b.To012()).ToList();
-                var permutations = new List<List<int>>();
-                foreach (var pp in Permutation.EnumerateAll(3))
-                    permutations.AddRange(zot.Select(ll => ll.Select(ii => pp[ii]).ToList()));
-
-                var comparer = new SequenceGeneralizer<int>.VectorComparer();
-                var examples = wonBoards.Select(b => b.To012()).ToList();
-                var nonExamples = Enumerable.Repeat(Enumerable.Range(0, 3), wonBoards[0].ToXYZ().Length).CartesianProduct().Select(ll => ll.ToList()).Except(permutations.Distinct(comparer), comparer).ToList();
+                
+                var zot = thisClaimBoards.Select(b => b.To012()).ToList();
+                var examples = thisClaimBoards.Select(b => b.To012()).ToList();
+                var nonExamples = Enumerable.Repeat(Enumerable.Range(0, 3), length).CartesianProduct().Select(ll => ll.ToList()).Except(zot.Distinct(comparer), comparer).ToList();
 
                 var generalized = sg.Generalize(examples, nonExamples);
                 var boardsXYZ = generalized.Select(gg => "$" + string.Join("", gg.Select(_ => _.ToTex())) + "$").Listify("or");
 
                 var countModifier = boards.Count > 1 ? "one of " : "";
-                sb.AppendLine(string.Format("\\claim{{{0}}}{{We can win all boards of the form " + boardsXYZ + ".}}", caseNumber));
+                sb.AppendLine(string.Format("\\case{{{0}}}{{$B$ is one of " + boardsXYZ + ".}}", caseNumber));
 
                 if (caseNumber == 1)
                 {
-                    sb.AppendLine("In all these cases, $G$ is immediately colorable from the lists.");
+                    sb.AppendLine("In all these cases, $H$ is immediately colorable from the lists.");
                 }
                 else
                 {
-                    sb.AppendLine();
-                    sb.AppendLine("By Claim " + (caseNumber - 1) + " it will suffice to check " + thisClaimBoards.Select(bb => bb.ToXYZ()).Listify() + ".");
                     sb.AppendLine();
                     var fixGroups = boards.GroupBy(b =>
                     {
@@ -187,9 +207,9 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
                             if (swapCountGroup.Key == 1)
                             {
                                 if (swapCountGroup.Count() > 1)
-                                    sb.AppendLine("Each of " + swapCountGroup.Select(b => b.ToXYZ()).Listify() + " have an odd number of " + others[0] + "'s and " + others[1] + "'s, so there is " + fixGroup.Key.GetArticle() + " " + fixGroup.Key + "-path with exactly one edge in $H$.");
+                                    sb.AppendLine("Each of " + swapCountGroup.Select(b => b.ToXYZ()).Listify() + " have an odd number of " + others[0] + "'s and " + others[1] + "'s, so there is " + fixGroup.Key.GetArticle() + " " + fixGroup.Key + "-path with exactly one end in $H$.");
                                 else
-                                    sb.AppendLine("Since " + swapCountGroup.Select(b => b.ToXYZ()).Listify() + " has an odd number of " + others[0] + "'s and " + others[1] + "'s, there is " + fixGroup.Key.GetArticle() + " " + fixGroup.Key + "-path with exactly one edge in $H$.");
+                                    sb.AppendLine("Since " + swapCountGroup.Select(b => b.ToXYZ()).Listify() + " has an odd number of " + others[0] + "'s and " + others[1] + "'s, there is " + fixGroup.Key.GetArticle() + " " + fixGroup.Key + "-path with exactly one end in $H$.");
 
                                 foreach (var b in swapCountGroup)
                                 {

@@ -28,6 +28,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
         public bool ExcludeNonNearlyColorableNonSuperabundantBoards { get; set; }
         public int MissingEdgeIndex { get; set; }
         public bool SuperabundantOnly { get; set; }
+        public bool DoComplexSwapsInProof { get; set; }
 
         public List<SuperSlimBoard> NonColorableBoards { get; private set; }
         public List<SuperSlimBoard> ColorableBoards { get; private set; }
@@ -35,14 +36,14 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
         public Dictionary<int, List<SuperSlimBoard>> BoardsOfDepth { get; private set; }
         public bool ProofFindingMode { get; private set; }
 
-        public SuperSlimMind(Graph g, bool storeTreeInfo = false)
+        public SuperSlimMind(Graph g, bool proofFindingMode = false, bool weaklyFixable = false)
         {
             _graph = g;
-            ProofFindingMode = storeTreeInfo;
+            ProofFindingMode = proofFindingMode;
             BuildLineGraph();
 
             _coloringAnalyzer = new SuperSlimColoringAnalyzer(_lineGraph, GetEdgeColorList);
-            _swapAnalyzer = new SuperSlimSwapAnalyzer(g.N, ProofFindingMode);
+            _swapAnalyzer = new SuperSlimSwapAnalyzer(g.N, ProofFindingMode, ProofFindingMode || weaklyFixable);
             _wonBoards = new HashSet<SuperSlimBoard>();
             _remainingBoards = new List<SuperSlimBoard>();
 
@@ -184,33 +185,58 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
                 {
                     if (ProofFindingMode)
                     {
-                        SuperSlimBoard bestWinBoard = null;
-                        int minWinSwaps = int.MaxValue;
-                        for (int i = _remainingBoards.Count - 1; i >= 0; i--)
+                        if (DoComplexSwapsInProof)
                         {
-                            var b = _remainingBoards[i];
-                            if (_swapAnalyzer.AnalyzeForProof(b, _wonBoards, singletonOnly))
+                            for (int i = _remainingBoards.Count - 1; i >= 0; i--)
                             {
-                                if (_swapAnalyzer.MinWinSwaps < minWinSwaps)
+                                var b = _remainingBoards[i];
+                                if (_swapAnalyzer.AnalyzeForProof(b, _wonBoards, false))
                                 {
-                                    minWinSwaps = _swapAnalyzer.MinWinSwaps;
-                                    bestWinBoard = b;
+                                    _remainingBoards.RemoveAt(i);
+                                    wonBoards.Add(b);
+
+                                    if (progress != null)
+                                    {
+                                        var p = 100 * (totalBoards - _remainingBoards.Count) / totalBoards;
+                                        if (p > lastP)
+                                        {
+                                            progress(new Tuple<string, int>(string.Format("Finding all {0} move wins...", winLength), p));
+                                            lastP = p;
+                                        }
+                                    }
                                 }
                             }
                         }
-
-                        if (bestWinBoard != null)
+                        else
                         {
-                            _remainingBoards.Remove(bestWinBoard);
-                            wonBoards.Add(bestWinBoard);
-
-                            if (progress != null)
+                            SuperSlimBoard bestWinBoard = null;
+                            int minWinSwaps = int.MaxValue;
+                            for (int i = _remainingBoards.Count - 1; i >= 0; i--)
                             {
-                                var p = 100 * (totalBoards - _remainingBoards.Count) / totalBoards;
-                                if (p > lastP)
+                                var b = _remainingBoards[i];
+                                if (_swapAnalyzer.AnalyzeForProof(b, _wonBoards, singletonOnly))
                                 {
-                                    progress(new Tuple<string, int>(string.Format("Finding all {0} move wins...", winLength), p));
-                                    lastP = p;
+                                    if (_swapAnalyzer.MinWinSwaps < minWinSwaps)
+                                    {
+                                        minWinSwaps = _swapAnalyzer.MinWinSwaps;
+                                        bestWinBoard = b;
+                                    }
+                                }
+                            }
+
+                            if (bestWinBoard != null)
+                            {
+                                _remainingBoards.Remove(bestWinBoard);
+                                wonBoards.Add(bestWinBoard);
+
+                                if (progress != null)
+                                {
+                                    var p = 100 * (totalBoards - _remainingBoards.Count) / totalBoards;
+                                    if (p > lastP)
+                                    {
+                                        progress(new Tuple<string, int>(string.Format("Finding all {0} move wins...", winLength), p));
+                                        lastP = p;
+                                    }
                                 }
                             }
                         }

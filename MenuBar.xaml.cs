@@ -42,6 +42,7 @@ namespace WebGraphs
         public event Action FindPaintNumber;
         public event Action ExportTeX;
         public event Action AnalyzeFixerBreaker;
+        public event Action AnalyzeFixerBreakerWeaklyFixable;
         public event Action DoMozhan;
         public event Action DoWebLink;
         public event Action DoLightWebLink;
@@ -79,6 +80,7 @@ namespace WebGraphs
         public event Action DoTiling;
         public event Action DoSpin;
         public event Action DoSuperabundantOnly;
+        public event Action DoSuperabundantOnlyWeakly;
         public event Action DoGenerateProof;
         public event Action DoGenerateProofSelectedEdge;
 
@@ -193,6 +195,9 @@ namespace WebGraphs
                 case "analyze":
                     A(AnalyzeFixerBreaker);
                     break;
+                case "analyze weakly fixable":
+                    A(AnalyzeFixerBreakerWeaklyFixable);
+                    break;
                 case "Δ-1 color":
                     A(DoMozhan);
                     break;
@@ -303,6 +308,9 @@ namespace WebGraphs
                     break;
                 case "analyze superabundant only":
                     A(DoSuperabundantOnly);
+                    break;
+                case "analyze superabundant only weakly":
+                    A(DoSuperabundantOnlyWeakly);
                     break;
                 case "generate proof":
                     A(DoGenerateProof);

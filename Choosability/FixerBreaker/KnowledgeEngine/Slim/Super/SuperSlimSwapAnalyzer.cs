@@ -9,6 +9,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
     {
         public int MinWinSwaps { get; private set; }
         bool ProofFindingMode { get; set; }
+        bool WeaklyFixable { get; set; }
         public Dictionary<SuperSlimBoard, GameTreeInfo> WinTreeInfo { get; private set; }
         public Dictionary<SuperSlimBoard, GameTreeInfo> LossTreeInfo { get; private set; }
 
@@ -16,10 +17,11 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
         int _fixerResponseCount;
         Dictionary<ulong, List<List<ulong>>> _breakerChoicesCache = new Dictionary<ulong, List<List<ulong>>>();
 
-        public SuperSlimSwapAnalyzer(int n, bool proofFindingMode = false)
+        public SuperSlimSwapAnalyzer(int n, bool proofFindingMode = false, bool weaklyFixable = false)
         {
             _fixerResponses = new ulong[8192];
             ProofFindingMode = proofFindingMode;
+            WeaklyFixable = weaklyFixable;
             if (ProofFindingMode)
             {
                 WinTreeInfo = new Dictionary<SuperSlimBoard, GameTreeInfo>();
@@ -45,6 +47,9 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
                         GetFixerResponses(breakerChoice);
                         for (int k = 1; k < _fixerResponseCount; k++)
                         {
+                            if (WeaklyFixable && _fixerResponses[k].PopulationCount() > 2)
+                                continue;
+
                             var childBoard = new SuperSlimBoard(board._trace, i, j, _fixerResponses[k], board._stackCount);
                             if (wonBoards.Contains(childBoard))
                             {
@@ -98,6 +103,8 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
                         foreach (var response in responses)
                         {
                             if (singletonOnly && response.PopulationCount() > 1)
+                                continue;
+                            if (WeaklyFixable && response.PopulationCount() > 2)
                                 continue;
 
                             var childBoard = new SuperSlimBoard(board._trace, i, j, response, board._stackCount);

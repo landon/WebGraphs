@@ -13,13 +13,14 @@ namespace Console
     {
         static void Main(string[] args)
         {
-            FixerBreakerTrees.Go();
+            WeaklyFixableTester.Go();
+          //  FixerBreakerTrees.Go();
             //SuperAbundanceFinder.Go();
            // FindFixerBreaker.Go();
             //MakePictures.Go();
            
            //  FindTarpits.Go();
-           // FindFixerBreaker.Go();
+            //FindFixerBreaker.Go();
             //FindChoosables.Go();
             System.Console.WriteLine();
             System.Console.WriteLine("done.");

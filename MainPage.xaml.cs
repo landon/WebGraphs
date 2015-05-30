@@ -63,6 +63,7 @@ namespace WebGraphs
             _mainMenu.FindPaintNumber += FindPaintNumber;
             _mainMenu.ExportTeX += ExportTeX;
             _mainMenu.AnalyzeFixerBreaker += AnalyzeFixerBreaker;
+            _mainMenu.AnalyzeFixerBreakerWeaklyFixable += AnalyzeFixerBreakerWeaklyFixable;
             _mainMenu.DoMozhan += DoMozhan;
             _mainMenu.DoWebLink += ExportWebLink;
             _mainMenu.DoLightWebLink += ExportLightWebLink;
@@ -101,6 +102,7 @@ namespace WebGraphs
             _mainMenu.DoTiling += _mainMenu_DoTiling;
             _mainMenu.DoSpin += _mainMenu_DoSpin;
             _mainMenu.DoSuperabundantOnly += AnalyzeSuperabundantOnly;
+            _mainMenu.DoSuperabundantOnlyWeakly += AnalyzeSuperabundantOnlyWeakly;
             _mainMenu.DoGenerateProof += _mainMenu_DoGenerateProof;
             _mainMenu.DoGenerateProofSelectedEdge += _mainMenu_DoGenerateProofSelectedEdge;
 
@@ -1656,7 +1658,12 @@ trash can button.
 
         async void AnalyzeSuperabundantOnly()
         {
-            await AnalyzeFixerBreaker(false, -1, true);
+            await AnalyzeFixerBreaker(false, -1, true, false, false);
+        }
+
+        async void AnalyzeSuperabundantOnlyWeakly()
+        {
+            await AnalyzeFixerBreaker(false, -1, true, false, true);
         }
 
         async void AnalyzeOnlyNearColoringsForSelectedEdge()
@@ -1686,8 +1693,12 @@ trash can button.
         {
             await AnalyzeFixerBreaker(false);
         }
+        async void AnalyzeFixerBreakerWeaklyFixable()
+        {
+            await AnalyzeFixerBreaker(false, -1, false, false, true);
+        }
 
-        async Task<string> AnalyzeFixerBreaker(bool onlyNearColorings, int missingEdgeIndex = -1, bool superAbundantOnly = false, bool generateProof = false)
+        async Task<string> AnalyzeFixerBreaker(bool onlyNearColorings, int missingEdgeIndex = -1, bool superAbundantOnly = false, bool generateProof = false, bool weaklyFixable = false)
         {
             var proof = "";
             var blob = AlgorithmBlob.Create(SelectedTabCanvas);
@@ -1718,11 +1729,12 @@ trash can button.
                 template = new Template(G.Vertices.Select(v => potSize + G.Degree(v) - blob.UIGraph.Vertices[v].Label.TryParseInt().Value).ToList());
             }
 
-            var mind = new Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.SuperSlimMind(G, generateProof);
+            var mind = new Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.SuperSlimMind(G, generateProof, weaklyFixable);
             mind.MaxPot = potSize;
             mind.SuperabundantOnly = superAbundantOnly;
             mind.OnlyConsiderNearlyColorableBoards = onlyNearColorings;
             mind.MissingEdgeIndex = missingEdgeIndex;
+            mind.DoComplexSwapsInProof = true;
             
             using (var resultWindow = new ResultWindow(true))
             {
@@ -1772,6 +1784,12 @@ trash can button.
                                             vv.Label = "" + i;
                                             i++;
                                         }
+                                    }
+
+                                    if (mind.OnlyConsiderNearlyColorableBoards)
+                                    {
+                                        foreach (var e in blob.UIGraph.SelectedEdges)
+                                            gg.Edges[blob.UIGraph.Edges.IndexOf(e)].Label = "e";
                                     }
 
                                     var tikz = TeXConverter.ToTikz(gg);

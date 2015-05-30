@@ -22,8 +22,8 @@ namespace Choosability.Utility
 
             if (includeBasicMatchers)
             {
-                foreach (var t in alphabet)
-                    AddMatcher("!" + t.ToString(), tt => !t.Equals(tt));
+              //  foreach (var t in alphabet)
+              //      AddMatcher("!" + t.ToString(), tt => !t.Equals(tt));
 
                 AddMatcher("*", tt => true);
             }
@@ -35,7 +35,7 @@ namespace Choosability.Utility
         }
 
         VectorComparer _vectorComparer = new VectorComparer();
-        public List<List<Matcher>> Generalize(List<List<T>> examples, List<List<T>> nonExamples)
+        public List<List<Matcher>> Generalize(List<List<T>> examples, List<List<T>> nonExamples, bool mostGeneral = false)
         {
             BuildMatcherLattice();
 
@@ -59,9 +59,17 @@ namespace Choosability.Utility
             while (remaining.Count > 0)
             {
                 var ordered = possibles.Select(pp => new {Vector = pp, Count = remaining.Count(r => IsMatch(r, pp))}).OrderByDescending(xx => xx.Count).ToList();
-                var maxers = ordered.TakeWhile(xx => xx.Count == ordered[0].Count).OrderByDescending(xx => xx.Vector.Count(x => _matchers[x].Name == "*"));
+                var maxers = ordered.TakeWhile(xx => xx.Count == ordered[0].Count).OrderByDescending(xx => xx.Vector.Aggregate((total, x) =>
+                    {
+                        if (_matchers[x].Name == "*")
+                            return total * _alphabet.Count;
+                        if (_matchers[x].Name.StartsWith("!"))
+                            return total * (_alphabet.Count - 1);
 
-                var best = maxers.First().Vector;
+                        return total;
+                    }));
+
+                var best = mostGeneral ? maxers.First().Vector : maxers.Last().Vector;
                 
                 generalizations.Add(best);
                 remaining.RemoveAll(r => IsMatch(r, best));

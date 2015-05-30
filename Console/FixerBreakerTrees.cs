@@ -34,7 +34,7 @@ namespace Console
             var g = new Choosability.Graph(uiG.GetEdgeWeights());
             var template = new Template(g.Vertices.Select(v => potSize + g.Degree(v) - uiG.Vertices[v].Label.TryParseInt().Value).ToList());
 
-            var mind = new Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.SuperSlimMind(g, storeTreeInfo: true);
+            var mind = new Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.SuperSlimMind(g, proofFindingMode: true);
             mind.MaxPot = potSize;
          //   mind.MissingEdgeIndex = 0;
          //   mind.OnlyConsiderNearlyColorableBoards = true;
@@ -63,7 +63,7 @@ namespace Console
 
             GraphViz.DrawGraph(g, root + @"\G.pdf", true);
 
-            var mind = new Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.SuperSlimMind(g, storeTreeInfo: true);
+            var mind = new Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.SuperSlimMind(g, proofFindingMode: true);
             mind.MaxPot = potSize;
           //  mind.OnlyConsiderNearlyColorableBoards = true;
           //  mind.MissingEdgeIndex = 0;

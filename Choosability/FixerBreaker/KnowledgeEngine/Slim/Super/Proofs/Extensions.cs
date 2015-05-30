@@ -178,7 +178,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
             switch (matcher.Name)
             {
                 case "*":
-                    return "A";
+                    return "\\wild ";
                 case "0":
                     return "X";
                 case "1":

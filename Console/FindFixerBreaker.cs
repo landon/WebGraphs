@@ -12,14 +12,15 @@ namespace Console
     {
         static int Delta = 3;
         static int MaxVertices = 20;
-        static bool TreesOnly = true;
+        static bool TreesOnly = false;
         static bool TriangleFree = false;
         static bool TreesOrTreesPlusEdgeOnly = false;
         static bool Planar = false;
         static bool LowGirth = false;
-        
+        static bool WeaklyFixable = false;
         const bool NearColorings = false;
-        static readonly string WinnersFile = (LowGirth ? "low girth induced " : "") + (Planar ? "planar " : "") + (TreesOrTreesPlusEdgeOnly ? "trees or trees plus edge only " : "") + (TriangleFree ? "triangle-free " : "") + (TreesOnly ? "trees only " : "") + (NearColorings ? "near colorings " : "") + "FixerBreaker winners Delta=" + Delta + ".txt";
+
+        static readonly string WinnersFile = (WeaklyFixable ? "weakly " : "") + (LowGirth ? "low girth induced " : "") + (Planar ? "planar " : "") + (TreesOrTreesPlusEdgeOnly ? "trees or trees plus edge only " : "") + (TriangleFree ? "triangle-free " : "") + (TreesOnly ? "trees only " : "") + (NearColorings ? "near colorings " : "") + "FixerBreaker winners Delta=" + Delta + ".txt";
 
         public static void Go()
         {
@@ -38,7 +39,7 @@ namespace Console
                 {
                     System.Console.Write("checking " + g.ToGraph6() + " with degrees [" + string.Join(",", g.VertexWeight) + "] ...");
 
-                    var mind = new Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.SuperSlimMind(g);
+                    var mind = new Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.SuperSlimMind(g, false, WeaklyFixable);
                     mind.MaxPot = Delta;
                     mind.OnlyConsiderNearlyColorableBoards = NearColorings;
 
