@@ -102,7 +102,10 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
             if (ll.Count == 1)
                 return ll[0].ToString();
 
-            return string.Join(", ", ll.Take(ll.Count - 1)) + " " + connector + " " + ll.Last();
+            if (connector != null)
+                return string.Join(", ", ll.Take(ll.Count - 1)) + " " + connector + " " + ll.Last();
+
+            return string.Join(", ", ll);
         }
 
         public static string Wordify(this int n)

@@ -8,7 +8,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
 {
     public class UltraCompactProofBuilder : CompactProofBuilder
     {
-        Dictionary<SuperSlimBoard, List<Tuple<Permutation, SuperSlimBoard>>> _permutationLinked;
+        protected Dictionary<SuperSlimBoard, List<Tuple<Permutation, SuperSlimBoard>>> _permutationLinked;
 
         public UltraCompactProofBuilder(SuperSlimMind mind, string tikz = "")
             : base(mind, tikz)
@@ -144,7 +144,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
             sb.AppendLine("represents a possible list assignment on $V(H)$ arising from a $3$-edge-coloring of $G-E(H)$.");
             sb.AppendLine("By an $X$-Kempe change, we mean flipping colors $0$ and $1$ on a two-colored path in $G-E(H)$.  We call such a path an $X$-path. ");
             sb.AppendLine("Any endpoint of an $X$-path in $H$ must end at a $Y$ or $Z$ vertex.  The meanings of $Y$-Kempe change, $Z$-Kempe change, $Y$-path and $Z$-path are analogous.");
-            sb.AppendLine("Note that if there are an odd number of $Y$'s and $Z$'s, then at least one $X$-Kempe change has only one endpoint in $H$.");
+            sb.AppendLine("Note that if there are an odd number of $Y$'s and $Z$'s, then at least one $X$-path has only one endpoint in $H$.");
             sb.AppendLine();
 
             if (Mind.OnlyConsiderNearlyColorableBoards)

@@ -1793,7 +1793,7 @@ trash can button.
                                     }
 
                                     var tikz = TeXConverter.ToTikz(gg);
-                                    var pb = new UltraCompactProofBuilder(mind, tikz);
+                                    var pb = new MegaSuperCompactProofBuilder(mind, tikz);
                                     sb.AppendLine(pb.WriteProof());
 
                                     return sb.ToString();
