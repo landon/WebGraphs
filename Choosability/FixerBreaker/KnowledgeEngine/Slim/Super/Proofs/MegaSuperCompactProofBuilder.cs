@@ -136,7 +136,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
                                     var groups = treeInfo.GroupBy(ss => ss.SwapVertices[0]);
 
                                     sb.Append("$\\K_{" + fixGroup.Key + ",\\infty}(" + b.ToXYZ() + "," + groups.OrderBy(gg => gg.Key).Select(gg => gg.Key.GetXYZIndex(b) + 1).Listify(null) + ")");
-                                    sb.AppendLine("\\Rightarrow " + groups.OrderBy(gg => gg.Key).Select(gg => GetChildBoardName(b, gg.First())).Listify(null) + "$ ( Case " + treeInfo.Select(bc => GetHandledCaseNumber(b, bc)).Distinct().OrderBy(xx => xx).Listify() + ").");
+                                    sb.AppendLine("\\Rightarrow $" + groups.OrderBy(gg => gg.Key).Select(gg => "$" + GetChildBoardName(b, gg.First()) + "$").Listify(null) + "( Case " + treeInfo.Select(bc => GetHandledCaseNumber(b, bc)).Distinct().OrderBy(xx => xx).Listify() + ").");
                                     sb.AppendLine();
 
                                     if (_permutationLinked[b].Count > 0)
@@ -160,7 +160,6 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
                                     var treeInfo = Mind.GetWinTreeInfo(b);
                                     var leftover = treeInfo.ToList();
 
-                                    IEnumerable<string> outcomeBoards = new string[0];
                                     while (leftover.Count > 0)
                                     {
                                         var commonestSwapper = Enumerable.Range(0, b._stackCount).MaxIndex(v => leftover.Count(bc => bc.SwapVertices.Contains(v)));
@@ -177,13 +176,11 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
                                             sb.Append("," + handled.Where(bc => bc.SwapVertices.Count > 1).OrderBy(bc => bc.SwapVertices.Except(commonestSwapper).First()).Select(bc => bc.SwapVertices.Except(commonestSwapper).First().GetXYZIndex(b) + 1).Listify(null));
                                         sb.Append(")");
 
-                                        sb.AppendLine("\\Rightarrow " + handled.OrderBy(bc => bc.SwapVertices.Count == 1 ? -1 : bc.SwapVertices.Except(commonestSwapper).First()).Select(bc => GetChildBoardName(b, bc)).Listify(null) + "$ (Case " + handled.Select(bc => GetHandledCaseNumber(b, bc)).Distinct().OrderBy(xx => xx).Listify() + ").");
+                                        sb.AppendLine("\\Rightarrow $" + handled.OrderBy(bc => bc.SwapVertices.Count == 1 ? -1 : bc.SwapVertices.Except(commonestSwapper).First()).Select(bc => "$" + GetChildBoardName(b, bc) + "$").Listify(null) + "(Case " + handled.Select(bc => GetHandledCaseNumber(b, bc)).Distinct().OrderBy(xx => xx).Listify() + ").");
                                         sb.AppendLine();
 
                                         foreach (var bc in handledAll)
                                             leftover.Remove(bc);
-
-                                        outcomeBoards = outcomeBoards.Concat(handled.OrderBy(bc => bc.SwapVertices.Count == 1 ? -1 : bc.SwapVertices.Except(commonestSwapper).First()).Select(bc => "\\pi(" + GetChildBoardName(b, bc) + ")"));
                                     }
 
                                     if (_permutationLinked[b].Count > 0)
