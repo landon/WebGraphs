@@ -13,8 +13,8 @@ namespace Console
         static int MaxVertices = 20;
         static int MaxDegree = 3;
         static bool TreesOnly = true;
-        static int ExtraPsi = 1;
-        static readonly string WinnersFile = (ExtraPsi > 0 ? ExtraPsi + " extra psi " : "") + (MaxDegree != int.MaxValue ? "max degree " + MaxDegree : "") + (TreesOnly ? "trees only " : "") + "superabundance.txt";
+        static int ExtraPsi = 2;
+        static readonly string WinnersFile = "nar " + (ExtraPsi > 0 ? ExtraPsi + " extra psi " : "") + (MaxDegree != int.MaxValue ? "max degree " + MaxDegree : "") + (TreesOnly ? "trees only " : "") + "superabundance.txt";
 
         public static void Go()
         {
@@ -122,7 +122,7 @@ namespace Console
 
         static IEnumerable<Choosability.Graph> EnumerateWeightings(Choosability.Graph g)
         {
-            foreach (var weighting in g.Vertices.Select(v => Enumerable.Range(g.Degree(v), 2)).CartesianProduct())
+            foreach (var weighting in g.Vertices.Select(v => Enumerable.Range(g.Degree(v), 2 + 1)).CartesianProduct())
             {
                 var gg = g.Clone();
                 gg.VertexWeight = weighting.ToList();
