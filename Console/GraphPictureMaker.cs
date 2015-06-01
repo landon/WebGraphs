@@ -10,7 +10,7 @@ namespace Console
 {
     public class GraphPictureMaker
     {
-        static readonly DotRenderer Renderer = new DotRenderer(@"C:\Program Files\Graphviz2.36\bin\neato.exe");
+        static readonly DotRenderer Renderer = new DotRenderer(@"C:\Program Files (x86)\Graphviz2.38\bin\neato.exe");
         static readonly List<string> DotColors = new List<string>() { "cadetblue", "brown", "dodgerblue", "turquoise", "orchid", "blue", "red", "green", 
                                                                       "yellow", "cyan",
                                                                       "limegreen",  "pink", 
@@ -20,6 +20,7 @@ namespace Console
 
         public bool Directed { get; set; }
         public bool ShowFactors { get; set; }
+        public bool InDegreeTerms { get; set; }
 
         public GraphPictureMaker(string graphFile) : this(GraphEnumerator.EnumerateGraphFile(graphFile)) { }
         public GraphPictureMaker(params Graph[] graphs) : this((IEnumerable<Graph>)graphs) { }
@@ -36,7 +37,7 @@ namespace Console
                 sw.Write(Resource.index.Replace("__FILL_THIS_SLOT__", graphs));
         }
 
-        public List<string> DrawAll(string outputDirectory, DotRenderType renderType = DotRenderType.png)
+        public List<string> DrawAll(string outputDirectory, DotRenderType renderType = DotRenderType.png, bool superabundance = false)
         {
             var imageFiles = new List<string>();
             Directory.CreateDirectory(outputDirectory);
@@ -72,7 +73,7 @@ namespace Console
 
         string Draw(Graph g, string path, DotRenderType renderType = DotRenderType.png)
         {
-            var imageFile = Renderer.Render(ToDot(g, Directed, ShowFactors), path, renderType);
+            var imageFile = Renderer.Render(ToDot(g, Directed, ShowFactors, InDegreeTerms), path, renderType);
          
             if (renderType == DotRenderType.svg)
                 FixSvg(imageFile);
@@ -101,7 +102,7 @@ namespace Console
             }
         }
 
-        static string ToDot(Graph g, bool directed = false, bool showFactors = false)
+        static string ToDot(Graph g, bool directed = false, bool showFactors = false, bool inDegreeTerms = false)
         {
             if (showFactors)
                 return g.ToDotWithFactors();
@@ -129,9 +130,27 @@ namespace Console
                 }
                 else
                 {
-                    label = g.VertexWeight == null ? "" : g.VertexWeight[v].ToString();
-                    colorIndex = g.VertexWeight == null ? 2 : g.VertexWeight[v];
+                    if (g.VertexWeight == null)
+                    {
+                        label = "";
+                        colorIndex = 2;
+                    }
+                    else if (inDegreeTerms)
+                    {
+                        var dd = g.VertexWeight[v] - g.Degree(v);
+
+                        label = "d";
+                        if (dd > 0)
+                            label += " + " + dd;
+                        colorIndex = dd + 2;
+                    }
+                    else
+                    {
+                        label = g.VertexWeight[v].ToString();
+                        colorIndex = g.VertexWeight[v];
+                    }
                 }
+
                 colorIndex -= 2;
                 if (colorIndex < 0)
                     colorIndex += 13;

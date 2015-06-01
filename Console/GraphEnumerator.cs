@@ -25,6 +25,7 @@ namespace Console
         Graph Last { get; set; }
         public string FileRoot { get; set; }
         public Func<Graph, Graph, int, int, bool> WeightCondition = WeightConditionDown;
+        public bool DoNotUsePreviousWinners { get; set; }
 
         public GraphEnumerator(string winnersFile, int minVertices, int maxVertices)
         {
@@ -183,7 +184,7 @@ namespace Console
                             }
                             else
                             {
-                                if (PreviousWinners.All(h => !g.ContainsInduced(h)))
+                                if (DoNotUsePreviousWinners || PreviousWinners.All(h => !g.ContainsInduced(h)))
                                     yield return g;
                                 else
                                     System.Console.WriteLine("skipping supergraph " + g.ToGraph6());

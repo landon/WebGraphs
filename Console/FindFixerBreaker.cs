@@ -11,13 +11,13 @@ namespace Console
     public static class FindFixerBreaker
     {
         static int Delta = 3;
-        static int MaxVertices = 20;
+        static int MaxVertices = 8;
         static bool TreesOnly = false;
-        static bool TriangleFree = false;
+        static bool TriangleFree = true;
         static bool TreesOrTreesPlusEdgeOnly = false;
         static bool Planar = false;
         static bool LowGirth = false;
-        static bool WeaklyFixable = false;
+        static bool WeaklyFixable = true;
         const bool NearColorings = false;
 
         static readonly string WinnersFile = (WeaklyFixable ? "weakly " : "") + (LowGirth ? "low girth induced " : "") + (Planar ? "planar " : "") + (TreesOrTreesPlusEdgeOnly ? "trees or trees plus edge only " : "") + (TriangleFree ? "triangle-free " : "") + (TreesOnly ? "trees only " : "") + (NearColorings ? "near colorings " : "") + "FixerBreaker winners Delta=" + Delta + ".txt";

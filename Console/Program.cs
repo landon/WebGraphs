@@ -13,11 +13,11 @@ namespace Console
     {
         static void Main(string[] args)
         {
-            WeaklyFixableTester.Go();
+           // WeaklyFixableTester.Go();
           //  FixerBreakerTrees.Go();
-            //SuperAbundanceFinder.Go();
-           // FindFixerBreaker.Go();
-            //MakePictures.Go();
+           // SuperAbundanceFinder.Go();
+          //  FindFixerBreaker.Go();
+            MakePictures.Go();
            
            //  FindTarpits.Go();
             //FindFixerBreaker.Go();

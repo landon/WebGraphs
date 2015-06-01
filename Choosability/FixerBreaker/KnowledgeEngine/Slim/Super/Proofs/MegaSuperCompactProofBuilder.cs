@@ -143,12 +143,8 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
                                     {
                                         sb.AppendLine();
                                         sb.AppendLine();
-                                        foreach (var ppp in _permutationLinked[b])
-                                        {
-                                            sb.AppendLine("$" + ppp.Item1 + "\\Rightarrow " + ppp.Item2.ToXYZ() + "$");
-                                            sb.AppendLine();
-                                        }
-                                        sb.AppendLine(); 
+                                        sb.AppendLine(_permutationLinked[b].Select(ppp => "$" + ppp.Item1 + "\\Rightarrow " + ppp.Item2.ToXYZ() + "$").Listify());
+                                        sb.AppendLine();
                                         sb.AppendLine();
                                     }
                                 }
@@ -187,11 +183,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
                                     {
                                         sb.AppendLine();
                                         sb.AppendLine();
-                                        foreach (var ppp in _permutationLinked[b])
-                                        {
-                                            sb.AppendLine("$" + ppp.Item1 + "\\Rightarrow " + ppp.Item2.ToXYZ() + "$");
-                                            sb.AppendLine();
-                                        }
+                                        sb.AppendLine(_permutationLinked[b].Select(ppp => "$" + ppp.Item1 + "\\Rightarrow " + ppp.Item2.ToXYZ() + "$").Listify());
                                         sb.AppendLine();
                                         sb.AppendLine();
                                     }
