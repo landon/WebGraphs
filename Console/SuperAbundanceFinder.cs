@@ -13,7 +13,8 @@ namespace Console
         static int MaxVertices = 20;
         static int MaxDegree = 3;
         static bool TreesOnly = true;
-        static readonly string WinnersFile = (MaxDegree != int.MaxValue ? "max degree " + MaxDegree : "") + (TreesOnly ? "trees only " : "") + "superabundance.txt";
+        static int ExtraPsi = 1;
+        static readonly string WinnersFile = (ExtraPsi > 0 ? ExtraPsi + " extra psi " : "") + (MaxDegree != int.MaxValue ? "max degree " + MaxDegree : "") + (TreesOnly ? "trees only " : "") + "superabundance.txt";
 
         public static void Go()
         {
@@ -37,6 +38,7 @@ namespace Console
                         mind.MaxPot = int.MaxValue;
                         mind.SuperabundantOnly = true;
                         mind.DoComplexSwapsInProof = false;
+                        mind.ExtraPsi = ExtraPsi;
 
                         var template = new Template(g.VertexWeight);
                         var win = mind.Analyze(template, null);

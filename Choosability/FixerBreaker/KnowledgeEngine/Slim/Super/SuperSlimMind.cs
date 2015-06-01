@@ -35,6 +35,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
         public List<SuperSlimBoard> BreakerWonBoards { get; private set; }
         public Dictionary<int, List<SuperSlimBoard>> BoardsOfDepth { get; private set; }
         public bool ProofFindingMode { get; private set; }
+        public int ExtraPsi { get; set; }
 
         public SuperSlimMind(Graph g, bool proofFindingMode = false, bool weaklyFixable = false)
         {
@@ -329,9 +330,10 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
         {
             ulong subset = 0;
 
+            int total = 0;
             while (subset < (1UL << b._stackCount))
             {
-                int total = 0;
+                total = 0;
                 for (int i = 0; i < b._length; i++)
                     total += (subset & b._trace[i]).PopulationCount() / 2;
 
@@ -341,6 +343,9 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
 
                 subset++;
             }
+
+            if (ExtraPsi > 0)
+                return total >= _graph.E + ExtraPsi;
 
             return true;
         }
