@@ -9,6 +9,7 @@ using Choosability.FixerBreaker.Chronicle;
 using Choosability.FixerBreaker.KnowledgeEngine;
 using Choosability.FixerBreaker.KnowledgeEngine.Slim.Super;
 using Choosability;
+using System.Threading;
 
 namespace Console
 {
@@ -35,9 +36,7 @@ namespace Console
 
             fileName = Path.Combine(root, Path.GetFileNameWithoutExtension(fileName) + "." + renderType);
 
-            var tempDirectory = Path.Combine(root, "Temporary");
-            Directory.CreateDirectory(tempDirectory);
-            var tempFile = Path.Combine(tempDirectory, @"temp.dot");
+            var tempFile = Path.GetTempFileName();
             using (var sw = new StreamWriter(tempFile))
                 sw.Write(dot);
 
@@ -49,6 +48,8 @@ namespace Console
             process.StartInfo = info;
             process.Start();
             process.WaitForExit();
+
+            File.Delete(tempFile);
 
             return fileName;
         }

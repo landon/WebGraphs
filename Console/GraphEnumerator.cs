@@ -17,7 +17,6 @@ namespace Console
         public static readonly string TreeFileRoot = Graph6Root + @"trees\trees";
         public static readonly string TreePlusEdgeFileRoot = Graph6Root + @"treesplusedge\treesplusedge";
 
-        StreamWriter Writer { get; set; }
         string WinnersFile { get; set; }
         int MinVertices { get; set; }
         int MaxVertices { get; set; }
@@ -44,11 +43,9 @@ namespace Console
             PreviousWinners = LoadPreviousWinners();
             System.Console.WriteLine("Found " + PreviousWinners.Count + " previous winners.");
 
-            Writer = new StreamWriter(WinnersFile);
-
             foreach (var g in PreviousWinners)
             {
-                WriteGraph(Writer, g);
+                WriteGraph(g);
                 Last = g;
             }
 
@@ -100,7 +97,7 @@ namespace Console
         {
             PreviousWinners.Add(g);
             output = output ?? g;
-            WriteGraph(Writer, output);
+            WriteGraph(output);
         }
 
         public static IEnumerable<Graph> EnumerateEntireGraph6File(string file)
@@ -217,20 +214,19 @@ namespace Console
             return false;
         }
 
-        static void WriteGraph(StreamWriter sw, Graph g)
+        void WriteGraph(Graph g)
         {
             var edgeWeights = string.Join(" ", g.GetEdgeWeights().Select(x => x.ToString()));
             var vertexWeights = "";
             if (g.VertexWeight != null)
                 vertexWeights = " [" + string.Join(",", g.VertexWeight) + "]";
 
-            sw.WriteLine(edgeWeights + vertexWeights);
-            sw.Flush();
+            using (var sw = new StreamWriter(WinnersFile, append: true))
+                sw.WriteLine(edgeWeights + vertexWeights);
         }
 
         public void Dispose()
         {
-            Writer.Dispose();
         }
     }
 }

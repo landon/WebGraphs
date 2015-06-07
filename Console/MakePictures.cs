@@ -28,24 +28,34 @@ namespace Console
 
             //MakePdfs(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\weakly triangle-free FixerBreaker winners Delta=3.txt", @"C:\Users\landon\Documents\GitHub\Research\fixable\Delta3TriangleFree");
            // MakePdfs(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\superabundance.txt", @"C:\Users\landon\Documents\GitHub\Research\fixable\Superabundance\all", true);
-            MakePdfs(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\max degree 3trees only superabundance.txt", @"C:\Users\landon\Documents\GitHub\Research\fixable\Superabundance\MaxDegree3Trees", true);
+          //  MakePdfs(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\max degree 3trees only superabundance.txt", @"C:\Users\landon\Documents\GitHub\Research\fixable\Superabundance\MaxDegree3Trees", true);
+
+            //MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Another\near colorings FixerBreaker winners Delta=4.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\Fixable\NearColoring\Delta4");
+           // MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\trees only near colorings FixerBreaker winners Delta=5.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\Fixable\NearColoring\Delta5Trees");
+            MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\YetAnother\teeeDelta4Near.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\Fixable\NearColoring\Delta4Trees");
+           // MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Another\treesOrTreesPlusEdgeDelta4Near.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\Fixable\NearColoring\Delta4TreeOrTreePlusEdge");
+            //MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\trees or trees plus edge only near colorings FixerBreaker winners Delta=5.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\Fixable\NearColoring\Delta5TreeOrTreePlusEdge");
+
+
+
+           // MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\near colorings FixerBreaker winners Delta=5.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\Fixable\NearColoring\Delta5");
             
         }
 
-        static void MakePdfs(string graphPath, string outputPath, bool superabundance = false)
+        public static void MakePdfs(string graphPath, string outputPath, bool superabundance = false)
         {
             var maker = new GraphPictureMaker(graphPath);
             maker.InDegreeTerms = superabundance;
             maker.DrawAll(outputPath, DotRenderType.pdf, superabundance);
         }
 
-        static void MakeWebpage(string graphPath, string outputPath, bool directed = false, bool showFactors = false)
+        public static void MakeWebpage(string graphPath, string outputPath, bool directed = false, bool showFactors = false)
         {
             var maker = new GraphPictureMaker(graphPath);
             MakeWebpage(maker, outputPath, directed, showFactors);
         }
 
-        static void MakeWebpage(GraphPictureMaker maker, string outputPath, bool directed = false, bool showFactors = false)
+        public static void MakeWebpage(GraphPictureMaker maker, string outputPath, bool directed = false, bool showFactors = false)
         {
             maker.Directed = directed;
             maker.ShowFactors = showFactors;

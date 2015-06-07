@@ -5,20 +5,24 @@ using System.Text;
 using System.Threading.Tasks;
 using Choosability.Utility;
 using Choosability.FixerBreaker.KnowledgeEngine;
+using System.IO;
 
 namespace Console
 {
     public static class FindFixerBreaker
     {
-        static int Delta = 3;
-        static int MaxVertices = 8;
-        static bool TreesOnly = false;
-        static bool TriangleFree = true;
+        static int Delta = 6;
+        static int MaxVertices = 20;
+        static bool TreesOnly = true;
+        static bool TriangleFree = false;
         static bool TreesOrTreesPlusEdgeOnly = false;
         static bool Planar = false;
         static bool LowGirth = false;
-        static bool WeaklyFixable = true;
-        const bool NearColorings = false;
+        static bool WeaklyFixable = false;
+        const bool NearColorings = true;
+
+        static bool MakeWebPage = true;
+        static string WebpageRoot = @"C:\Users\landon\Dropbox\Public\Web\GraphData\Fixable\Automated";
 
         static readonly string WinnersFile = (WeaklyFixable ? "weakly " : "") + (LowGirth ? "low girth induced " : "") + (Planar ? "planar " : "") + (TreesOrTreesPlusEdgeOnly ? "trees or trees plus edge only " : "") + (TriangleFree ? "triangle-free " : "") + (TreesOnly ? "trees only " : "") + (NearColorings ? "near colorings " : "") + "FixerBreaker winners Delta=" + Delta + ".txt";
 
@@ -29,7 +33,7 @@ namespace Console
                 if (TreesOnly)
                     graphEnumerator.FileRoot = @"C:\Users\landon\Google Drive\research\Graph6\trees\trees";
                 else if (TreesOrTreesPlusEdgeOnly)
-                    graphEnumerator.FileRoot = GraphEnumerator.TreePlusEdgeFileRoot;
+                    graphEnumerator.FileRoot = @"C:\Users\landon\Google Drive\research\Graph6\degree5treesplusedge\geng";
                 else if (Planar)
                     graphEnumerator.FileRoot = @"C:\Users\landon\Google Drive\research\Graph6\planar\planar_conn.";
                 else
@@ -53,6 +57,11 @@ namespace Console
                         System.Console.ForegroundColor = ConsoleColor.White;
                         graphEnumerator.AddWinner(g);
                         _wonWeightings.Add(g.VertexWeight);
+
+                        if (MakeWebPage)
+                        {
+                            MakePictures.MakeWebpage(WinnersFile, Path.Combine(WebpageRoot, Path.GetFileNameWithoutExtension(WinnersFile)));
+                        }
                     }
                     else
                     {
