@@ -13,10 +13,10 @@ namespace Console
     {
         static int Delta = 6;
         static int MaxVertices = 20;
-        static bool TreesOnly = true;
+        static bool TreesOnly = false;
         static bool TriangleFree = false;
         static bool TreesOrTreesPlusEdgeOnly = false;
-        static bool Planar = false;
+        static bool Planar = true;
         static bool LowGirth = false;
         static bool WeaklyFixable = false;
         const bool NearColorings = true;
