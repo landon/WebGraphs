@@ -431,6 +431,7 @@ namespace Graphs
                 {
                     var v = new Vertex((e.V1.X + e.V2.X) / 2, (e.V1.Y + e.V2.Y) / 2);
                     g.AddVertex(v);
+                    v.Label = e.Label;
 
                     foreach (var other in clique)
                         g.AddEdge(other, v);
