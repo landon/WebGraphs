@@ -13,8 +13,9 @@ namespace Console
         static int MaxVertices = 20;
         static int MaxDegree = 3;
         static bool TreesOnly = true;
-        static int ExtraPsi = 2;
-        static readonly string WinnersFile = "nar " + (ExtraPsi > 0 ? ExtraPsi + " extra psi " : "") + (MaxDegree != int.MaxValue ? "max degree " + MaxDegree : "") + (TreesOnly ? "trees only " : "") + "superabundance.txt";
+        static int ExtraPsi = 0;
+        const bool NearColorings = true;
+        static readonly string WinnersFile = (NearColorings ? "near colorings " : "") + (ExtraPsi > 0 ? ExtraPsi + " extra psi " : "") + (MaxDegree != int.MaxValue ? "max degree " + MaxDegree : "") + (TreesOnly ? "trees only " : "") + "superabundance.txt";
 
         public static void Go()
         {
@@ -39,6 +40,7 @@ namespace Console
                         mind.SuperabundantOnly = true;
                         mind.DoComplexSwapsInProof = false;
                         mind.ExtraPsi = ExtraPsi;
+                        mind.OnlyConsiderNearlyColorableBoards = NearColorings;
 
                         var template = new Template(g.VertexWeight);
                         var win = mind.Analyze(template, null);
