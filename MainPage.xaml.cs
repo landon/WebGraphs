@@ -1752,7 +1752,7 @@ trash can button.
                         var win = mind.Analyze(template, resultWindow.OnProgress);
                         if (superAbundantOnly)
                         {
-                            var stats = GetStats(mind.BoardCountsList.OrderByDescending(bc => bc.Count).First());
+                            var stats = GetStats(mind.BoardCountsList);
                             if (win)
                                 return "Fixer wins\n\n" + stats;
 
@@ -1760,7 +1760,7 @@ trash can button.
                         }
                         else
                         {
-                            var stats = GetStats(mind.BoardCounts);
+                            var stats = GetStats(mind.BoardCountsList);
 
                             if (mind.HasNonSuperabundantBoardThatIsNearlyColorable)
                             {
@@ -1835,10 +1835,26 @@ trash can button.
             return proof;
         }
 
-        static string GetStats(List<int> boardCounts)
+        static string GetStats(List<List<int>> boardCountsList)
         {
-            if (boardCounts == null)
+            if (boardCountsList == null)
                 return "";
+
+            var boardCounts = new List<int>();
+            foreach (var bc in boardCountsList)
+            {
+                for (int i = 0; i < bc.Count; i++)
+                {
+                    if (i >= boardCounts.Count)
+                    {
+                        boardCounts.Add(bc[i]);
+                    }
+                    else
+                    {
+                        boardCounts[i] += bc[i];
+                    }
+                }
+            }
 
             if (boardCounts.Count <= 2)
                 return boardCounts[0] + " total boards\n" + (boardCounts[0] - boardCounts[1]) + " colorable boards\n";
