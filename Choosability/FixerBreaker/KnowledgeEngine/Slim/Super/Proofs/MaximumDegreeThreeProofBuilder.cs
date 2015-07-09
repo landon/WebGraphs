@@ -6,11 +6,13 @@ using Choosability.Utility;
 
 namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
 {
-    public class MegaSuperCompactProofBuilder : UltraCompactProofBuilder
+    public class MaximumDegreeThreeProofBuilder : PermutationAwareProofBuilder
     {
-        public MegaSuperCompactProofBuilder(SuperSlimMind mind, string tikz = "")
-            : base(mind, tikz)
+        string _figureTikz;
+        public MaximumDegreeThreeProofBuilder(SuperSlimMind mind, string figureTikz = "")
+            : base(mind)
         {
+            _figureTikz = figureTikz;
         }
 
         public override string WriteProof()
@@ -34,7 +36,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
 
             sb.AppendLine("\\begin{figure}");
             sb.AppendLine("\\centering");
-            sb.AppendLine(_tikz);
+            sb.AppendLine(_figureTikz);
             sb.AppendLine("\\caption{Solid vertices have lists of size 3 and the labeled vertices have lists of size 2.}\\label{" + figureID + "}");
             sb.AppendLine("\\end{figure}");
 

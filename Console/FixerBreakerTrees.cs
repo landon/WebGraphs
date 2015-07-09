@@ -44,7 +44,7 @@ namespace Console
 
             if (win)
             {
-                var pb = new ProofBuilder(mind);
+                var pb = new MaximumDegreeThreeProofBuilder(mind);
                 var proof = pb.WriteProof();
             }
         }
