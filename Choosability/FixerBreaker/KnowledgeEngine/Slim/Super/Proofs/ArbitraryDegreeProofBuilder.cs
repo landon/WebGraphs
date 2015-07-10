@@ -10,6 +10,8 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
 {
     public class ArbitraryDegreeProofBuilder : PermutationAwareProofBuilder
     {
+        public bool UseWildCards { get; set; }
+
         string _figureTikz;
         int _maxPot;
         List<int> _activeIndices;
@@ -25,6 +27,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
         {
             _figureTikz = figureTikz;
             _maxPot = mind.MaxPot;
+            UseWildCards = true;
         }
 
         public override string WriteProof()
@@ -173,11 +176,16 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
 
         string GeneralizeBoards(List<SuperSlimBoard> boards)
         {
-            var examples = boards.Select(b => ToListIndices(b)).ToList();
-            var nonExamples = Enumerable.Repeat(_possibleListIndices, _activeIndices.Count).CartesianProduct().Select(ll => ll.ToList()).Except(examples.Distinct(_sequenceComparer), _sequenceComparer).ToList();
+            if (UseWildCards)
+            {
+                var examples = boards.Select(b => ToListIndices(b)).ToList();
+                var nonExamples = Enumerable.Repeat(_possibleListIndices, _activeIndices.Count).CartesianProduct().Select(ll => ll.ToList()).Except(examples.Distinct(_sequenceComparer), _sequenceComparer).ToList();
 
-            var generalized = _sequenceGeneralizer.Generalize(examples, nonExamples, false);
-            return generalized.Select(gg => "$" + string.Join("|", gg.Select((_, i) => _.ToTex(_possibleLists, _activeListSizes[i]))) + "$").Listify("or");
+                var generalized = _sequenceGeneralizer.Generalize(examples, nonExamples, false);
+                return generalized.Select(gg => "$" + string.Join("|", gg.Select((_, i) => _.ToTex(_possibleLists, _activeListSizes[i]))) + "$").Listify("or");
+            }
+
+            return boards.Select(b => "$" + ToListString(b) + "$").Listify("or");
         }
 
         List<int> ToListIndices(SuperSlimBoard b)

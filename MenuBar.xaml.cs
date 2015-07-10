@@ -83,6 +83,7 @@ namespace WebGraphs
         public event Action DoSuperabundantOnlyWeakly;
         public event Action DoGenerateProof;
         public event Action DoGenerateProofSelectedEdge;
+        public event Action OnToggleFixerBreakerUseWildCards;
 
         public MenuBar()
         {
@@ -317,6 +318,14 @@ namespace WebGraphs
                     break;
                 case "generate proof only near colorings for selected edge":
                     A(DoGenerateProofSelectedEdge);
+                    break;
+                case "use wildcards":
+                    UseWildCardsItem.Header = "don't use wildcards";
+                    A(OnToggleFixerBreakerUseWildCards);
+                    break;
+                case "don't use wildcards":
+                    UseWildCardsItem.Header = "use wildcards";
+                    A(OnToggleFixerBreakerUseWildCards);
                     break;
             }
         }

@@ -105,6 +105,7 @@ namespace WebGraphs
             _mainMenu.DoSuperabundantOnlyWeakly += AnalyzeSuperabundantOnlyWeakly;
             _mainMenu.DoGenerateProof += _mainMenu_DoGenerateProof;
             _mainMenu.DoGenerateProofSelectedEdge += _mainMenu_DoGenerateProofSelectedEdge;
+            _mainMenu.OnToggleFixerBreakerUseWildCards += _mainMenu_OnToggleFixerBreakerUseWildCards;
 
             _propertyGrid.SomethingChanged += _propertyGrid_SomethingChanged;
 
@@ -1631,6 +1632,12 @@ trash can button.
         {
         }
 
+        bool _useFixerBreakerWildCards = false;
+        void _mainMenu_OnToggleFixerBreakerUseWildCards()
+        {
+            _useFixerBreakerWildCards = !_useFixerBreakerWildCards;
+        }
+
         async void _mainMenu_DoGenerateProofSelectedEdge()
         {
             var blob = AlgorithmBlob.Create(SelectedTabCanvas);
@@ -1794,6 +1801,7 @@ trash can button.
 
                                     var tikz = TeXConverter.ToTikz(gg);
                                     var pb = new ArbitraryDegreeProofBuilder(mind, tikz);
+                                    pb.UseWildCards = _useFixerBreakerWildCards;
                                     sb.AppendLine(pb.WriteProof());
 
                                     return sb.ToString();
