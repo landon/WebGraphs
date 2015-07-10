@@ -111,10 +111,10 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs.ArbitraryM
 {
     public static class Extensions
     {
-        public static string ToTex(this SequenceGeneralizer<int>.Matcher matcher, List<List<int>> lists, int index)
+        public static string ToTex(this SequenceGeneralizer<int>.Matcher matcher, List<List<int>> lists, int listSize)
         {
             if (matcher.Name == "*")
-                return string.Join("", Enumerable.Repeat("\\wild", lists[index].Count)) + " ";
+                return string.Join("", Enumerable.Repeat("\\wild", listSize)) + " ";
 
             int i;
             if (!int.TryParse(matcher.Name, out i))

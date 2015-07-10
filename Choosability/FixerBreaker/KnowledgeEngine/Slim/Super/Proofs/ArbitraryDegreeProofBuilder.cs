@@ -13,6 +13,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
         string _figureTikz;
         int _maxPot;
         List<int> _activeIndices;
+        List<int> _activeListSizes;
         List<int> _possibleListIndices;
         List<List<int>> _possibleLists;
         List<SuperSlimBoard> _allBoards;
@@ -77,18 +78,20 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
                                 var groups = treeInfo.GroupBy(ss => ss.SwapVertices[0]);
 
                                 sb.Append("$\\K_{" + alpha + "" + beta + ",\\infty}(" + ToListString(b) + "," + groups.OrderBy(gg => gg.Key).Select(gg => gg.Key.GetActiveListIndex(b, _maxPot) + 1).Listify(null) + ")");
-                                sb.AppendLine("\\Rightarrow $" + groups.OrderBy(gg => gg.Key).Select(gg => "$" + GetChildBoardName(b, gg.First()) + "$").Listify(null) + " (Case " + treeInfo.Select(bc => GetHandledCaseNumber(b, bc)).Distinct().OrderBy(xx => xx).Listify() + ").");
+                                sb.AppendLine("\\Rightarrow $ " + groups.OrderBy(gg => gg.Key).Select(gg => "$" + GetChildBoardName(b, gg.First()) + "$").Listify(null) + " (Case " + treeInfo.Select(bc => GetHandledCaseNumber(b, bc)).Distinct().OrderBy(xx => xx).Listify() + ").");
                                 sb.AppendLine();
 
                                 if (_permutationLinked[b].Count > 0)
                                 {
                                     sb.AppendLine();
                                     sb.AppendLine();
-                                    sb.AppendLine("Free by color permutation: " + _permutationLinked[b].Select(ppp => "$" + ppp.Item1 + "\\Rightarrow " + ToListString(ppp.Item2) + "$").Listify());
+                                    sb.AppendLine("Free by vertex permutation: " + _permutationLinked[b].Select(ppp => "$" + ppp.Item1 + "\\Rightarrow " + ToListString(ppp.Item2) + "$").Listify());
                                     sb.AppendLine();
-                                    sb.AppendLine("\\bigskip");
                                     sb.AppendLine();
                                 }
+
+                                sb.AppendLine("\\bigskip");
+                                sb.AppendLine();
                             }
                         }
                         else if (swapCountGroup.Key == 2)
@@ -116,7 +119,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
                                         sb.Append("," + handled.Where(bc => bc.SwapVertices.Count > 1).OrderBy(bc => bc.SwapVertices.Except(commonestSwapper).First()).Select(bc => bc.SwapVertices.Except(commonestSwapper).First().GetActiveListIndex(b, _maxPot) + 1).Listify(null));
                                     sb.Append(")");
 
-                                    sb.AppendLine("\\Rightarrow $" + handled.OrderBy(bc => bc.SwapVertices.Count == 1 ? -1 : bc.SwapVertices.Except(commonestSwapper).First()).Select(bc => "$" + GetChildBoardName(b, bc) + "$").Listify(null) + " (Case " + handled.Select(bc => GetHandledCaseNumber(b, bc)).Distinct().OrderBy(xx => xx).Listify() + ").");
+                                    sb.AppendLine("\\Rightarrow $ " + handled.OrderBy(bc => bc.SwapVertices.Count == 1 ? -1 : bc.SwapVertices.Except(commonestSwapper).First()).Select(bc => "$" + GetChildBoardName(b, bc) + "$").Listify(null) + " (Case " + handled.Select(bc => GetHandledCaseNumber(b, bc)).Distinct().OrderBy(xx => xx).Listify() + ").");
                                     sb.AppendLine();
 
                                     foreach (var bc in handledAll)
@@ -127,12 +130,13 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
                                 {
                                     sb.AppendLine();
                                     sb.AppendLine();
-                                    sb.AppendLine("Free by color permutation: " + _permutationLinked[b].Select(ppp => "$" + ppp.Item1 + "\\Rightarrow " + ToListString(ppp.Item2) + "$").Listify());
+                                    sb.AppendLine("Free by vertex permutation: " + _permutationLinked[b].Select(ppp => "$" + ppp.Item1 + "\\Rightarrow " + ToListString(ppp.Item2) + "$").Listify());
                                     sb.AppendLine();
-                                    sb.AppendLine("\\bigskip");
                                     sb.AppendLine();
                                 }
 
+                                sb.AppendLine();
+                                sb.AppendLine("\\bigskip");
                                 sb.AppendLine();
                             }
                         }
@@ -173,7 +177,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
             var nonExamples = Enumerable.Repeat(_possibleListIndices, _activeIndices.Count).CartesianProduct().Select(ll => ll.ToList()).Except(examples.Distinct(_sequenceComparer), _sequenceComparer).ToList();
 
             var generalized = _sequenceGeneralizer.Generalize(examples, nonExamples, false);
-            return generalized.Select(gg => "$" + string.Join("|", gg.Select((_, i) => _.ToTex(_possibleLists, i))) + "$").Listify("or");
+            return generalized.Select(gg => "$" + string.Join("|", gg.Select((_, i) => _.ToTex(_possibleLists, _activeListSizes[i]))) + "$").Listify("or");
         }
 
         List<int> ToListIndices(SuperSlimBoard b)
@@ -192,10 +196,10 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
         {
             var stacks = Mind.ColorableBoards[0].Stacks.Value.Select(l => l.ToSet()).ToList();
             _activeIndices = stacks.IndicesWhere(s => s.Count < _maxPot).ToList();
-            var sizes = stacks.Select(s => s.Count).Where(c => c < _maxPot).Distinct().OrderBy(c => c).ToList();
+            _activeListSizes = stacks.Select(s => s.Count).Where(c => c < _maxPot).ToList();
 
             var pot = Enumerable.Range(0, _maxPot).ToList();
-            _possibleLists = sizes.SelectMany(c => pot.EnumerateSublists(c)).ToList();
+            _possibleLists = _activeListSizes.Distinct().OrderBy(c => c).ToList().SelectMany(c => pot.EnumerateSublists(c)).ToList();
             _possibleListIndices = Enumerable.Range(0, _possibleLists.Count).ToList();
         }
 
