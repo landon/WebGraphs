@@ -8,77 +8,6 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
 {
     public static class Extensions
     {
-        const string Alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-
-        public static string ToXYZ(this SuperSlimBoard board)
-        {
-            return string.Join("", board.Stacks.Value.Select(ToXYZ));
-        }
-
-        public static List<int> To012(this SuperSlimBoard board)
-        {
-            return board.Stacks.Value.Select(To012).Where(x => x >= 0).ToList();
-        }
-
-        public static string ToCompactedPartitionId(this SuperSlimBoard board, List<List<int>> partition)
-        {
-            var xyz = board.Stacks.Value.Select(ToXYZ).ToList();
-            return xyz.ToPartitionId(partition);
-        }
-
-        public static string ToPartitionId(this SuperSlimBoard board, List<List<int>> partition)
-        {
-            var xyz = board.Stacks.Value.Select(stack =>
-                {
-                    var s = stack.ToXYZ();
-                    if (s.Length <= 0)
-                        return "*";
-                    return s;
-                }).ToList();
-
-            return xyz.ToPartitionId(partition);
-        }
-
-        public static string ToPartitionId(this List<string> xyz, List<List<int>> partition)
-        {
-            var pp = partition.OrderBy(part => part.Min()).ToList();
-            for (int i = 0; i < pp.Count; i++)
-            {
-                var l = Alphabet[i].ToString();
-                foreach (var j in pp[i])
-                    xyz[j] = l;
-            }
-
-            return string.Join("", xyz);
-        }
-
-        public static string ToXYZ(this long stack)
-        {
-            switch (stack)
-            {
-                case 3:
-                    return "X";
-                case 5:
-                    return "Y";
-                case 6:
-                    return "Z";
-            }
-
-            return "";
-        }
-
-        public static int To012(this long stack)
-        {
-            if (stack > 6)
-                return -1;
-            return ((int)stack / 2) - 1;
-        }
-
-        public static int GetXYZIndex(this int i, SuperSlimBoard b)
-        {
-            return b.Stacks.Value.Take(i + 1).Count(ss => ss.PopulationCount() == 2) - 1;
-        }
-
         public static string GetArticle(this string letter)
         {
             switch (letter)
@@ -174,6 +103,106 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
             }
 
             return distinct;
+        }
+    }
+}
+
+namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs.ArbitraryMaxDegree
+{
+    public static class Extensions
+    {
+        public static string ToTex(this SequenceGeneralizer<int>.Matcher matcher, List<List<int>> lists, int index)
+        {
+            if (matcher.Name == "*")
+                return string.Join("", Enumerable.Repeat("\\wild", lists[index].Count)) + " ";
+
+            int i;
+            if (!int.TryParse(matcher.Name, out i))
+                return "?";
+
+            return string.Join("", lists[i]);
+        }
+
+        public static int GetActiveListIndex(this int i, SuperSlimBoard b, int maxPot)
+        {
+            return b.Stacks.Value.Take(i + 1).Count(ss => ss.PopulationCount() < maxPot) - 1;
+        }
+    }
+}
+
+namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs.MaxDegreeThree
+{
+    public static class Extensions
+    {
+        const string Alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+        public static string ToXYZ(this SuperSlimBoard board)
+        {
+            return string.Join("", board.Stacks.Value.Select(ToXYZ));
+        }
+
+        public static List<int> To012(this SuperSlimBoard board)
+        {
+            return board.Stacks.Value.Select(To012).Where(x => x >= 0).ToList();
+        }
+
+        public static string ToCompactedPartitionId(this SuperSlimBoard board, List<List<int>> partition)
+        {
+            var xyz = board.Stacks.Value.Select(ToXYZ).ToList();
+            return xyz.ToPartitionId(partition);
+        }
+
+        public static string ToPartitionId(this SuperSlimBoard board, List<List<int>> partition)
+        {
+            var xyz = board.Stacks.Value.Select(stack =>
+                {
+                    var s = stack.ToXYZ();
+                    if (s.Length <= 0)
+                        return "*";
+                    return s;
+                }).ToList();
+
+            return xyz.ToPartitionId(partition);
+        }
+
+        public static string ToPartitionId(this List<string> xyz, List<List<int>> partition)
+        {
+            var pp = partition.OrderBy(part => part.Min()).ToList();
+            for (int i = 0; i < pp.Count; i++)
+            {
+                var l = Alphabet[i].ToString();
+                foreach (var j in pp[i])
+                    xyz[j] = l;
+            }
+
+            return string.Join("", xyz);
+        }
+
+        public static string ToXYZ(this long stack)
+        {
+            switch (stack)
+            {
+                case 3:
+                    return "X";
+                case 5:
+                    return "Y";
+                case 6:
+                    return "Z";
+            }
+
+            return "";
+        }
+
+        public static int To012(this long stack)
+        {
+            if (stack > 6)
+                return -1;
+            return ((int)stack / 2) - 1;
+        }
+
+        public static int GetXYZIndex(this int i, SuperSlimBoard b)
+        {
+            return b.Stacks.Value.Take(i + 1).Count(ss => ss.PopulationCount() == 2) - 1;
         }
 
         public static string ToTex(this SequenceGeneralizer<int>.Matcher matcher)

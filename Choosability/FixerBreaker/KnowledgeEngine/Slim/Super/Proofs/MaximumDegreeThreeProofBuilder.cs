@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Choosability.Utility;
+using Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs.MaxDegreeThree;
 
 namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
 {
@@ -200,6 +201,12 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
 
             sb.AppendLine("\\end{proof}");
             return sb.ToString();
+        }
+
+        string GetChildBoardName(SuperSlimBoard b, BreakerChoiceInfo bc)
+        {
+            var childBoard = new SuperSlimBoard(b._trace, bc.Alpha, bc.Beta, bc.Response, b._stackCount);
+            return childBoard.ToXYZ();
         }
     }
 }

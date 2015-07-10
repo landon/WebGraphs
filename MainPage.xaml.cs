@@ -1793,7 +1793,7 @@ trash can button.
                                     }
 
                                     var tikz = TeXConverter.ToTikz(gg);
-                                    var pb = new MaximumDegreeThreeProofBuilder(mind, tikz);
+                                    var pb = new ArbitraryDegreeProofBuilder(mind, tikz);
                                     sb.AppendLine(pb.WriteProof());
 
                                     return sb.ToString();

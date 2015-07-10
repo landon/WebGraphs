@@ -59,12 +59,6 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
             return Cases.IndicesWhere(cc => cc.Boards.Contains(childBoard)).First() + 1;
         }
 
-        protected string GetChildBoardName(SuperSlimBoard b, BreakerChoiceInfo bc)
-        {
-            var childBoard = new SuperSlimBoard(b._trace, bc.Alpha, bc.Beta, bc.Response, b._stackCount);
-            return childBoard.ToXYZ();
-        }
-
         public abstract string WriteProof();
     }
 }

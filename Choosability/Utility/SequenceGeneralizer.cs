@@ -12,7 +12,7 @@ namespace Choosability.Utility
         List<Matcher> _matchers = new List<Matcher>();
         Dictionary<int, List<int>> _generalizers;
 
-        public SequenceGeneralizer(int length, List<T> alphabet, bool includeBasicMatchers = true)
+        public SequenceGeneralizer(int length, List<T> alphabet)
         {
             _length = length;
             _alphabet = alphabet;
@@ -20,13 +20,7 @@ namespace Choosability.Utility
             foreach (var t in alphabet)
                 AddMatcher(t.ToString(), tt => t.Equals(tt));
 
-            if (includeBasicMatchers)
-            {
-              //  foreach (var t in alphabet)
-              //      AddMatcher("!" + t.ToString(), tt => !t.Equals(tt));
-
-                AddMatcher("*", tt => true);
-            }
+            AddMatcher("*", tt => true);
         }
 
         public void AddMatcher(string name, Func<T, bool> match)
