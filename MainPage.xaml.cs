@@ -106,6 +106,7 @@ namespace WebGraphs
             _mainMenu.DoGenerateProof += _mainMenu_DoGenerateProof;
             _mainMenu.DoGenerateProofSelectedEdge += _mainMenu_DoGenerateProofSelectedEdge;
             _mainMenu.OnToggleFixerBreakerUseWildCards += _mainMenu_OnToggleFixerBreakerUseWildCards;
+            _mainMenu.DoSuperabundantOnlyNearColorings += _mainMenu_DoSuperabundantOnlyNearColorings;
 
             _propertyGrid.SomethingChanged += _propertyGrid_SomethingChanged;
 
@@ -1666,6 +1667,11 @@ trash can button.
         async void AnalyzeSuperabundantOnly()
         {
             await AnalyzeFixerBreaker(false, -1, true, false, false);
+        }
+
+        async void _mainMenu_DoSuperabundantOnlyNearColorings()
+        {
+            await AnalyzeFixerBreaker(true, -1, true, false, false);
         }
 
         async void AnalyzeSuperabundantOnlyWeakly()

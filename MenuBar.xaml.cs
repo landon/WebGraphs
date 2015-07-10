@@ -84,6 +84,7 @@ namespace WebGraphs
         public event Action DoGenerateProof;
         public event Action DoGenerateProofSelectedEdge;
         public event Action OnToggleFixerBreakerUseWildCards;
+        public event Action DoSuperabundantOnlyNearColorings;
 
         public MenuBar()
         {
@@ -309,6 +310,9 @@ namespace WebGraphs
                     break;
                 case "analyze superabundant only":
                     A(DoSuperabundantOnly);
+                    break;
+                case "analyze superabundant only near colorings":
+                    A(DoSuperabundantOnlyNearColorings);
                     break;
                 case "analyze superabundant only weakly":
                     A(DoSuperabundantOnlyWeakly);

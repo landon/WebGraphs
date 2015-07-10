@@ -153,6 +153,7 @@
                     <local:SuperMenuItem Header="analyze weakly fixable" Click="MenuItemClick"/>
                     <menu:Separator/>
                     <local:SuperMenuItem Header="analyze superabundant only" Click="MenuItemClick"/>
+                    <local:SuperMenuItem Header="analyze superabundant only near colorings" Click="MenuItemClick"/>
                     <local:SuperMenuItem Header="analyze superabundant only weakly" Click="MenuItemClick"/>
                     <menu:Separator/>
                     <local:SuperMenuItem x:Name="UseWildCardsItem" Header="use wildcards" Click="MenuItemClick"/>
