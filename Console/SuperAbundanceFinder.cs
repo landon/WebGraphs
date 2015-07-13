@@ -11,7 +11,7 @@ namespace Console
     public static class SuperAbundanceFinder
     {
         static int MaxVertices = 20;
-        static int MaxDegree = int.MaxValue;
+        static int MaxDegree = 3;
         static bool TreesOnly = false;
         static int ExtraPsi = 0;
         const bool NearColorings = true;

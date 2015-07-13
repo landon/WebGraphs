@@ -21,6 +21,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
         List<SuperSlimBoard> _allBoards;
         SequenceGeneralizer<int>.VectorComparer _sequenceComparer;
         SequenceGeneralizer<int> _sequenceGeneralizer;
+        Dictionary<string, string> _orderFilter = new Dictionary<string, string>();
 
         public ArbitraryDegreeProofBuilder(SuperSlimMind mind, string figureTikz = "")
             : base(mind)
@@ -197,7 +198,27 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
         string ToListString(SuperSlimBoard b)
         {
             var stacks = b.Stacks.Value.Select(l => l.ToSet()).Where(s => s.Count < _maxPot).ToList();
-            return string.Join("|", stacks.Select(s => string.Join("", s)));
+            return ApplyOrderFilter(string.Join("|", stacks.Select(s => string.Join("", s.OrderBy(x => x)))));
+        }
+
+        string ApplyOrderFilter(string stacksString)
+        {
+            string lexSmallest;
+            if (!_orderFilter.TryGetValue(stacksString, out lexSmallest))
+            {
+                var stacks = stacksString.Split('|').Select(s => s.ToCharArray().Select(c => int.Parse(c.ToString())).ToList()).ToList();
+                lexSmallest = stacksString;
+
+                var h = _maxPot - 1;
+                foreach (var p in Permutation.EnumerateAll(_maxPot))
+                {
+                    var permutedString = string.Join("|", stacks.Select(s => string.Join("", s.Select(a => p[a]).OrderBy(x => x))));
+                    if (permutedString.CompareTo(lexSmallest) < 0)
+                        lexSmallest = permutedString;
+                }
+            }
+
+            return lexSmallest;
         }
 
         void GeneratePossibleLists()
