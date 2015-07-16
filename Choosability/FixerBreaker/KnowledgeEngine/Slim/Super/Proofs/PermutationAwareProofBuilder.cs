@@ -30,7 +30,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
             Cases.Add(colorableCase);
             caseNumber++;
 
-            var remainingBoards = Mind.NonColorableBoards.ToList();
+            var remainingBoards = Mind.NonColorableBoards.Except(Mind.BreakerWonBoards).ToList();
             var wonBoards = Mind.ColorableBoards.ToList();
             while (remainingBoards.Count > 0)
             {
@@ -90,6 +90,15 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
                 }
 
                 caseNumber++;
+            }
+
+            if (Mind.BreakerWonBoards.Count > 0)
+            {
+                foreach (var group in Mind.BreakerWonBoards.GroupBy(b => Mind.IsSuperabundant(b)))
+                {
+                    var lostCase = new ProofCase(Mind, caseNumber, group.ToList()) { BreakerWin = true, Superabundant = group.Key };
+                    Cases.Add(lostCase);
+                }
             }
         }
 

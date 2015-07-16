@@ -161,6 +161,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
                 {
                     FixerWonAllNearlyColorableBoards = false;
                     BreakerWonBoard = nonSuperabundantBoards[0];
+                    BreakerWonBoards.AddRange(nonSuperabundantBoards);
                     return false;
                 }
                 else if (ExistsNearlyColorableBoardForEachEdge(nonSuperabundantBoards))
@@ -168,6 +169,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
                     FixerWonAllNearlyColorableBoards = false;
                     HasNonSuperabundantBoardThatIsNearlyColorable = true;
                     BreakerWonBoard = nonSuperabundantBoards[0];
+                    BreakerWonBoards.AddRange(nonSuperabundantBoards);
                     return false;
                 }
             }
@@ -326,7 +328,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
             var goodPacks = packs.Where(pack => pack.All(ssb => IsSuperabundant(ssb))).ToList();
         }
 
-        bool IsSuperabundant(SuperSlimBoard b)
+        public bool IsSuperabundant(SuperSlimBoard b)
         {
             ulong subset = 0;
 

@@ -9,8 +9,9 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
     {
         public SuperSlimMind Mind { get; private set; }
         public List<SuperSlimBoard> Boards { get; private set; }
-
+        public bool BreakerWin { get; set; }
         public int CaseNumber { get; private set; }
+        public bool Superabundant { get; set; }
 
         public ProofCase(SuperSlimMind mind, int caseNumber, List<SuperSlimBoard> boards = null)
         {

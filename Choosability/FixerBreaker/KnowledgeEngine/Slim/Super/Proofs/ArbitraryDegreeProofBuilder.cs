@@ -22,6 +22,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
         SequenceGeneralizer<int>.VectorComparer _sequenceComparer;
         SequenceGeneralizer<int> _sequenceGeneralizer;
         Dictionary<string, string> _orderFilter = new Dictionary<string, string>();
+        bool _isWin;
 
         public ArbitraryDegreeProofBuilder(SuperSlimMind mind, string figureTikz = "")
             : base(mind)
@@ -34,6 +35,8 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
         public override string WriteProof()
         {
             var sb = new StringBuilder();
+
+            _isWin = Cases.All(c => !c.BreakerWin);
        
             AddFigure(sb);
             BeginProof(sb);
@@ -44,15 +47,17 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
             for (int caseNumber = 1; caseNumber <= Cases.Count; caseNumber++)
             {
                 var c = Cases[caseNumber - 1];
-
-                var boards = c.Boards;
+                var boards = c.Boards.OrderBy(b => ToListString(b)).ToList();
+                
                 List<SuperSlimBoard> thisClaimBoards;
-                if (caseNumber > 1)
+                if (caseNumber > 1 && !c.BreakerWin)
                     thisClaimBoards = boards.SelectMany(b => new[] { b }.Union(_permutationLinked[b].Select(tup => tup.Item2))).ToList();
                 else
                     thisClaimBoards = boards;
 
-                wonBoards.AddRange(thisClaimBoards);
+                if (!c.BreakerWin)
+                    wonBoards.AddRange(thisClaimBoards);
+
                 var thisClaimBoardsTex = GeneralizeBoards(thisClaimBoards);
 
                 sb.AppendLine();
@@ -60,7 +65,17 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
                 sb.AppendLine(string.Format("\\case{{{0}}}{{$B$ is one of " + thisClaimBoardsTex + ".}}", caseNumber));
                 sb.AppendLine();
                 sb.AppendLine("\\bigskip");
-                if (caseNumber == 1)
+
+                if (c.BreakerWin)
+                {
+                    sb.AppendLine();
+
+                    if (c.Superabundant)
+                        sb.AppendLine("No single Kempe exchange gets from these boards to a previous case.");
+                    else
+                        sb.AppendLine("These boards are not superabundant.");
+                }
+                else if (caseNumber == 1)
                 {
                     sb.AppendLine();
                     sb.AppendLine("In all these cases, $H$ is immediately colorable from the lists.");
@@ -74,6 +89,8 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
                     {
                         if (swapCountGroup.Key == 1)
                         {
+                            sb.AppendLine("Each of the following boards can be handled by a single Kempe change that has an endpoint at infinity.");
+
                             foreach (var b in swapCountGroup)
                             {
                                 var treeInfo = Mind.GetWinTreeInfo(b);
@@ -100,6 +117,9 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
                         }
                         else if (swapCountGroup.Key == 2)
                         {
+                            sb.AppendLine("\\bigskip");
+                            sb.AppendLine();
+                            sb.AppendLine("Each of the following boards can be handled by a single Kempe change.");
                             foreach (var b in swapCountGroup)
                             {
                                 var treeInfo = Mind.GetWinTreeInfo(b);
@@ -161,16 +181,21 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
 
         void GeneralizeAllBoards(StringBuilder sb)
         {
-            _allBoards = Mind.ColorableBoards.Union(Mind.NonColorableBoards).ToList();
+            _allBoards = Mind.ColorableBoards.Union(Mind.NonColorableBoards).Union(Mind.BreakerWonBoards).ToList();
             _sequenceComparer = new SequenceGeneralizer<int>.VectorComparer();
             _sequenceGeneralizer = new SequenceGeneralizer<int>(_activeIndices.Count, _possibleListIndices);
 
             var allBoardsTex = GeneralizeBoards(_allBoards);
 
             if (Mind.OnlyConsiderNearlyColorableBoards)
-                sb.AppendLine("We need to handle all boards that are nearly colorable for edge $e$ up to permutation of colors, so it will suffice to handle all boards of the form " + allBoardsTex + ".");
+                sb.AppendLine("We need to handle all boards that are nearly colorable for edge $e$ up to permutation of colors, so it will suffice to handle the following " + _allBoards.Count + " boards: " + allBoardsTex + ".");
             else
-                sb.AppendLine("We need to handle all boards up to permutation of colors, so it will suffice to handle all boards of the form " + allBoardsTex + ".");
+                sb.AppendLine("We need to handle all boards up to permutation of colors, so it will suffice to handle the following " + _allBoards.Count + " boards: " + allBoardsTex + ".");
+
+            if (Mind.BreakerWonBoards.Count > 0)
+            {
+                sb.AppendLine("Unfortunately, the following " + Mind.BreakerWonBoards.Count +  " boards cannot be handled: " + GeneralizeBoards(Mind.BreakerWonBoards) + ".");
+            }
 
             sb.AppendLine();
         }
@@ -183,10 +208,10 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
                 var nonExamples = Enumerable.Repeat(_possibleListIndices, _activeIndices.Count).CartesianProduct().Select(ll => ll.ToList()).Except(examples.Distinct(_sequenceComparer), _sequenceComparer).ToList();
 
                 var generalized = _sequenceGeneralizer.Generalize(examples, nonExamples, false);
-                return generalized.Select(gg => "$" + string.Join("|", gg.Select((_, i) => _.ToTex(_possibleLists, _activeListSizes[i]))) + "$").Listify("or");
+                return generalized.Select(gg => "$" + string.Join("|", gg.Select((_, i) => _.ToTex(_possibleLists, _activeListSizes[i]))) + "$").Listify("and");
             }
 
-            return boards.Select(b => "$" + ToListString(b) + "$").Listify("or");
+            return boards.Select(b => ToListString(b)).OrderBy(x => x).Select(s => "$" + s + "$").Listify("and");
         }
 
         List<int> ToListIndices(SuperSlimBoard b)
@@ -253,7 +278,10 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
             sb.AppendLine("\\end{figure}");
 
             sb.AppendLine("\\begin{lem}");
-            sb.AppendLine("The graph in Figure \\ref{" + figureID + "} is reducible.");
+            if (_isWin)
+                sb.AppendLine("The graph in Figure \\ref{" + figureID + "} is reducible.");
+            else
+                sb.AppendLine("The graph in Figure \\ref{" + figureID + "} is not reducible.");
             sb.AppendLine("\\end{lem}");
         }
     }

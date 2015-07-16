@@ -1836,7 +1836,7 @@ trash can button.
                 t.Text = result;
                 resultWindow.AddChild(t);
 
-                if (mind.BreakerWonBoard != null)
+                if (!generateProof && mind.BreakerWonBoard != null)
                 {
                     var gr = blob.UIGraph.Clone();
                     for (int i = 0; i < gr.Vertices.Count; i++)
