@@ -31,6 +31,14 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
 
         public bool Analyze(SuperSlimBoard board, HashSet<SuperSlimBoard> wonBoards)
         {
+            if (ProofFindingMode)
+                return AnalyzeForProofInternal(board, wonBoards);
+
+            return AnalyzeInternal(board, wonBoards);
+        }
+       
+        bool AnalyzeInternal(SuperSlimBoard board, HashSet<SuperSlimBoard> wonBoards)
+        {
             for (int i = 0; i < board._length; i++)
             {
                 for (int j = i + 1; j < board._length; j++)
@@ -73,7 +81,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
             return false;
         }
 
-        public bool AnalyzeForProof(SuperSlimBoard board, HashSet<SuperSlimBoard> wonBoards, bool singletonOnly = false)
+        bool AnalyzeForProofInternal(SuperSlimBoard board, HashSet<SuperSlimBoard> wonBoards, bool singletonOnly = false)
         {
             var lossInfo = new GameTreeInfo();
             LossTreeInfo[board] = lossInfo;

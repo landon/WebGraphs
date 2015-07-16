@@ -1747,7 +1747,6 @@ trash can button.
             mind.SuperabundantOnly = superAbundantOnly;
             mind.OnlyConsiderNearlyColorableBoards = onlyNearColorings;
             mind.MissingEdgeIndex = missingEdgeIndex;
-            mind.DoComplexSwapsInProof = true;
             
             using (var resultWindow = new ResultWindow(true))
             {

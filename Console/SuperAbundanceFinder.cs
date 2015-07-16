@@ -38,7 +38,6 @@ namespace Console
                         var mind = new Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.SuperSlimMind(g, false, true);
                         mind.MaxPot = int.MaxValue;
                         mind.SuperabundantOnly = true;
-                        mind.DoComplexSwapsInProof = false;
                         mind.ExtraPsi = ExtraPsi;
                         mind.OnlyConsiderNearlyColorableBoards = NearColorings;
 
