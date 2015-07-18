@@ -11,17 +11,17 @@ namespace Console
 {
     public static class FindFixerBreaker
     {
-        static int Delta = 6;
+        static int Delta = 3;
         static int MaxVertices = 20;
         static bool TreesOnly = false;
-        static bool TriangleFree = false;
+        static bool TriangleFree = true;
         static bool TreesOrTreesPlusEdgeOnly = false;
-        static bool Planar = true;
+        static bool Planar = false;
         static bool LowGirth = false;
         static bool WeaklyFixable = false;
         const bool NearColorings = true;
 
-        static bool MakeWebPage = true;
+        static bool MakeWebPage = false;
         static string WebpageRoot = @"C:\Users\landon\Dropbox\Public\Web\GraphData\Fixable\Automated";
 
         static readonly string WinnersFile = (WeaklyFixable ? "weakly " : "") + (LowGirth ? "low girth induced " : "") + (Planar ? "planar " : "") + (TreesOrTreesPlusEdgeOnly ? "trees or trees plus edge only " : "") + (TriangleFree ? "triangle-free " : "") + (TreesOnly ? "trees only " : "") + (NearColorings ? "near colorings " : "") + "FixerBreaker winners Delta=" + Delta + ".txt";

@@ -85,6 +85,8 @@ namespace WebGraphs
         public event Action DoGenerateProofSelectedEdge;
         public event Action OnToggleFixerBreakerUseWildCards;
         public event Action DoSuperabundantOnlyNearColorings;
+        public event Action OnAddClockSpindle;
+        public event Action OnAddCClockSpindle;
 
         public MenuBar()
         {
@@ -330,6 +332,12 @@ namespace WebGraphs
                 case "don't use wildcards":
                     UseWildCardsItem.Header = "use wildcards";
                     A(OnToggleFixerBreakerUseWildCards);
+                    break;
+                case "add clock spindle":
+                    A(OnAddClockSpindle);
+                    break;
+                case "add cclock spindle":
+                    A(OnAddCClockSpindle);
                     break;
             }
         }

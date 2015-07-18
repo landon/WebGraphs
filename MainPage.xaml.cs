@@ -107,6 +107,8 @@ namespace WebGraphs
             _mainMenu.DoGenerateProofSelectedEdge += _mainMenu_DoGenerateProofSelectedEdge;
             _mainMenu.OnToggleFixerBreakerUseWildCards += _mainMenu_OnToggleFixerBreakerUseWildCards;
             _mainMenu.DoSuperabundantOnlyNearColorings += _mainMenu_DoSuperabundantOnlyNearColorings;
+            _mainMenu.OnAddClockSpindle += _mainMenu_OnAddClockSpindle;
+            _mainMenu.OnAddCClockSpindle += _mainMenu_OnAddCClockSpindle;
 
             _propertyGrid.SomethingChanged += _propertyGrid_SomethingChanged;
 
@@ -818,6 +820,29 @@ trash can button.
             AddTab(gg.Item2, "rotated", snapToGrid:false);
 
             ShowText("total: " + e.Count + Environment.NewLine + string.Join(Environment.NewLine, e));
+        }
+
+
+        void _mainMenu_OnAddCClockSpindle()
+        {
+            DoAddSpindle(false);
+        }
+
+        void _mainMenu_OnAddClockSpindle()
+        {
+            DoAddSpindle(true);
+        }
+
+        void DoAddSpindle(bool clock)
+        {
+            var blob = AlgorithmBlob.Create(SelectedTabCanvas);
+            if (blob.UIGraph.SelectedVertices.Count != 4 || blob.UIGraph.SelectedVertices.Count(vv => vv.Label != "") != 1)
+            {
+                ShowText("Select 4 vertices of a diamond, exactly one of which is labeled \"v\".");
+                return;
+            }
+
+            SpindleAnalyzer.AddSpindle(blob, clock);
         }
 
         async void _mainMenu_DoSixFoldWay()

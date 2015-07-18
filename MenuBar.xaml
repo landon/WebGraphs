@@ -173,6 +173,8 @@
                     <local:SuperMenuItem Header="generate LP" Click="MenuItemClick"/>
                     <local:SuperMenuItem Header="do tiling" Click="MenuItemClick"/>
                     <local:SuperMenuItem Header="spin" Click="MenuItemClick"/>
+                    <local:SuperMenuItem Header="add clock spindle" Click="MenuItemClick"/>
+                    <local:SuperMenuItem Header="add cclock spindle" Click="MenuItemClick"/>
                 </menu:ContextMenu>
             </menu:ContextMenuService.ContextMenu>
         </Button>

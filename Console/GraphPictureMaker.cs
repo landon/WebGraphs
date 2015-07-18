@@ -14,7 +14,7 @@ namespace Console
         static readonly List<string> DotColors = new List<string>() { "cadetblue", "brown", "dodgerblue", "turquoise", "orchid", "blue", "red", "green", 
                                                                       "yellow", "cyan",
                                                                       "limegreen",  "pink", 
-                                                                      "orange",  "goldenrod", "aquamarine", "black", };
+                                                                      "orange",  "goldenrod", "aquamarine", "black", "white"};
 
         IEnumerable<Graph> _graphs;
 
@@ -115,8 +115,8 @@ namespace Console
                 sb.AppendLine("graph G {");
             sb.AppendLine("overlap = false;");
             sb.AppendLine("splines=true;");
-            sb.AppendLine("sep=0.3;");
-            sb.AppendLine("node[fontsize=20, style=bold, color=black; shape=circle, penwidth=1];");
+            sb.AppendLine("sep=0.0;");
+            sb.AppendLine("node[fontsize=42, fontname=\"Latin Modern Math\" color=black; shape=circle, penwidth=1, width = .92, height=.92, fixedsize=true];");
             sb.AppendLine("edge[style=bold, color=black, penwidth=2];");
 
             foreach (int v in g.Vertices)
@@ -139,15 +139,27 @@ namespace Console
                     {
                         var dd = g.VertexWeight[v] - g.Degree(v);
 
-                        label = "d";
-                        if (dd > 0)
-                            label += " + " + dd;
-                        colorIndex = dd + 2;
+                        if (dd == 0)
+                        {
+                            label = "d";
+                        }
+                        else
+                        {
+                            label = "d+";
+                        }
+                        //label = "d";
+                        //if (dd > 0)
+                        //    label = "+" + dd;
+
+
+                      //  colorIndex = dd + 2;
+                        colorIndex = DotColors.Count + 1;
                     }
                     else
                     {
                         label = g.VertexWeight[v].ToString();
-                        colorIndex = g.VertexWeight[v];
+                        //colorIndex = g.VertexWeight[v];
+                        colorIndex = DotColors.Count + 1;
                     }
                 }
 

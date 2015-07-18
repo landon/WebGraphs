@@ -615,5 +615,44 @@ namespace WebGraphs.Analysis
             var dd = data as Tuple<List<Vector>, List<SpindleAnalyzer.DiamondType>>;
             return layout.Select((v, i) => Rotate(dd.Item1[i], v, !(dd.Item2[i] == DiamondType.U || dd.Item2[i] == DiamondType.DR || dd.Item2[i] == DiamondType.DL))).ToList();
         }
+
+        public static void AddSpindle(AlgorithmBlob blob, bool clock)
+        {
+            var style = clock ? "clock_" : "cclock_";
+
+            var indices = blob.UIGraph.SelectedVertices.Select(v => blob.UIGraph.Vertices.IndexOf(v)).ToList();
+            var bottom = blob.UIGraph.Vertices.IndexOf(blob.UIGraph.SelectedVertices.First(vv => vv.Label != ""));
+            var bottom_v = blob.UIGraph.Vertices[bottom];
+            var ll = bottom_v.Label;
+
+            var g = blob.AlgorithmGraph;
+            var mids = g.NeighborsInSubgraph(bottom, indices).ToList();
+            var top = indices.Except(new[] { bottom }.Union(mids)).First();
+            var top_v = blob.UIGraph.Vertices[top];
+
+            var p = blob.UIGraph.Vertices.Select(v => new Vector(v.X, v.Y)).ToList();
+
+            var top_r = Rotate(p[bottom], p[top], clock);
+            var mid0_r = Rotate(p[bottom], p[mids[0]], clock);
+            var mid1_r = Rotate(p[bottom], p[mids[1]], clock);
+
+            var top_rv = new Vertex(top_r);
+            var mid0_rv = new Vertex(mid0_r);
+            var mid1_rv = new Vertex(mid1_r);
+
+            blob.UIGraph.AddVertex(top_rv);
+            blob.UIGraph.AddVertex(mid0_rv);
+            blob.UIGraph.AddVertex(mid1_rv);
+            blob.UIGraph.AddEdge(bottom_v, mid0_rv, Edge.Orientations.None, 1, 3, style + "edge" + "_" + ll);
+            blob.UIGraph.AddEdge(bottom_v, mid1_rv, Edge.Orientations.None, 1, 3, style + "edge" + "_" + ll);
+            blob.UIGraph.AddEdge(top_rv, mid0_rv, Edge.Orientations.None, 1, 3, style + "edge" + "_" + ll);
+            blob.UIGraph.AddEdge(top_rv, mid1_rv, Edge.Orientations.None, 1, 3, style + "edge" + "_" + ll);
+            blob.UIGraph.AddEdge(mid0_rv, mid1_rv, Edge.Orientations.None, 1, 3, style + "edge" + "_" + ll);
+            blob.UIGraph.AddEdge(top_rv, top_v, Edge.Orientations.None, 1, 3, style + "edgetween" + "_" + ll);
+
+            top_rv.Style = style + "vertex" + "_" + ll;
+            mid0_rv.Style = style + "vertex" + "_" + ll;
+            mid1_rv.Style = style + "vertex" + "_" + ll;
+        }
     }
 }

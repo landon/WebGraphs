@@ -15,9 +15,9 @@ namespace Console
         {
            // WeaklyFixableTester.Go();
           //  FixerBreakerTrees.Go();
-            SuperAbundanceFinder.Go();
-           // FindFixerBreaker.Go();
-          //  MakePictures.Go();
+         //   SuperAbundanceFinder.Go();
+          //  FindFixerBreaker.Go();
+            MakePictures.Go();
            
            //  FindTarpits.Go();
            // FindFixerBreaker.Go();
