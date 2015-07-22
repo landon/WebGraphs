@@ -93,12 +93,15 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
 
                             foreach (var b in swapCountGroup)
                             {
+                                Permutation pp;
+                                var listString = ToListString(b, out pp);
+
                                 var treeInfo = Mind.GetWinTreeInfo(b);
-                                var alpha = treeInfo.First().Alpha;
-                                var beta = treeInfo.First().Beta;
+                                var alpha = pp[treeInfo.First().Alpha];
+                                var beta = pp[treeInfo.First().Beta];
                                 var groups = treeInfo.GroupBy(ss => ss.SwapVertices[0]);
 
-                                sb.Append("$\\K_{" + alpha + "" + beta + ",\\infty}(" + ToListString(b) + "," + groups.OrderBy(gg => gg.Key).Select(gg => gg.Key.GetActiveListIndex(b, _maxPot) + 1).Listify(null) + ")");
+                                sb.Append("$\\K_{" + alpha + "" + beta + ",\\infty}(" + listString + "," + groups.OrderBy(gg => gg.Key).Select(gg => gg.Key.GetActiveListIndex(b, _maxPot) + 1).Listify(null) + ")");
                                 sb.AppendLine("\\Rightarrow $ " + groups.OrderBy(gg => gg.Key).Select(gg => "$" + GetChildBoardName(b, gg.First()) + "$").Listify(null) + " (Case " + treeInfo.Select(bc => GetHandledCaseNumber(b, bc)).Distinct().OrderBy(xx => xx).Listify() + ").");
                                 sb.AppendLine();
 
@@ -122,9 +125,12 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
                             sb.AppendLine("Each of the following boards can be handled by a single Kempe change.");
                             foreach (var b in swapCountGroup)
                             {
+                                Permutation pp;
+                                var listString = ToListString(b, out pp);
+
                                 var treeInfo = Mind.GetWinTreeInfo(b);
-                                var alpha = treeInfo.First().Alpha;
-                                var beta = treeInfo.First().Beta;
+                                var alpha = pp[treeInfo.First().Alpha];
+                                var beta = pp[treeInfo.First().Beta];
                                 var leftover = treeInfo.ToList();
 
                                 while (leftover.Count > 0)
@@ -133,7 +139,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
                                     var handledAll = leftover.Where(bc => bc.SwapVertices.Contains(commonestSwapper)).ToList();
                                     var handled = handledAll.Distinct(bc => bc.SwapVertices.Count == 1 ? -1 : bc.SwapVertices.Except(commonestSwapper).First()).ToList();
 
-                                    sb.Append("$\\K_{" + alpha + "" + beta + "," + (commonestSwapper.GetActiveListIndex(b, _maxPot) + 1) + "}(" + ToListString(b));
+                                    sb.Append("$\\K_{" + alpha + "" + beta + "," + (commonestSwapper.GetActiveListIndex(b, _maxPot) + 1) + "}(" + listString);
 
                                     var single = handled.FirstOrDefault(bc => bc.SwapVertices.Count == 1);
                                     if (single != null)
@@ -222,12 +228,19 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
 
         string ToListString(SuperSlimBoard b)
         {
-            var stacks = b.Stacks.Value.Select(l => l.ToSet()).Where(s => s.Count < _maxPot).ToList();
-            return ApplyOrderFilter(string.Join("|", stacks.Select(s => string.Join("", s.OrderBy(x => x)))));
+            Permutation pp;
+            return ToListString(b, out pp);
         }
 
-        string ApplyOrderFilter(string stacksString)
+        string ToListString(SuperSlimBoard b, out Permutation pp)
         {
+            var stacks = b.Stacks.Value.Select(l => l.ToSet()).Where(s => s.Count < _maxPot).ToList();
+            return ApplyOrderFilter(string.Join("|", stacks.Select(s => string.Join("", s.OrderBy(x => x)))), out pp);
+        }
+
+        string ApplyOrderFilter(string stacksString, out Permutation pp)
+        {
+            pp = null;
             string lexSmallest;
             if (!_orderFilter.TryGetValue(stacksString, out lexSmallest))
             {
@@ -238,8 +251,11 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
                 foreach (var p in Permutation.EnumerateAll(_maxPot))
                 {
                     var permutedString = string.Join("|", stacks.Select(s => string.Join("", s.Select(a => p[a]).OrderBy(x => x))));
-                    if (permutedString.CompareTo(lexSmallest) < 0)
+                    if (permutedString.CompareTo(lexSmallest) <= 0)
+                    {
                         lexSmallest = permutedString;
+                        pp = p;
+                    }
                 }
             }
 
