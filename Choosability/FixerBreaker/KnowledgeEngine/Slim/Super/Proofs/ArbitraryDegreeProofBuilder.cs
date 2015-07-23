@@ -97,9 +97,16 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
                                 var listString = ToListString(b, out pp);
 
                                 var treeInfo = Mind.GetWinTreeInfo(b);
-                                var alpha = pp[treeInfo.First().Alpha];
-                                var beta = pp[treeInfo.First().Beta];
+                                var alpha = Math.Min(pp[treeInfo.First().Alpha], pp[treeInfo.First().Beta]);
+                                var beta = Math.Max(pp[treeInfo.First().Alpha], pp[treeInfo.First().Beta]);
                                 var groups = treeInfo.GroupBy(ss => ss.SwapVertices[0]);
+
+                                if (!CheckPermutationGoodNess(alpha, beta, listString, treeInfo.Select(ss => ss.SwapVertices[0]).Distinct().ToList()))
+                                {
+                                    sb.AppendLine();
+                                    sb.AppendLine("there is badness here");
+                                    sb.AppendLine();
+                                }
 
                                 sb.Append("$\\K_{" + alpha + "" + beta + ",\\infty}(" + listString + "," + groups.OrderBy(gg => gg.Key).Select(gg => gg.Key.GetActiveListIndex(b, _maxPot) + 1).Listify(null) + ")");
                                 sb.AppendLine("\\Rightarrow $ " + groups.OrderBy(gg => gg.Key).Select(gg => "$" + GetChildBoardName(b, gg.First()) + "$").Listify(null) + " (Case " + treeInfo.Select(bc => GetHandledCaseNumber(b, bc)).Distinct().OrderBy(xx => xx).Listify() + ").");
@@ -129,9 +136,16 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
                                 var listString = ToListString(b, out pp);
 
                                 var treeInfo = Mind.GetWinTreeInfo(b);
-                                var alpha = pp[treeInfo.First().Alpha];
-                                var beta = pp[treeInfo.First().Beta];
+                                var alpha = Math.Min(pp[treeInfo.First().Alpha], pp[treeInfo.First().Beta]);
+                                var beta = Math.Max(pp[treeInfo.First().Alpha], pp[treeInfo.First().Beta]);
                                 var leftover = treeInfo.ToList();
+
+                                if (!CheckPermutationGoodNess(alpha, beta, listString, treeInfo.SelectMany(ss => ss.SwapVertices).Distinct().ToList()))
+                                {
+                                    sb.AppendLine();
+                                    sb.AppendLine("there is badness here");
+                                    sb.AppendLine();
+                                }
 
                                 while (leftover.Count > 0)
                                 {
@@ -177,6 +191,23 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
             EndProof(sb);
 
             return sb.ToString();
+        }
+
+        bool CheckPermutationGoodNess(int alpha, int beta, string stacksString, List<int> swapVertices)
+        {
+            var stacks = stacksString.Split('|').Select(s => s.ToCharArray().Select(c => int.Parse(c.ToString())).ToList()).ToList();
+
+            var colors = new List<int>() { alpha, beta };
+            foreach (var v in swapVertices)
+            {
+                if (colors.IntersectionCount(stacks[v]) != 1)
+                {
+                    System.Diagnostics.Debugger.Break();
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         string GetChildBoardName(SuperSlimBoard b, BreakerChoiceInfo bc)
