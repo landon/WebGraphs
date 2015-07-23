@@ -21,7 +21,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
 
             _permutationLinked = new Dictionary<SuperSlimBoard, List<Tuple<Permutation, SuperSlimBoard>>>();
 
-            var indices = Mind.ColorableBoards[0].Stacks.Value.IndicesWhere(stack => stack.PopulationCount() == 2).ToList();
+            var indices = Enumerable.Range(0, Mind.ColorableBoards[0].Stacks.Value.Length).ToList();
             var permutations = Permutation.EnumerateAll(indices.Count).ToList();
 
             var caseNumber = 0;
