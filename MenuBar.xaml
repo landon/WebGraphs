@@ -156,7 +156,7 @@
                     <local:SuperMenuItem Header="analyze superabundant only near colorings" Click="MenuItemClick"/>
                     <local:SuperMenuItem Header="analyze superabundant only weakly" Click="MenuItemClick"/>
                     <menu:Separator/>
-                    <local:SuperMenuItem x:Name="UseWildCardsItem" Header="use wildcards" Click="MenuItemClick"/>
+                    <local:SuperMenuItem x:Name="ThinkHarderItem" Header="think harder" Click="MenuItemClick"/>
                     <local:SuperMenuItem Header="generate proof" Click="MenuItemClick"/>
                     <local:SuperMenuItem Header="generate proof only near colorings for selected edge" Click="MenuItemClick"/>
                 </menu:ContextMenu>

@@ -105,7 +105,7 @@ namespace WebGraphs
             _mainMenu.DoSuperabundantOnlyWeakly += AnalyzeSuperabundantOnlyWeakly;
             _mainMenu.DoGenerateProof += _mainMenu_DoGenerateProof;
             _mainMenu.DoGenerateProofSelectedEdge += _mainMenu_DoGenerateProofSelectedEdge;
-            _mainMenu.OnToggleFixerBreakerUseWildCards += _mainMenu_OnToggleFixerBreakerUseWildCards;
+            _mainMenu.OnToggleFixerBreakerThinkHarder += _mainMenu_OnToggleFixerBreakerThinkHarder;
             _mainMenu.DoSuperabundantOnlyNearColorings += _mainMenu_DoSuperabundantOnlyNearColorings;
             _mainMenu.OnAddClockSpindle += _mainMenu_OnAddClockSpindle;
             _mainMenu.OnAddCClockSpindle += _mainMenu_OnAddCClockSpindle;
@@ -1659,9 +1659,10 @@ trash can button.
         }
 
         bool _useFixerBreakerWildCards = false;
-        void _mainMenu_OnToggleFixerBreakerUseWildCards()
+        bool _fixerBreakerThinkHarder = false;
+        void _mainMenu_OnToggleFixerBreakerThinkHarder()
         {
-            _useFixerBreakerWildCards = !_useFixerBreakerWildCards;
+            _fixerBreakerThinkHarder = !_fixerBreakerThinkHarder;
         }
 
         async void _mainMenu_DoGenerateProofSelectedEdge()
@@ -1772,6 +1773,7 @@ trash can button.
             mind.SuperabundantOnly = superAbundantOnly;
             mind.OnlyConsiderNearlyColorableBoards = onlyNearColorings;
             mind.MissingEdgeIndex = missingEdgeIndex;
+            mind.ThinkHarder = _fixerBreakerThinkHarder;
             
             using (var resultWindow = new ResultWindow(true))
             {

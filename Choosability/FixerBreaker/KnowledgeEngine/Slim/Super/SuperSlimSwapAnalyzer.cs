@@ -7,7 +7,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
 {
     public class SuperSlimSwapAnalyzer
     {
-        public int MinWinSwaps { get; private set; }
+        public int LastWinChildCount { get; private set; }
         bool ProofFindingMode { get; set; }
         bool WeaklyFixable { get; set; }
         public Dictionary<SuperSlimBoard, GameTreeInfo> WinTreeInfo { get; private set; }
@@ -83,10 +83,11 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
 
         bool AnalyzeForProofInternal(SuperSlimBoard board, HashSet<SuperSlimBoard> wonBoards)
         {
+            var winInfo = new GameTreeInfo();
+            WinTreeInfo[board] = winInfo;
+
             var lossInfo = new GameTreeInfo();
             LossTreeInfo[board] = lossInfo;
-
-            var winInfos = new GameTreeInfo[board._length, board._length];
 
             var colorPairs = new List<Tuple<int, int>>();
             for (int i = 0; i < board._length; i++)
@@ -97,7 +98,6 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
             {
                 var i = cp.Item1;
                 var j = cp.Item2;
-                winInfos[i, j] = new GameTreeInfo();
 
                 var x = board._trace[i];
                 var y = board._trace[j];
@@ -119,7 +119,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
                         if (wonBoards.Contains(childBoard))
                         {
                             winningSwapExists = true;
-                            winInfos[i, j].Add(breakerChoice, i, j, response);
+                            winInfo.Add(breakerChoice, i, j, response);
                             break;
                         }
                         else
@@ -130,7 +130,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
 
                     if (!winningSwapExists)
                     {
-                        winInfos[i, j].Clear();
+                        winInfo.Clear();
                         winningSwapAlwaysExists = false;
                         break;
                     }
@@ -138,7 +138,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
 
                 if (winningSwapAlwaysExists)
                 {
-                    WinTreeInfo[board] = winInfos[i, j];
+                    LastWinChildCount = swappable.PopulationCount();
                     return true;
                 }
             }
