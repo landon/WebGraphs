@@ -132,9 +132,9 @@ namespace Graphs
                 double y = 1.0 - v.Y;
 
                 if (string.IsNullOrEmpty(v.Style))
-                    sb.AppendLine(string.Format(@"\Vertex[style = {4}, x = {0}, y = {1}, L = \tiny {{{2}}}]{{{3}}}", x, y, Mathify(v.Label), vertexName, string.IsNullOrEmpty(v.Label) ? "unlabeledStyle" : "labeledStyle"));
+                    sb.AppendLine(string.Format(@"\Vertex[style = {4}, x = {0:0.000}, y = {1:0.000}, L = \tiny {{{2}}}]{{{3}}}", x, y, Mathify(v.Label), vertexName, string.IsNullOrEmpty(v.Label) ? "unlabeledStyle" : "labeledStyle"));
                 else
-                    sb.AppendLine(string.Format(@"\Vertex[style = {4}, x = {0}, y = {1}, L = \tiny {{{2}}}]{{{3}}}", x, y, Mathify(v.Label), vertexName, vertexStyleLookup[v.Style.Trim()]));
+                    sb.AppendLine(string.Format(@"\Vertex[style = {4}, x = {0:0.000}, y = {1:0.000}, L = \tiny {{{2}}}]{{{3}}}", x, y, Mathify(v.Label), vertexName, vertexStyleLookup[v.Style.Trim()]));
 
                 vertexCount++;
             }
