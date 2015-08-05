@@ -8,29 +8,32 @@ using System.Threading.Tasks;
 using BitLevelGeneration;
 using Choosability;
 using Choosability.Polynomials;
+using Choosability.Utility;
 
 namespace Console
 {
-    public static class FindChoosables
+    public static class MixedChoosables
     {
         const int MinVertices = 3;
         const int MaxVertices = 8;
 
-        const bool Offline = false;
-        const bool AT = true;
+        const bool Offline = true;
+        const bool AT = false;
         const int MaxIndependenceNumber = int.MaxValue;
         const int Fold = 1;
-        
+        const int Spread = 2;
+
         const int MaxDegree = int.MaxValue;
         const bool DiamondFreeOnly = false;
         const bool LineGraph = false;
-        
-        static readonly string WinnersFile = (MaxIndependenceNumber < int.MaxValue ? "alpha at most " + MaxIndependenceNumber + " " : "") + (DiamondFreeOnly ? "cliquey neighborhoods " : "") + (AT ? "AT " : "") + (Offline ? "offline " : "") + (LineGraph ? "line graph " : "") + (MaxDegree < int.MaxValue ? "max degree " + MaxDegree + "_" : "") + string.Format("winners{0}.txt", Fold);
+
+        static readonly string WinnersFile = "Mixed spread " + Spread + " " + (MaxIndependenceNumber < int.MaxValue ? "alpha at most " + MaxIndependenceNumber + " " : "") + (DiamondFreeOnly ? "cliquey neighborhoods " : "") + (AT ? "AT " : "") + (Offline ? "offline " : "") + (LineGraph ? "line graph " : "") + (MaxDegree < int.MaxValue ? "max degree " + MaxDegree + "_" : "") + string.Format("winners{0}.txt", Fold);
         public static void Go()
         {
-            using (var graphIO = new GraphEnumerator(WinnersFile, MinVertices, MaxVertices))
+            using (var graphEnumerator = new GraphEnumerator(WinnersFile, MinVertices, MaxVertices))
             {
-                foreach (var g in graphIO.EnumerateGraph6File())
+                graphEnumerator.FileRoot = @"C:\Users\landon\Google Drive\research\Graph6\graph";
+                foreach (var g in graphEnumerator.EnumerateGraph6File(Filter, EnumerateWeightings, induced:true))
                 {
                     if (MaxIndependenceNumber < int.MaxValue)
                     {
@@ -43,33 +46,33 @@ namespace Console
 
                     if (AT)
                     {
-                            System.Console.Write("checking " + g.ToGraph6() + "...");
-                            if (!g.IsOnlineFGChoosable(v => g.Degree(v) - 1, v => 1))
+                        System.Console.Write("checking " + g.ToGraph6() + " with weights [" + string.Join(",", g.VertexWeight) + "] ...");
+                        if (!g.IsOnlineFGChoosable(v => g.Degree(v) - g.VertexWeight[v], v => 1))
+                        {
+                            System.Console.WriteLine(" not paintable");
+                        }
+                        else
+                        {
+                            var result = HasFOrientation(g, v => g.Degree(v) - g.VertexWeight[v], true);
+                            if (result != null)
                             {
-                                System.Console.WriteLine(" not paintable");
+                                graphEnumerator.AddWinner(g, result.Graph);
+                                System.Console.WriteLine(string.Format(" is f-AT"));
                             }
                             else
-                            {
-                                var result = HasFOrientation(g, v => g.Degree(v) - 1, true);
-                                if (result != null)
-                                {
-                                    graphIO.AddWinner(g, result.Graph);
-                                    System.Console.WriteLine(string.Format(" is d_1-AT"));
-                                }
-                                else
-                                    System.Console.WriteLine(" not AT");
-                            }
+                                System.Console.WriteLine(" not AT");
+                        }
                     }
                     else if (Offline)
                     {
                         List<List<int>> badAssignment;
                         var bg = new BitGraph_long(g.GetEdgeWeights());
 
-                        System.Console.Write("checking " + g.ToGraph6() + "...");
-                        if (bg.IsFChoosable(v => bg.Degree(v) - 1, out badAssignment))
+                        System.Console.Write("checking " + " with weights [" + string.Join(",", g.VertexWeight) + "] ...");
+                        if (bg.IsFChoosable(v => bg.Degree(v) - g.VertexWeight[v], out badAssignment))
                         {
-                            graphIO.AddWinner(g);
-                            System.Console.WriteLine(string.Format(" is {0}-fold d_1-choosable", Fold));
+                            graphEnumerator.AddWinner(g);
+                            System.Console.WriteLine(string.Format(" is {0}-fold f-choosable", Fold));
                         }
                         else
                             System.Console.WriteLine(" not choosable");
@@ -78,11 +81,11 @@ namespace Console
                     {
                         if (!DiamondFreeOnly || !g.ContainsInduced(Choosability.Graphs.Diamond))
                         {
-                            System.Console.Write("checking " + g.ToGraph6() + "...");
-                            if (g.IsOnlineFGChoosable(v => Fold * g.Degree(v) - 1, v => Fold))
+                            System.Console.Write("checking " + " with weights [" + string.Join(",", g.VertexWeight) + "] ...");
+                            if (g.IsOnlineFGChoosable(v => Fold * g.Degree(v) - g.VertexWeight[v], v => Fold))
                             {
-                                graphIO.AddWinner(g);
-                                System.Console.WriteLine(string.Format(" is {0}-fold d_1-paintable", Fold));
+                                graphEnumerator.AddWinner(g);
+                                System.Console.WriteLine(string.Format(" is {0}-fold f-paintable", Fold));
                             }
                             else
                                 System.Console.WriteLine(" not paintable");
@@ -91,6 +94,22 @@ namespace Console
                             System.Console.WriteLine("skipping due to diamond " + g.ToGraph6());
                     }
                 }
+            }
+        }
+
+        static bool Filter(Choosability.Graph g)
+        {
+            return true;
+        }
+
+        static IEnumerable<Choosability.Graph> EnumerateWeightings(Choosability.Graph g)
+        {
+            foreach (var weighting in g.Vertices.Select(v => Enumerable.Range(0, Spread).Reverse()).CartesianProduct())
+            {
+                var gg = g.Clone();
+                gg.VertexWeight = weighting.ToList();
+
+                yield return gg;
             }
         }
 
@@ -162,4 +181,3 @@ namespace Console
         }
     }
 }
-

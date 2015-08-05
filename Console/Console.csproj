@@ -72,6 +72,7 @@
     <Compile Include="GraphViz.cs" />
     <Compile Include="LocalGraphExtensions.cs" />
     <Compile Include="MakePictures.cs" />
+    <Compile Include="MixedChoosables.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="GraphPictureMaker.cs" />

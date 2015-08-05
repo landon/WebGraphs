@@ -414,7 +414,7 @@ namespace Choosability
             var requiredNeighbors = A.Neighbors[v].IntersectionSorted(placed).Select(u => tau[u]).OrderBy(t => t).ToList();
             var candidates = Vertices.Except(images)
                                      .Where(w => A.Degree(v) <= Degree(w))
-                                     .Where(w => induced ? requiredNeighbors.SequenceEqual(Neighbors[w].IntersectionSorted(images))
+                                     .Where(w => induced ? requiredNeighbors.SequenceEqual(Neighbors[w].Intersection(images))
                                                          : requiredNeighbors.SubsetEqualSorted(Neighbors[w]))
                                      .Where(w => condition(this, A, w, v));
 

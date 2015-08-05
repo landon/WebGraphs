@@ -96,6 +96,9 @@ namespace Console
         public void AddWinner(Graph g, Graph output = null)
         {
             PreviousWinners.Add(g);
+            if (output != null)
+                output.VertexWeight = g.VertexWeight;
+
             output = output ?? g;
             WriteGraph(output);
         }
@@ -119,7 +122,7 @@ namespace Console
         }
 
 
-        public IEnumerable<Graph> EnumerateGraph6File(Func<Graph, bool> filter = null, Func<Graph, IEnumerable<Graph>> secondaryEnumerator = null)
+        public IEnumerable<Graph> EnumerateGraph6File(Func<Graph, bool> filter = null, Func<Graph, IEnumerable<Graph>> secondaryEnumerator = null, bool induced = false)
         {
             var min = MinVertices;
             string lastGraph6 = null;
@@ -164,7 +167,7 @@ namespace Console
                             {
                                 foreach (var gg in secondaryEnumerator(g))
                                 {
-                                    if (PreviousWinners.All(h => !gg.Contains(h, false, WeightCondition)))
+                                    if (PreviousWinners.All(h => !gg.Contains(h, induced, WeightCondition)))
                                     {
                                         yield return gg;
                                     }
