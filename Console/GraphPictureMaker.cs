@@ -21,6 +21,7 @@ namespace Console
         public bool Directed { get; set; }
         public bool ShowFactors { get; set; }
         public bool InDegreeTerms { get; set; }
+        public bool IsLowPlus { get; set; }
 
         public GraphPictureMaker(string graphFile) : this(GraphEnumerator.EnumerateGraphFile(graphFile)) { }
         public GraphPictureMaker(params Graph[] graphs) : this((IEnumerable<Graph>)graphs) { }
@@ -73,7 +74,7 @@ namespace Console
 
         string Draw(Graph g, string path, DotRenderType renderType = DotRenderType.png)
         {
-            var imageFile = Renderer.Render(ToDot(g, Directed, ShowFactors, InDegreeTerms), path, renderType);
+            var imageFile = Renderer.Render(ToDot(g, Directed, ShowFactors, InDegreeTerms, IsLowPlus), path, renderType);
          
             if (renderType == DotRenderType.svg)
                 FixSvg(imageFile);
@@ -102,7 +103,7 @@ namespace Console
             }
         }
 
-        static string ToDot(Graph g, bool directed = false, bool showFactors = false, bool inDegreeTerms = false)
+        static string ToDot(Graph g, bool directed = false, bool showFactors = false, bool inDegreeTerms = false, bool isLowPlus = false)
         {
             if (showFactors)
                 return g.ToDotWithFactors();
@@ -135,6 +136,11 @@ namespace Console
                         label = "";
                         colorIndex = 2;
                     }
+                    else if (isLowPlus)
+                    {
+                        label = g.VertexWeight[v].ToString();
+                        colorIndex = g.VertexWeight[v] + 2;
+                    }
                     else if (inDegreeTerms)
                     {
                         var dd = g.VertexWeight[v] - g.Degree(v);
@@ -152,7 +158,7 @@ namespace Console
                         //    label = "+" + dd;
 
 
-                      //  colorIndex = dd + 2;
+                        //  colorIndex = dd + 2;
                         colorIndex = DotColors.Count + 1;
                     }
                     else

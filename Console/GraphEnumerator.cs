@@ -102,26 +102,7 @@ namespace Console
             output = output ?? g;
             WriteGraph(output);
         }
-
-        public static IEnumerable<Graph> EnumerateEntireGraph6File(string file)
-        {
-            using (var sr = new StreamReader(file))
-            {
-                while (true)
-                {
-                    var line = sr.ReadLine();
-                    if (string.IsNullOrWhiteSpace(line))
-                        break;
-
-                    var ew = line.GetEdgeWeights();
-                    var g = new Graph(ew);
-
-                    yield return g;
-                }
-            }
-        }
-
-
+        
         public IEnumerable<Graph> EnumerateGraph6File(Func<Graph, bool> filter = null, Func<Graph, IEnumerable<Graph>> secondaryEnumerator = null, bool induced = false)
         {
             var min = MinVertices;

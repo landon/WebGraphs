@@ -1211,7 +1211,7 @@ namespace Choosability
         public int Mic()
         {
             var mic = 0;
-            foreach (var set in _independentSets.Value)
+            foreach (var set in EnumerateMaximalIndependentSets())
             {
                 var t = set.Sum(v => Degree(v));
                 mic = Math.Max(mic, t);

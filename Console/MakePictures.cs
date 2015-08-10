@@ -26,9 +26,9 @@ namespace Console
            // MakeWebpage(new GraphPictureMaker(GraphEnumerator.EnumerateEntireGraph6File(@"C:\Users\landon\Google Drive\research\Graph6\class2.g6").Where(g => g.MaxDegree == 3 && g.MinDegree >= 2)), @"C:\Users\landon\Dropbox\Public\Web\GraphData\Fixable\Delta3class2", directed: false, showFactors: false);
             //MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Debug\superabundance.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\superabundance\all", directed: false, showFactors: false);
 
-            MakePdfs(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\triangle-free near colorings FixerBreaker winners Delta=3.txt", @"C:\Users\landon\Documents\GitHub\Research\fixable\Delta3TriangleFree");
-            MakePdfs(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\superabundance.txt", @"C:\Users\landon\Documents\GitHub\Research\fixable\Superabundance\all", true);
-            MakePdfs(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\max degree 3trees only superabundance.txt", @"C:\Users\landon\Documents\GitHub\Research\fixable\Superabundance\MaxDegree3Trees", true);
+            //MakePdfs(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\triangle-free near colorings FixerBreaker winners Delta=3.txt", @"C:\Users\landon\Documents\GitHub\Research\fixable\Delta3TriangleFree");
+            //MakePdfs(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\superabundance.txt", @"C:\Users\landon\Documents\GitHub\Research\fixable\Superabundance\all", true);
+            //MakePdfs(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\max degree 3trees only superabundance.txt", @"C:\Users\landon\Documents\GitHub\Research\fixable\Superabundance\MaxDegree3Trees", true);
 
             //MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Another\near colorings FixerBreaker winners Delta=4.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\Fixable\NearColoring\Delta4");
            // MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Another\trees only near colorings FixerBreaker winners Delta=5.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\Fixable\NearColoring\Delta5Trees");
@@ -36,9 +36,16 @@ namespace Console
            // MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Another\treesOrTreesPlusEdgeDelta4Near.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\Fixable\NearColoring\Delta4TreeOrTreePlusEdge");
             //MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\trees or trees plus edge only near colorings FixerBreaker winners Delta=5.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\Fixable\NearColoring\Delta5TreeOrTreePlusEdge");
 
-
-
             //MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\near colorings FixerBreaker winners Delta=5.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\Fixable\NearColoring\Delta5");
+
+            //MakeWebpage(@"C:\Users\landon\Google Drive\research\graphs\WithLows\OneHigh\10 vertex Mixed spread 2 max high 1 winners1.txt.eliminated.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\WithLows\OneHigh\Paint", directed: false, showFactors: false, lowPlus: true);
+           // MakeWebpage(@"C:\Users\landon\Google Drive\research\graphs\WithLows\OneHigh\9 vertex Mixed spread 2 max high 1 AT winners1.txt.eliminated.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\WithLows\OneHigh\AT", directed: true, showFactors: false, lowPlus: true);
+
+            //MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\YetAnother\8 vertex Mixed spread 2 max high 2 winners1.txt.eliminated.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\WithLows\TwoHigh\Paint", directed: false, showFactors: false, lowPlus: true);
+          //  MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\8 vertex Mixed spread 2 max high 3 winners1.txt.eliminated.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\WithLows\ThreeHigh\Paint", directed: false, showFactors: false, lowPlus: true);
+
+            MakeWebpage(@"C:\Users\landon\Google Drive\research\graphs\WithLows\TwoHigh\8 vertex Mixed spread 2 max high 2 offline winners1.txt.eliminated.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\WithLows\TwoHigh\Choose", directed: false, showFactors: false, lowPlus: true);
+            MakeWebpage(@"C:\Users\landon\Google Drive\research\graphs\WithLows\TwoHigh\8 vertex Mixed spread 2 max high 2 AT winners1.txt.eliminated.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\WithLows\TwoHigh\AT", directed: true, showFactors: false, lowPlus: true);
             
         }
 
@@ -49,16 +56,17 @@ namespace Console
             maker.DrawAll(outputPath, DotRenderType.pdf, superabundance);
         }
 
-        public static void MakeWebpage(string graphPath, string outputPath, bool directed = false, bool showFactors = false)
+        public static void MakeWebpage(string graphPath, string outputPath, bool directed = false, bool showFactors = false, bool lowPlus = false)
         {
             var maker = new GraphPictureMaker(graphPath);
-            MakeWebpage(maker, outputPath, directed, showFactors);
+            MakeWebpage(maker, outputPath, directed, showFactors, lowPlus);
         }
 
-        public static void MakeWebpage(GraphPictureMaker maker, string outputPath, bool directed = false, bool showFactors = false)
+        public static void MakeWebpage(GraphPictureMaker maker, string outputPath, bool directed = false, bool showFactors = false, bool lowPlus = false)
         {
             maker.Directed = directed;
             maker.ShowFactors = showFactors;
+            maker.IsLowPlus = lowPlus;
             maker.DrawAllAndMakeWebpage(outputPath);
         }
     }

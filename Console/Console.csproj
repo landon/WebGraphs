@@ -64,6 +64,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DotRenderer.cs" />
+    <Compile Include="EliminiteDoubleEdgeSubdivisions.cs" />
     <Compile Include="FindChoosables.cs" />
     <Compile Include="FindFixerBreaker.cs" />
     <Compile Include="FindTarpits.cs" />
