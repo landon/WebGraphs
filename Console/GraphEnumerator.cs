@@ -25,14 +25,16 @@ namespace Console
         public string FileRoot { get; set; }
         public Func<Graph, Graph, int, int, bool> WeightCondition = WeightConditionDown;
         public bool DoNotUsePreviousWinners { get; set; }
+        public bool OnlyExcludeBySpanningSubgraphs { get; set; }
 
-        public GraphEnumerator(string winnersFile, int minVertices, int maxVertices)
+        public GraphEnumerator(string winnersFile, int minVertices, int maxVertices, bool usePreviousWinners = true)
         {
             FileRoot = GraphFileRoot;
             WinnersFile = winnersFile;
             MinVertices = minVertices;
             MaxVertices = maxVertices;
 
+            DoNotUsePreviousWinners = !usePreviousWinners;
             Initialize();
         }
         
@@ -78,6 +80,9 @@ namespace Console
 
         List<Graph> LoadPreviousWinners()
         {
+            if (DoNotUsePreviousWinners)
+                return new List<Graph>();
+
             try
             {
                 try
@@ -102,7 +107,7 @@ namespace Console
             output = output ?? g;
             WriteGraph(output);
         }
-        
+
         public IEnumerable<Graph> EnumerateGraph6File(Func<Graph, bool> filter = null, Func<Graph, IEnumerable<Graph>> secondaryEnumerator = null, bool induced = false)
         {
             var min = MinVertices;
@@ -148,7 +153,7 @@ namespace Console
                             {
                                 foreach (var gg in secondaryEnumerator(g))
                                 {
-                                    if (PreviousWinners.All(h => !gg.Contains(h, induced, WeightCondition)))
+                                    if (PreviousWinners.All(h => h.N != gg.N && OnlyExcludeBySpanningSubgraphs || !gg.Contains(h, induced, WeightCondition)))
                                     {
                                         yield return gg;
                                     }

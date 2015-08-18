@@ -63,7 +63,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConAndNon.cs" />
     <Compile Include="DotRenderer.cs" />
+    <Compile Include="EliminateDoubleEdgeNotSubdivisions.cs" />
     <Compile Include="EliminiteDoubleEdgeSubdivisions.cs" />
     <Compile Include="FindChoosables.cs" />
     <Compile Include="FindFixerBreaker.cs" />

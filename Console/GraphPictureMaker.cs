@@ -38,7 +38,7 @@ namespace Console
                 sw.Write(Resource.index.Replace("__FILL_THIS_SLOT__", graphs));
         }
 
-        public List<string> DrawAll(string outputDirectory, DotRenderType renderType = DotRenderType.png, bool superabundance = false)
+        public List<string> DrawAll(string outputDirectory, DotRenderType renderType = DotRenderType.png)
         {
             var imageFiles = new List<string>();
             Directory.CreateDirectory(outputDirectory);

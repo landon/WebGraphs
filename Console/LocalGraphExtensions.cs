@@ -4,11 +4,27 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Choosability;
+using System.IO;
 
 namespace Console
 {
     public static class LocalGraphExtensions
     {
+        public static IEnumerable<Graph> EnumerateGraph6File(this string graph6File)
+        {
+            using (var sr = new StreamReader(graph6File))
+            {
+                while (true)
+                {
+                    var line = sr.ReadLine();
+                    if (line == null)
+                        break;
+
+                    yield return new Graph(line.GetEdgeWeights());
+                }
+            }
+        }
+
         public static List<int> GetEdgeWeights(this string graph6)
         {
             var chars = graph6.ToCharArray();

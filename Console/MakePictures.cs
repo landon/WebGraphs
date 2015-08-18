@@ -44,16 +44,35 @@ namespace Console
             //MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\YetAnother\8 vertex Mixed spread 2 max high 2 winners1.txt.eliminated.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\WithLows\TwoHigh\Paint", directed: false, showFactors: false, lowPlus: true);
           //  MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\8 vertex Mixed spread 2 max high 3 winners1.txt.eliminated.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\WithLows\ThreeHigh\Paint", directed: false, showFactors: false, lowPlus: true);
 
-            MakeWebpage(@"C:\Users\landon\Google Drive\research\graphs\WithLows\TwoHigh\8 vertex Mixed spread 2 max high 2 offline winners1.txt.eliminated.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\WithLows\TwoHigh\Choose", directed: false, showFactors: false, lowPlus: true);
-            MakeWebpage(@"C:\Users\landon\Google Drive\research\graphs\WithLows\TwoHigh\8 vertex Mixed spread 2 max high 2 AT winners1.txt.eliminated.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\WithLows\TwoHigh\AT", directed: true, showFactors: false, lowPlus: true);
-            
+         //   MakeWebpage(@"C:\Users\landon\Google Drive\research\graphs\WithLows\TwoHigh\8 vertex Mixed spread 2 max high 2 offline winners1.txt.eliminated.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\WithLows\TwoHigh\Choose", directed: false, showFactors: false, lowPlus: true);
+       //     MakeWebpage(@"C:\Users\landon\Google Drive\research\graphs\WithLows\TwoHigh\8 vertex Mixed spread 2 max high 2 AT winners1.txt.eliminated.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\WithLows\TwoHigh\AT", directed: true, showFactors: false, lowPlus: true);
+
+            //MakeWebpage(@"C:\Users\landon\Google Drive\research\graphs\WithLows\OneHigh\10 vertex Mixed spread 2 max high 1 kappa2 winners1.txt.eliminated.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\WithLows\OneHigh\Paint2Connected", directed: false, showFactors: false, lowPlus: true);
+
+            //MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\not 10 vertex Mixed spread 2 max high 1 kappa2 winners1.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\WithLows\OneHigh\NotPaintDegreesOK10", directed: false, showFactors: false, lowPlus: true);
+            //MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\not 8 vertex Mixed spread 2 max high 1 kappa2 winners1.txt.eliminated.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\WithLows\OneHigh\NotPaintDegreesOKelim", directed: false, showFactors: false, lowPlus: true);
+            //MakePdfs(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\not 10 vertex Mixed spread 2 max high 1 kappa2 winners1.txt", @"C:\Users\landon\Documents\GitHub\Research\MixedChoosables\pictures", lowPlus:true);
+
+           // MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\YetAnother\not 8 vertex Mixed spread 2 max high 1 kappa2 winners1.txt.not.eliminated.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\WithLows\OneHigh\NotPaintDegreesOK8Eliminated", directed: false, showFactors: false, lowPlus: true);
+            //MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\YetAnother\not 7 vertex Mixed spread 2 max high 2 kappa2 AT winners1.txt.not.eliminated.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\WithLows\TwoHigh\NotATDegreesOK7Eliminated", directed: false, showFactors: false, lowPlus: true);
+
+            //MakeWebpage(@"C:\Users\landon\Google Drive\research\graphs\WithLows\OneHigh\not 10 vertex Mixed spread 2 max high 1 kappa2 winners1.txt.not.eliminated.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\WithLows\OneHigh\NotPaintDegreesOK10-Eliminated", directed: false, showFactors: false, lowPlus: true);
+
+            MakeNonCon();
         }
 
-        public static void MakePdfs(string graphPath, string outputPath, bool superabundance = false)
+        static void MakeNonCon()
+        {
+            var gpm = new GraphPictureMaker("justbads.txt".EnumerateGraph6File());
+            gpm.DrawAllAndMakeWebpage(@"C:\Users\landon\Dropbox\Public\Web\GraphData\ConNon");
+        }
+
+        public static void MakePdfs(string graphPath, string outputPath, bool superabundance = false, bool lowPlus = false)
         {
             var maker = new GraphPictureMaker(graphPath);
             maker.InDegreeTerms = superabundance;
-            maker.DrawAll(outputPath, DotRenderType.pdf, superabundance);
+            maker.IsLowPlus = lowPlus;
+            maker.DrawAll(outputPath, DotRenderType.pdf);
         }
 
         public static void MakeWebpage(string graphPath, string outputPath, bool directed = false, bool showFactors = false, bool lowPlus = false)
