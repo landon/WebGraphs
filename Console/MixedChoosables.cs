@@ -17,23 +17,28 @@ namespace Console
         const int MinVertices = 3;
         const int MaxVertices = 8;
 
-        const bool Offline = true;
-        const bool AT = false;
+        const bool Offline = false;
+        const bool AT = true;
+        const bool Mic = false;
+        const bool TwoConnectedOnly = true;
         const int MaxIndependenceNumber = int.MaxValue;
         const int Fold = 1;
         const int Spread = 2;
+        const int MaxHighs = 1;
+        const bool Not = true;
 
         const int MaxDegree = int.MaxValue;
-        const bool DiamondFreeOnly = false;
         const bool LineGraph = false;
 
-        static readonly string WinnersFile = "Mixed spread " + Spread + " " + (MaxIndependenceNumber < int.MaxValue ? "alpha at most " + MaxIndependenceNumber + " " : "") + (DiamondFreeOnly ? "cliquey neighborhoods " : "") + (AT ? "AT " : "") + (Offline ? "offline " : "") + (LineGraph ? "line graph " : "") + (MaxDegree < int.MaxValue ? "max degree " + MaxDegree + "_" : "") + string.Format("winners{0}.txt", Fold);
+        static readonly string WinnersFile = (Not ? "not " : "") + MaxVertices + " vertex " + "Mixed spread " + Spread + " " + (MaxHighs < int.MaxValue ? "max high " + MaxHighs + " " : "") + (TwoConnectedOnly ? "kappa2 " : "") + (Mic ? "mic " : "") + (MaxIndependenceNumber < int.MaxValue ? "alpha at most " + MaxIndependenceNumber + " " : "") +  (AT ? "AT " : "") + (Offline ? "offline " : "") + (LineGraph ? "line graph " : "") + (MaxDegree < int.MaxValue ? "max degree " + MaxDegree + "_" : "") + string.Format("winners{0}.txt", Fold);
         public static void Go()
         {
-            using (var graphEnumerator = new GraphEnumerator(WinnersFile, MinVertices, MaxVertices))
+            using (var graphEnumerator = new GraphEnumerator(WinnersFile, MinVertices, MaxVertices, false))
             {
                 graphEnumerator.FileRoot = @"C:\Users\landon\Google Drive\research\Graph6\graph";
-                foreach (var g in graphEnumerator.EnumerateGraph6File(Filter, EnumerateWeightings, induced:true))
+                graphEnumerator.WeightCondition = WeightCondition;
+                graphEnumerator.OnlyExcludeBySpanningSubgraphs = true;
+                foreach (var g in graphEnumerator.EnumerateGraph6File(Filter, EnumerateWeightings, induced: true))
                 {
                     if (MaxIndependenceNumber < int.MaxValue)
                     {
@@ -44,23 +49,51 @@ namespace Console
                     if (MaxDegree < int.MaxValue && g.MaxDegree > MaxDegree)
                         continue;
 
-                    if (AT)
+                    if (Mic)
                     {
                         System.Console.Write("checking " + g.ToGraph6() + " with weights [" + string.Join(",", g.VertexWeight) + "] ...");
-                        if (!g.IsOnlineFGChoosable(v => g.Degree(v) - g.VertexWeight[v], v => 1))
+
+                        var micScore = g.Vertices.Sum(v => g.VertexWeight[v] + 1);
+
+                        if (g.Mic() >= micScore)
                         {
-                            System.Console.WriteLine(" not paintable");
+                            graphEnumerator.AddWinner(g);
+                            System.Console.WriteLine(string.Format(" is f-KP"));
+                        }
+                        else
+                            System.Console.WriteLine(" not f-mic'able");
+                    }
+                    else if (AT)
+                    {
+                        System.Console.Write("checking " + g.ToGraph6() + " with weights [" + string.Join(",", g.VertexWeight) + "] ...");
+                        if (!Not)
+                        {
+                            if (!g.IsOnlineFGChoosable(v => g.Degree(v) - g.VertexWeight[v], v => 1))
+                            {
+                                System.Console.WriteLine(" not paintable");
+                            }
+                            else
+                            {
+                                var result = HasFOrientation(g, v => g.Degree(v) - g.VertexWeight[v], true);
+                                if (result != null)
+                                {
+                                    graphEnumerator.AddWinner(g, result.Graph);
+                                    System.Console.WriteLine(string.Format(" is f-AT"));
+                                }
+                                else
+                                    System.Console.WriteLine(" not AT");
+                            }
                         }
                         else
                         {
-                            var result = HasFOrientation(g, v => g.Degree(v) - g.VertexWeight[v], true);
-                            if (result != null)
+                            var good = !g.IsOnlineFGChoosable(v => g.Degree(v) - g.VertexWeight[v], v => 1) || HasFOrientation(g, v => g.Degree(v) - g.VertexWeight[v], true) == null;
+                            if (good)
                             {
-                                graphEnumerator.AddWinner(g, result.Graph);
-                                System.Console.WriteLine(string.Format(" is f-AT"));
+                                graphEnumerator.AddWinner(g);
+                                System.Console.WriteLine(string.Format(" not f-AT"));
                             }
                             else
-                                System.Console.WriteLine(" not AT");
+                                System.Console.WriteLine(" is AT");
                         }
                     }
                     else if (Offline)
@@ -79,9 +112,9 @@ namespace Console
                     }
                     else
                     {
-                        if (!DiamondFreeOnly || !g.ContainsInduced(Choosability.Graphs.Diamond))
+                        System.Console.Write("checking " + " with weights [" + string.Join(",", g.VertexWeight) + "] ...");
+                        if (!Not)
                         {
-                            System.Console.Write("checking " + " with weights [" + string.Join(",", g.VertexWeight) + "] ...");
                             if (g.IsOnlineFGChoosable(v => Fold * g.Degree(v) - g.VertexWeight[v], v => Fold))
                             {
                                 graphEnumerator.AddWinner(g);
@@ -91,29 +124,60 @@ namespace Console
                                 System.Console.WriteLine(" not paintable");
                         }
                         else
-                            System.Console.WriteLine("skipping due to diamond " + g.ToGraph6());
+                        {
+                            if (!g.IsOnlineFGChoosable(v => Fold * g.Degree(v) - g.VertexWeight[v], v => Fold))
+                            {
+                                graphEnumerator.AddWinner(g);
+                                System.Console.WriteLine(string.Format(" is not {0}-fold f-paintable", Fold));
+                            }
+                            else
+                                System.Console.WriteLine(" paintable");
+                        }
                     }
                 }
             }
+
+            if (Not)
+                EliminateDoubleEdgeNotSubdivisions.Go(WinnersFile, AT);
+            else
+                EliminiteDoubleEdgeSubdivisions.Go(WinnersFile);
+        }
+
+        public static bool WeightCondition(Graph self, Graph A, int selfV, int av)
+        {
+            if (Not)
+                return GraphEnumerator.WeightConditionUp(self, A, selfV, av);
+            return GraphEnumerator.WeightConditionDown(self, A, selfV, av);
         }
 
         static bool Filter(Choosability.Graph g)
         {
+            if (TwoConnectedOnly)
+                return g.Vertices.All(v => g.FindComponents(g.Vertices.Except(new[] { v }).ToList()).GetEquivalenceClasses().Count() <= 1);
+         
             return true;
         }
 
         static IEnumerable<Choosability.Graph> EnumerateWeightings(Choosability.Graph g)
         {
-            foreach (var weighting in g.Vertices.Select(v => Enumerable.Range(0, Spread).Reverse()).CartesianProduct())
+            var space = Not ? g.Vertices.Select(v => Enumerable.Range(0, Spread)).CartesianProduct() : g.Vertices.Select(v => Enumerable.Range(0, Spread).Reverse()).CartesianProduct();
+            foreach (var weighting in space)
             {
+                var www = weighting.ToList();
+                if (www.Count(w => w > 0) > MaxHighs)
+                    continue;
+
+                if (g.Vertices.Any(v => g.Degree(v) <= www[v] + 1))
+                    continue;
+
                 var gg = g.Clone();
-                gg.VertexWeight = weighting.ToList();
+                gg.VertexWeight = www;
 
                 yield return gg;
             }
         }
 
-        static OrientationResult HasFOrientation(Graph g, Func<int, int> f, bool useDerivative = false)
+        public static OrientationResult HasFOrientation(Graph g, Func<int, int> f, bool useSchauz = true)
         {
             const int RandomTries = 10;
             int MaxFails = 100;
@@ -133,14 +197,14 @@ namespace Console
                     continue;
                 }
 
-                var result = CheckOrientation(o, degreeSequences, useDerivative);
+                var result = CheckOrientation(o, degreeSequences, useSchauz);
                 if (result != null)
                     return result;
             }
 
             foreach (var orientation in g.EnumerateOrientations(v => g.Degree(v) + 1 - f(v)))
             {
-                var result = CheckOrientation(orientation, degreeSequences, useDerivative);
+                var result = CheckOrientation(orientation, degreeSequences, useSchauz);
                 if (result != null)
                     return result;
             }
@@ -148,14 +212,14 @@ namespace Console
             return null;
         }
 
-        static OrientationResult CheckOrientation(Graph orientation, List<int[]> degreeSequences, bool useDerivative = false)
+        static OrientationResult CheckOrientation(Graph orientation, List<int[]> degreeSequences, bool useSchauz = true)
         {
             if (degreeSequences.Any(seq => Enumerable.SequenceEqual(seq, orientation.InDegreeSequence.Value)))
                 return null;
 
             degreeSequences.Add(orientation.InDegreeSequence.Value);
 
-            if (useDerivative)
+            if (useSchauz)
             {
                 var c = orientation.GetCoefficient(orientation.Vertices.Select(v => orientation.OutDegree(v)).ToArray());
                 if (c != 0)
@@ -173,7 +237,7 @@ namespace Console
             return null;
         }
 
-        class OrientationResult
+        public class OrientationResult
         {
             public Graph Graph { get; set; }
             public int Even { get; set; }
