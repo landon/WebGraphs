@@ -19,7 +19,7 @@ namespace Choosability
         Lazy<List<List<int>>> _complementNeighbors;
         Lazy<List<List<int>>> _outNeighbors;
         Lazy<List<List<int>>> _inNeighbors;
-        Lazy<List<List<int>>> _laterNeighbors;
+        public Lazy<List<List<int>>> _laterNeighbors;
         List<int> _vertices;
         Lazy<List<List<int>>> _independentSets;
         Lazy<List<List<int>>> _maximalIndependentSets;
@@ -1177,7 +1177,7 @@ namespace Choosability
         }
         bool IsChoosable(List<long> assignment, int v)
         {
-            if (v >= N) 
+            if (v >= N)
                 return true;
 
             var colors = assignment[v];

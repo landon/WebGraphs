@@ -87,6 +87,7 @@ namespace WebGraphs
         public event Action DoSuperabundantOnlyNearColorings;
         public event Action OnAddClockSpindle;
         public event Action OnAddCClockSpindle;
+        public event Action OnAnalyzeCurrentBoard;
 
         public MenuBar()
         {
@@ -338,6 +339,9 @@ namespace WebGraphs
                     break;
                 case "add cclock spindle":
                     A(OnAddCClockSpindle);
+                    break;
+                case "analyze current board":
+                    A(OnAnalyzeCurrentBoard);
                     break;
             }
         }

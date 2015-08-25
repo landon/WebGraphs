@@ -117,6 +117,7 @@
     <Compile Include="Satsuma\Utils.cs" />
     <Compile Include="SerializationClasses.cs" />
     <Compile Include="TeXConverter.cs" />
+    <Compile Include="TreeBuilder.cs" />
     <Compile Include="Utility.cs" />
     <Compile Include="Vector.cs" />
     <Compile Include="Vertex.cs" />

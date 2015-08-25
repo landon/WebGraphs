@@ -8,7 +8,6 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
 {
     public class SuperSlimColoringAnalyzer
     {
-       // BitGraph _bitLineGraph;
         Graph _lineGraph;
         Func<SuperSlimBoard, int, long> _getEdgeColorList;
 
@@ -16,31 +15,13 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
         {
             _lineGraph = lineGraph;
             _getEdgeColorList = getEdgeColorList;
-
-          //  _bitLineGraph = new BitGraph(_lineGraph.GetEdgeWeights());
         }
-
-        //public bool Analyze(SuperSlimBoard b)
-        //{
-        //    return _bitLineGraph.IsChoosable(Enumerable.Range(0, _lineGraph.N).Select(e => (uint)_getEdgeColorList(b, e)).ToArray());
-        //}
-
-        //public bool ColorableWithoutEdge(SuperSlimBoard b, int edgeIndex)
-        //{
-        //    return _bitLineGraph.IsChoosable(Enumerable.Range(0, _lineGraph.N).Select(e =>
-        //    {
-        //        if (e == edgeIndex)
-        //            return ~0U;
-
-        //        return (uint)_getEdgeColorList(b, e);
-        //    }).ToArray());
-        //}
 
         public bool Analyze(SuperSlimBoard b)
         {
             return _lineGraph.IsChoosable(Enumerable.Range(0, _lineGraph.N).Select(e => _getEdgeColorList(b, e)).ToList());
         }
-
+      
         public bool ColorableWithoutEdge(SuperSlimBoard b, int edgeIndex)
         {
             return _lineGraph.IsChoosable(Enumerable.Range(0, _lineGraph.N).Select(e =>
@@ -50,6 +31,43 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
 
                 return _getEdgeColorList(b, e);
             }).ToList());
+        }
+
+
+        public bool Analyze(SuperSlimBoard b, out Dictionary<int, long> coloring)
+        {
+            return IsChoosable(Enumerable.Range(0, _lineGraph.N).Select(e => _getEdgeColorList(b, e)).ToList(), out coloring);
+        }
+
+        public bool IsChoosable(List<long> assignment, out Dictionary<int, long> coloring)
+        {
+            coloring = new Dictionary<int, long>();
+            return IsChoosable(assignment, 0, coloring);
+        }
+        bool IsChoosable(List<long> assignment, int v, Dictionary<int, long> coloring)
+        {
+            if (v >= _lineGraph.N)
+            {
+                return true;
+            }
+
+            var colors = assignment[v];
+            while (colors != 0)
+            {
+                var color = colors & -colors;
+
+                var assignmentCopy = new List<long>(assignment);
+                foreach (var neighbor in _lineGraph._laterNeighbors.Value[v])
+                    assignmentCopy[neighbor] &= ~color;
+
+                coloring[v] = color;
+                if (IsChoosable(assignmentCopy, v + 1, coloring))
+                    return true;
+
+                colors ^= color;
+            }
+
+            return false;
         }
     }
 }

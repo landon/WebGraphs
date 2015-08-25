@@ -84,6 +84,7 @@
     <Compile Include="AssignmentEnumerator.cs" />
     <Compile Include="ChoosabilityResult.cs" />
     <Compile Include="Counting.cs" />
+    <Compile Include="DataStructures\Bijection.cs" />
     <Compile Include="Delegates.cs" />
     <Compile Include="FixerBreaker\Board.cs" />
     <Compile Include="FixerBreaker\Chronicle\BranchGenerator.cs" />

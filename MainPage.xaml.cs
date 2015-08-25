@@ -29,6 +29,7 @@ using WebGraphs.Analysis;
 using System.Text;
 using Choosability.FixerBreaker.KnowledgeEngine.Slim.Super;
 using Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs;
+using Choosability.DataStructures;
 
 namespace WebGraphs
 {
@@ -109,6 +110,7 @@ namespace WebGraphs
             _mainMenu.DoSuperabundantOnlyNearColorings += _mainMenu_DoSuperabundantOnlyNearColorings;
             _mainMenu.OnAddClockSpindle += _mainMenu_OnAddClockSpindle;
             _mainMenu.OnAddCClockSpindle += _mainMenu_OnAddCClockSpindle;
+            _mainMenu.OnAnalyzeCurrentBoard += _mainMenu_OnAnalyzeCurrentBoard;
 
             _propertyGrid.SomethingChanged += _propertyGrid_SomethingChanged;
 
@@ -1656,6 +1658,103 @@ trash can button.
         }
         void FindPaintNumber()
         {
+        }
+
+        async void _mainMenu_OnAnalyzeCurrentBoard()
+        {
+            var blob = AlgorithmBlob.Create(SelectedTabCanvas);
+            var G = blob.AlgorithmGraph;
+
+            var lists = blob.UIGraph.Vertices.Select(v => v.Label.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(c => c.Trim()).ToList()).ToList();
+
+            foreach (var e in blob.UIGraph.Edges)
+            {
+                if (string.IsNullOrWhiteSpace(e.Label))
+                    continue;
+
+                var ll = e.Label.Trim();
+
+                var v1 = blob.UIGraph.Vertices.IndexOf(e.V1);
+                var v2 = blob.UIGraph.Vertices.IndexOf(e.V2);
+
+                if (lists[v1].Contains(ll) || lists[v2].Contains(ll))
+                {
+                    MessageBox.Show("color " + ll + " is incorrectly claimed to be missing.");
+                    return;
+                }
+
+                lists[v1].Add(ll);
+                lists[v2].Add(ll);
+            }
+
+            foreach (var l in lists)
+                l.Sort();
+
+            var pot = lists.SelectMany(l => l).Distinct().ToList();
+
+            var mind = new Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.SuperSlimMind(G, true, true);
+            mind.MaxPot = pot.Count;
+            mind.SuperabundantOnly = true;
+            mind.OnlyConsiderNearlyColorableBoards = false;
+
+            var boardAndNumbering = SuperSlimBoard.Create(lists);
+            var board = boardAndNumbering.Item1;
+            var numbering = boardAndNumbering.Item2;
+
+            var template = new Template(lists.Select(l => l.Count).ToList());
+
+            using (var resultWindow = new ResultWindow(true))
+            {
+                resultWindow.Show();
+                var result = await Task.Factory.StartNew<string>(() =>
+                {
+                    mind.Analyze(template, resultWindow.OnProgress);
+
+                    var sb = new StringBuilder();
+                    sb.AppendLine("Ψ - E = " + mind.ComputeAbundanceSurplus(board));
+                    sb.AppendLine();
+
+                    
+                    if (mind.FixerWonBoards.Contains(board))
+                    {
+                        if (mind.ColorableBoards.Contains(board))
+                        {
+                            sb.AppendLine("Fixer wins since board is colorable.");
+                        }
+                        else
+                        {
+                            var gameTree = mind.BuildGameTree(board, true);
+                            sb.AppendLine("Fixer wins in " + gameTree.GetDepth() + " moves.");
+                        }
+                    }
+                    else
+                    {
+                        if (!mind.IsSuperabundant(board))
+                            sb.AppendLine("Breaker wins since board is not superabundant.");
+                        else
+                            sb.AppendLine("Breaker wins");
+                    }
+
+                    return sb.ToString();
+                });
+
+                resultWindow.ClearChildren();
+
+                var t = new TextBox();
+                t.Text = result;
+                resultWindow.AddChild(t);
+
+                if (result.Contains("Fixer"))
+                {
+                    var treeBuilder = new TreeBuilder();
+
+                    var tc = AddTab(treeBuilder.BuildWinTree(blob.UIGraph, mind, board, numbering), blob.UIGraph.Name + " win tree");
+                    tc.GraphCanvas.SetZoomDelta(0.04);
+                    tc.GraphCanvas.SnapToGrid = false;
+                    tc.GraphCanvas.DrawGrid = false;
+                    tc.GraphCanvas.ZoomFitNextPaint();
+                }
+            }
         }
 
         bool _useFixerBreakerWildCards = false;

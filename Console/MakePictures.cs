@@ -51,14 +51,13 @@ namespace Console
 
             //MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\not 10 vertex Mixed spread 2 max high 1 kappa2 winners1.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\WithLows\OneHigh\NotPaintDegreesOK10", directed: false, showFactors: false, lowPlus: true);
             //MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\not 8 vertex Mixed spread 2 max high 1 kappa2 winners1.txt.eliminated.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\WithLows\OneHigh\NotPaintDegreesOKelim", directed: false, showFactors: false, lowPlus: true);
-            //MakePdfs(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\not 10 vertex Mixed spread 2 max high 1 kappa2 winners1.txt", @"C:\Users\landon\Documents\GitHub\Research\MixedChoosables\pictures", lowPlus:true);
+            MakePdfs(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\K_4.txt", @"C:\Users\landon\Documents\GitHub\Research\MixedChoosables\pictures", lowPlus:true);
 
            // MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\YetAnother\not 8 vertex Mixed spread 2 max high 1 kappa2 winners1.txt.not.eliminated.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\WithLows\OneHigh\NotPaintDegreesOK8Eliminated", directed: false, showFactors: false, lowPlus: true);
             //MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\YetAnother\not 7 vertex Mixed spread 2 max high 2 kappa2 AT winners1.txt.not.eliminated.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\WithLows\TwoHigh\NotATDegreesOK7Eliminated", directed: false, showFactors: false, lowPlus: true);
 
             //MakeWebpage(@"C:\Users\landon\Google Drive\research\graphs\WithLows\OneHigh\not 10 vertex Mixed spread 2 max high 1 kappa2 winners1.txt.not.eliminated.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\WithLows\OneHigh\NotPaintDegreesOK10-Eliminated", directed: false, showFactors: false, lowPlus: true);
 
-            MakeNonCon();
         }
 
         static void MakeNonCon()

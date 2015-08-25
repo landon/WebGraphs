@@ -54,8 +54,15 @@ namespace Graphs
 
             if (!string.IsNullOrEmpty(_label))
             {
-                if (IsUniversal)
-                    g.FillEllipse(UniversalVertexFillBrushColor, bounds);
+                if (Color.Equals(default(GraphicsLayer.ARGB)))
+                {
+                    if (IsUniversal)
+                        g.FillEllipse(UniversalVertexFillBrushColor, bounds);
+                }
+                else
+                {
+                    g.FillEllipse(Color, bounds);
+                }
 
                 g.DrawEllipse(_IsSelected ? BoundarySelectedPenColor : BoundaryPenColor, bounds, _IsSelected ? BoundarySelectedPenWidth : 1);
                 g.DrawString(_label, LabelFont, LabelBrushColor, bounds);

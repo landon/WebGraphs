@@ -19,5 +19,19 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
             tree.Info = info;
             AddChild(tree);
         }
+
+        public override bool Equals(object obj)
+        {
+            var gg = obj as GameTree;
+            if (gg == null)
+                return false;
+
+            return gg.Board.Equals(Board);
+        }
+
+        public override int GetHashCode()
+        {
+            return Board.GetHashCode();
+        }
     }
 }

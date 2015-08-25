@@ -13,11 +13,19 @@ namespace Graphs
         public event Action<Graph> GraphModified;
         public event Action<string> NameModified;
 
-        const int BaseViewScale = 800;
+        const int DefaultBaseViewScale = 800;
+        public int BaseViewScale = DefaultBaseViewScale;
         const int MaxZoomScale = 6000;
-        const double ZoomDelta = 0.25;
-        const double MinZoom = ZoomDelta;
+        double ZoomDelta = 0.15;
+        double MinZoom = 0.15;
 
+        public void SetZoomDelta(double d)
+        {
+            ZoomDelta = d;
+            MinZoom = d;
+        }
+
+        bool _zoomFitNextPaint;
         bool _snapToGrid = true;
         double _gridStep = 0.05;
         bool _drawGrid = true;
@@ -94,7 +102,7 @@ namespace Graphs
         public bool IsEmpty { get { return _graph.Vertices.Count <= 0; } }
 
         States _state = States.Idle;
-        int _viewScale = BaseViewScale;
+        int _viewScale = DefaultBaseViewScale;
         double _Zoom = 1.0;
         Func<Choosability.Graph, Graph> _layoutEngine;
         Func<string, Graph> _secondaryConverter;
@@ -598,6 +606,9 @@ namespace Graphs
 
         public void Paint(GraphicsLayer.IGraphics g, int width, int height)
         {
+            if (width == 0 || height == 0)
+                return;
+
             try
             {
                 Width = width;
@@ -637,6 +648,13 @@ namespace Graphs
             catch { }
 
             HasPainted = true;
+
+            if (_zoomFitNextPaint)
+            {
+                _zoomFitNextPaint = false;
+                DoZoomFit();
+                DoZoom(5, new GraphicsLayer.Box(0.5, 0.5));
+            }
         }
 
         public void OnMouseMove(double X, double Y)
@@ -857,6 +875,12 @@ namespace Graphs
 
             if (graphChanged)
                 GraphChanged();
+        }
+
+        public void ZoomFitNextPaint()
+        {
+            _zoomFitNextPaint = true;
+            Invalidate();
         }
     }
 }

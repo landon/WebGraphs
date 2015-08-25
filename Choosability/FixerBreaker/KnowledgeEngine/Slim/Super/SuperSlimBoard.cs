@@ -1,4 +1,5 @@
-﻿using Choosability.Utility;
+﻿using Choosability.DataStructures;
+using Choosability.Utility;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,24 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
         public int _length;
         public int _stackCount;
         int _hashCode;
+
+        public static Tuple<SuperSlimBoard, Bijection<int, T>> Create<T>(List<List<T>> lists)
+        {
+            var pot = lists.SelectMany(l => l).Distinct().ToList();
+            var numbering = pot.NumberObjects();
+
+            var intLists = lists.Select(l => numbering.Apply(l).ToList()).ToList();
+            var trace = new ulong[pot.Count];
+
+            for (int i = 0; i < pot.Count; i++)
+                trace[i] = intLists.IndicesWhere(ll => ll.Contains(i)).ToUInt64();
+
+            pot = pot.OrderBy(c => trace[pot.IndexOf(c)]).ToList();
+            numbering = pot.NumberObjects();
+
+            Array.Sort(trace);
+            return new Tuple<SuperSlimBoard, Bijection<int, T>>(new SuperSlimBoard(trace, lists.Count), numbering);
+        }
 
         public SuperSlimBoard(ulong[] trace, int stackCount)
         {

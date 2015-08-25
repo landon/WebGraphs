@@ -30,9 +30,11 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
         public bool SuperabundantOnly { get; set; }
         public bool ThinkHarder { get; set; }
 
+        public SuperSlimColoringAnalyzer ColoringAnalyzer { get { return _coloringAnalyzer; } }
         public List<SuperSlimBoard> NonColorableBoards { get; private set; }
         public List<SuperSlimBoard> ColorableBoards { get; private set; }
         public List<SuperSlimBoard> BreakerWonBoards { get; private set; }
+        public HashSet<SuperSlimBoard> FixerWonBoards { get { return _wonBoards; } }
         public Dictionary<int, List<SuperSlimBoard>> BoardsOfDepth { get; private set; }
         public int ExtraPsi { get; set; }
 
