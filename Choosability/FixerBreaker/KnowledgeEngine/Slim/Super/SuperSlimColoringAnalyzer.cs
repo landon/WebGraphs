@@ -60,9 +60,11 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
                 foreach (var neighbor in _lineGraph._laterNeighbors.Value[v])
                     assignmentCopy[neighbor] &= ~color;
 
-                coloring[v] = color;
                 if (IsChoosable(assignmentCopy, v + 1, coloring))
+                {
+                    coloring[v] = color;
                     return true;
+                }
 
                 colors ^= color;
             }

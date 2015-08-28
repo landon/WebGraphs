@@ -25,15 +25,22 @@ namespace GraphsCore
 
             var bounds = new Bounds(gg);
 
-            var treeG = BuildWinTree(tree, g, mind, bounds, 0, numbering);
+            var treeG = BuildWinTree(tree, g, mind, bounds, 0, numbering, null);
 
             return treeG;
         }
 
-        Graphs.Graph BuildWinTree(GameTree tree, Graphs.Graph g, SuperSlimMind mind, Bounds original, int level, Bijection<int, string> numbering)
+        Graphs.Graph BuildWinTree(GameTree tree, Graphs.Graph g, SuperSlimMind mind, Bounds original, int level, Bijection<int, string> numbering, List<List<int>> lastLists)
         {
             var clone = g.Clone();
             var lists = tree.Board.Stacks.Value.Select(s => s.ToSet()).ToList();
+
+            Choosability.Utility.Permutation ppp = null;
+            if (tree.Parent != null)
+            {
+                ppp = tree.Parent.Board.GetPermutation(tree.Info.Alpha, tree.Info.Beta, tree.Info.Response);
+                lists = lists.Select(l => l.Select(vv => ppp[vv]).ToList()).ToList();
+            }
 
             if (tree.IsColorable)
             {
@@ -43,10 +50,18 @@ namespace GraphsCore
                 int jj = 0;
                 foreach (var e in clone.Edges)
                 {
-                    var v1 = clone.Vertices.IndexOf(e.V1);
-                    var v2 = clone.Vertices.IndexOf(e.V2);
+                    var v1 = mind._edges[jj].Item1;
+                    var v2 = mind._edges[jj].Item2;
 
                     var c = coloring[jj].LeastSignificantBit();
+                    if (ppp != null)
+                        c = ppp[c];
+
+                    if (!lists[v1].Contains(c))
+                        System.Diagnostics.Debugger.Break();
+                    if (!lists[v2].Contains(c))
+                        System.Diagnostics.Debugger.Break();
+
                     lists[v1].Remove(c);
                     lists[v2].Remove(c);
 
@@ -76,6 +91,23 @@ namespace GraphsCore
                         }
                     }
                 }
+
+                foreach (var e in clone.Edges)
+                {
+                    if (!string.IsNullOrWhiteSpace(e.Label) || string.IsNullOrWhiteSpace(g.Edges[clone.Edges.IndexOf(e)].Label))
+                        continue;
+
+                    var v1 = clone.Vertices.IndexOf(e.V1);
+                    var v2 = clone.Vertices.IndexOf(e.V2);
+
+                    var common = Choosability.Utility.ListUtility.Intersection(lists[v1], lists[v2]);
+                    if (common.Count > 0)
+                    {
+                        e.Label = numbering[common[0]];
+                        lists[v1].Remove(common[0]);
+                        lists[v2].Remove(common[0]);
+                    }
+                }
             }
 
             for (int q = 0; q < lists.Count; q++)
@@ -92,7 +124,7 @@ namespace GraphsCore
 
             var children = tree.Children.Distinct().ToList();
 
-            var childGraphs = children.Select(child => BuildWinTree(child, g, mind, original, level++, numbering)).ToList();
+            var childGraphs = children.Select(child => BuildWinTree(child, g, mind, original, level++, numbering, lists)).ToList();
             var childBounds = childGraphs.Select(cg => new Bounds(cg)).ToList();
 
             var min = Math.Max(original.Width * Scale, original.Height * Scale);

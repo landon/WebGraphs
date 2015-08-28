@@ -75,6 +75,23 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
             _hashCode = Hashing.Hash(_trace, _length);
         }
 
+        public Permutation GetPermutation(int i, int j, ulong swap)
+        {
+            var t = _trace.ToList();
+
+            t[i] = t[i] ^ swap;
+            t[j] = t[j] ^ swap;
+
+            if (t[i] == 0)
+                t[i] = int.MaxValue;
+            if (t[j] == 0)
+                t[j] = int.MaxValue;
+
+            var sequence = t.Zip(Enumerable.Range(0, t.Count), (tr, ii) => new { T = tr, I = ii }).OrderBy(v => v.T).Select(v => v.I).ToList();
+
+            return new Permutation(sequence);
+        }
+
         public SuperSlimBoard Permute(Permutation p, List<int> indices)
         {
             var trace = new ulong[_trace.Length];

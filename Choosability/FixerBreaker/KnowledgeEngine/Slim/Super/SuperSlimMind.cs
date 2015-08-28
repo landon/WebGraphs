@@ -13,7 +13,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
         SuperSlimColoringAnalyzer _coloringAnalyzer;
         Graph _graph;
         Graph _lineGraph;
-        List<Tuple<int, int>> _edges;
+        public List<Tuple<int, int>> _edges;
         int _totalPositions;
 
         public int MinPot { get; set; }

@@ -653,7 +653,7 @@ namespace Graphs
             {
                 _zoomFitNextPaint = false;
                 DoZoomFit();
-                DoZoom(5, new GraphicsLayer.Box(0.5, 0.5));
+                DoZoom(4, new GraphicsLayer.Box(0.5, 0.5));
             }
         }
 
