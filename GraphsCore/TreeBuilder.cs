@@ -48,6 +48,9 @@ namespace GraphsCore
                     int score = 0;
                     for (int ii = 0; ii < strings.Count; ii++)
                     {
+                        if (tree.Info.SwapVertices.Contains(ii))
+                            continue;
+
                         if (strings[ii] == lastListStrings[ii])
                             score += strings[ii].Length;
                     }
