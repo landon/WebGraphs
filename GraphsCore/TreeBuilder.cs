@@ -24,31 +24,52 @@ namespace GraphsCore
             }
 
             var bounds = new Bounds(gg);
-
-            var treeG = BuildWinTree(tree, g, mind, bounds, 0, numbering, null);
+            var potSize = board.Stacks.Value.SelectMany(l => l.ToSet()).Distinct().Count();
+            var treeG = BuildWinTree(tree, g, mind, bounds, 0, numbering, new Choosability.Utility.Permutation(Enumerable.Range(0, potSize).ToList()), null);
 
             return treeG;
         }
 
-        Graphs.Graph BuildWinTree(GameTree tree, Graphs.Graph g, SuperSlimMind mind, Bounds original, int level, Bijection<int, string> numbering, List<List<int>> lastLists)
+        Graphs.Graph BuildWinTree(GameTree tree, Graphs.Graph g, SuperSlimMind mind, Bounds original, int level, Bijection<int, string> numbering, Choosability.Utility.Permutation pp, List<string> lastListStrings)
         {
             var clone = g.Clone();
             var lists = tree.Board.Stacks.Value.Select(s => s.ToSet()).ToList();
 
-            Choosability.Utility.Permutation ppp = null;
+            var ppp = pp;
             if (tree.Parent != null)
             {
-                ppp = tree.Parent.Board.GetPermutation(tree.Info.Alpha, tree.Info.Beta, tree.Info.Response);
+                var potSize = lists.SelectMany(l => l).Distinct().Count();
+                var bestScore = int.MinValue;
+
+                foreach (var p in Choosability.Utility.Permutation.EnumerateAll(potSize))
+                {
+                    var strings = lists.Select(ll => string.Join(",", ll.Select(n => numbering[p[n]]).OrderBy(s => s))).ToList();
+                    
+                    int score = 0;
+                    for (int ii = 0; ii < strings.Count; ii++)
+                    {
+                        if (strings[ii] == lastListStrings[ii])
+                            score += strings[ii].Length;
+                    }
+
+                    if (score > bestScore)
+                    {
+                        bestScore = score;
+                        ppp = p;
+                    }
+                }
+
                 lists = lists.Select(l => l.Select(vv => ppp[vv]).ToList()).ToList();
             }
+
+            var listStrings = lists.Select(ll => string.Join(",", ll.Select(n => numbering[n]).OrderBy(s => s))).ToList();
 
             if (tree.IsColorable)
             {
                 Dictionary<int, long> coloring;
                 mind.ColoringAnalyzer.Analyze(tree.Board, out coloring);
 
-                int jj = 0;
-                foreach (var e in clone.Edges)
+                for (int jj = 0; jj < clone.Edges.Count; jj++)
                 {
                     var v1 = mind._edges[jj].Item1;
                     var v2 = mind._edges[jj].Item2;
@@ -65,9 +86,8 @@ namespace GraphsCore
                     lists[v1].Remove(c);
                     lists[v2].Remove(c);
 
+                    var e = clone.Edges.First(ee => Choosability.Utility.ListUtility.Equal(new List<int>() { clone.Vertices.IndexOf(ee.V1), clone.Vertices.IndexOf(ee.V2) }, new List<int>() {v1,v2}));
                     e.Label = numbering[c];
-
-                    jj++;
                 }
             }
             else
@@ -112,7 +132,7 @@ namespace GraphsCore
 
             for (int q = 0; q < lists.Count; q++)
             {
-                clone.Vertices[q].Label = string.Join(",", numbering.Apply(lists[q]));
+                clone.Vertices[q].Label = string.Join(",", numbering.Apply(lists[q].OrderBy(x => x)));
             }
 
             clone.Translate(new Graphs.Vector(-original.Left, -original.Top));
@@ -124,7 +144,7 @@ namespace GraphsCore
 
             var children = tree.Children.Distinct().ToList();
 
-            var childGraphs = children.Select(child => BuildWinTree(child, g, mind, original, level++, numbering, lists)).ToList();
+            var childGraphs = children.Select(child => BuildWinTree(child, g, mind, original, level++, numbering, ppp, listStrings)).ToList();
             var childBounds = childGraphs.Select(cg => new Bounds(cg)).ToList();
 
             var min = Math.Max(original.Width * Scale, original.Height * Scale);
@@ -145,8 +165,8 @@ namespace GraphsCore
                 uberGraph.DisjointUnion(gg);
                 xoff += childBounds[i].Width + min;
 
-                var a = children[i].Info == null ? "" : numbering[children[i].Info.Alpha];
-                var b = children[i].Info == null ? "" : numbering[children[i].Info.Beta];
+                var a = children[i].Info == null ? "" : numbering[ppp[children[i].Info.Alpha]];
+                var b = children[i].Info == null ? "" : numbering[ppp[children[i].Info.Beta]];
 
                 var maxYY = clone.Vertices.Max(vvv => vvv.Y);
                 var pvs = clone.Vertices.Where(vvv => vvv.Y == maxYY).ToList();
