@@ -10,6 +10,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
+using Choosability.FixerBreaker.KnowledgeEngine.Slim.Super;
 
 namespace WebGraphs
 {
@@ -64,8 +65,6 @@ namespace WebGraphs
         public event Action OnAbout;
         public event Action ComputeSignSum;
         public event Action ClearOrientation;
-        public event Action AnalyzeOnlyNearColorings;
-        public event Action AnalyzeOnlyNearColoringsForSelectedEdge;
         public event Action CheckFGPaintable;
         public event Action DoLaplacianLayout;
         public event Action DoWalkMatrixLayout;
@@ -79,15 +78,12 @@ namespace WebGraphs
         public event Action DoSixFoldWay;
         public event Action DoTiling;
         public event Action DoSpin;
-        public event Action DoSuperabundantOnly;
-        public event Action DoSuperabundantOnlyWeakly;
-        public event Action DoGenerateProof;
-        public event Action DoGenerateProofSelectedEdge;
-        public event Action OnToggleFixerBreakerThinkHarder;
-        public event Action DoSuperabundantOnlyNearColorings;
         public event Action OnAddClockSpindle;
         public event Action OnAddCClockSpindle;
-        public event Action OnAnalyzeCurrentBoard;
+
+        public event Action<bool, int, FixerBreakerSwapMode, bool, bool, bool> Analyze;
+        public event Action<bool, int, FixerBreakerSwapMode, bool, bool, bool> AnalyzeCurrentBoard;
+        public event Action<bool, int, FixerBreakerSwapMode, bool, bool, bool> GenenerateBoard;
 
         public MenuBar()
         {
@@ -197,12 +193,6 @@ namespace WebGraphs
                 case "Export TeX":
                     A(ExportTeX);
                     break;
-                case "analyze":
-                    A(AnalyzeFixerBreaker);
-                    break;
-                case "analyze weakly fixable":
-                    A(AnalyzeFixerBreakerWeaklyFixable);
-                    break;
                 case "Δ-1 color":
                     A(DoMozhan);
                     break;
@@ -263,11 +253,14 @@ namespace WebGraphs
                 case "clear orientation":
                     A(ClearOrientation);
                     break;
+                case "analyze":
+                    A(Analyze, false, 0, GetSwapMode(), false, false, false);
+                    break;
                 case "analyze only near colorings":
-                    A(AnalyzeOnlyNearColorings);
+                    A(Analyze, true, 0, GetSwapMode(), false, false, false);
                     break;
                 case "analyze only near colorings for selected edge":
-                    A(AnalyzeOnlyNearColoringsForSelectedEdge);
+                    A(Analyze, true, 0, GetSwapMode(), true, false, false);
                     break;
                 case "check (f:g)-paintable":
                     A(CheckFGPaintable);
@@ -312,27 +305,19 @@ namespace WebGraphs
                     A(DoSpin);
                     break;
                 case "analyze superabundant only":
-                    A(DoSuperabundantOnly);
+                    A(Analyze, false, 0, GetSwapMode(), false, true, false);
                     break;
                 case "analyze superabundant only near colorings":
-                    A(DoSuperabundantOnlyNearColorings);
+                    A(Analyze, true, 0, GetSwapMode(), false, true, false);
                     break;
-                case "analyze superabundant only weakly":
-                    A(DoSuperabundantOnlyWeakly);
+                case "analyze superabundant only near colorings, extra psi":
+                    A(Analyze, true, 1, GetSwapMode(), false, true, false);
                     break;
                 case "generate proof":
-                    A(DoGenerateProof);
+                    A(Analyze, false, 0, GetSwapMode(), false, false, true);
                     break;
                 case "generate proof only near colorings for selected edge":
-                    A(DoGenerateProofSelectedEdge);
-                    break;
-                case "think harder":
-                    ThinkHarderItem.Header = "think softer";
-                    A(OnToggleFixerBreakerThinkHarder);
-                    break;
-                case "think softer":
-                    ThinkHarderItem.Header = "think harder";
-                    A(OnToggleFixerBreakerThinkHarder);
+                    A(Analyze, true, 0, GetSwapMode(), true, false, true);
                     break;
                 case "add clock spindle":
                     A(OnAddClockSpindle);
@@ -341,15 +326,92 @@ namespace WebGraphs
                     A(OnAddCClockSpindle);
                     break;
                 case "analyze current board":
-                    A(OnAnalyzeCurrentBoard);
+                    A(AnalyzeCurrentBoard, false, 0, GetSwapMode(), false, true, false);
                     break;
+                case "analyze current board maintaining extra psi":
+                    A(AnalyzeCurrentBoard, false, 1, GetSwapMode(), false, true, false);
+                    break;
+                case "analyze current board through near colorings":
+                    A(AnalyzeCurrentBoard, true, 0, GetSwapMode(), false, true, false);
+                    break;
+                case "analyze current board maintaining extra psi through near colorings":
+                    A(AnalyzeCurrentBoard, true, 1, GetSwapMode(), false, true, false);
+                    break;
+                case "generate deepest board, near coloring":
+                    A(GenenerateBoard, true, 0, GetSwapMode(), false, true, false);
+                    break;
+                case "generate deepest extra psi board, near coloring":
+                    A(GenenerateBoard, true, 1, GetSwapMode(), false, true, false);
+                    break;
+                case "generate deepest board":
+                    A(GenenerateBoard, false, 0, GetSwapMode(), false, true, false);
+                    break;
+                case "generate deepest extra psi board":
+                    A(GenenerateBoard, false, 1, GetSwapMode(), false, true, false);
+                    break;
+                case "original mode":
+                    _fixerBreakerModeItem.Header = "single swap mode";
+                    break;
+                case "single swap mode":
+                    _fixerBreakerModeItem.Header = "multi swap mode";
+                    break;
+                case "multi swap mode":
+                    _fixerBreakerModeItem.Header = "original mode";
+                    break;
+             
             }
         }
+
+        FixerBreakerSwapMode GetSwapMode()
+        {
+            switch ((string)_fixerBreakerModeItem.Header)
+            {
+                case "original mode":
+                    return FixerBreakerSwapMode.Original;
+                case "single swap mode":
+                    return FixerBreakerSwapMode.SingleSwap;
+                case "multi swap mode":
+                    return FixerBreakerSwapMode.MultiSwap;
+            }
+
+            return FixerBreakerSwapMode.SingleSwap;
+        }
+
         static void A(Action a)
         {
             var b = a;
             if (b != null)
                 b();
+        }
+        static void A<T>(Action<T> a, T t)
+        {
+            var b = a;
+            if (b != null)
+                b(t);
+        }
+        static void A<T,S>(Action<T,S> a, T t, S s)
+        {
+            var b = a;
+            if (b != null)
+                b(t,s);
+        }
+        static void A<T, S, R>(Action<T, S, R> a, T t, S s, R r)
+        {
+            var b = a;
+            if (b != null)
+                b(t, s, r);
+        }
+        static void A<T, S, R, P>(Action<T, S, R, P> a, T t, S s, R r, P p)
+        {
+            var b = a;
+            if (b != null)
+                b(t, s, r, p);
+        }
+        static void A<T, S, R, P, Q, Z>(Action<T, S, R, P, Q, Z> a, T t, S s, R r, P p, Q q, Z z)
+        {
+            var b = a;
+            if (b != null)
+                b(t, s, r, p, q, z);
         }
     }
 }

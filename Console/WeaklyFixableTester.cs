@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Choosability.Utility;
 using Choosability;
+using Choosability.FixerBreaker.KnowledgeEngine.Slim.Super;
 
 namespace Console
 {
@@ -14,7 +15,7 @@ namespace Console
         const int Delta = int.MaxValue;
         public static void Go()
         {
-            using (var graphEnumerator = new GraphEnumerator("superabundant weakly fixable test.txt", 2, 20))
+            using (var graphEnumerator = new GraphEnumerator("superabundant near coloring original fixable test.txt", 2, 20))
             {
                 graphEnumerator.FileRoot = @"C:\Users\landon\Google Drive\research\Graph6\graph";
 
@@ -22,13 +23,15 @@ namespace Console
                 {
                     System.Console.Write("checking " + g.ToGraph6() + " with degrees [" + string.Join(",", g.VertexWeight) + "] ...");
 
-                    var mind = new Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.SuperSlimMind(g, false, false);
+                    var mind = new Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.SuperSlimMind(g, false, FixerBreakerSwapMode.SingleSwap);
                     mind.MaxPot = Delta;
                     mind.SuperabundantOnly = true;
+                    mind.OnlyConsiderNearlyColorableBoards = true;
 
-                    var weakMind = new Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.SuperSlimMind(g, false, true);
+                    var weakMind = new Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.SuperSlimMind(g, false, FixerBreakerSwapMode.Original);
                     weakMind.MaxPot = Delta;
                     weakMind.SuperabundantOnly = true;
+                    weakMind.OnlyConsiderNearlyColorableBoards = true;
 
                     var template = new Template(g.VertexWeight);
 
@@ -60,7 +63,7 @@ namespace Console
             if (g.MaxDegree > 4)
                 yield break;
 
-            foreach (var weighting in g.Vertices.Select(v => Enumerable.Range(g.Degree(v), 2).Reverse()).CartesianProduct())
+            foreach (var weighting in g.Vertices.Select(v => Enumerable.Range(g.Degree(v), 2)).CartesianProduct())
             {
                 var www = weighting.ToList();
 

@@ -25,12 +25,12 @@ namespace GraphsCore
 
             var bounds = new Bounds(gg);
             var potSize = board.Stacks.Value.SelectMany(l => l.ToSet()).Distinct().Count();
-            var treeG = BuildWinTree(tree, g, mind, bounds, 0, numbering, new Choosability.Utility.Permutation(Enumerable.Range(0, potSize).ToList()), null);
+            var treeG = BuildWinTree(tree, g, mind, bounds, 0, numbering, new Choosability.Utility.Permutation(Enumerable.Range(0, potSize).ToList()), null, potSize);
 
             return treeG;
         }
 
-        Graphs.Graph BuildWinTree(GameTree tree, Graphs.Graph g, SuperSlimMind mind, Bounds original, int level, Bijection<int, string> numbering, Choosability.Utility.Permutation pp, List<string> lastListStrings)
+        Graphs.Graph BuildWinTree(GameTree tree, Graphs.Graph g, SuperSlimMind mind, Bounds original, int level, Bijection<int, string> numbering, Choosability.Utility.Permutation pp, List<string> lastListStrings, int potSize)
         {
             var clone = g.Clone();
             var lists = tree.Board.Stacks.Value.Select(s => s.ToSet()).ToList();
@@ -38,29 +38,48 @@ namespace GraphsCore
             var ppp = pp;
             if (tree.Parent != null)
             {
-                var potSize = lists.SelectMany(l => l).Distinct().Count();
                 var bestScore = int.MinValue;
 
+                var allbad = true;
                 foreach (var p in Choosability.Utility.Permutation.EnumerateAll(potSize))
                 {
+                    var bad = false;
+                    foreach (var sw in tree.Info.SwapVertices)
+                    {
+                        var lll = lists[sw].Select(ll => p[ll]).ToList();
+                        var colors = new List<int>() { pp[tree.Info.Alpha], pp[tree.Info.Beta] };
+                        if (Choosability.Utility.ListUtility.IntersectionCount(lll, colors) != 1)
+                        {
+                            bad = true;
+                            break;
+                        }
+                    }
+
+                    if (bad)
+                        continue;
+
                     var strings = lists.Select(ll => string.Join(",", ll.Select(n => numbering[p[n]]).OrderBy(s => s))).ToList();
-                    
                     int score = 0;
                     for (int ii = 0; ii < strings.Count; ii++)
                     {
-                        if (tree.Info.SwapVertices.Contains(ii))
-                            continue;
-
                         if (strings[ii] == lastListStrings[ii])
-                            score += strings[ii].Length;
+                        {
+                            if (!tree.Info.SwapVertices.Contains(ii))
+                                score += 100;
+                        }
                     }
 
                     if (score > bestScore)
                     {
                         bestScore = score;
                         ppp = p;
+                        allbad = false;
                     }
                 }
+
+
+                if (allbad)
+                    System.Diagnostics.Debugger.Break();
 
                 lists = lists.Select(l => l.Select(vv => ppp[vv]).ToList()).ToList();
             }
@@ -147,7 +166,7 @@ namespace GraphsCore
 
             var children = tree.Children.Distinct().ToList();
 
-            var childGraphs = children.Select(child => BuildWinTree(child, g, mind, original, level++, numbering, ppp, listStrings)).ToList();
+            var childGraphs = children.Select(child => BuildWinTree(child, g, mind, original, level++, numbering, ppp, listStrings, potSize)).ToList();
             var childBounds = childGraphs.Select(cg => new Bounds(cg)).ToList();
 
             var min = Math.Max(original.Width * Scale, original.Height * Scale);

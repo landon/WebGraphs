@@ -14,7 +14,8 @@ namespace WebGraphs
 {
     public partial class ResultWindow : ChildWindow, IDisposable
     {
-        public ResultWindow(bool realProgress = false)
+        bool _closeOnFinish;
+        public ResultWindow(bool realProgress = false, bool closeOnFinish = false)
         {
             InitializeComponent();
             HasCloseButton = false;
@@ -28,6 +29,7 @@ namespace WebGraphs
             }
 
             Title = "thinking...";
+            _closeOnFinish = closeOnFinish;
             Show();
         }
 
@@ -66,6 +68,12 @@ namespace WebGraphs
             _layoutRoot.Children.Remove(_progressIndicator);
             Title = ResultTitle ?? "results";
             HasCloseButton = true;
+
+            if (_closeOnFinish)
+            {
+                DialogResult = true;
+                Application.Current.RootVisual.SetValue(Control.IsEnabledProperty, true);
+            }
         }
 
         public string ResultTitle { get; set; }
