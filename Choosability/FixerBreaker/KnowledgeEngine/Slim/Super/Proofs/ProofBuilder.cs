@@ -26,7 +26,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
             Cases.Add(colorableCase);
             caseNumber++;
 
-            var remainingBoards = Mind.NonColorableBoards.ToList();
+            var remainingBoards = Mind.PlayableBoards.ToList();
             var wonBoards = Mind.ColorableBoards.ToList();
             while (remainingBoards.Count > 0)
             {

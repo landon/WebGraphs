@@ -1662,7 +1662,7 @@ trash can button.
         {
         }
 
-        async void _mainMenu_OnGenenerateBoard(bool nearColoring, int extraPsi, FixerBreakerSwapMode swapMode, bool useMissingEdge, bool superabundantOnly, bool generateProof)
+        async void _mainMenu_OnGenenerateBoard(bool nearColoring, int extraPsi, FixerBreakerSwapMode swapMode, bool allowAllIntermediateBoards, bool superabundantOnly, bool generateProof)
         {
             var blob = AlgorithmBlob.Create(SelectedTabCanvas);
             var G = blob.AlgorithmGraph;
@@ -1677,10 +1677,12 @@ trash can button.
                         var template = new Template(sizes);
 
                         var mind = new SuperSlimMind(G, true, swapMode);
-                        mind.SuperabundantOnly = true;
+                        mind.OnlySuperabundantBoards = true;
                         mind.ExtraPsi = extraPsi;
                         mind.OnlyConsiderNearlyColorableBoards = nearColoring;
                         mind.MaxPot = int.MaxValue;
+                        mind.MissingEdgeIndex = GetMissingEdgeIndex(nearColoring);
+                        mind.AllIntermediateBoardsInRestrictedClass = !allowAllIntermediateBoards;
 
                         var win = mind.Analyze(template, resultWindow.OnProgress);
 
@@ -1728,7 +1730,7 @@ trash can button.
             SelectedTabCanvas.Invalidate();
         }
 
-        async void _mainMenu_OnAnalyzeCurrentBoard(bool nearColoring, int extraPsi, FixerBreakerSwapMode swapMode, bool useMissingEdge, bool superabundantOnly, bool generateProof)
+        async void _mainMenu_OnAnalyzeCurrentBoard(bool nearColoring, int extraPsi, FixerBreakerSwapMode swapMode, bool allowAllIntermediateBoards, bool superabundantOnly, bool generateProof)
         {
             var blob = AlgorithmBlob.Create(SelectedTabCanvas);
             var G = blob.AlgorithmGraph;
@@ -1762,10 +1764,12 @@ trash can button.
 
             var mind = new Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.SuperSlimMind(G, true, swapMode);
             mind.MaxPot = pot.Count;
-            mind.SuperabundantOnly = true;
+            mind.OnlySuperabundantBoards = true;
             mind.ExtraPsi = extraPsi;
             mind.OnlyConsiderNearlyColorableBoards = nearColoring;
             mind.OnlyConsiderNearlyColorableBoards = false;
+            mind.MissingEdgeIndex = GetMissingEdgeIndex(nearColoring);
+            mind.AllIntermediateBoardsInRestrictedClass = !allowAllIntermediateBoards;
 
             var boardAndNumbering = SuperSlimBoard.Create(lists);
             var board = boardAndNumbering.Item1;
@@ -1827,35 +1831,28 @@ trash can button.
             }
         }
 
-        int GetMissingEdgeIndex(bool useMissingEdge)
+        int GetMissingEdgeIndex(bool nearColoring)
         {
-            if (!useMissingEdge)
+            if (!nearColoring)
                 return -1;
 
             var blob = AlgorithmBlob.Create(SelectedTabCanvas);
             if (blob == null)
                 return -1;
-
             if (blob.SelectedEdgeIndices.Count <= 0)
-            {
-                MessageBox.Show("no edges selected");
                 return -1;
-            }
             if (blob.SelectedEdgeIndices.Count >= 2)
-            {
-                MessageBox.Show("too many edges selected");
                 return -1;
-            }
 
             return blob.SelectedEdgeIndices.First();
         }
 
-        async void AnalyzeFixerBreaker(bool nearColoring, int extraPsi, FixerBreakerSwapMode swapMode, bool useMissingEdge, bool superabundantOnly, bool generateProof)
+        async void AnalyzeFixerBreaker(bool nearColoring, int extraPsi, FixerBreakerSwapMode swapMode, bool allowAllIntermediateBoards, bool superabundantOnly, bool generateProof)
         {
-            await AnalyzeFixerBreaker(nearColoring, GetMissingEdgeIndex(useMissingEdge), superabundantOnly, generateProof, swapMode, extraPsi);
+            await AnalyzeFixerBreaker(nearColoring, GetMissingEdgeIndex(nearColoring), superabundantOnly, generateProof, swapMode, extraPsi, allowAllIntermediateBoards);
         }
 
-        async Task<string> AnalyzeFixerBreaker(bool onlyNearColorings, int missingEdgeIndex, bool superAbundantOnly, bool generateProof, FixerBreakerSwapMode swapMode, int extraPsi)
+        async Task<string> AnalyzeFixerBreaker(bool onlyNearColorings, int missingEdgeIndex, bool superAbundantOnly, bool generateProof, FixerBreakerSwapMode swapMode, int extraPsi, bool allowAllIntermediateBoards)
         {
             var proof = "";
             var blob = AlgorithmBlob.Create(SelectedTabCanvas);
@@ -1888,10 +1885,11 @@ trash can button.
 
             var mind = new Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.SuperSlimMind(G, generateProof, swapMode);
             mind.MaxPot = potSize;
-            mind.SuperabundantOnly = superAbundantOnly;
+            mind.OnlySuperabundantBoards = superAbundantOnly;
             mind.OnlyConsiderNearlyColorableBoards = onlyNearColorings;
             mind.MissingEdgeIndex = missingEdgeIndex;
             mind.ExtraPsi = extraPsi;
+            mind.AllIntermediateBoardsInRestrictedClass = !allowAllIntermediateBoards;
             
             using (var resultWindow = new ResultWindow(true))
             {
@@ -1907,9 +1905,10 @@ trash can button.
                     try
                     {
                         var win = mind.Analyze(template, resultWindow.OnProgress);
+                        var stats = GetStats(mind);
+
                         if (superAbundantOnly)
                         {
-                            var stats = GetStats(mind.BoardCountsList);
                             if (win)
                                 return "Fixer wins\n\n" + stats;
 
@@ -1917,55 +1916,45 @@ trash can button.
                         }
                         else
                         {
-                            var stats = GetStats(mind.BoardCountsList);
-
-                            if (mind.HasNonSuperabundantBoardThatIsNearlyColorable)
+                            if (generateProof)
                             {
-                                return "Breaker wins since there is a non-superabundant nearly colorable board";
+                                var sb = new StringBuilder();
+                                var gg = blob.UIGraph.Clone();
+                                int i = 1;
+                                foreach (var vv in gg.Vertices)
+                                {
+                                    if (template.Sizes[gg.Vertices.IndexOf(vv)] == potSize)
+                                    {
+                                        vv.Label = "";
+                                    }
+                                    else
+                                    {
+                                        vv.Label = "" + i;
+                                        i++;
+                                    }
+                                }
+
+                                if (mind.OnlyConsiderNearlyColorableBoards)
+                                {
+                                    foreach (var e in blob.UIGraph.SelectedEdges)
+                                        gg.Edges[blob.UIGraph.Edges.IndexOf(e)].Label = "e";
+                                }
+
+                                var tikz = TeXConverter.ToTikz(gg);
+                                var pb = new ArbitraryDegreeProofBuilder(mind, tikz);
+                                pb.UseWildCards = false;
+                                sb.AppendLine(pb.WriteProof());
+
+                                return sb.ToString();
                             }
                             else
                             {
-                                if (generateProof)
-                                {
-                                    var sb = new StringBuilder();
-                                    var gg = blob.UIGraph.Clone();
-                                    int i = 1;
-                                    foreach (var vv in gg.Vertices)
-                                    {
-                                        if (template.Sizes[gg.Vertices.IndexOf(vv)] == potSize)
-                                        {
-                                            vv.Label = "";
-                                        }
-                                        else
-                                        {
-                                            vv.Label = "" + i;
-                                            i++;
-                                        }
-                                    }
+                                if (win)
+                                    return "Fixer wins\n\n" + stats;
 
-                                    if (mind.OnlyConsiderNearlyColorableBoards)
-                                    {
-                                        foreach (var e in blob.UIGraph.SelectedEdges)
-                                            gg.Edges[blob.UIGraph.Edges.IndexOf(e)].Label = "e";
-                                    }
-
-                                    var tikz = TeXConverter.ToTikz(gg);
-                                    var pb = new ArbitraryDegreeProofBuilder(mind, tikz);
-                                    pb.UseWildCards = false;
-                                    sb.AppendLine(pb.WriteProof());
-
-                                    return sb.ToString();
-                                }
-                                else
-                                {
-                                    if (win)
-                                        return "Fixer wins\n\n" + stats;
-                                    if (mind.FixerWonAllNearlyColorableBoards)
-                                        return "Fixer wins on all nearly colorable boards (for some edge)\n\n" + stats;
-
-                                    return "Breaker wins\n\n" + stats;
-                                }
+                                return "Breaker wins\n\n" + stats;
                             }
+
                         }
                     }
                     catch (Exception ex) 
@@ -1980,11 +1969,11 @@ trash can button.
                 t.Text = result;
                 resultWindow.AddChild(t);
 
-                if (!generateProof && mind.BreakerWonBoard != null)
+                if (!generateProof && mind.BreakerWonBoards.Count > 0)
                 {
                     var gr = blob.UIGraph.Clone();
                     for (int i = 0; i < gr.Vertices.Count; i++)
-                        gr.Vertices[i].Label = string.Join(", ", mind.BreakerWonBoard.Stacks.Value[i].ToSet());
+                        gr.Vertices[i].Label = string.Join(", ", mind.BreakerWonBoards[0].Stacks.Value[i].ToSet());
 
                     AddTab(gr, ((TabItem)_tabControl.SelectedItem).Header + " (Breaker win)");
                 }
@@ -1993,40 +1982,39 @@ trash can button.
             return proof;
         }
 
-        static string GetStats(List<List<int>> boardCountsList)
+        static string GetStats(SuperSlimMind mind)
         {
-            if (boardCountsList == null)
-                return "";
-
-            var boardCounts = new List<int>();
-            foreach (var bc in boardCountsList)
-            {
-                for (int i = 0; i < bc.Count; i++)
-                {
-                    if (i >= boardCounts.Count)
-                    {
-                        boardCounts.Add(bc[i]);
-                    }
-                    else
-                    {
-                        boardCounts[i] += bc[i];
-                    }
-                }
-            }
+            var boardCounts = mind.BoardCounts;
 
             if (boardCounts.Count <= 2)
                 return boardCounts[0] + " total boards\n" + (boardCounts[0] - boardCounts[1]) + " colorable boards\n";
 
-            var stats = boardCounts[0] + " total boards\n" + (boardCounts[0] - boardCounts[1]) + " colorable boards\n" + (boardCounts[1] - boardCounts[2]) + " non-superabundant boards (none nearly colorable)\n";
-            for (int i = 3; i < boardCounts.Count - 1; i++)
-                stats += (boardCounts[i - 1] - boardCounts[i]) + " depth " + (i - 2) + " boards\n";
+            if (mind.OnlyConsiderNearlyColorableBoards)
+            {
+                var stats = boardCounts[0] + " total boards\n" + (boardCounts[0] - boardCounts[1]) + " colorable boards\n" + (boardCounts[1] - boardCounts[2]) + " non-nearly-colorable boards\n" + (boardCounts[2] - boardCounts[3]) + " non-superabundant boards\n";
+                for (int i = 4; i < boardCounts.Count - 1; i++)
+                    stats += (boardCounts[i - 1] - boardCounts[i]) + " depth " + (i - 2) + " boards\n";
 
-            var finalDifference = boardCounts[boardCounts.Count - 2] - boardCounts[boardCounts.Count - 1];
-            if (finalDifference == 0)
-                stats += boardCounts[boardCounts.Count - 1] + " lost boards";
+                var finalDifference = boardCounts[boardCounts.Count - 2] - boardCounts[boardCounts.Count - 1];
+                if (finalDifference == 0)
+                    stats += boardCounts[boardCounts.Count - 1] + " lost boards";
+                else
+                    stats += finalDifference + " depth " + (boardCounts.Count - 3) + " boards\n";
+                return stats;
+            }
             else
-                stats += finalDifference + " depth " + (boardCounts.Count - 3) + " boards\n";
-            return stats;
+            {
+                var stats = boardCounts[0] + " total boards\n" + (boardCounts[0] - boardCounts[1]) + " colorable boards\n" + (boardCounts[1] - boardCounts[2]) + " non-superabundant boards\n";
+                for (int i = 3; i < boardCounts.Count - 1; i++)
+                    stats += (boardCounts[i - 1] - boardCounts[i]) + " depth " + (i - 2) + " boards\n";
+
+                var finalDifference = boardCounts[boardCounts.Count - 2] - boardCounts[boardCounts.Count - 1];
+                if (finalDifference == 0)
+                    stats += boardCounts[boardCounts.Count - 1] + " lost boards";
+                else
+                    stats += finalDifference + " depth " + (boardCounts.Count - 3) + " boards\n";
+                return stats;
+            }
         }
 
         void OnThoughtProgress(ThoughtProgress p, VisualizationWindow w, GraphCanvas graphCanvas)

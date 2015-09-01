@@ -63,7 +63,7 @@ namespace UnitTests
 
             var win = mind.Analyze(template, null);
 
-            Assert.AreEqual(totalPositions, mind.TotalPositions, "total positions fail");
+            Assert.AreEqual(totalPositions, mind.TotalBoards, "total positions fail");
             Assert.AreEqual(shouldWin, win, "outright win fail");
 
             if (!win)

@@ -25,12 +25,12 @@ namespace Console
 
                     var mind = new Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.SuperSlimMind(g, false, FixerBreakerSwapMode.SingleSwap);
                     mind.MaxPot = Delta;
-                    mind.SuperabundantOnly = true;
+                    mind.OnlySuperabundantBoards = true;
                     mind.OnlyConsiderNearlyColorableBoards = true;
 
                     var weakMind = new Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.SuperSlimMind(g, false, FixerBreakerSwapMode.Original);
                     weakMind.MaxPot = Delta;
-                    weakMind.SuperabundantOnly = true;
+                    weakMind.OnlySuperabundantBoards = true;
                     weakMind.OnlyConsiderNearlyColorableBoards = true;
 
                     var template = new Template(g.VertexWeight);
@@ -51,7 +51,6 @@ namespace Console
                             System.Console.ForegroundColor = ConsoleColor.Blue;
                         else
                             System.Console.ForegroundColor = ConsoleColor.Green;
-                        System.Console.WriteLine("  " + weakMind.BoardCountsList.Max(l => l.Count) + " - " + mind.BoardCountsList.Max(l => l.Count) + " = " + (weakMind.BoardCountsList.Max(l => l.Count) - mind.BoardCountsList.Max(l => l.Count)));
                         System.Console.ForegroundColor = ConsoleColor.White;
                     }
                 }

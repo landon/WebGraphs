@@ -148,17 +148,16 @@
             <menu:ContextMenuService.ContextMenu>
                 <menu:ContextMenu>
                     <local:SuperMenuItem x:Name="_fixerBreakerModeItem" Header="single swap mode" Click="MenuItemClick"/>
+                    <local:SuperMenuItem x:Name="_fixerBreakerIntermediateModeItem" Header="restrict intermediate boards mode" Click="MenuItemClick"/>
                     <menu:Separator/>
                     <local:SuperMenuItem Header="analyze" Click="MenuItemClick"/>
                     <local:SuperMenuItem Header="analyze only near colorings" Click="MenuItemClick"/>
-                    <local:SuperMenuItem Header="analyze only near colorings for selected edge" Click="MenuItemClick"/>
                     <menu:Separator/>
                     <local:SuperMenuItem Header="analyze superabundant only" Click="MenuItemClick"/>
                     <local:SuperMenuItem Header="analyze superabundant only near colorings" Click="MenuItemClick"/>
                     <local:SuperMenuItem Header="analyze superabundant only near colorings, extra psi" Click="MenuItemClick"/>
                     <menu:Separator/>
                     <local:SuperMenuItem Header="generate proof" Click="MenuItemClick"/>
-                    <local:SuperMenuItem Header="generate proof only near colorings for selected edge" Click="MenuItemClick"/>
                     <menu:Separator/>
                     <local:SuperMenuItem Header="generate deepest board, near coloring" Click="MenuItemClick"/>
                     <local:SuperMenuItem Header="generate deepest extra psi board, near coloring" Click="MenuItemClick"/>

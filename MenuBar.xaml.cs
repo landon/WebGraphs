@@ -254,13 +254,13 @@ namespace WebGraphs
                     A(ClearOrientation);
                     break;
                 case "analyze":
-                    A(Analyze, false, 0, GetSwapMode(), false, false, false);
+                    A(Analyze, false, 0, GetSwapMode(), AllowAllIntermediateMode(), false, false);
                     break;
                 case "analyze only near colorings":
-                    A(Analyze, true, 0, GetSwapMode(), false, false, false);
+                    A(Analyze, true, 0, GetSwapMode(), AllowAllIntermediateMode(), false, false);
                     break;
                 case "analyze only near colorings for selected edge":
-                    A(Analyze, true, 0, GetSwapMode(), true, false, false);
+                    A(Analyze, true, 0, GetSwapMode(), AllowAllIntermediateMode(), false, false);
                     break;
                 case "check (f:g)-paintable":
                     A(CheckFGPaintable);
@@ -305,19 +305,19 @@ namespace WebGraphs
                     A(DoSpin);
                     break;
                 case "analyze superabundant only":
-                    A(Analyze, false, 0, GetSwapMode(), false, true, false);
+                    A(Analyze, false, 0, GetSwapMode(), AllowAllIntermediateMode(), true, false);
                     break;
                 case "analyze superabundant only near colorings":
-                    A(Analyze, true, 0, GetSwapMode(), false, true, false);
+                    A(Analyze, true, 0, GetSwapMode(), AllowAllIntermediateMode(), true, false);
                     break;
                 case "analyze superabundant only near colorings, extra psi":
-                    A(Analyze, true, 1, GetSwapMode(), false, true, false);
+                    A(Analyze, true, 1, GetSwapMode(), AllowAllIntermediateMode(), true, false);
                     break;
                 case "generate proof":
-                    A(Analyze, false, 0, GetSwapMode(), false, false, true);
+                    A(Analyze, false, 0, GetSwapMode(), AllowAllIntermediateMode(), false, true);
                     break;
                 case "generate proof only near colorings for selected edge":
-                    A(Analyze, true, 0, GetSwapMode(), true, false, true);
+                    A(Analyze, true, 0, GetSwapMode(), AllowAllIntermediateMode(), false, true);
                     break;
                 case "add clock spindle":
                     A(OnAddClockSpindle);
@@ -326,28 +326,28 @@ namespace WebGraphs
                     A(OnAddCClockSpindle);
                     break;
                 case "analyze current board":
-                    A(AnalyzeCurrentBoard, false, 0, GetSwapMode(), false, true, false);
+                    A(AnalyzeCurrentBoard, false, 0, GetSwapMode(), AllowAllIntermediateMode(), true, false);
                     break;
                 case "analyze current board maintaining extra psi":
-                    A(AnalyzeCurrentBoard, false, 1, GetSwapMode(), false, true, false);
+                    A(AnalyzeCurrentBoard, false, 1, GetSwapMode(), AllowAllIntermediateMode(), true, false);
                     break;
                 case "analyze current board through near colorings":
-                    A(AnalyzeCurrentBoard, true, 0, GetSwapMode(), false, true, false);
+                    A(AnalyzeCurrentBoard, true, 0, GetSwapMode(), true, true, false);
                     break;
                 case "analyze current board maintaining extra psi through near colorings":
-                    A(AnalyzeCurrentBoard, true, 1, GetSwapMode(), false, true, false);
+                    A(AnalyzeCurrentBoard, true, 1, GetSwapMode(), true, true, false);
                     break;
                 case "generate deepest board, near coloring":
-                    A(GenenerateBoard, true, 0, GetSwapMode(), false, true, false);
+                    A(GenenerateBoard, true, 0, GetSwapMode(), AllowAllIntermediateMode(), true, false);
                     break;
                 case "generate deepest extra psi board, near coloring":
-                    A(GenenerateBoard, true, 1, GetSwapMode(), false, true, false);
+                    A(GenenerateBoard, true, 1, GetSwapMode(), AllowAllIntermediateMode(), true, false);
                     break;
                 case "generate deepest board":
-                    A(GenenerateBoard, false, 0, GetSwapMode(), false, true, false);
+                    A(GenenerateBoard, false, 0, GetSwapMode(), AllowAllIntermediateMode(), true, false);
                     break;
                 case "generate deepest extra psi board":
-                    A(GenenerateBoard, false, 1, GetSwapMode(), false, true, false);
+                    A(GenenerateBoard, false, 1, GetSwapMode(), AllowAllIntermediateMode(), true, false);
                     break;
                 case "original mode":
                     _fixerBreakerModeItem.Header = "single swap mode";
@@ -357,6 +357,12 @@ namespace WebGraphs
                     break;
                 case "multi swap mode":
                     _fixerBreakerModeItem.Header = "original mode";
+                    break;
+                case "restrict intermediate boards mode":
+                    _fixerBreakerIntermediateModeItem.Header = "allow all intermediate boards mode";
+                    break;
+                case "allow all intermediate boards mode":
+                    _fixerBreakerIntermediateModeItem.Header = "restrict intermediate boards mode";
                     break;
              
             }
@@ -375,6 +381,11 @@ namespace WebGraphs
             }
 
             return FixerBreakerSwapMode.SingleSwap;
+        }
+
+        bool AllowAllIntermediateMode()
+        {
+            return (string)_fixerBreakerIntermediateModeItem.Header == "allow all intermediate boards mode";
         }
 
         static void A(Action a)
