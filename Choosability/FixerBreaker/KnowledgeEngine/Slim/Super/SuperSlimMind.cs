@@ -43,6 +43,10 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
         public HashSet<SuperSlimBoard> FixerWonBoards { get; private set; }
         public int ExtraPsi { get; set; }
 
+        public int NonSuperabundantBoardCount { get; private set; }
+        public int NonSuperabundantExtraPsiBoardCount { get; private set; }
+        public int NonNearlyColorableBoardCount { get; private set; }
+
         public SuperSlimMind(Graph g, bool proofFindingMode = false, FixerBreakerSwapMode swapMode = FixerBreakerSwapMode.SingleSwap)
         {
             _graph = g;
@@ -56,8 +60,6 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
 
         public bool Analyze(Template template, Action<Tuple<string, int>> progress = null)
         {
-            AllIntermediateBoardsInRestrictedClass = true;
-
             _lastProgress = -1;
             _remainingBoards = new List<SuperSlimBoard>();
             FixerWonBoards = new HashSet<SuperSlimBoard>();
@@ -88,7 +90,12 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
             if (OnlyConsiderNearlyColorableBoards)
                 leftover = leftover.Intersect(NearlyColorableBoards);
             if (OnlySuperabundantBoards)
-                leftover = leftover.Intersect(SuperabundantBoards);
+            {
+                if (ExtraPsi <= 0)
+                    leftover = leftover.Intersect(SuperabundantBoards);
+                else
+                    leftover = leftover.Intersect(SuperabundantWithExtraPsiBoards);
+            }
 
             BreakerWonBoards = leftover.ToList();
             return BreakerWonBoards.Count <= 0;
@@ -96,8 +103,6 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
 
         void FindColorableBoards(Action<Tuple<string, int>> progress)
         {
-            BoardCounts.Add(_remainingBoards.Count);
-
             for (int i = _remainingBoards.Count - 1; i >= 0; i--)
             {
                 var b = _remainingBoards[i];
@@ -110,15 +115,17 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
 
                 DoProgress(progress, "Finding all colorable positions...");
             }
+
+            BoardCounts.Add(ColorableBoards.Count);
         }
 
         void FindNearlyColorableBoards(Action<Tuple<string, int>> progress)
         {
+            NonNearlyColorableBoardCount = 0;
+
             if (!OnlyConsiderNearlyColorableBoards)
                 return;
-
-            BoardCounts.Add(_remainingBoards.Count);
-
+            
             for (int i = _remainingBoards.Count - 1; i >= 0; i--)
             {
                 var b = _remainingBoards[i];
@@ -126,20 +133,25 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
 
                 if (nearlyColorable)
                     NearlyColorableBoards.Add(b);
-                else if (AllIntermediateBoardsInRestrictedClass)
+                else
                 {
-                    _remainingBoards.RemoveAt(i);
-                    DoProgress(progress, "Finding all nearly colorable positions...");
+                    NonNearlyColorableBoardCount++;
+                    if (AllIntermediateBoardsInRestrictedClass)
+                    {
+                        _remainingBoards.RemoveAt(i);
+                        DoProgress(progress, "Finding all nearly colorable positions...");
+                    }
                 }
             }
         }
 
         void FindSuperabundantBoards(Action<Tuple<string, int>> progress)
         {
+            NonSuperabundantBoardCount = 0;
+            NonSuperabundantExtraPsiBoardCount = 0;
+
             if (!OnlySuperabundantBoards)
                 return;
-
-            BoardCounts.Add(_remainingBoards.Count);
 
             for (int i = _remainingBoards.Count - 1; i >= 0; i--)
             {
@@ -156,15 +168,22 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
                         {
                             SuperabundantWithExtraPsiBoards.Add(b);
                         }
-                        else if (AllIntermediateBoardsInRestrictedClass)
+                        else
                         {
-                            _remainingBoards.RemoveAt(i);
-                            DoProgress(progress, "Finding all superabundant positions with extra psi...");
+                            NonSuperabundantExtraPsiBoardCount++;
+
+                            if (AllIntermediateBoardsInRestrictedClass)
+                            {
+                                _remainingBoards.RemoveAt(i);
+                                DoProgress(progress, "Finding all superabundant positions with extra psi...");
+                            }
                         }
                     }
                 }
                 else
                 {
+                    NonSuperabundantBoardCount++;
+
                     BreakerWonBoards.Add(b);
                     
                     _remainingBoards.RemoveAt(i);
@@ -175,14 +194,8 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
 
         void Analyze(Action<Tuple<string, int>> progress)
         {
-            BoardCounts.Add(_remainingBoards.Count);
-
-            int winLength = 0;
             while (_remainingBoards.Count > 0)
             {
-                var count = _remainingBoards.Count;
-
-                winLength++;
                 var wonBoards = new List<SuperSlimBoard>();
                 for (int i = _remainingBoards.Count - 1; i >= 0; i--)
                 {
@@ -192,17 +205,21 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
                         _remainingBoards.RemoveAt(i);
                         wonBoards.Add(b);
 
-                        DoProgress(progress, string.Format("Finding all {0} move wins...", winLength));
+                        DoProgress(progress, string.Format("Finding all {0} move wins...", BoardCounts.Count));
                     }
                 }
 
-                foreach (var b in wonBoards)
-                    FixerWonBoards.Add(b);
+                if (wonBoards.Count > 0)
+                {
+                    BoardCounts.Add(wonBoards.Count);
 
-                BoardCounts.Add(_remainingBoards.Count);
-
-                if (_remainingBoards.Count == count)
+                    foreach (var b in wonBoards)
+                        FixerWonBoards.Add(b);
+                }
+                else
+                {
                     break;
+                }
             }
         }
 

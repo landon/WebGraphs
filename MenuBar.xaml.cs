@@ -80,6 +80,7 @@ namespace WebGraphs
         public event Action DoSpin;
         public event Action OnAddClockSpindle;
         public event Action OnAddCClockSpindle;
+        public event Action OnNextDeepestBoard;
 
         public event Action<bool, int, FixerBreakerSwapMode, bool, bool, bool> Analyze;
         public event Action<bool, int, FixerBreakerSwapMode, bool, bool, bool> AnalyzeCurrentBoard;
@@ -328,25 +329,25 @@ namespace WebGraphs
                 case "analyze current board":
                     A(AnalyzeCurrentBoard, false, 0, GetSwapMode(), AllowAllIntermediateMode(), true, false);
                     break;
-                case "analyze current board maintaining extra psi":
+                case "analyze current board, extra psi":
                     A(AnalyzeCurrentBoard, false, 1, GetSwapMode(), AllowAllIntermediateMode(), true, false);
                     break;
-                case "analyze current board through near colorings":
-                    A(AnalyzeCurrentBoard, true, 0, GetSwapMode(), true, true, false);
+                case "analyze current board, near colorings":
+                    A(AnalyzeCurrentBoard, true, 0, GetSwapMode(), AllowAllIntermediateMode(), true, false);
                     break;
-                case "analyze current board maintaining extra psi through near colorings":
-                    A(AnalyzeCurrentBoard, true, 1, GetSwapMode(), true, true, false);
+                case "analyze current board, extra psi, near colorings":
+                    A(AnalyzeCurrentBoard, true, 1, GetSwapMode(), AllowAllIntermediateMode(), true, false);
                     break;
-                case "generate deepest board, near coloring":
+                case "generate deepest board, near colorings":
                     A(GenenerateBoard, true, 0, GetSwapMode(), AllowAllIntermediateMode(), true, false);
                     break;
-                case "generate deepest extra psi board, near coloring":
+                case "generate deepest board, extra psi, near colorings":
                     A(GenenerateBoard, true, 1, GetSwapMode(), AllowAllIntermediateMode(), true, false);
                     break;
                 case "generate deepest board":
                     A(GenenerateBoard, false, 0, GetSwapMode(), AllowAllIntermediateMode(), true, false);
                     break;
-                case "generate deepest extra psi board":
+                case "generate deepest board, extra psi":
                     A(GenenerateBoard, false, 1, GetSwapMode(), AllowAllIntermediateMode(), true, false);
                     break;
                 case "original mode":
@@ -363,6 +364,9 @@ namespace WebGraphs
                     break;
                 case "allow all intermediate boards mode":
                     _fixerBreakerIntermediateModeItem.Header = "restrict intermediate boards mode";
+                    break;
+                case "next deepest board":
+                    A(OnNextDeepestBoard);
                     break;
              
             }

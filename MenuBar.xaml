@@ -159,16 +159,16 @@
                     <menu:Separator/>
                     <local:SuperMenuItem Header="generate proof" Click="MenuItemClick"/>
                     <menu:Separator/>
-                    <local:SuperMenuItem Header="generate deepest board, near coloring" Click="MenuItemClick"/>
-                    <local:SuperMenuItem Header="generate deepest extra psi board, near coloring" Click="MenuItemClick"/>
                     <local:SuperMenuItem Header="generate deepest board" Click="MenuItemClick"/>
-                    <local:SuperMenuItem Header="generate deepest extra psi board" Click="MenuItemClick"/>
+                    <local:SuperMenuItem Header="generate deepest board, near colorings" Click="MenuItemClick"/>
+                    <local:SuperMenuItem Header="generate deepest board, extra psi" Click="MenuItemClick"/>
+                    <local:SuperMenuItem Header="generate deepest board, extra psi, near colorings" Click="MenuItemClick"/>
+                    <local:SuperMenuItem Header="next deepest board" Click="MenuItemClick"/>
                     <menu:Separator/>
                     <local:SuperMenuItem Header="analyze current board" Click="MenuItemClick"/>
-                    <local:SuperMenuItem Header="analyze current board maintaining extra psi" Click="MenuItemClick"/>
-                    <menu:Separator/>
-                    <local:SuperMenuItem Header="analyze current board through near colorings" Click="MenuItemClick"/>
-                    <local:SuperMenuItem Header="analyze current board maintaining extra psi through near colorings" Click="MenuItemClick"/>
+                    <local:SuperMenuItem Header="analyze current board, near colorings" Click="MenuItemClick"/>
+                    <local:SuperMenuItem Header="analyze current board, extra psi" Click="MenuItemClick"/>
+                    <local:SuperMenuItem Header="analyze current board, extra psi, near colorings" Click="MenuItemClick"/>
                 </menu:ContextMenu>
             </menu:ContextMenuService.ContextMenu>
         </Button>

@@ -109,6 +109,8 @@ namespace WebGraphs
             _mainMenu.OnAddClockSpindle += _mainMenu_OnAddClockSpindle;
             _mainMenu.OnAddCClockSpindle += _mainMenu_OnAddCClockSpindle;
 
+            _mainMenu.OnNextDeepestBoard += GoNextDeepestBoard;
+
             _mainMenu.Analyze += AnalyzeFixerBreaker;
             _mainMenu.AnalyzeCurrentBoard += _mainMenu_OnAnalyzeCurrentBoard;
             _mainMenu.GenenerateBoard += _mainMenu_OnGenenerateBoard;
@@ -117,7 +119,6 @@ namespace WebGraphs
 
             DoAutoLoad();
         }
-
 
         void DoAutoLoad()
         {
@@ -1662,59 +1663,9 @@ trash can button.
         {
         }
 
-        async void _mainMenu_OnGenenerateBoard(bool nearColoring, int extraPsi, FixerBreakerSwapMode swapMode, bool allowAllIntermediateBoards, bool superabundantOnly, bool generateProof)
+        void GoNextDeepestBoard()
         {
             var blob = AlgorithmBlob.Create(SelectedTabCanvas);
-            var G = blob.AlgorithmGraph;
-
-            var sizes = G.Vertices.Select(v => blob.UIGraph.Vertices[v].Label.TryParseInt().Value).ToList();
-            using (var resultWindow = new ResultWindow(true, false))
-            {
-                resultWindow.Show();
-                _lastGeneratedBoards = await Task.Factory.StartNew<List<SuperSlimBoard>>(() =>
-                    {
-                        var extraPsiBoards = new List<SuperSlimBoard>();
-                        var template = new Template(sizes);
-
-                        var mind = new SuperSlimMind(G, true, swapMode);
-                        mind.OnlySuperabundantBoards = true;
-                        mind.ExtraPsi = extraPsi;
-                        mind.OnlyConsiderNearlyColorableBoards = nearColoring;
-                        mind.MaxPot = int.MaxValue;
-                        mind.MissingEdgeIndex = GetMissingEdgeIndex(nearColoring);
-                        mind.AllIntermediateBoardsInRestrictedClass = !allowAllIntermediateBoards;
-
-                        var win = mind.Analyze(template, resultWindow.OnProgress);
-
-                        if (win)
-                        {
-                            var gameTrees = mind.FixerWonBoards.Select(bb => mind.BuildGameTree(bb)).ToList();
-                            var maxDepth = gameTrees.Max(gt => gt.GetDepth());
-                            return gameTrees.Where(gt => gt.GetDepth() == maxDepth).Select(gt => gt.Board).ToList();
-                        }
-                        else
-                            return null;
-                    });
-
-                _lastGenerationIndex = 0;
-                resultWindow.ClearChildren();
-
-                var t = new TextBox();
-
-                if (_lastGeneratedBoards == null)
-                {
-
-                    t.Text = "Breaker wins under these conditions.";
-                }
-                else
-                {
-                    t.Text = "Here is a deepest board.  There are " + _lastGeneratedBoards.Count + " of them.";
-                }
-
-                resultWindow.AddChild(t);
-            }
-
-            _lastGenerationGraph = G;
 
             if (_lastGeneratedBoards != null)
             {
@@ -1728,6 +1679,64 @@ trash can button.
             }
 
             SelectedTabCanvas.Invalidate();
+        }
+
+        async void _mainMenu_OnGenenerateBoard(bool nearColoring, int extraPsi, FixerBreakerSwapMode swapMode, bool allowAllIntermediateBoards, bool superabundantOnly, bool generateProof)
+        {
+            var blob = AlgorithmBlob.Create(SelectedTabCanvas);
+            var G = blob.AlgorithmGraph;
+            var missingEdgeIndex = GetMissingEdgeIndex(nearColoring);
+
+            var sizes = G.Vertices.Select(v => blob.UIGraph.Vertices[v].Label.TryParseInt().Value).ToList();
+            using (var resultWindow = new ResultWindow(true, false))
+            {
+                int maxDepth = 0;
+                resultWindow.Show();
+                _lastGeneratedBoards = await Task.Factory.StartNew<List<SuperSlimBoard>>(() =>
+                    {
+                        var extraPsiBoards = new List<SuperSlimBoard>();
+                        var template = new Template(sizes);
+
+                        var mind = new SuperSlimMind(G, true, swapMode);
+                        mind.OnlySuperabundantBoards = true;
+                        mind.ExtraPsi = extraPsi;
+                        mind.OnlyConsiderNearlyColorableBoards = nearColoring;
+                        mind.MaxPot = int.MaxValue;
+                        mind.MissingEdgeIndex = missingEdgeIndex;
+                        mind.AllIntermediateBoardsInRestrictedClass = !allowAllIntermediateBoards;
+
+                        var win = mind.Analyze(template, resultWindow.OnProgress);
+
+                        if (win)
+                        {
+                            var gameTrees = mind.FixerWonBoards.Select(bb => mind.BuildGameTree(bb)).ToList();
+                            maxDepth = gameTrees.Max(gt => gt.GetDepth());
+                            return gameTrees.Where(gt => gt.GetDepth() == maxDepth).Select(gt => gt.Board).ToList();
+                        }
+                        else
+                            return null;
+                    });
+
+                _lastGenerationIndex = 0;
+                resultWindow.ClearChildren();
+
+                var t = new TextBox();
+
+                if (_lastGeneratedBoards == null)
+                {
+                    t.Text = "Breaker wins under these conditions.";
+                }
+                else
+                {
+                    t.Text = "Here is a deepest board (depth " + maxDepth + ").  There are " + _lastGeneratedBoards.Count + " of them.";
+                }
+
+                resultWindow.AddChild(t);
+            }
+
+            _lastGenerationGraph = G;
+
+            GoNextDeepestBoard();
         }
 
         async void _mainMenu_OnAnalyzeCurrentBoard(bool nearColoring, int extraPsi, FixerBreakerSwapMode swapMode, bool allowAllIntermediateBoards, bool superabundantOnly, bool generateProof)
@@ -1767,7 +1776,6 @@ trash can button.
             mind.OnlySuperabundantBoards = true;
             mind.ExtraPsi = extraPsi;
             mind.OnlyConsiderNearlyColorableBoards = nearColoring;
-            mind.OnlyConsiderNearlyColorableBoards = false;
             mind.MissingEdgeIndex = GetMissingEdgeIndex(nearColoring);
             mind.AllIntermediateBoardsInRestrictedClass = !allowAllIntermediateBoards;
 
@@ -1823,7 +1831,7 @@ trash can button.
                     var treeBuilder = new TreeBuilder();
 
                     var tc = AddTab(treeBuilder.BuildWinTree(blob.UIGraph, mind, board, numbering), blob.UIGraph.Name + " win tree");
-                    tc.GraphCanvas.SetZoomDelta(0.04);
+                    tc.GraphCanvas.SetZoomDelta(0.015);
                     tc.GraphCanvas.SnapToGrid = false;
                     tc.GraphCanvas.DrawGrid = false;
                     tc.GraphCanvas.ZoomFitNextPaint();
@@ -1984,37 +1992,25 @@ trash can button.
 
         static string GetStats(SuperSlimMind mind)
         {
-            var boardCounts = mind.BoardCounts;
-
-            if (boardCounts.Count <= 2)
-                return boardCounts[0] + " total boards\n" + (boardCounts[0] - boardCounts[1]) + " colorable boards\n";
-
-            if (mind.OnlyConsiderNearlyColorableBoards)
+            var sb = new StringBuilder();
+            sb.AppendLine(mind.TotalBoards + " total boards");
+            sb.AppendLine(mind.ColorableBoards.Count + " colorable boards");
+            if (mind.OnlyConsiderNearlyColorableBoards && mind.AllIntermediateBoardsInRestrictedClass)
+                sb.AppendLine(mind.NonNearlyColorableBoardCount + " non-nearly-colorable boards");
+            if (mind.OnlySuperabundantBoards)
             {
-                var stats = boardCounts[0] + " total boards\n" + (boardCounts[0] - boardCounts[1]) + " colorable boards\n" + (boardCounts[1] - boardCounts[2]) + " non-nearly-colorable boards\n" + (boardCounts[2] - boardCounts[3]) + " non-superabundant boards\n";
-                for (int i = 4; i < boardCounts.Count - 1; i++)
-                    stats += (boardCounts[i - 1] - boardCounts[i]) + " depth " + (i - 2) + " boards\n";
-
-                var finalDifference = boardCounts[boardCounts.Count - 2] - boardCounts[boardCounts.Count - 1];
-                if (finalDifference == 0)
-                    stats += boardCounts[boardCounts.Count - 1] + " lost boards";
-                else
-                    stats += finalDifference + " depth " + (boardCounts.Count - 3) + " boards\n";
-                return stats;
+                sb.AppendLine(mind.NonSuperabundantBoardCount + " non-superabundant boards");
+                if (mind.ExtraPsi > 0 && mind.AllIntermediateBoardsInRestrictedClass)
+                    sb.AppendLine(mind.NonSuperabundantExtraPsiBoardCount + " non-extra-psi boards");
             }
-            else
-            {
-                var stats = boardCounts[0] + " total boards\n" + (boardCounts[0] - boardCounts[1]) + " colorable boards\n" + (boardCounts[1] - boardCounts[2]) + " non-superabundant boards\n";
-                for (int i = 3; i < boardCounts.Count - 1; i++)
-                    stats += (boardCounts[i - 1] - boardCounts[i]) + " depth " + (i - 2) + " boards\n";
 
-                var finalDifference = boardCounts[boardCounts.Count - 2] - boardCounts[boardCounts.Count - 1];
-                if (finalDifference == 0)
-                    stats += boardCounts[boardCounts.Count - 1] + " lost boards";
-                else
-                    stats += finalDifference + " depth " + (boardCounts.Count - 3) + " boards\n";
-                return stats;
-            }
+            for (int depth = 1; depth < mind.BoardCounts.Count; depth++)
+                sb.AppendLine(mind.BoardCounts[depth] + " depth " + depth + " boards");
+
+            if (mind.BreakerWonBoards.Count > 0)
+                sb.AppendLine(mind.BreakerWonBoards.Count + " breaker won boards");
+
+            return sb.ToString();
         }
 
         void OnThoughtProgress(ThoughtProgress p, VisualizationWindow w, GraphCanvas graphCanvas)
