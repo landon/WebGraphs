@@ -221,11 +221,11 @@ namespace Graphs
 
             int width = Width;
             int height = Height;
-            var bounds = _graph.BoundingRectangle;
+            var bounds = _graph.SelectedBoundingRectangle;
             var c = new Vector(bounds.Left + bounds.Width / 2, bounds.Top + bounds.Height / 2);
 
             var actual = Math.Min(width, height);
-            Zoom = 0.9 * actual / Math.Max(bounds.Width, bounds.Height) / BaseViewScale;
+            Zoom = 0.8 * actual / Math.Max(bounds.Width, bounds.Height) / BaseViewScale;
 
             var center = new Vector((double)width / (double)_viewScale * 0.5, (double)height / (double)_viewScale * 0.5);
             _graph.Translate(center - c);

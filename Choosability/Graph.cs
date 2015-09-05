@@ -59,6 +59,10 @@ namespace Choosability
 
         public List<List<int>> IndependentSets { get { return _independentSets.Value; } }
         public List<List<int>> MaximalIndependentSets { get { return _maximalIndependentSets.Value; } }
+        public Lazy<List<Tuple<int, int>>> Edges { get; private set; }
+        public Lazy<List<Tuple<int, int>>> NonCutEdges { get; private set; }
+        public Lazy<List<Tuple<int, int>>> PendantEdges { get; private set; }
+        public Lazy<Graph> LineGraph { get; private set; }
 
         public Graph FromOutNeighborLists(Dictionary<int, List<int>> outNeighbors)
         {
@@ -298,6 +302,41 @@ namespace Choosability
             _independentThreeSets = new Lazy<List<List<int>>>(() => _independentSets.Value.Where(set => set.Count == 3).ToList(), true);
             _vertexSubsets = new Lazy<List<List<int>>>(() => ListUtility.GenerateSublists(_vertices));
             _maximalIndependentSets = new Lazy<List<List<int>>>(() => ListUtility.MaximalElements(_independentSets.Value), true);
+
+            Edges = new Lazy<List<Tuple<int, int>>>(() =>
+                {
+                    var edges = new List<Tuple<int, int>>();
+                    for (int i = 0; i < N; i++)
+                        for (int j = i + 1; j < N; j++)
+                            if (this[i, j])
+                                edges.Add(new Tuple<int, int>(i, j));
+
+                    return edges;
+                });
+
+            NonCutEdges = new Lazy<List<Tuple<int, int>>>(() =>
+            {
+                return Edges.Value.Where(e => IsConnected(e)).ToList();
+            });
+
+            PendantEdges = new Lazy<List<Tuple<int, int>>>(() =>
+            {
+                return Edges.Value.Where(e => Degree(e.Item1) == 1 || Degree(e.Item2) == 1).ToList();
+            });
+
+            LineGraph = new Lazy<Graph>(() =>
+                {
+                    var meets = new bool[Edges.Value.Count, Edges.Value.Count];
+                    for (int i = 0; i < Edges.Value.Count; i++)
+                        for (int j = i + 1; j < Edges.Value.Count; j++)
+                            if (Edges.Value[i].Item1 == Edges.Value[j].Item1 ||
+                                Edges.Value[i].Item1 == Edges.Value[j].Item2 ||
+                                Edges.Value[i].Item2 == Edges.Value[j].Item1 ||
+                                Edges.Value[i].Item2 == Edges.Value[j].Item2)
+                                meets[i, j] = meets[j, i] = true;
+
+                    return new Graph(meets);
+                });
         }
 
         #region Equality and Isomorphism
@@ -1863,35 +1902,39 @@ namespace Choosability
 
             return equivalenceRelation;
         }
-        public EquivalenceRelation<int> FindComponents()
+
+        public bool IsConnected(params Tuple<int, int>[] missingEdges)
         {
-            var equivalenceRelation = new Choosability.Utility.EquivalenceRelation<int>();
-
-            for (int i = 0; i < N; i++)
-            {
-                equivalenceRelation.AddElement(i);
-
-                for (int j = i + 1; j < N; j++)
-                {
-                    if (_adjacent[i, j])
-                        equivalenceRelation.Relate(i, j);
-                }
-            }
-
-            return equivalenceRelation;
+            return IsConnected(Vertices, missingEdges);
         }
-        public EquivalenceRelation<int> FindComponents(List<int> v)
+        public bool IsConnected(IEnumerable<Tuple<int, int>> missingEdges = null)
         {
+            return IsConnected(Vertices, missingEdges);
+        }
+        public bool IsConnected(List<int> subgraphVertices, IEnumerable<Tuple<int, int>> missingEdges = null)
+        {
+            return FindComponents(subgraphVertices, missingEdges).GetEquivalenceClasses().Count() == 1;
+        }
+        public EquivalenceRelation<int> FindComponents(IEnumerable<Tuple<int,int>> missingEdges = null)
+        {
+            return FindComponents(Vertices, missingEdges);
+        }
+        public EquivalenceRelation<int> FindComponents(List<int> subgraphVertices, IEnumerable<Tuple<int, int>> missingEdges = null)
+        {
+            var me = missingEdges == null ? new List<Tuple<int, int>>() : missingEdges.ToList();
+
             var equivalenceRelation = new Choosability.Utility.EquivalenceRelation<int>();
-
-            for (int i = 0; i < v.Count; i++)
+            for (int i = 0; i < subgraphVertices.Count; i++)
             {
-                equivalenceRelation.AddElement(v[i]);
+                equivalenceRelation.AddElement(subgraphVertices[i]);
 
-                for (int j = i + 1; j < v.Count; j++)
+                for (int j = i + 1; j < subgraphVertices.Count; j++)
                 {
-                    if (_adjacent[v[i], v[j]])
-                        equivalenceRelation.Relate(v[i], v[j]);
+                    if (_adjacent[subgraphVertices[i], subgraphVertices[j]])
+                    {
+                        if (!missingEdges.Any(e => e.Item1 == i && e.Item2 == j || e.Item1 == j && e.Item2 == i))
+                            equivalenceRelation.Relate(i, j);
+                    }
                 }
             }
 

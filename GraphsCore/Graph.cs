@@ -83,6 +83,34 @@ namespace Graphs
             }
         }
 
+        public GraphicsLayer.Box SelectedBoundingRectangle
+        {
+            get
+            {
+                var sv = SelectedVertices.ToList();
+                if (sv.Count <= 0)
+                    return BoundingRectangle;
+
+                lock (_ModifyListsToken)
+                {
+                    var left = double.MaxValue;
+                    var right = double.MinValue;
+                    var top = double.MaxValue;
+                    var bottom = double.MinValue;
+
+                    foreach (var v in sv)
+                    {
+                        left = Math.Min(left, v.LocalBounds.Left);
+                        right = Math.Max(right, v.LocalBounds.Right);
+                        top = Math.Min(top, v.LocalBounds.Top);
+                        bottom = Math.Max(bottom, v.LocalBounds.Bottom);
+                    }
+
+                    return new GraphicsLayer.Box(left, top, right - left, bottom - top);
+                }
+            }
+        }
+
         public string Name
         {
             get

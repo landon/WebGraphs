@@ -13,7 +13,8 @@ namespace Console
     {
         static void Main(string[] args)
         {
-            WeaklyFixableTester.Go();
+            GenerateWithExcludedSubgraphs.Go();
+            //WeaklyFixableTester.Go();
           //  FixerBreakerTrees.Go();
          //   SuperAbundanceFinder.Go();
           //  FindFixerBreaker.Go();

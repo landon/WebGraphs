@@ -100,6 +100,7 @@
     <Compile Include="FixerBreaker\KnowledgeEngine\Slim\Super\Proofs\ProofBuilder.cs" />
     <Compile Include="FixerBreaker\KnowledgeEngine\Slim\Super\Proofs\ProofCase.cs" />
     <Compile Include="FixerBreaker\KnowledgeEngine\Slim\Super\Proofs\PermutationAwareProofBuilder.cs" />
+    <Compile Include="FixerBreaker\KnowledgeEngine\Slim\Super\SubFixableMind.cs" />
     <Compile Include="FixerBreaker\KnowledgeEngine\Slim\Super\SuperSlimBoard.cs" />
     <Compile Include="FixerBreaker\KnowledgeEngine\Slim\Super\SuperSlimColoringAnalyzer.cs" />
     <Compile Include="FixerBreaker\KnowledgeEngine\Slim\Super\SuperSlimMind.cs" />

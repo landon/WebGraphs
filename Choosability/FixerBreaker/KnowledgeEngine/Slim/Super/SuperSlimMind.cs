@@ -17,10 +17,11 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
         List<SuperSlimBoard> _remainingBoards;
         SuperSlimSwapAnalyzer _swapAnalyzer;
         SuperSlimColoringAnalyzer _coloringAnalyzer;
-        Graph _graph;
-        Graph _lineGraph;
         int _lastProgress;
-        public List<Tuple<int, int>> _edges;
+
+        public Graph G { get; private set; }
+        Graph _lineG;
+        List<Tuple<int, int>> _edges;
 
         public int MinPot { get; set; }
         public int MaxPot { get; set; }
@@ -49,10 +50,10 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
 
         public SuperSlimMind(Graph g, bool proofFindingMode = false, FixerBreakerSwapMode swapMode = FixerBreakerSwapMode.SingleSwap)
         {
-            _graph = g;
+            G = g;
             BuildLineGraph();
 
-            _coloringAnalyzer = new SuperSlimColoringAnalyzer(_lineGraph, GetEdgeColorList);
+            _coloringAnalyzer = new SuperSlimColoringAnalyzer(_lineG, GetEdgeColorList);
             _swapAnalyzer = new SuperSlimSwapAnalyzer(g.N, proofFindingMode, swapMode);
             
             MissingEdgeIndex = -1;
@@ -156,7 +157,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
             for (int i = _remainingBoards.Count - 1; i >= 0; i--)
             {
                 var b = _remainingBoards[i];
-                var superabundant = IsSuperabundantForGraph(b, _graph, 0);
+                var superabundant = IsSuperabundantForGraph(b, G, 0);
 
                 if (superabundant)
                 {
@@ -243,17 +244,17 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
 
         bool ExistsNearlyColorableBoardForEachEdge(List<SuperSlimBoard> boards)
         {
-            return Enumerable.Range(0, _lineGraph.N).All(e => boards.Any(b => NearlyColorableForEdge(b, e)));
+            return Enumerable.Range(0, _lineG.N).All(e => boards.Any(b => NearlyColorableForEdge(b, e)));
         }
 
         public bool NearlyColorableForSomeEdge(SuperSlimBoard board)
         {
-            return Enumerable.Range(0, _lineGraph.N).Any(e => NearlyColorableForEdge(board, e));
+            return Enumerable.Range(0, _lineG.N).Any(e => NearlyColorableForEdge(board, e));
         }
 
         public bool IsSuperabundant(SuperSlimBoard b)
         {
-            return IsSuperabundantForGraph(b, _graph);
+            return IsSuperabundantForGraph(b, G);
         }
 
         public static bool IsSuperabundantForGraph(SuperSlimBoard b, Graph g, int extraPsi = 0)
@@ -286,7 +287,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
             for (int i = 0; i < b._length; i++)
                 total += b._trace[i].PopulationCount() / 2;
 
-            return total - _graph.E;
+            return total - G.E;
         }
 
         IEnumerable<SuperSlimBoard> EnumerateAllBoards(Template template, int colorCount, Action<Tuple<string, int>> progress = null)
@@ -299,25 +300,8 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
 
         void BuildLineGraph()
         {
-            var adjacent = _graph.Adjacent;
-            int n = adjacent.GetUpperBound(0) + 1;
-
-            _edges = new List<Tuple<int, int>>();
-            for (int i = 0; i < n; i++)
-                for (int j = i + 1; j < n; j++)
-                    if (adjacent[i, j])
-                        _edges.Add(new Tuple<int, int>(i, j));
-
-            var meets = new bool[_edges.Count, _edges.Count];
-            for (int i = 0; i < _edges.Count; i++)
-                for (int j = i + 1; j < _edges.Count; j++)
-                    if (_edges[i].Item1 == _edges[j].Item1 ||
-                        _edges[i].Item1 == _edges[j].Item2 ||
-                        _edges[i].Item2 == _edges[j].Item1 ||
-                        _edges[i].Item2 == _edges[j].Item2)
-                        meets[i, j] = meets[j, i] = true;
-
-            _lineGraph = new Graph(meets);
+            _edges = G.Edges.Value;
+            _lineG = G.LineGraph.Value;
         }
 
         long GetEdgeColorList(SuperSlimBoard b, int e)

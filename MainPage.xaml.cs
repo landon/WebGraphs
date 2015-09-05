@@ -371,6 +371,8 @@ namespace WebGraphs
                 case Key.A:
                     break;
                 case Key.Add:
+                    if (Keyboard.Modifiers == ModifierKeys.Control)
+                        ZoomIn();
                     break;
                 case Key.Alt:
                     break;
@@ -523,6 +525,8 @@ namespace WebGraphs
                 case Key.Space:
                     break;
                 case Key.Subtract:
+                    if (Keyboard.Modifiers == ModifierKeys.Control)
+                        ZoomOut();
                     break;
                 case Key.T:
                     break;
@@ -1779,7 +1783,7 @@ trash can button.
             mind.MissingEdgeIndex = GetMissingEdgeIndex(nearColoring);
             mind.AllIntermediateBoardsInRestrictedClass = !allowAllIntermediateBoards;
 
-            var boardAndNumbering = SuperSlimBoard.Create(lists);
+            var boardAndNumbering = SuperSlimBoard.CreateAndNumber(lists);
             var board = boardAndNumbering.Item1;
             var numbering = boardAndNumbering.Item2;
 

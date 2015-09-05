@@ -93,8 +93,8 @@ namespace GraphsCore
 
                 for (int jj = 0; jj < clone.Edges.Count; jj++)
                 {
-                    var v1 = mind._edges[jj].Item1;
-                    var v2 = mind._edges[jj].Item2;
+                    var v1 = mind.G.Edges.Value[jj].Item1;
+                    var v2 = mind.G.Edges.Value[jj].Item2;
 
                     var c = coloring[jj].LeastSignificantBit();
                     if (ppp != null)
@@ -108,7 +108,7 @@ namespace GraphsCore
                     lists[v1].Remove(c);
                     lists[v2].Remove(c);
 
-                    var e = clone.Edges.First(ee => Choosability.Utility.ListUtility.Equal(new List<int>() { clone.Vertices.IndexOf(ee.V1), clone.Vertices.IndexOf(ee.V2) }, new List<int>() {v1,v2}));
+                    var e = clone.Edges.First(ee => Choosability.Utility.ListUtility.Equal(new List<int>() { clone.Vertices.IndexOf(ee.V1), clone.Vertices.IndexOf(ee.V2) }, new List<int>() { v1, v2 }));
                     e.Label = numbering[c];
                 }
             }
