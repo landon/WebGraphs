@@ -89,6 +89,7 @@ namespace WebGraphs
         public MenuBar()
         {
             InitializeComponent();
+            LoadSettings();
         }
 
         void MenuTopLevelClick(object sender, RoutedEventArgs e)
@@ -254,15 +255,6 @@ namespace WebGraphs
                 case "clear orientation":
                     A(ClearOrientation);
                     break;
-                case "analyze":
-                    A(Analyze, false, GetExtraPsi(), GetSwapMode(), AllowAllIntermediateMode(), false, false, GetReductionMode());
-                    break;
-                case "analyze only near colorings":
-                    A(Analyze, true, GetExtraPsi(), GetSwapMode(), AllowAllIntermediateMode(), false, false, GetReductionMode());
-                    break;
-                case "analyze only near colorings for selected edge":
-                    A(Analyze, true, GetExtraPsi(), GetSwapMode(), AllowAllIntermediateMode(), false, false, GetReductionMode());
-                    break;
                 case "check (f:g)-paintable":
                     A(CheckFGPaintable);
                     break;
@@ -305,71 +297,115 @@ namespace WebGraphs
                 case "spin":
                     A(DoSpin);
                     break;
-                case "analyze superabundant only":
-                    A(Analyze, false, GetExtraPsi(), GetSwapMode(), AllowAllIntermediateMode(), true, false, GetReductionMode());
-                    break;
-                case "analyze superabundant only near colorings":
-                    A(Analyze, true, GetExtraPsi(), GetSwapMode(), AllowAllIntermediateMode(), true, false, GetReductionMode());
-                    break;
-                case "generate proof":
-                    A(Analyze, false, GetExtraPsi(), GetSwapMode(), AllowAllIntermediateMode(), false, true, GetReductionMode());
-                    break;
-                case "generate proof only near colorings for selected edge":
-                    A(Analyze, true, GetExtraPsi(), GetSwapMode(), AllowAllIntermediateMode(), false, true, GetReductionMode());
-                    break;
                 case "add clock spindle":
                     A(OnAddClockSpindle);
                     break;
                 case "add cclock spindle":
                     A(OnAddCClockSpindle);
                     break;
+                case "analyze fixed Δ":
+                    A(Analyze, GetNearColoring(), GetExtraPsi(), GetSwapMode(), AllowAllIntermediateMode(), false, false, GetReductionMode());
+                    break;
+                case "analyze superabundant only":
+                    A(Analyze, GetNearColoring(), GetExtraPsi(), GetSwapMode(), AllowAllIntermediateMode(), true, false, GetReductionMode());
+                    break;
+                case "generate proof fixed Δ":
+                    A(Analyze, GetNearColoring(), GetExtraPsi(), GetSwapMode(), AllowAllIntermediateMode(), false, true, GetReductionMode());
+                    break;
                 case "analyze current board":
-                    A(AnalyzeCurrentBoard, false, GetExtraPsi(), GetSwapMode(), AllowAllIntermediateMode(), true, false, GetReductionMode());
-                    break;
-                case "analyze current board, near colorings":
-                    A(AnalyzeCurrentBoard, true, GetExtraPsi(), GetSwapMode(), AllowAllIntermediateMode(), true, false, GetReductionMode());
-                    break;
-                case "generate deepest board, near colorings":
-                    A(GenenerateBoard, true, GetExtraPsi(), GetSwapMode(), AllowAllIntermediateMode(), true, false, GetReductionMode());
+                    A(AnalyzeCurrentBoard, GetNearColoring(), GetExtraPsi(), GetSwapMode(), AllowAllIntermediateMode(), true, false, GetReductionMode());
                     break;
                 case "generate deepest board":
-                    A(GenenerateBoard, false, GetExtraPsi(), GetSwapMode(), AllowAllIntermediateMode(), true, false, GetReductionMode());
+                    A(GenenerateBoard, GetNearColoring(), GetExtraPsi(), GetSwapMode(), AllowAllIntermediateMode(), true, false, GetReductionMode());
                     break;
                 case "original mode":
                     _fixerBreakerModeItem.Header = "single swap mode";
+                    SaveSettings();
                     break;
                 case "single swap mode":
                     _fixerBreakerModeItem.Header = "multi swap mode";
+                    SaveSettings();
                     break;
                 case "multi swap mode":
                     _fixerBreakerModeItem.Header = "original mode";
+                    SaveSettings();
                     break;
                 case "restrict intermediate boards mode":
                     _fixerBreakerIntermediateModeItem.Header = "allow all intermediate boards mode";
+                    SaveSettings();
                     break;
                 case "allow all intermediate boards mode":
                     _fixerBreakerIntermediateModeItem.Header = "restrict intermediate boards mode";
+                    SaveSettings();
                     break;
                 case "next deepest board":
                     A(OnNextDeepestBoard);
                     break;
                 case "no reductions":
                     _fixerBreakerReductionModeItem.Header = "superabundant reductions";
+                    SaveSettings();
                     break;
                 case "superabundant reductions":
                     _fixerBreakerReductionModeItem.Header = "definite reductions";
+                    SaveSettings();
                     break;
                 case "definite reductions":
                     _fixerBreakerReductionModeItem.Header = "no reductions";
+                    SaveSettings();
                     break;
                 case "extra psi 0":
                     _extraPsiItem.Header = "extra psi 1";
+                    SaveSettings();
                     break;
                 case "extra psi 1":
                     _extraPsiItem.Header = "extra psi 0";
+                    SaveSettings();
                     break;
-             
+                case "near colorings only":
+                    _nearColoringItem.Header = "all assignments";
+                    SaveSettings();
+                    break;
+                case "all assignments":
+                    _nearColoringItem.Header = "near colorings only";
+                    SaveSettings();
+                    break;
             }
+        }
+
+        void SaveSettings()
+        {
+            System.IO.IsolatedStorage.IsolatedStorageSettings.SiteSettings["_fixerBreakerReductionModeItem.Header"] = _fixerBreakerReductionModeItem.Header;
+            System.IO.IsolatedStorage.IsolatedStorageSettings.SiteSettings["_extraPsiItem.Header"] = _extraPsiItem.Header;
+            System.IO.IsolatedStorage.IsolatedStorageSettings.SiteSettings["_nearColoringItem.Header"] = _nearColoringItem.Header;
+            System.IO.IsolatedStorage.IsolatedStorageSettings.SiteSettings["_fixerBreakerModeItem.Header"] = _fixerBreakerModeItem.Header;
+            System.IO.IsolatedStorage.IsolatedStorageSettings.SiteSettings["_fixerBreakerIntermediateModeItem.Header"] = _fixerBreakerIntermediateModeItem.Header;
+        }
+
+        void LoadSettings()
+        {
+            if (System.IO.IsolatedStorage.IsolatedStorageSettings.SiteSettings.Contains("_fixerBreakerReductionModeItem.Header"))
+                _fixerBreakerReductionModeItem.Header = (string)System.IO.IsolatedStorage.IsolatedStorageSettings.SiteSettings["_fixerBreakerReductionModeItem.Header"];
+            if (System.IO.IsolatedStorage.IsolatedStorageSettings.SiteSettings.Contains("_extraPsiItem.Header"))
+                _extraPsiItem.Header = (string)System.IO.IsolatedStorage.IsolatedStorageSettings.SiteSettings["_extraPsiItem.Header"];
+            if (System.IO.IsolatedStorage.IsolatedStorageSettings.SiteSettings.Contains("_nearColoringItem.Header"))
+                _nearColoringItem.Header = (string)System.IO.IsolatedStorage.IsolatedStorageSettings.SiteSettings["_nearColoringItem.Header"];
+            if (System.IO.IsolatedStorage.IsolatedStorageSettings.SiteSettings.Contains("_fixerBreakerModeItem.Header"))
+                _fixerBreakerModeItem.Header = (string)System.IO.IsolatedStorage.IsolatedStorageSettings.SiteSettings["_fixerBreakerModeItem.Header"];
+            if (System.IO.IsolatedStorage.IsolatedStorageSettings.SiteSettings.Contains("_fixerBreakerIntermediateModeItem.Header"))
+                _fixerBreakerIntermediateModeItem.Header = (string)System.IO.IsolatedStorage.IsolatedStorageSettings.SiteSettings["_fixerBreakerIntermediateModeItem.Header"];
+        }
+
+        bool GetNearColoring()
+        {
+            switch ((string)_nearColoringItem.Header)
+            {
+                case "near colorings only":
+                    return true;
+                case "all assignments":
+                    return false;
+            }
+
+            return false;
         }
 
         int GetExtraPsi()

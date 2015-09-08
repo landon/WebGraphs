@@ -151,21 +151,15 @@
                     <local:SuperMenuItem x:Name="_fixerBreakerIntermediateModeItem" Header="restrict intermediate boards mode" Click="MenuItemClick"/>
                     <local:SuperMenuItem x:Name="_fixerBreakerReductionModeItem" Header="no reductions" Click="MenuItemClick"/>
                     <local:SuperMenuItem x:Name="_extraPsiItem" Header="extra psi 0" Click="MenuItemClick"/>
+                    <local:SuperMenuItem x:Name="_nearColoringItem" Header="near colorings only" Click="MenuItemClick"/>
                     <menu:Separator/>
-                    <local:SuperMenuItem Header="analyze" Click="MenuItemClick"/>
-                    <local:SuperMenuItem Header="analyze only near colorings" Click="MenuItemClick"/>
+                    <local:SuperMenuItem Header="analyze fixed Δ" Click="MenuItemClick"/>
+                    <local:SuperMenuItem Header="generate proof fixed Δ" Click="MenuItemClick"/>
                     <menu:Separator/>
                     <local:SuperMenuItem Header="analyze superabundant only" Click="MenuItemClick"/>
-                    <local:SuperMenuItem Header="analyze superabundant only near colorings" Click="MenuItemClick"/>
-                    <menu:Separator/>
-                    <local:SuperMenuItem Header="generate proof" Click="MenuItemClick"/>
-                    <menu:Separator/>
-                    <local:SuperMenuItem Header="generate deepest board" Click="MenuItemClick"/>
-                    <local:SuperMenuItem Header="generate deepest board, near colorings" Click="MenuItemClick"/>
-                    <local:SuperMenuItem Header="next deepest board" Click="MenuItemClick"/>
-                    <menu:Separator/>
                     <local:SuperMenuItem Header="analyze current board" Click="MenuItemClick"/>
-                    <local:SuperMenuItem Header="analyze current board, near colorings" Click="MenuItemClick"/>
+                    <local:SuperMenuItem Header="generate deepest board" Click="MenuItemClick"/>
+                    <local:SuperMenuItem Header="next deepest board" Click="MenuItemClick"/>
                 </menu:ContextMenu>
             </menu:ContextMenuService.ContextMenu>
         </Button>

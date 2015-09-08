@@ -1919,6 +1919,7 @@ trash can button.
             mind.MissingEdgeIndex = missingEdgeIndex;
             mind.ExtraPsi = extraPsi;
             mind.AllIntermediateBoardsInRestrictedClass = !allowAllIntermediateBoards;
+            mind.PartialOrderOnBoards = BoardOrderings.CurrentOrder;
             
             using (var resultWindow = new ResultWindow(true))
             {

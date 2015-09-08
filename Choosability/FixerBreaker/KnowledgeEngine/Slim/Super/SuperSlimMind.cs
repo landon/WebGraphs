@@ -40,6 +40,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
         public int MissingEdgeIndex { get; set; }
         public bool OnlySuperabundantBoards { get; set; }
         public bool AllIntermediateBoardsInRestrictedClass { get; set; }
+        public int ExtraPsi { get; set; }
 
         public SuperSlimColoringAnalyzer ColoringAnalyzer { get { return _coloringAnalyzer; } }
         public List<SuperSlimBoard> PlayableBoards { get; private set; }
@@ -50,7 +51,6 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
         public List<SuperSlimBoard> BreakerWonBoards { get; private set; }
         public List<SuperSlimBoard> ReducibleBoards { get; private set; }
         public HashSet<SuperSlimBoard> FixerWonBoards { get; private set; }
-        public int ExtraPsi { get; set; }
 
         public int NonSuperabundantBoardCount { get; private set; }
         public int NonSuperabundantExtraPsiBoardCount { get; private set; }
@@ -58,6 +58,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
         public bool ProofFindingMode { get; private set; }
         public FixerBreakerSwapMode SwapMode { get; private set; }
         public FixerBreakeReductionMode ReductionMode { get; private set; }
+        public Func<SuperSlimMind, SuperSlimBoard, SuperSlimBoard, int> PartialOrderOnBoards { get; set; }
 
         Lazy<SubFixableMind> SubFixableMind { get; set; }
 
@@ -103,9 +104,9 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
             FindNearlyColorableBoards(progress);
             FindSuperabundantBoards(progress);
             FindReducibleBoards(progress);
+            DoOrdering();
 
             PlayableBoards.AddRange(_remainingBoards);
-
             Analyze(progress);
 
             var leftover = BreakerWonBoards.Union(_remainingBoards);
@@ -121,6 +122,15 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
 
             BreakerWonBoards = leftover.ToList();
             return BreakerWonBoards.Count <= 0;
+        }
+
+        void DoOrdering()
+        {
+            var order = PartialOrderOnBoards;
+            if (order == null)
+                return;
+
+            _remainingBoards.Sort((a, b) => order(this, a, b));
         }
 
         void FindColorableBoards(Action<Tuple<string, int>> progress)
@@ -237,18 +247,25 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
 
         void Analyze(Action<Tuple<string, int>> progress)
         {
-            while (true)
+            while (_remainingBoards.Count > 0)
             {
                 var wonBoards = new List<SuperSlimBoard>();
                 for (int i = _remainingBoards.Count - 1; i >= 0; i--)
                 {
                     var b = _remainingBoards[i];
+                    var lastThisRound = i >= 1 && CheckOrdering(b, _remainingBoards[i - 1]);
+
                     if (_swapAnalyzer.Analyze(b, FixerWonBoards))
                     {
                         _remainingBoards.RemoveAt(i);
                         wonBoards.Add(b);
 
                         DoProgress(progress, string.Format("Finding all {0} move wins...", BoardCounts.Count));
+                    }
+
+                    if (lastThisRound)
+                    {
+                        break;
                     }
                 }
 
@@ -265,6 +282,15 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
                     break;
                 }
             }
+        }
+
+        bool CheckOrdering(SuperSlimBoard a, SuperSlimBoard b)
+        {
+            var order = PartialOrderOnBoards;
+            if (order == null)
+                return false;
+
+            return order(this, a, b) > 0;
         }
 
         void DoProgress(Action<Tuple<string, int>> progress, string message)
