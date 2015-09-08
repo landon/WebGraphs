@@ -12,6 +12,13 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
         MultiSwap
     }
 
+    public enum FixerBreakeReductionMode
+    {
+        None,
+        Superabundant,
+        Definite
+    }
+
     public class SuperSlimMind : IMind
     {
         List<SuperSlimBoard> _remainingBoards;
@@ -41,21 +48,32 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
         public List<SuperSlimBoard> SuperabundantBoards { get; private set; }
         public List<SuperSlimBoard> SuperabundantWithExtraPsiBoards { get; private set; }
         public List<SuperSlimBoard> BreakerWonBoards { get; private set; }
+        public List<SuperSlimBoard> ReducibleBoards { get; private set; }
         public HashSet<SuperSlimBoard> FixerWonBoards { get; private set; }
         public int ExtraPsi { get; set; }
 
         public int NonSuperabundantBoardCount { get; private set; }
         public int NonSuperabundantExtraPsiBoardCount { get; private set; }
         public int NonNearlyColorableBoardCount { get; private set; }
+        public bool ProofFindingMode { get; private set; }
+        public FixerBreakerSwapMode SwapMode { get; private set; }
+        public FixerBreakeReductionMode ReductionMode { get; private set; }
 
-        public SuperSlimMind(Graph g, bool proofFindingMode = false, FixerBreakerSwapMode swapMode = FixerBreakerSwapMode.SingleSwap)
+        Lazy<SubFixableMind> SubFixableMind { get; set; }
+
+        public SuperSlimMind(Graph g, bool proofFindingMode = false, FixerBreakerSwapMode swapMode = FixerBreakerSwapMode.SingleSwap, FixerBreakeReductionMode reductionMode = FixerBreakeReductionMode.None)
         {
             G = g;
             BuildLineGraph();
 
+            ProofFindingMode = proofFindingMode;
+            SwapMode = swapMode;
+            ReductionMode = reductionMode;
+
             _coloringAnalyzer = new SuperSlimColoringAnalyzer(_lineG, GetEdgeColorList);
             _swapAnalyzer = new SuperSlimSwapAnalyzer(g.N, proofFindingMode, swapMode);
-            
+            SubFixableMind = new Lazy<SubFixableMind>(() => new SubFixableMind() { Mind = this, ForbiddenEdge = OnlyConsiderNearlyColorableBoards && MissingEdgeIndex >= 0 ? _edges[MissingEdgeIndex] : null });
+
             MissingEdgeIndex = -1;
         }
 
@@ -65,12 +83,14 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
             _remainingBoards = new List<SuperSlimBoard>();
             FixerWonBoards = new HashSet<SuperSlimBoard>();
             BreakerWonBoards = new List<SuperSlimBoard>();
+            ReducibleBoards = new List<SuperSlimBoard>();
             BoardCounts = new List<int>();
             PlayableBoards = new List<SuperSlimBoard>();
             ColorableBoards = new List<SuperSlimBoard>();
             NearlyColorableBoards = new List<SuperSlimBoard>();
             SuperabundantBoards = new List<SuperSlimBoard>();
             SuperabundantWithExtraPsiBoards = new List<SuperSlimBoard>();
+            SubFixableMind.Value.Progress = progress;
             
             var minimumColorCount = Math.Max(MinPot, template.Sizes.Max());
             var maximumColorCount = Math.Min(MaxPot, template.Sizes.Sum());
@@ -82,6 +102,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
             FindColorableBoards(progress);
             FindNearlyColorableBoards(progress);
             FindSuperabundantBoards(progress);
+            FindReducibleBoards(progress);
 
             PlayableBoards.AddRange(_remainingBoards);
 
@@ -118,6 +139,27 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
             }
 
             BoardCounts.Add(ColorableBoards.Count);
+        }
+
+        void FindReducibleBoards(Action<Tuple<string, int>> progress)
+        {
+            if (ReductionMode == FixerBreakeReductionMode.None)
+                return;
+
+            for (int i = _remainingBoards.Count - 1; i >= 0; i--)
+            {
+                var b = _remainingBoards[i];
+
+                var reduction = CheckReducibility(b);
+                if (reduction != null)
+                {
+                    _remainingBoards.RemoveAt(i);
+                    FixerWonBoards.Add(b);
+                    ReducibleBoards.Add(b);
+                }
+
+                DoProgress(progress, "Finding all reducible positions...");
+            }
         }
 
         void FindNearlyColorableBoards(Action<Tuple<string, int>> progress)
@@ -195,7 +237,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
 
         void Analyze(Action<Tuple<string, int>> progress)
         {
-            while (_remainingBoards.Count > 0)
+            while (true)
             {
                 var wonBoards = new List<SuperSlimBoard>();
                 for (int i = _remainingBoards.Count - 1; i >= 0; i--)
@@ -219,6 +261,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
                 }
                 else
                 {
+                    BoardCounts.Add(0);
                     break;
                 }
             }
@@ -235,6 +278,18 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
                     _lastProgress = p;
                 }
             }
+        }
+
+        public Reduction CheckReducibility(SuperSlimBoard board, Action<Tuple<string, int>> progress = null)
+        {
+            if (ReductionMode == FixerBreakeReductionMode.None)
+                return null;
+
+            SubFixableMind.Value.Progress = progress;
+            if (ReductionMode == FixerBreakeReductionMode.Superabundant)
+                return SubFixableMind.Value.CanReduceToSuperabundant(G, board, ExtraPsi);
+
+            return SubFixableMind.Value.CanReduceToWin(G, board);
         }
 
         bool NearlyColorableForEdge(SuperSlimBoard board, int edgeIndex)
@@ -333,12 +388,16 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
             tree.IsColorable = _coloringAnalyzer.Analyze(board);
             tree.IsSuperabundant = win || IsSuperabundant(board);
             tree.GameTreeIndex = _gameTreeIndex;
+            tree.Reduction = SubFixableMind.Value.CanReduceToSuperabundant(G, board, ExtraPsi);;
             _gameTreeIndex++;
 
             if (tree.IsColorable)
                 return tree;
 
             if (!tree.IsSuperabundant)
+                return tree;
+
+            if (tree.Reduction != null)
                 return tree;
 
             var treeInfo = win ? _swapAnalyzer.WinTreeInfo[board] : _swapAnalyzer.LossTreeInfo[board];

@@ -77,7 +77,6 @@ namespace GraphsCore
                     }
                 }
 
-
                 if (allbad)
                     System.Diagnostics.Debugger.Break();
 
@@ -100,17 +99,28 @@ namespace GraphsCore
                     if (ppp != null)
                         c = ppp[c];
 
-                    if (!lists[v1].Contains(c))
-                        System.Diagnostics.Debugger.Break();
-                    if (!lists[v2].Contains(c))
-                        System.Diagnostics.Debugger.Break();
-
                     lists[v1].Remove(c);
                     lists[v2].Remove(c);
 
                     var e = clone.Edges.First(ee => Choosability.Utility.ListUtility.Equal(new List<int>() { clone.Vertices.IndexOf(ee.V1), clone.Vertices.IndexOf(ee.V2) }, new List<int>() { v1, v2 }));
                     e.Label = numbering[c];
                 }
+            }
+            else if (tree.Reduction != null)
+            {
+                var c = tree.Reduction.Color.LeastSignificantBit();
+                if (ppp != null)
+                    c = ppp[c];
+
+                lists[tree.Reduction.Leaf].Remove(c);
+                lists[tree.Reduction.Stem].Remove(c);
+
+                foreach (var ee in clone.Edges)
+                    ee.Label = "";
+
+                var e = clone.Edges.First(ee => Choosability.Utility.ListUtility.Equal(new List<int>() { clone.Vertices.IndexOf(ee.V1), clone.Vertices.IndexOf(ee.V2) }, new List<int>() { tree.Reduction.Leaf, tree.Reduction.Stem }));
+                e.Label = numbering[c] + " reduce";
+                e.Thickness = 5;
             }
             else
             {

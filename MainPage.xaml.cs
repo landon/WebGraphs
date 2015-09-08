@@ -1685,7 +1685,7 @@ trash can button.
             SelectedTabCanvas.Invalidate();
         }
 
-        async void _mainMenu_OnGenenerateBoard(bool nearColoring, int extraPsi, FixerBreakerSwapMode swapMode, bool allowAllIntermediateBoards, bool superabundantOnly, bool generateProof)
+        async void _mainMenu_OnGenenerateBoard(bool nearColoring, int extraPsi, FixerBreakerSwapMode swapMode, bool allowAllIntermediateBoards, bool superabundantOnly, bool generateProof, FixerBreakeReductionMode reductionMode)
         {
             var blob = AlgorithmBlob.Create(SelectedTabCanvas);
             var G = blob.AlgorithmGraph;
@@ -1701,7 +1701,7 @@ trash can button.
                         var extraPsiBoards = new List<SuperSlimBoard>();
                         var template = new Template(sizes);
 
-                        var mind = new SuperSlimMind(G, true, swapMode);
+                        var mind = new SuperSlimMind(G, true, swapMode, reductionMode);
                         mind.OnlySuperabundantBoards = true;
                         mind.ExtraPsi = extraPsi;
                         mind.OnlyConsiderNearlyColorableBoards = nearColoring;
@@ -1743,7 +1743,7 @@ trash can button.
             GoNextDeepestBoard();
         }
 
-        async void _mainMenu_OnAnalyzeCurrentBoard(bool nearColoring, int extraPsi, FixerBreakerSwapMode swapMode, bool allowAllIntermediateBoards, bool superabundantOnly, bool generateProof)
+        async void _mainMenu_OnAnalyzeCurrentBoard(bool nearColoring, int extraPsi, FixerBreakerSwapMode swapMode, bool allowAllIntermediateBoards, bool superabundantOnly, bool generateProof, FixerBreakeReductionMode reductionMode)
         {
             var blob = AlgorithmBlob.Create(SelectedTabCanvas);
             var G = blob.AlgorithmGraph;
@@ -1775,7 +1775,7 @@ trash can button.
 
             var pot = lists.SelectMany(l => l).Distinct().ToList();
 
-            var mind = new Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.SuperSlimMind(G, true, swapMode);
+            var mind = new Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.SuperSlimMind(G, true, swapMode, reductionMode);
             mind.MaxPot = pot.Count;
             mind.OnlySuperabundantBoards = true;
             mind.ExtraPsi = extraPsi;
@@ -1794,14 +1794,19 @@ trash can button.
                 resultWindow.Show();
                 var result = await Task.Factory.StartNew<string>(() =>
                 {
-                    mind.Analyze(template, resultWindow.OnProgress);
+                    var reduction = mind.CheckReducibility(board, resultWindow.OnProgress);
+                    if (reduction == null)
+                        mind.Analyze(template, resultWindow.OnProgress);
 
                     var sb = new StringBuilder();
                     sb.AppendLine("Ψ - E = " + mind.ComputeAbundanceSurplus(board));
                     sb.AppendLine();
 
-                    
-                    if (mind.FixerWonBoards.Contains(board))
+                    if (reduction != null)
+                    {
+                        sb.AppendLine("Fixer can reduce to a smaller board.");
+                    }
+                    else if (mind.FixerWonBoards.Contains(board))
                     {
                         if (mind.ColorableBoards.Contains(board))
                         {
@@ -1859,12 +1864,12 @@ trash can button.
             return blob.SelectedEdgeIndices.First();
         }
 
-        async void AnalyzeFixerBreaker(bool nearColoring, int extraPsi, FixerBreakerSwapMode swapMode, bool allowAllIntermediateBoards, bool superabundantOnly, bool generateProof)
+        async void AnalyzeFixerBreaker(bool nearColoring, int extraPsi, FixerBreakerSwapMode swapMode, bool allowAllIntermediateBoards, bool superabundantOnly, bool generateProof, FixerBreakeReductionMode reductionMode)
         {
-            await AnalyzeFixerBreaker(nearColoring, GetMissingEdgeIndex(nearColoring), superabundantOnly, generateProof, swapMode, extraPsi, allowAllIntermediateBoards);
+            await AnalyzeFixerBreaker(nearColoring, GetMissingEdgeIndex(nearColoring), superabundantOnly, generateProof, swapMode, extraPsi, allowAllIntermediateBoards, reductionMode);
         }
 
-        async Task<string> AnalyzeFixerBreaker(bool onlyNearColorings, int missingEdgeIndex, bool superAbundantOnly, bool generateProof, FixerBreakerSwapMode swapMode, int extraPsi, bool allowAllIntermediateBoards)
+        async Task<string> AnalyzeFixerBreaker(bool onlyNearColorings, int missingEdgeIndex, bool superAbundantOnly, bool generateProof, FixerBreakerSwapMode swapMode, int extraPsi, bool allowAllIntermediateBoards, FixerBreakeReductionMode reductionMode)
         {
             var proof = "";
             var blob = AlgorithmBlob.Create(SelectedTabCanvas);
@@ -1895,7 +1900,7 @@ trash can button.
                 template = new Template(G.Vertices.Select(v => potSize + G.Degree(v) - blob.UIGraph.Vertices[v].Label.TryParseInt().Value).ToList());
             }
 
-            var mind = new Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.SuperSlimMind(G, generateProof, swapMode);
+            var mind = new Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.SuperSlimMind(G, generateProof, swapMode, reductionMode);
             mind.MaxPot = potSize;
             mind.OnlySuperabundantBoards = superAbundantOnly;
             mind.OnlyConsiderNearlyColorableBoards = onlyNearColorings;
@@ -2007,6 +2012,8 @@ trash can button.
                 if (mind.ExtraPsi > 0 && mind.AllIntermediateBoardsInRestrictedClass)
                     sb.AppendLine(mind.NonSuperabundantExtraPsiBoardCount + " non-extra-psi boards");
             }
+
+            sb.AppendLine(mind.ReducibleBoards.Count + " reducible boards");
 
             for (int depth = 1; depth < mind.BoardCounts.Count; depth++)
                 sb.AppendLine(mind.BoardCounts[depth] + " depth " + depth + " boards");

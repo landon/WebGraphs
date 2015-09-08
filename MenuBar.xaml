@@ -149,6 +149,7 @@
                 <menu:ContextMenu>
                     <local:SuperMenuItem x:Name="_fixerBreakerModeItem" Header="single swap mode" Click="MenuItemClick"/>
                     <local:SuperMenuItem x:Name="_fixerBreakerIntermediateModeItem" Header="restrict intermediate boards mode" Click="MenuItemClick"/>
+                    <local:SuperMenuItem x:Name="_fixerBreakerReductionModeItem" Header="no reductions" Click="MenuItemClick"/>
                     <menu:Separator/>
                     <local:SuperMenuItem Header="analyze" Click="MenuItemClick"/>
                     <local:SuperMenuItem Header="analyze only near colorings" Click="MenuItemClick"/>

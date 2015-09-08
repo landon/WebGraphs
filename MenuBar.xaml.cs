@@ -82,9 +82,9 @@ namespace WebGraphs
         public event Action OnAddCClockSpindle;
         public event Action OnNextDeepestBoard;
 
-        public event Action<bool, int, FixerBreakerSwapMode, bool, bool, bool> Analyze;
-        public event Action<bool, int, FixerBreakerSwapMode, bool, bool, bool> AnalyzeCurrentBoard;
-        public event Action<bool, int, FixerBreakerSwapMode, bool, bool, bool> GenenerateBoard;
+        public event Action<bool, int, FixerBreakerSwapMode, bool, bool, bool, FixerBreakeReductionMode> Analyze;
+        public event Action<bool, int, FixerBreakerSwapMode, bool, bool, bool, FixerBreakeReductionMode> AnalyzeCurrentBoard;
+        public event Action<bool, int, FixerBreakerSwapMode, bool, bool, bool, FixerBreakeReductionMode> GenenerateBoard;
 
         public MenuBar()
         {
@@ -255,13 +255,13 @@ namespace WebGraphs
                     A(ClearOrientation);
                     break;
                 case "analyze":
-                    A(Analyze, false, 0, GetSwapMode(), AllowAllIntermediateMode(), false, false);
+                    A(Analyze, false, 0, GetSwapMode(), AllowAllIntermediateMode(), false, false, GetReductionMode());
                     break;
                 case "analyze only near colorings":
-                    A(Analyze, true, 0, GetSwapMode(), AllowAllIntermediateMode(), false, false);
+                    A(Analyze, true, 0, GetSwapMode(), AllowAllIntermediateMode(), false, false, GetReductionMode());
                     break;
                 case "analyze only near colorings for selected edge":
-                    A(Analyze, true, 0, GetSwapMode(), AllowAllIntermediateMode(), false, false);
+                    A(Analyze, true, 0, GetSwapMode(), AllowAllIntermediateMode(), false, false, GetReductionMode());
                     break;
                 case "check (f:g)-paintable":
                     A(CheckFGPaintable);
@@ -306,19 +306,19 @@ namespace WebGraphs
                     A(DoSpin);
                     break;
                 case "analyze superabundant only":
-                    A(Analyze, false, 0, GetSwapMode(), AllowAllIntermediateMode(), true, false);
+                    A(Analyze, false, 0, GetSwapMode(), AllowAllIntermediateMode(), true, false, GetReductionMode());
                     break;
                 case "analyze superabundant only near colorings":
-                    A(Analyze, true, 0, GetSwapMode(), AllowAllIntermediateMode(), true, false);
+                    A(Analyze, true, 0, GetSwapMode(), AllowAllIntermediateMode(), true, false, GetReductionMode());
                     break;
                 case "analyze superabundant only near colorings, extra psi":
-                    A(Analyze, true, 1, GetSwapMode(), AllowAllIntermediateMode(), true, false);
+                    A(Analyze, true, 1, GetSwapMode(), AllowAllIntermediateMode(), true, false, GetReductionMode());
                     break;
                 case "generate proof":
-                    A(Analyze, false, 0, GetSwapMode(), AllowAllIntermediateMode(), false, true);
+                    A(Analyze, false, 0, GetSwapMode(), AllowAllIntermediateMode(), false, true, GetReductionMode());
                     break;
                 case "generate proof only near colorings for selected edge":
-                    A(Analyze, true, 0, GetSwapMode(), AllowAllIntermediateMode(), false, true);
+                    A(Analyze, true, 0, GetSwapMode(), AllowAllIntermediateMode(), false, true, GetReductionMode());
                     break;
                 case "add clock spindle":
                     A(OnAddClockSpindle);
@@ -327,28 +327,28 @@ namespace WebGraphs
                     A(OnAddCClockSpindle);
                     break;
                 case "analyze current board":
-                    A(AnalyzeCurrentBoard, false, 0, GetSwapMode(), AllowAllIntermediateMode(), true, false);
+                    A(AnalyzeCurrentBoard, false, 0, GetSwapMode(), AllowAllIntermediateMode(), true, false, GetReductionMode());
                     break;
                 case "analyze current board, extra psi":
-                    A(AnalyzeCurrentBoard, false, 1, GetSwapMode(), AllowAllIntermediateMode(), true, false);
+                    A(AnalyzeCurrentBoard, false, 1, GetSwapMode(), AllowAllIntermediateMode(), true, false, GetReductionMode());
                     break;
                 case "analyze current board, near colorings":
-                    A(AnalyzeCurrentBoard, true, 0, GetSwapMode(), AllowAllIntermediateMode(), true, false);
+                    A(AnalyzeCurrentBoard, true, 0, GetSwapMode(), AllowAllIntermediateMode(), true, false, GetReductionMode());
                     break;
                 case "analyze current board, extra psi, near colorings":
-                    A(AnalyzeCurrentBoard, true, 1, GetSwapMode(), AllowAllIntermediateMode(), true, false);
+                    A(AnalyzeCurrentBoard, true, 1, GetSwapMode(), AllowAllIntermediateMode(), true, false, GetReductionMode());
                     break;
                 case "generate deepest board, near colorings":
-                    A(GenenerateBoard, true, 0, GetSwapMode(), AllowAllIntermediateMode(), true, false);
+                    A(GenenerateBoard, true, 0, GetSwapMode(), AllowAllIntermediateMode(), true, false, GetReductionMode());
                     break;
                 case "generate deepest board, extra psi, near colorings":
-                    A(GenenerateBoard, true, 1, GetSwapMode(), AllowAllIntermediateMode(), true, false);
+                    A(GenenerateBoard, true, 1, GetSwapMode(), AllowAllIntermediateMode(), true, false, GetReductionMode());
                     break;
                 case "generate deepest board":
-                    A(GenenerateBoard, false, 0, GetSwapMode(), AllowAllIntermediateMode(), true, false);
+                    A(GenenerateBoard, false, 0, GetSwapMode(), AllowAllIntermediateMode(), true, false, GetReductionMode());
                     break;
                 case "generate deepest board, extra psi":
-                    A(GenenerateBoard, false, 1, GetSwapMode(), AllowAllIntermediateMode(), true, false);
+                    A(GenenerateBoard, false, 1, GetSwapMode(), AllowAllIntermediateMode(), true, false, GetReductionMode());
                     break;
                 case "original mode":
                     _fixerBreakerModeItem.Header = "single swap mode";
@@ -368,8 +368,32 @@ namespace WebGraphs
                 case "next deepest board":
                     A(OnNextDeepestBoard);
                     break;
+                case "no reductions":
+                    _fixerBreakerReductionModeItem.Header = "superabundant reductions";
+                    break;
+                case "superabundant reductions":
+                    _fixerBreakerReductionModeItem.Header = "definite reductions";
+                    break;
+                case "definite reductions":
+                    _fixerBreakerReductionModeItem.Header = "no reductions";
+                    break;
              
             }
+        }
+
+        FixerBreakeReductionMode GetReductionMode()
+        {
+            switch ((string)_fixerBreakerReductionModeItem.Header)
+            {
+                case "no reductions":
+                    return FixerBreakeReductionMode.None;
+                case "superabundant reductions":
+                    return FixerBreakeReductionMode.Superabundant;
+                case "definite reductions":
+                    return FixerBreakeReductionMode.Definite;
+            }
+
+            return FixerBreakeReductionMode.None;
         }
 
         FixerBreakerSwapMode GetSwapMode()
@@ -427,6 +451,12 @@ namespace WebGraphs
             var b = a;
             if (b != null)
                 b(t, s, r, p, q, z);
+        }
+        static void A<T, S, R, P, Q, Z, M>(Action<T, S, R, P, Q, Z, M> a, T t, S s, R r, P p, Q q, Z z, M m)
+        {
+            var b = a;
+            if (b != null)
+                b(t, s, r, p, q, z, m);
         }
     }
 }

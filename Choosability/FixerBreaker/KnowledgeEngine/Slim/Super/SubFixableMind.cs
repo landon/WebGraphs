@@ -7,26 +7,21 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
 {
     public class SubFixableMind
     {
-        public bool ProofFindingMode;
-        public FixerBreakerSwapMode SwapMode = FixerBreakerSwapMode.SingleSwap;
+        public SuperSlimMind Mind;
         public Action<Tuple<string, int>> Progress;
+        public Tuple<int, int> ForbiddenEdge;
 
-        public Reduction CanReduceToSuperabundantExtraPsi(Graph g, SuperSlimBoard board, Tuple<int, int> forbiddenEdge = null)
+        public Reduction CanReduceToSuperabundant(Graph g, SuperSlimBoard board, int extraPsi)
         {
-            return CanReduce(g, board, (h, l) => l.FirstOrDefault(r => SuperSlimMind.IsSuperabundantForGraph(r.Board, h, 1)), forbiddenEdge);
+            return CanReduce(g, board, (h, l) => l.FirstOrDefault(r => SuperSlimMind.IsSuperabundantForGraph(r.Board, h, extraPsi)));
         }
 
-        public Reduction CanReduceToSuperabundant(Graph g, SuperSlimBoard board, Tuple<int, int> forbiddenEdge = null)
+        public Reduction CanReduceToWin(Graph g, SuperSlimBoard board)
         {
-            return CanReduce(g, board, (h, l) => l.FirstOrDefault(r => SuperSlimMind.IsSuperabundantForGraph(r.Board, h)), forbiddenEdge);
+            return CanReduce(g, board, CheckReductionForWin);
         }
 
-        public Reduction CanReduceToWin(Graph g, SuperSlimBoard board, Tuple<int, int> forbiddenEdge = null)
-        {
-            return CanReduce(g, board, CheckReductionForWin, forbiddenEdge);
-        }
-
-        Reduction CanReduce(Graph g, SuperSlimBoard board, Func<Graph, List<Reduction>, Reduction> reducibilityChecker, Tuple<int, int> forbiddenEdge = null)
+        Reduction CanReduce(Graph g, SuperSlimBoard board, Func<Graph, List<Reduction>, Reduction> reducibilityChecker)
         {
             var edges = g.Edges.Value;
             var pendantEdges = g.PendantEdges.Value;
@@ -42,7 +37,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
                     w = tup.Item1;
                 }
 
-                if (forbiddenEdge != null && (w == forbiddenEdge.Item1 || w == forbiddenEdge.Item2))
+                if (ForbiddenEdge != null && (w == ForbiddenEdge.Item1 || w == ForbiddenEdge.Item2))
                     continue;
 
                 var h = g.RemoveEdge(tup);
@@ -80,7 +75,14 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
                 return null;
 
             var sizes = possibleReductions[0].Board.Stacks.Value.Select(s => s.PopulationCount()).ToList();
-            var mind = new SuperSlimMind(h, ProofFindingMode, SwapMode);
+            var mind = new SuperSlimMind(h, Mind.ProofFindingMode, Mind.SwapMode, Mind.ReductionMode);
+            mind.MaxPot = Mind.MaxPot;
+            mind.OnlySuperabundantBoards = Mind.OnlySuperabundantBoards;
+            mind.ExtraPsi = Mind.ExtraPsi;
+            mind.OnlyConsiderNearlyColorableBoards = Mind.OnlyConsiderNearlyColorableBoards;
+            if (ForbiddenEdge != null)
+                mind.MissingEdgeIndex = h.Edges.Value.IndicesWhere(tt => tt.Item1 == ForbiddenEdge.Item1 && tt.Item2 == ForbiddenEdge.Item2 || tt.Item2 == ForbiddenEdge.Item1 && tt.Item1 == ForbiddenEdge.Item2).First();
+            mind.AllIntermediateBoardsInRestrictedClass = Mind.AllIntermediateBoardsInRestrictedClass;
             mind.Analyze(new Template(sizes), Progress);
 
             return possibleReductions.FirstOrDefault(r => mind.FixerWonBoards.Contains(r.Board));
