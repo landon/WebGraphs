@@ -37,6 +37,9 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
                     w = tup.Item1;
                 }
 
+                var dv = g.Degree(v);
+                var dw = g.Degree(w);
+
                 if (ForbiddenEdge != null && (w == ForbiddenEdge.Item1 || w == ForbiddenEdge.Item2))
                     continue;
 
@@ -75,7 +78,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
                 return null;
 
             var sizes = possibleReductions[0].Board.Stacks.Value.Select(s => s.PopulationCount()).ToList();
-            var mind = new SuperSlimMind(h, Mind.ProofFindingMode, Mind.SwapMode, Mind.ReductionMode);
+            var mind = new SuperSlimMind(h, Mind.ProofFindingMode, Mind.SwapMode, FixerBreakeReductionMode.None);
             mind.MaxPot = Mind.MaxPot;
             mind.OnlySuperabundantBoards = Mind.OnlySuperabundantBoards;
             mind.ExtraPsi = Mind.ExtraPsi;

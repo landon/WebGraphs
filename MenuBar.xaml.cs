@@ -255,13 +255,13 @@ namespace WebGraphs
                     A(ClearOrientation);
                     break;
                 case "analyze":
-                    A(Analyze, false, 0, GetSwapMode(), AllowAllIntermediateMode(), false, false, GetReductionMode());
+                    A(Analyze, false, GetExtraPsi(), GetSwapMode(), AllowAllIntermediateMode(), false, false, GetReductionMode());
                     break;
                 case "analyze only near colorings":
-                    A(Analyze, true, 0, GetSwapMode(), AllowAllIntermediateMode(), false, false, GetReductionMode());
+                    A(Analyze, true, GetExtraPsi(), GetSwapMode(), AllowAllIntermediateMode(), false, false, GetReductionMode());
                     break;
                 case "analyze only near colorings for selected edge":
-                    A(Analyze, true, 0, GetSwapMode(), AllowAllIntermediateMode(), false, false, GetReductionMode());
+                    A(Analyze, true, GetExtraPsi(), GetSwapMode(), AllowAllIntermediateMode(), false, false, GetReductionMode());
                     break;
                 case "check (f:g)-paintable":
                     A(CheckFGPaintable);
@@ -306,19 +306,16 @@ namespace WebGraphs
                     A(DoSpin);
                     break;
                 case "analyze superabundant only":
-                    A(Analyze, false, 0, GetSwapMode(), AllowAllIntermediateMode(), true, false, GetReductionMode());
+                    A(Analyze, false, GetExtraPsi(), GetSwapMode(), AllowAllIntermediateMode(), true, false, GetReductionMode());
                     break;
                 case "analyze superabundant only near colorings":
-                    A(Analyze, true, 0, GetSwapMode(), AllowAllIntermediateMode(), true, false, GetReductionMode());
-                    break;
-                case "analyze superabundant only near colorings, extra psi":
-                    A(Analyze, true, 1, GetSwapMode(), AllowAllIntermediateMode(), true, false, GetReductionMode());
+                    A(Analyze, true, GetExtraPsi(), GetSwapMode(), AllowAllIntermediateMode(), true, false, GetReductionMode());
                     break;
                 case "generate proof":
-                    A(Analyze, false, 0, GetSwapMode(), AllowAllIntermediateMode(), false, true, GetReductionMode());
+                    A(Analyze, false, GetExtraPsi(), GetSwapMode(), AllowAllIntermediateMode(), false, true, GetReductionMode());
                     break;
                 case "generate proof only near colorings for selected edge":
-                    A(Analyze, true, 0, GetSwapMode(), AllowAllIntermediateMode(), false, true, GetReductionMode());
+                    A(Analyze, true, GetExtraPsi(), GetSwapMode(), AllowAllIntermediateMode(), false, true, GetReductionMode());
                     break;
                 case "add clock spindle":
                     A(OnAddClockSpindle);
@@ -327,28 +324,16 @@ namespace WebGraphs
                     A(OnAddCClockSpindle);
                     break;
                 case "analyze current board":
-                    A(AnalyzeCurrentBoard, false, 0, GetSwapMode(), AllowAllIntermediateMode(), true, false, GetReductionMode());
-                    break;
-                case "analyze current board, extra psi":
-                    A(AnalyzeCurrentBoard, false, 1, GetSwapMode(), AllowAllIntermediateMode(), true, false, GetReductionMode());
+                    A(AnalyzeCurrentBoard, false, GetExtraPsi(), GetSwapMode(), AllowAllIntermediateMode(), true, false, GetReductionMode());
                     break;
                 case "analyze current board, near colorings":
-                    A(AnalyzeCurrentBoard, true, 0, GetSwapMode(), AllowAllIntermediateMode(), true, false, GetReductionMode());
-                    break;
-                case "analyze current board, extra psi, near colorings":
-                    A(AnalyzeCurrentBoard, true, 1, GetSwapMode(), AllowAllIntermediateMode(), true, false, GetReductionMode());
+                    A(AnalyzeCurrentBoard, true, GetExtraPsi(), GetSwapMode(), AllowAllIntermediateMode(), true, false, GetReductionMode());
                     break;
                 case "generate deepest board, near colorings":
-                    A(GenenerateBoard, true, 0, GetSwapMode(), AllowAllIntermediateMode(), true, false, GetReductionMode());
-                    break;
-                case "generate deepest board, extra psi, near colorings":
-                    A(GenenerateBoard, true, 1, GetSwapMode(), AllowAllIntermediateMode(), true, false, GetReductionMode());
+                    A(GenenerateBoard, true, GetExtraPsi(), GetSwapMode(), AllowAllIntermediateMode(), true, false, GetReductionMode());
                     break;
                 case "generate deepest board":
-                    A(GenenerateBoard, false, 0, GetSwapMode(), AllowAllIntermediateMode(), true, false, GetReductionMode());
-                    break;
-                case "generate deepest board, extra psi":
-                    A(GenenerateBoard, false, 1, GetSwapMode(), AllowAllIntermediateMode(), true, false, GetReductionMode());
+                    A(GenenerateBoard, false, GetExtraPsi(), GetSwapMode(), AllowAllIntermediateMode(), true, false, GetReductionMode());
                     break;
                 case "original mode":
                     _fixerBreakerModeItem.Header = "single swap mode";
@@ -377,8 +362,27 @@ namespace WebGraphs
                 case "definite reductions":
                     _fixerBreakerReductionModeItem.Header = "no reductions";
                     break;
+                case "extra psi 0":
+                    _extraPsiItem.Header = "extra psi 1";
+                    break;
+                case "extra psi 1":
+                    _extraPsiItem.Header = "extra psi 0";
+                    break;
              
             }
+        }
+
+        int GetExtraPsi()
+        {
+            switch ((string)_extraPsiItem.Header)
+            {
+                case "extra psi 0":
+                    return 0;
+                case "extra psi 1":
+                    return 1;
+            }
+
+            return 0;
         }
 
         FixerBreakeReductionMode GetReductionMode()

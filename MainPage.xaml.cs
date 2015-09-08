@@ -1713,7 +1713,19 @@ trash can button.
 
                         if (win)
                         {
-                            var gameTrees = mind.FixerWonBoards.Select(bb => mind.BuildGameTree(bb)).ToList();
+                            IEnumerable<SuperSlimBoard> allWins = mind.FixerWonBoards.ToList();
+                            if (mind.OnlyConsiderNearlyColorableBoards)
+                                allWins = allWins.Intersect(mind.NearlyColorableBoards);
+                            if (mind.OnlySuperabundantBoards)
+                            {
+                                if (mind.ExtraPsi <= 0)
+                                    allWins = allWins.Intersect(mind.SuperabundantBoards);
+                                else
+                                    allWins = allWins.Intersect(mind.SuperabundantWithExtraPsiBoards);
+                            }
+
+                            var gameTrees = allWins.Select(bb => mind.BuildGameTree(bb)).ToList();
+
                             maxDepth = gameTrees.Max(gt => gt.GetDepth());
                             return gameTrees.Where(gt => gt.GetDepth() == maxDepth).Select(gt => gt.Board).ToList();
                         }

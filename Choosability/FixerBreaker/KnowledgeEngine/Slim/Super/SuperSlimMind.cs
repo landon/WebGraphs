@@ -388,7 +388,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
             tree.IsColorable = _coloringAnalyzer.Analyze(board);
             tree.IsSuperabundant = win || IsSuperabundant(board);
             tree.GameTreeIndex = _gameTreeIndex;
-            tree.Reduction = SubFixableMind.Value.CanReduceToSuperabundant(G, board, ExtraPsi);;
+            tree.Reduction = CheckReducibility(board);
             _gameTreeIndex++;
 
             if (tree.IsColorable)
