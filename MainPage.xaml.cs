@@ -1708,26 +1708,37 @@ trash can button.
                         mind.MaxPot = int.MaxValue;
                         mind.MissingEdgeIndex = missingEdgeIndex;
                         mind.AllIntermediateBoardsInRestrictedClass = !allowAllIntermediateBoards;
+                        mind.PartialOrderOnBoards = BoardOrderings.OrderingFunc;
 
                         var win = mind.Analyze(template, resultWindow.OnProgress);
 
                         if (win)
                         {
-                            IEnumerable<SuperSlimBoard> allWins = mind.FixerWonBoards.ToList();
-                            if (mind.OnlyConsiderNearlyColorableBoards)
-                                allWins = allWins.Intersect(mind.NearlyColorableBoards);
-                            if (mind.OnlySuperabundantBoards)
+                            List<SuperSlimBoard> deepestBoards;
+                            if (mind.DeepestBoards == null)
                             {
-                                if (mind.ExtraPsi <= 0)
-                                    allWins = allWins.Intersect(mind.SuperabundantBoards);
-                                else
-                                    allWins = allWins.Intersect(mind.SuperabundantWithExtraPsiBoards);
+                                IEnumerable<SuperSlimBoard> allWins = mind.FixerWonBoards.ToList();
+                                if (mind.OnlyConsiderNearlyColorableBoards)
+                                    allWins = allWins.Intersect(mind.NearlyColorableBoards);
+                                if (mind.OnlySuperabundantBoards)
+                                {
+                                    if (mind.ExtraPsi <= 0)
+                                        allWins = allWins.Intersect(mind.SuperabundantBoards);
+                                    else
+                                        allWins = allWins.Intersect(mind.SuperabundantWithExtraPsiBoards);
+                                }
+
+                                var gameTrees = allWins.Select(bb => mind.BuildGameTree(bb)).ToList();
+
+                                maxDepth = gameTrees.Max(gt => gt.GetDepth());
+                                deepestBoards = gameTrees.Where(gt => gt.GetDepth() == maxDepth).Select(gt => gt.Board).ToList();
+                            }
+                            else
+                            {
+                                deepestBoards = mind.DeepestBoards;
                             }
 
-                            var gameTrees = allWins.Select(bb => mind.BuildGameTree(bb)).ToList();
-
-                            maxDepth = gameTrees.Max(gt => gt.GetDepth());
-                            return gameTrees.Where(gt => gt.GetDepth() == maxDepth).Select(gt => gt.Board).ToList();
+                            return deepestBoards;
                         }
                         else
                             return null;
@@ -1794,6 +1805,7 @@ trash can button.
             mind.OnlyConsiderNearlyColorableBoards = nearColoring;
             mind.MissingEdgeIndex = GetMissingEdgeIndex(nearColoring);
             mind.AllIntermediateBoardsInRestrictedClass = !allowAllIntermediateBoards;
+            mind.PartialOrderOnBoards = BoardOrderings.OrderingFunc;
 
             var boardAndNumbering = SuperSlimBoard.CreateAndNumber(lists);
             var board = boardAndNumbering.Item1;
@@ -1919,7 +1931,7 @@ trash can button.
             mind.MissingEdgeIndex = missingEdgeIndex;
             mind.ExtraPsi = extraPsi;
             mind.AllIntermediateBoardsInRestrictedClass = !allowAllIntermediateBoards;
-            mind.PartialOrderOnBoards = BoardOrderings.CurrentOrder;
+            mind.PartialOrderOnBoards = BoardOrderings.OrderingFunc;
             
             using (var resultWindow = new ResultWindow(true))
             {

@@ -51,6 +51,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
         public List<SuperSlimBoard> BreakerWonBoards { get; private set; }
         public List<SuperSlimBoard> ReducibleBoards { get; private set; }
         public HashSet<SuperSlimBoard> FixerWonBoards { get; private set; }
+        public List<SuperSlimBoard> DeepestBoards { get; private set; }
 
         public int NonSuperabundantBoardCount { get; private set; }
         public int NonSuperabundantExtraPsiBoardCount { get; private set; }
@@ -275,6 +276,9 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
 
                     foreach (var b in wonBoards)
                         FixerWonBoards.Add(b);
+
+                    if (_remainingBoards.Count <= 0)
+                        DeepestBoards = wonBoards.ToList();
                 }
                 else
                 {
