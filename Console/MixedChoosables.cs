@@ -15,16 +15,16 @@ namespace Console
     public static class MixedChoosables
     {
         const int MinVertices = 3;
-        const int MaxVertices = 8;
+        const int MaxVertices = 9;
 
-        const bool Offline = false;
-        const bool AT = true;
+        const bool Offline = true;
+        const bool AT = false;
         const bool Mic = false;
         const bool TwoConnectedOnly = true;
         const int MaxIndependenceNumber = int.MaxValue;
         const int Fold = 1;
         const int Spread = 2;
-        const int MaxHighs = 1;
+        const int MaxHighs = 2;
         const bool Not = true;
 
         const int MaxDegree = int.MaxValue;

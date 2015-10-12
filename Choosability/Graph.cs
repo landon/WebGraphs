@@ -1932,7 +1932,7 @@ namespace Choosability
                 {
                     if (_adjacent[subgraphVertices[i], subgraphVertices[j]])
                     {
-                        if (!missingEdges.Any(e => e.Item1 == i && e.Item2 == j || e.Item1 == j && e.Item2 == i))
+                        if (!me.Any(e => e.Item1 == i && e.Item2 == j || e.Item1 == j && e.Item2 == i))
                             equivalenceRelation.Relate(i, j);
                     }
                 }
