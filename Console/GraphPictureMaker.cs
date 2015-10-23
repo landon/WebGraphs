@@ -22,6 +22,7 @@ namespace Console
         public bool ShowFactors { get; set; }
         public bool InDegreeTerms { get; set; }
         public bool IsLowPlus { get; set; }
+        public bool IsFivePlus { get; set; }
 
         public GraphPictureMaker(string graphFile) : this(GraphEnumerator.EnumerateGraphFile(graphFile)) { }
         public GraphPictureMaker(params Graph[] graphs) : this((IEnumerable<Graph>)graphs) { }
@@ -68,13 +69,13 @@ namespace Console
                     name += "[" + string.Join(",", g.VertexWeight) + "]";
 
                 using(var sw = new StreamWriter(Path.Combine(outputDirectory, name) + ".dot"))
-                    sw.Write(ToDot(g, Directed, ShowFactors));
+                    sw.Write(ToDot(g, Directed, ShowFactors, InDegreeTerms, IsLowPlus, IsFivePlus));
             }
         }
 
         string Draw(Graph g, string path, DotRenderType renderType = DotRenderType.png)
         {
-            var imageFile = Renderer.Render(ToDot(g, Directed, ShowFactors, InDegreeTerms, IsLowPlus), path, renderType);
+            var imageFile = Renderer.Render(ToDot(g, Directed, ShowFactors, InDegreeTerms, IsLowPlus, IsFivePlus), path, renderType);
          
             if (renderType == DotRenderType.svg)
                 FixSvg(imageFile);
@@ -103,7 +104,7 @@ namespace Console
             }
         }
 
-        static string ToDot(Graph g, bool directed = false, bool showFactors = false, bool inDegreeTerms = false, bool isLowPlus = false)
+        static string ToDot(Graph g, bool directed = false, bool showFactors = false, bool inDegreeTerms = false, bool isLowPlus = false, bool isFivePlus = false)
         {
             if (showFactors)
                 return g.ToDotWithFactors();
@@ -124,7 +125,7 @@ namespace Console
             {
                 int colorIndex;
                 var label = "";
-                if (directed)
+                if (directed && !isFivePlus)
                 {
                     label = g.InDegree(v).ToString();
                     colorIndex = g.InDegree(v);
@@ -161,6 +162,11 @@ namespace Console
                         //  colorIndex = dd + 2;
                         colorIndex = DotColors.Count + 1;
                     }
+                    else if (isFivePlus)
+                    {
+                        label = (g.VertexWeight[v] + 5).ToString();
+                        colorIndex = g.VertexWeight[v] + 2;
+                    }
                     else
                     {
                         label = g.VertexWeight[v].ToString();
@@ -196,5 +202,7 @@ namespace Console
             sb.AppendLine("}");
             return sb.ToString();
         }
+
+        
     }
 }

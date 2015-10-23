@@ -13,8 +13,8 @@ namespace Console
 {
     public static class FindChoosables
     {
-        const int MinVertices = 3;
-        const int MaxVertices = 8;
+        const int MinVertices = 4;
+        const int MaxVertices = 16;
 
         const bool Offline = false;
         const bool AT = true;
@@ -24,7 +24,7 @@ namespace Console
         const int MaxDegree = int.MaxValue;
         const bool DiamondFreeOnly = false;
         const bool LineGraph = false;
-        
+
         static readonly string WinnersFile = (MaxIndependenceNumber < int.MaxValue ? "alpha at most " + MaxIndependenceNumber + " " : "") + (DiamondFreeOnly ? "cliquey neighborhoods " : "") + (AT ? "AT " : "") + (Offline ? "offline " : "") + (LineGraph ? "line graph " : "") + (MaxDegree < int.MaxValue ? "max degree " + MaxDegree + "_" : "") + string.Format("winners{0}.txt", Fold);
         public static void Go()
         {

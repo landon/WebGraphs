@@ -66,7 +66,9 @@
     <Compile Include="ConAndNon.cs" />
     <Compile Include="DotRenderer.cs" />
     <Compile Include="EliminateDoubleEdgeNotSubdivisions.cs" />
+    <Compile Include="EliminateTriangleBlowups.cs" />
     <Compile Include="EliminiteDoubleEdgeSubdivisions.cs" />
+    <Compile Include="FindChoosableAdvanced.cs" />
     <Compile Include="FindChoosables.cs" />
     <Compile Include="FindFixerBreaker.cs" />
     <Compile Include="FindTarpits.cs" />
@@ -86,6 +88,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resource.resx</DependentUpon>
     </Compile>
+    <Compile Include="SinkEliminator.cs" />
     <Compile Include="SuperAbundanceFinder.cs" />
     <Compile Include="WeaklyFixableTester.cs" />
   </ItemGroup>

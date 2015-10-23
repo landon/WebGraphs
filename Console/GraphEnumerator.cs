@@ -27,6 +27,8 @@ namespace Console
         public bool DoNotUsePreviousWinners { get; set; }
         public bool OnlyExcludeBySpanningSubgraphs { get; set; }
 
+        public int RingSize { get; set; }
+
         public GraphEnumerator(string winnersFile, int minVertices, int maxVertices, bool usePreviousWinners = true)
         {
             FileRoot = GraphFileRoot;
@@ -123,7 +125,7 @@ namespace Console
             for (int N = min; N <= MaxVertices; N++)
             {
                 System.Console.WriteLine("Checking " + N + " vertex graphs...");
-                var file = FileRoot + N + ".g6";
+                var file = FileRoot + N + (RingSize > 0 ? "_" + RingSize : "") + ".g6";
                 if (!File.Exists(file))
                 {
                     System.Console.WriteLine(file + " does not exist, skipping.");

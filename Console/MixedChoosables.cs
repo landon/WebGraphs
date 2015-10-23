@@ -14,11 +14,11 @@ namespace Console
 {
     public static class MixedChoosables
     {
-        const int MinVertices = 3;
+        const int MinVertices = 2;
         const int MaxVertices = 9;
 
-        const bool Offline = true;
-        const bool AT = false;
+        const bool Offline = false;
+        const bool AT = true;
         const bool Mic = false;
         const bool TwoConnectedOnly = true;
         const int MaxIndependenceNumber = int.MaxValue;

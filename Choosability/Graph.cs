@@ -551,7 +551,11 @@ namespace Choosability
                     w.Add(0);
 
                     if (_adjacent[subgraph[i], subgraph[j]] || _adjacent[subgraph[j], subgraph[i]])
+                    {
                         w[k] = 1;
+                        if (Directed[subgraph[j], subgraph[i]])
+                            w[k] = -1;
+                    }
 
                     k++;
                 }
@@ -721,7 +725,7 @@ namespace Choosability
         }
         public Graph Clone()
         {
-            return new Graph(GetEdgeWeights());
+            return InducedSubgraph(Vertices);
         }
         public Graph Complement()
         {
