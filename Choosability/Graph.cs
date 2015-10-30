@@ -1262,7 +1262,7 @@ namespace Choosability
 
             return mic;
         }
-        public bool IsOnlineFChoosable(Func<int, int> f)
+        public bool IsOnlineFChoosable(Func<int, int> f, CancellationToken cancellationToken)
         {
             NodesVisited = 0;
             CacheHits = 0;
@@ -1273,10 +1273,19 @@ namespace Choosability
 
             var cache = new Dictionary<OnlineChoiceHashGraph, bool>();
 
-            return IsOnlineFChoosable(fTrace, Enumerable.Repeat(1, N).ToArray(), cache);
+            try
+            {
+                return IsOnlineFChoosable(fTrace, Enumerable.Repeat(1, N).ToArray(), cache, cancellationToken);
+            }
+            catch (OperationCanceledException oce)
+            {
+                return false;
+            }
         }
-        bool IsOnlineFChoosable(int[] f, int[] g, Dictionary<OnlineChoiceHashGraph, bool> cache)
+        bool IsOnlineFChoosable(int[] f, int[] g, Dictionary<OnlineChoiceHashGraph, bool> cache, CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             Interlocked.Increment(ref NodesVisited);
 
             OnlineChoiceHashGraph key = null;
@@ -1345,7 +1354,7 @@ namespace Choosability
                     foreach (var v in C)
                         g[v]--;
 
-                    choosable = IsOnlineFChoosable(f, g, cache);
+                    choosable = IsOnlineFChoosable(f, g, cache, cancellationToken);
 
                     foreach (var v in C)
                         g[v]++;

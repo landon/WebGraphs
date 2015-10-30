@@ -1482,13 +1482,15 @@ trash can button.
             if (blob == null)
                 return;
 
+            var tokenSource = new CancellationTokenSource();
+            var token = tokenSource.Token;
             using (var resultWindow = new ResultWindow())
             {
                 var paintable = false;
                 await Task.Factory.StartNew(() =>
                 {
-                    paintable = blob.AlgorithmGraph.IsOnlineFChoosable(v => blob.AlgorithmGraph.Degree(v) - (blob.UIGraph.Vertices[v].IsSelected ? 0 : 1) - blob.UIGraph.Vertices[v].Modifier);
-                });
+                    paintable = blob.AlgorithmGraph.IsOnlineFChoosable(v => blob.AlgorithmGraph.Degree(v) - (blob.UIGraph.Vertices[v].IsSelected ? 0 : 1) - blob.UIGraph.Vertices[v].Modifier, token);
+                }, token);
 
                 resultWindow.AddChild(new TextBlock() { Text = (paintable ? "is d1-paintable" : "not d1-paintable") + Environment.NewLine + Choosability.Graph.NodesVisited + " nodes visited" + Environment.NewLine + Choosability.Graph.CacheHits + " cache hits" });
             }
@@ -1499,6 +1501,8 @@ trash can button.
             if (blob == null)
                 return;
 
+            var tokenSource = new CancellationTokenSource();
+            var token = tokenSource.Token;
             using (var resultWindow = new ResultWindow())
             {
                 var listSizes = ParseListSizes(blob, resultWindow);
@@ -1508,8 +1512,8 @@ trash can button.
                 var paintable = false;
                 await Task.Factory.StartNew(() =>
                 {
-                    paintable = blob.AlgorithmGraph.IsOnlineFChoosable(v => listSizes[v]);
-                });
+                    paintable = blob.AlgorithmGraph.IsOnlineFChoosable(v => listSizes[v], token);
+                }, token);
 
                 resultWindow.AddChild(new TextBlock() { Text = (paintable ? "is f-paintable" : "not f-paintable") + Environment.NewLine + Choosability.Graph.NodesVisited + " nodes visited" + Environment.NewLine + Choosability.Graph.CacheHits + " cache hits" });
             }
