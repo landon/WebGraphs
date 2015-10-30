@@ -65,9 +65,9 @@ namespace Console
             //MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\YetAnother\not 9 vertex Mixed spread 2 max high 2 kappa2 winners1.txt.not.eliminated.txt.triangle_eliminated.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\WithLows\TwoHigh\NotPaintDegreesOK9TrianglesEliminated", directed: false, showFactors: false, lowPlus: true);
 
           //  MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\drawme.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\Planar\AT\5or6\2c", directed: true, showFactors: false, lowPlus: false, fivePlus: true);
-            MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\drawme.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\Planar\AT\5678\9ring\nosink", directed: true, showFactors: false, lowPlus: false, fivePlus: true);
-            MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Another\drawme.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\Planar\AT\5678\10ring\nosink", directed: true, showFactors: false, lowPlus: false, fivePlus: true);
-            MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\YetAnother\drawme.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\Planar\AT\5678\11ring\nosink", directed: true, showFactors: false, lowPlus: false, fivePlus: true);
+            MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Another\ring size 7 min spread 0 spread 4 planar triangulationAT winners.txt.nosink.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\Planar\AT\5678\7ring\nosink\laplace", directed: true, showFactors: false, lowPlus: false, fivePlus: true, useLaplacian: true);
+          //  MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Another\drawme.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\Planar\AT\5678\10ring\nosink", directed: true, showFactors: false, lowPlus: false, fivePlus: true);
+          //  MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\YetAnother\drawme.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\Planar\AT\5678\11ring\nosink", directed: true, showFactors: false, lowPlus: false, fivePlus: true);
 
         }
 
@@ -77,7 +77,7 @@ namespace Console
             gpm.DrawAllAndMakeWebpage(@"C:\Users\landon\Dropbox\Public\Web\GraphData\ConNon");
         }
 
-        public static void MakePdfs(string graphPath, string outputPath, bool superabundance = false, bool lowPlus = false, bool fivePlus = false)
+        public static void MakePdfs(string graphPath, string outputPath, bool superabundance = false, bool lowPlus = false, bool fivePlus = false, bool useLaplacian = false)
         {
             var maker = new GraphPictureMaker(graphPath);
             maker.InDegreeTerms = superabundance;
@@ -86,18 +86,19 @@ namespace Console
             maker.DrawAll(outputPath, DotRenderType.pdf);
         }
 
-        public static void MakeWebpage(string graphPath, string outputPath, bool directed = false, bool showFactors = false, bool lowPlus = false, bool fivePlus = false)
+        public static void MakeWebpage(string graphPath, string outputPath, bool directed = false, bool showFactors = false, bool lowPlus = false, bool fivePlus = false, bool useLaplacian = false)
         {
             var maker = new GraphPictureMaker(graphPath);
-            MakeWebpage(maker, outputPath, directed, showFactors, lowPlus, fivePlus);
+            MakeWebpage(maker, outputPath, directed, showFactors, lowPlus, fivePlus, useLaplacian);
         }
 
-        public static void MakeWebpage(GraphPictureMaker maker, string outputPath, bool directed = false, bool showFactors = false, bool lowPlus = false, bool fivePlus = false)
+        public static void MakeWebpage(GraphPictureMaker maker, string outputPath, bool directed = false, bool showFactors = false, bool lowPlus = false, bool fivePlus = false, bool useLaplacian = false)
         {
             maker.Directed = directed;
             maker.ShowFactors = showFactors;
             maker.IsLowPlus = lowPlus;
             maker.IsFivePlus = fivePlus;
+            maker.UseLaplacian = useLaplacian;
             maker.DrawAllAndMakeWebpage(outputPath);
         }
     }

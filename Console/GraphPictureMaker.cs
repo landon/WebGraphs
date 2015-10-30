@@ -10,7 +10,7 @@ namespace Console
 {
     public class GraphPictureMaker
     {
-        static readonly DotRenderer Renderer = new DotRenderer(@"C:\Program Files (x86)\Graphviz2.38\bin\neato.exe");
+        DotRenderer Renderer = new DotRenderer(@"C:\Program Files (x86)\Graphviz2.38\bin\neato.exe");
         static readonly List<string> DotColors = new List<string>() { "cadetblue", "brown", "dodgerblue", "turquoise", "orchid", "blue", "red", "green", 
                                                                       "yellow", "cyan",
                                                                       "limegreen",  "pink", 
@@ -18,6 +18,16 @@ namespace Console
 
         IEnumerable<Graph> _graphs;
 
+        bool _useLaplacian = false;
+        public bool UseLaplacian
+        {
+            get { return _useLaplacian; }
+            set
+            {
+                _useLaplacian = value;
+               // Renderer.SkipLayout = _useLaplacian;
+            }
+        }
         public bool Directed { get; set; }
         public bool ShowFactors { get; set; }
         public bool InDegreeTerms { get; set; }
@@ -69,13 +79,13 @@ namespace Console
                     name += "[" + string.Join(",", g.VertexWeight) + "]";
 
                 using(var sw = new StreamWriter(Path.Combine(outputDirectory, name) + ".dot"))
-                    sw.Write(ToDot(g, Directed, ShowFactors, InDegreeTerms, IsLowPlus, IsFivePlus));
+                    sw.Write(ToDot(g, Directed, ShowFactors, InDegreeTerms, IsLowPlus, IsFivePlus, UseLaplacian));
             }
         }
 
         string Draw(Graph g, string path, DotRenderType renderType = DotRenderType.png)
         {
-            var imageFile = Renderer.Render(ToDot(g, Directed, ShowFactors, InDegreeTerms, IsLowPlus, IsFivePlus), path, renderType);
+            var imageFile = Renderer.Render(ToDot(g, Directed, ShowFactors, InDegreeTerms, IsLowPlus, IsFivePlus, UseLaplacian), path, renderType);
          
             if (renderType == DotRenderType.svg)
                 FixSvg(imageFile);
@@ -104,10 +114,17 @@ namespace Console
             }
         }
 
-        static string ToDot(Graph g, bool directed = false, bool showFactors = false, bool inDegreeTerms = false, bool isLowPlus = false, bool isFivePlus = false)
+        static string ToDot(Graph g, bool directed = false, bool showFactors = false, bool inDegreeTerms = false, bool isLowPlus = false, bool isFivePlus = false, bool useLaplacian = false)
         {
             if (showFactors)
                 return g.ToDotWithFactors();
+
+            List<Graphs.Vector> fixedPositions = null;
+            if (useLaplacian)
+            {
+                fixedPositions = GraphsCore.Layout.GetLaplacianLayout(g);
+                //fixedPositions = GraphsCore.Layout.GetSpringsLayout(g);
+            }
 
             var sb = new StringBuilder();
 
@@ -179,7 +196,14 @@ namespace Console
                 if (colorIndex < 0)
                     colorIndex += 13;
 
-                sb.AppendLine(string.Format(@"{0} [label = ""{2}"", style = filled, fillcolor = ""{1}""];", v, DotColors[colorIndex % DotColors.Count], label));
+                if (fixedPositions != null)
+                {
+                    sb.AppendLine(string.Format(@"{0} [label = ""{2}"", style = filled, fillcolor = ""{1}"", pos = ""{3},{4}""];", v, DotColors[colorIndex % DotColors.Count], label, fixedPositions[v].X, fixedPositions[v].Y));
+                }
+                else
+                {
+                    sb.AppendLine(string.Format(@"{0} [label = ""{2}"", style = filled, fillcolor = ""{1}""];", v, DotColors[colorIndex % DotColors.Count], label));
+                }
             }
 
             for (int i = 0; i < g.N; i++)

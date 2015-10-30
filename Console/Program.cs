@@ -14,14 +14,14 @@ namespace Console
         static void Main(string[] args)
         {
            // SinkEliminator.Go(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\YetAnother\ring size 11 min spread 0 spread 4 planar triangulationAT winners.txt");
-          //  FindChoosablesAdvanced.Go();
+            FindChoosablesAdvanced.Go();
           //  MicTester.Go();
            // GenerateWithExcludedSubgraphs.Go();
             //WeaklyFixableTester.Go();
           //  FixerBreakerTrees.Go();
          //   SuperAbundanceFinder.Go();
           //  FindFixerBreaker.Go();
-            MakePictures.Go();
+         //   MakePictures.Go();
 
           //  MixedChoosables.Go();
             //EliminiteDoubleEdgeSubdivisions.Go(@"C:\Users\landon\Google Drive\research\graphs\WithLows\Mixed spread 2 AT winners1.txt");

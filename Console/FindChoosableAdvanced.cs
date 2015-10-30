@@ -16,11 +16,11 @@ namespace Console
     {
         const int MinVertices = 4;
         const int MaxVertices = 14;
-        const int RingSize = 11;
+        const int RingSize = 9;
 
         const bool Offline = false;
         const bool AT = true;
-        const int Spread = 4;
+        const int Spread = 5;
         const int MinSpread = 0;
 
         const int MaxDegree = int.MaxValue;
@@ -113,8 +113,10 @@ namespace Console
                     continue;
                 }
 
-                if (g.Vertices.Any(v => 
+                if (g.Vertices.Any(v =>
                     {
+                        if (RingSize == 5)
+                            return false;
                         if (www[v] > 1)
                             return false;
 
