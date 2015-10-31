@@ -13,6 +13,7 @@ namespace Console
     {
         static void Main(string[] args)
         {
+          //  @"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\PreFilterW ring size 4 -- 14degrees 6 -- 7planar triangulationAT winners.txt".EnumerateWeightedGraphs().EliminateSinks().RemoveIsomorphs().WriteToWeightFile("goods.txt");
             //for (int i = 5; i <= 14; i++)
             //{
             //    for (int j = 5; j <= 14; j++)
@@ -24,14 +25,14 @@ namespace Console
             //}
             
            // SinkEliminator.Go(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\YetAnother\ring size 11 min spread 0 spread 4 planar triangulationAT winners.txt");
-            FindChoosablesAdvanced.Go();
+           // FindChoosablesAdvanced.Go();
           //  MicTester.Go();
            // GenerateWithExcludedSubgraphs.Go();
             //WeaklyFixableTester.Go();
           //  FixerBreakerTrees.Go();
          //   SuperAbundanceFinder.Go();
           //  FindFixerBreaker.Go();
-          //  MakePictures.Go();
+            MakePictures.Go();
 
           //  MixedChoosables.Go();
             //EliminiteDoubleEdgeSubdivisions.Go(@"C:\Users\landon\Google Drive\research\graphs\WithLows\Mixed spread 2 AT winners1.txt");

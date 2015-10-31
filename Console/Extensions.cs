@@ -9,6 +9,15 @@ namespace Console
 {
     public static class Extensions
     {
+        public static void WriteToWeightFile(this IEnumerable<Choosability.Graph> graphs, string path)
+        {
+            using (var sw = new StreamWriter(path, append: false))
+            {
+                foreach (var g in graphs)
+                    sw.WriteLine(g.ToWeightString());
+            }
+        }
+
         public static void AppendToFile(this Choosability.Graph g, string path)
         {
             using (var sw = new StreamWriter(path, append: true))

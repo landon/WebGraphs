@@ -87,6 +87,7 @@
     <Compile Include="GenerateWithExcludedSubgraphs.cs" />
     <Compile Include="GraphEnumerator.cs" />
     <Compile Include="GraphViz.cs" />
+    <Compile Include="IsomorphRemover.cs" />
     <Compile Include="LocalGraphExtensions.cs" />
     <Compile Include="MakePictures.cs" />
     <Compile Include="MicTester.cs" />
