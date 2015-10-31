@@ -35,19 +35,8 @@ namespace Console
                         continue;
                 }
 
-                WriteGraph(g, eliminatedPath);
+                g.AppendToFile(eliminatedPath);
             }
-        }
-
-        static void WriteGraph(Graph g, string path)
-        {
-            var edgeWeights = string.Join(" ", g.GetEdgeWeights().Select(x => x.ToString()));
-            var vertexWeights = "";
-            if (g.VertexWeight != null)
-                vertexWeights = " [" + string.Join(",", g.VertexWeight) + "]";
-
-            using (var sw = new StreamWriter(path, append: true))
-                sw.WriteLine(edgeWeights + vertexWeights);
         }
     }
 }

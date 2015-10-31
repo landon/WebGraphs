@@ -1333,20 +1333,17 @@ namespace Choosability
                 goto done;
             }
 
-            var independentSets = _independentSets.Value.Where(set => set.Count >= 1 && ListUtility.SubsetEqualSorted(set, liveVertices)).ToList();
-
             foreach (var V in ListUtility.EnumerateSublists(liveVertices))
             {
                 if (V.Count <= 1)
                     continue;
 
-                if (independentSets.Any(ss => ListUtility.SubsetEqualSorted(V, ss)))
+                var maximalIndependentSets = EnumerateMaximalIndependentSets(V).ToList();
+                if (maximalIndependentSets.Count == 1)
                     continue;
 
                 foreach (var v in V)
                     f[v]--;
-
-                var maximalIndependentSets = ListUtility.MaximalElementsSorted(independentSets.Where(set => ListUtility.SubsetEqualSorted(set, V)).ToList());
 
                 var choosable = false;
                 foreach (var C in maximalIndependentSets)
@@ -1444,20 +1441,17 @@ namespace Choosability
                 goto done;
             }
 
-            var independentSets = _independentSets.Value.Where(set => set.Count >= 1 && ListUtility.SubsetEqualSorted(set, liveVertices)).ToList();
-
             foreach (var V in ListUtility.EnumerateSublists(liveVertices))
             {
                 if (V.Count <= 1)
                     continue;
 
-                if (independentSets.Any(ss => ListUtility.SubsetEqualSorted(V, ss)))
+                var maximalIndependentSets = EnumerateMaximalIndependentSets(V).ToList();
+                if (maximalIndependentSets.Count == 1)
                     continue;
 
                 foreach (var v in V)
                     f[v]--;
-
-                var maximalIndependentSets = ListUtility.MaximalElementsSorted(independentSets.Where(set => ListUtility.SubsetEqualSorted(set, V)).ToList());
 
                 var choosable = false;
                 foreach (var C in maximalIndependentSets)

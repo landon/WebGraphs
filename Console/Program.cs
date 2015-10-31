@@ -13,6 +13,16 @@ namespace Console
     {
         static void Main(string[] args)
         {
+            //for (int i = 5; i <= 14; i++)
+            //{
+            //    for (int j = 5; j <= 14; j++)
+            //    {
+            //        var file = string.Format(@"C:\Users\landon\Google Drive\research\Graph6\triangulation\disk\triangulation{0}_{1}.g6", i, j);
+            //        if (File.Exists(file))
+            //            FilterTriangleCutsets.FilterGraph6AndMinWeight(file);
+            //    }
+            //}
+            
            // SinkEliminator.Go(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\YetAnother\ring size 11 min spread 0 spread 4 planar triangulationAT winners.txt");
             FindChoosablesAdvanced.Go();
           //  MicTester.Go();
@@ -21,7 +31,7 @@ namespace Console
           //  FixerBreakerTrees.Go();
          //   SuperAbundanceFinder.Go();
           //  FindFixerBreaker.Go();
-         //   MakePictures.Go();
+          //  MakePictures.Go();
 
           //  MixedChoosables.Go();
             //EliminiteDoubleEdgeSubdivisions.Go(@"C:\Users\landon\Google Drive\research\graphs\WithLows\Mixed spread 2 AT winners1.txt");

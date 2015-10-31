@@ -21,7 +21,13 @@ namespace Console
             var eliminatedPath = path + ".nosink.txt";
             File.Delete(eliminatedPath);
 
-            foreach (var g in GraphEnumerator.EnumerateGraphFile(path))
+            foreach (var g in GraphEnumerator.EnumerateGraphFile(path).EliminateSinks())
+                g.AppendToFile(eliminatedPath);
+        }
+
+        public static IEnumerable<Graph> EliminateSinks(this IEnumerable<Graph> graphs)
+        {
+            foreach (var g in graphs)
             {
                 var h = g.Clone();
                 while (h.E > 0 && h.Vertices.Any(v => h.OutDegree(v) == 0))
@@ -31,19 +37,8 @@ namespace Console
                 }
 
                 if (h.E > 0)
-                    WriteGraph(h, eliminatedPath);
+                    yield return h;
             }
-        }
-
-        static void WriteGraph(Graph g, string path)
-        {
-            var edgeWeights = string.Join(" ", g.GetEdgeWeights().Select(x => x.ToString()));
-            var vertexWeights = "";
-            if (g.VertexWeight != null)
-                vertexWeights = " [" + string.Join(",", g.VertexWeight) + "]";
-
-            using (var sw = new StreamWriter(path, append: true))
-                sw.WriteLine(edgeWeights + vertexWeights);
         }
     }
 }

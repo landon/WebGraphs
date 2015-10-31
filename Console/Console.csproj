@@ -77,6 +77,8 @@
     <Compile Include="EliminateDoubleEdgeNotSubdivisions.cs" />
     <Compile Include="EliminateTriangleBlowups.cs" />
     <Compile Include="EliminiteDoubleEdgeSubdivisions.cs" />
+    <Compile Include="Extensions.cs" />
+    <Compile Include="FilterTriangleCutsets.cs" />
     <Compile Include="FindChoosableAdvanced.cs" />
     <Compile Include="FindChoosables.cs" />
     <Compile Include="FindFixerBreaker.cs" />

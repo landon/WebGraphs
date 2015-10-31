@@ -16,120 +16,104 @@ namespace Console
     public static class FindChoosablesAdvanced
     {
         const int MinVertices = 4;
-        const int MaxVertices = 12;
-        const int MinRingSize = 6;
+        const int MaxVertices = 14;
+        const int MinRingSize = 4;
         const int MaxRingSize = 14;
         const int MinDegree = 6;
-        const int MaxDegree = 8;
-        const bool AllowTriangleCuts = false;
+        const int MaxDegree = 7;
 
         const bool Offline = false;
         const bool AT = true;
 
-        static readonly string WinnersFile = (AllowTriangleCuts ? "YES" : "NO") + " triangle cuts " + ("ring size " + MinRingSize + " -- " + MaxRingSize) + ("degrees " + MinDegree + " -- " + MaxDegree) + ("planar triangulation") + (AT ? "AT " : "") + (Offline ? "offline " : "") + string.Format("winners.txt");
+        static readonly string WinnersFile = "PreFilterW " + ("ring size " + MinRingSize + " -- " + MaxRingSize) + ("degrees " + MinDegree + " -- " + MaxDegree) + ("planar triangulation") + (AT ? "AT " : "") + (Offline ? "offline " : "") + string.Format("winners.txt");
         public static void Go()
         {
+            File.Delete(WinnersFile);
+
             var tokenSource = new CancellationTokenSource();
             var token = tokenSource.Token;
 
-            using (var graphIO = new GraphEnumerator(WinnersFile, MinVertices, MaxVertices, true))
+            int winnersFound = 0;
+            for (int N = MinVertices; N <= MaxVertices; N++)
             {
-                for (var ringSize = MinRingSize; ringSize <= MaxRingSize; ringSize++)
+                System.Console.ForegroundColor = ConsoleColor.DarkCyan;
+                System.Console.WriteLine("Checking " + N + " vertex graphs...");
+                System.Console.ForegroundColor = ConsoleColor.White;
+
+                for (var R = MinRingSize; R <= MaxRingSize; R++)
                 {
-                    System.Console.WriteLine();
-                    System.Console.ForegroundColor = ConsoleColor.Blue;
-                    System.Console.WriteLine("Checking ring size " + ringSize + "...");
+                    System.Console.ForegroundColor = ConsoleColor.DarkGray;
+                    System.Console.WriteLine("Checking ring size " + R + "...");
                     System.Console.ForegroundColor = ConsoleColor.White;
-                    System.Console.WriteLine();
-                    graphIO.FileRoot = @"C:\Users\landon\Google Drive\research\Graph6\triangulation\disk\triangulation";
-                    graphIO.RingSize = ringSize;
 
-                    foreach (var g in graphIO.EnumerateGraph6File(Filter, EnumerateWeightings))
+                    var path = string.Format(@"C:\Users\landon\Google Drive\research\Graph6\triangulation\disk\triangulation{0}_{1}.g6.tri.weighted.txt", N, R);
+                    if (!File.Exists(path))
+                        continue;
+
+                    foreach (var h in path.EnumerateWeightedGraphs())
                     {
-                        if (AT)
+                        foreach (var g in EnumerateWeightings(h))
                         {
-                            var result = HasFOrientation(g, v => g.Degree(v) - g.VertexWeight[v], true);
-                            if (result != null)
+                            if (AT)
                             {
-                                graphIO.AddWinner(g, result.Graph);
-                                System.Console.WriteLine(string.Format(" is AT"));
-                            }
-                            else
-                                System.Console.WriteLine(" not AT");
-                        }
-                        else if (Offline)
-                        {
-                            List<List<int>> badAssignment;
-                            var bg = new BitGraph_long(g.GetEdgeWeights());
+                                var result = HasFOrientation(g, v => g.Degree(v) - g.VertexWeight[v], true);
+                                if (result != null)
+                                {
+                                    winnersFound++;
+                                    result.Graph.VertexWeight = g.VertexWeight;
+                                    result.Graph.AppendToFile(WinnersFile);
+                                    System.Console.ForegroundColor = ConsoleColor.Green;
+                                    System.Console.WriteLine(string.Format("found {0} AT graph{1} so far", winnersFound, winnersFound > 1 ? "s" : ""));
+                                    System.Console.ForegroundColor = ConsoleColor.White;
+                                }
+                                else
+                                {
 
-                            System.Console.Write("checking " + g.ToGraph6() + "...");
-                            if (bg.IsFChoosable(v => bg.Degree(v) - g.VertexWeight[v], out badAssignment))
+                                }
+                            }
+                            else if (Offline)
                             {
-                                graphIO.AddWinner(g);
-                                System.Console.WriteLine(string.Format(" is choosable"));
+                                List<List<int>> badAssignment;
+                                var bg = new BitGraph_long(g.GetEdgeWeights());
+
+                                System.Console.Write("checking " + g.ToGraph6() + "...");
+                                if (bg.IsFChoosable(v => bg.Degree(v) - g.VertexWeight[v], out badAssignment))
+                                {
+                                    g.AppendToFile(WinnersFile);
+                                    System.Console.WriteLine(string.Format(" is choosable"));
+                                }
+                                else
+                                    System.Console.WriteLine(" not choosable");
                             }
                             else
-                                System.Console.WriteLine(" not choosable");
-                        }
-                        else
-                        {
-                            System.Console.Write("checking " + g.ToGraph6() + "...");
-                            if (g.IsOnlineFChoosable(v => g.Degree(v) - g.VertexWeight[v], token))
                             {
-                                graphIO.AddWinner(g);
-                                System.Console.WriteLine(string.Format(" is paintable"));
+                                System.Console.Write("checking " + g.ToGraph6() + "...");
+                                if (g.IsOnlineFChoosable(v => g.Degree(v) - g.VertexWeight[v], token))
+                                {
+                                    g.AppendToFile(WinnersFile);
+                                    System.Console.WriteLine(string.Format(" is paintable"));
+                                }
+                                else
+                                    System.Console.WriteLine(" not paintable");
                             }
-                            else
-                                System.Console.WriteLine(" not paintable");
                         }
                     }
                 }
             }
         }
 
-        static bool Filter(Graph g)
-        {
-            return true;
-        }
-
         static IEnumerable<Graph> EnumerateWeightings(Graph g)
         {
-            var space = g.Vertices.Select(v => Enumerable.Range(g.Degree(v) - 5, MaxDegree - g.Degree(v) + 1).Reverse()).CartesianProduct();
+            var space = g.Vertices.Select(v => Enumerable.Range(MinDegree - 5, Math.Min(g.VertexWeight[v], MaxDegree) - MinDegree + 1).Reverse()).CartesianProduct();
             foreach (var weighting in space)
             {
                 var www = weighting.ToList();
 
+                if (g.Vertices.Any(v => g.Degree(v) > www[v] + 5))
+                    continue;
+
                 if (g.Vertices.Any(v => www[v] >= g.Degree(v)))
                     continue;
-
-                if (!AllowTriangleCuts)
-                {
-                    if (g.Vertices.Any(v =>
-                    {
-                        if (g.EdgesOn(g.Neighbors[v]) != g.Degree(v))
-                            return false;
-
-                        return www[v] + 5 > g.Degree(v) || g.Degree(v) <= 4;
-                    }))
-                    {
-                        continue;
-                    }
-                }
-
-                if (g.Vertices.Any(v =>
-                    {
-                        if (MaxRingSize == 5)
-                            return false;
-                        if (www[v] > 1)
-                            return false;
-
-                        var zn = g.Neighbors[v].Where(w => www[w] == 0).ToList();
-
-                        return g.InducedSubgraph(zn).MaxDegree > 1;
-                    }))
-                {
-                    continue;
-                }
 
                 var gg = g.Clone();
                 gg.VertexWeight = www;
@@ -145,7 +129,6 @@ namespace Console
 
             var degreeSequences = new List<int[]>();
 
-            System.Console.Write("Checking AT randomly...");
             for (int i = 0; i < RandomTries; i++)
             {
                 var o = g.GenerateRandomOrientation();
@@ -164,7 +147,6 @@ namespace Console
                     return result;
             }
 
-            System.Console.Write(" not found randomly, checking AT full...");
             var tokenSource = new CancellationTokenSource();
             var token = tokenSource.Token;
 
@@ -197,13 +179,11 @@ namespace Console
             {
                 if (((Task<bool>)doneTask).Result)
                 {
-                    System.Console.Write(" paintable,");
                     return ((Task<OrientationResult>)tasks[1]).Result;
                 }
                 else
                 {
                     tokenSource.Cancel();
-                    System.Console.Write(" not paintable, so");
                     return null;
                 }
             }

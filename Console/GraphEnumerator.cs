@@ -49,7 +49,7 @@ namespace Console
 
             foreach (var g in PreviousWinners)
             {
-                WriteGraph(g);
+                g.AppendToFile(WinnersFile);
                 Last = g;
             }
 
@@ -107,7 +107,7 @@ namespace Console
                 output.VertexWeight = g.VertexWeight;
 
             output = output ?? g;
-            WriteGraph(output);
+            output.AppendToFile(WinnersFile);
         }
 
         public IEnumerable<Graph> EnumerateGraph6File(Func<Graph, bool> filter = null, Func<Graph, IEnumerable<Graph>> secondaryEnumerator = null, bool induced = false)
@@ -203,17 +203,6 @@ namespace Console
         public static bool WeightConditionFalse(Graph self, Graph A, int selfV, int av)
         {
             return false;
-        }
-
-        void WriteGraph(Graph g)
-        {
-            var edgeWeights = string.Join(" ", g.GetEdgeWeights().Select(x => x.ToString()));
-            var vertexWeights = "";
-            if (g.VertexWeight != null)
-                vertexWeights = " [" + string.Join(",", g.VertexWeight) + "]";
-
-            using (var sw = new StreamWriter(WinnersFile, append: true))
-                sw.WriteLine(edgeWeights + vertexWeights);
         }
 
         public void Dispose()
