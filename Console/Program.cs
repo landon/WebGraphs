@@ -13,26 +13,31 @@ namespace Console
     {
         static void Main(string[] args)
         {
-          //  @"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\PreFilterW ring size 4 -- 14degrees 6 -- 7planar triangulationAT winners.txt".EnumerateWeightedGraphs().EliminateSinks().RemoveIsomorphs().WriteToWeightFile("goods.txt");
-            //for (int i = 5; i <= 14; i++)
+           // @"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Another\generated.txt".EnumerateWeightedGraphs().RemoveSelfIsomorphs().WriteToWeightFile("generated_noiso.txt");
+            NewGenerator.Go();
+            //FindATCounterexample.Go();
+          //  FilterTriangleCutsets.FilterGraph6AndMinWeight(@"C:\Users\landon\Google Drive\research\code\plantri\plantri\Debug\triangulation15_6.txt");
+          //  @"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\OneMore\test.txt".EnumerateWeightedGraphs().EliminateSinks().RemoveIsomorphs().OrderBy(g => g.VertexWeight.Count(x => x == 0)).WriteToWeightFile("goods2.txt");
+          //  @"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\4--15-6--8a.txt".EnumerateWeightedGraphs().EliminateSinks().RemoveIsomorphs().WriteToWeightFile("4--15-6--8.txt");
+            //for (int i = 15; i <= 16; i++)
             //{
-            //    for (int j = 5; j <= 14; j++)
+            //    for (int j = 5; j <= 15; j++)
             //    {
-            //        var file = string.Format(@"C:\Users\landon\Google Drive\research\Graph6\triangulation\disk\triangulation{0}_{1}.g6", i, j);
+            //        var file = string.Format(@"C:\Users\landon\Google Drive\research\code\plantri\plantri\Debug\triangulation{0}_{1}.g6", i, j);
             //        if (File.Exists(file))
             //            FilterTriangleCutsets.FilterGraph6AndMinWeight(file);
             //    }
             //}
             
            // SinkEliminator.Go(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\YetAnother\ring size 11 min spread 0 spread 4 planar triangulationAT winners.txt");
-           // FindChoosablesAdvanced.Go();
+          // FindChoosablesAdvanced.Go();
           //  MicTester.Go();
            // GenerateWithExcludedSubgraphs.Go();
             //WeaklyFixableTester.Go();
           //  FixerBreakerTrees.Go();
          //   SuperAbundanceFinder.Go();
           //  FindFixerBreaker.Go();
-            MakePictures.Go();
+          //  MakePictures.Go();
 
           //  MixedChoosables.Go();
             //EliminiteDoubleEdgeSubdivisions.Go(@"C:\Users\landon\Google Drive\research\graphs\WithLows\Mixed spread 2 AT winners1.txt");

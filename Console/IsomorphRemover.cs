@@ -9,7 +9,7 @@ namespace Console
 {
     public static class IsomorphRemover
     {
-        public static IEnumerable<Graph> RemoveIsomorphs(this IEnumerable<Graph> graphs, bool induced = true, Func<Graph, Graph, int, int, bool> weightCondition = null)
+        public static IEnumerable<Graph> RemoveSelfIsomorphs(this IEnumerable<Graph> graphs, bool induced = true, Func<Graph, Graph, int, int, bool> weightCondition = null)
         {
             if (weightCondition == null)
                 weightCondition = WeightConditionDown;
@@ -38,6 +38,15 @@ namespace Console
                 if (good)
                     yield return g;
             }
+        }
+
+        public static IEnumerable<Graph> RemoveIsomorphs(this IEnumerable<Graph> graphs, IEnumerable<Graph> excluded, bool induced = true, Func<Graph, Graph, int, int, bool> weightCondition = null)
+        {
+            if (weightCondition == null)
+                weightCondition = WeightConditionDown;
+
+            return graphs.Where(g => !excluded.Any(h => g.Contains(h, induced, weightCondition)));
+
         }
 
         public static bool WeightConditionEqual(Graph self, Graph A, int selfV, int av)

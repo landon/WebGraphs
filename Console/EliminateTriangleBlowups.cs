@@ -35,7 +35,7 @@ namespace Console
                         continue;
                 }
 
-                g.AppendToFile(eliminatedPath);
+                g.AppendWeightStringToFile(eliminatedPath);
             }
         }
     }

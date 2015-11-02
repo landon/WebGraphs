@@ -119,6 +119,7 @@
     <Compile Include="IndependenceRatio\MinorFinder.cs" />
     <Compile Include="OneFactorizationsOfCompleteGraph.cs" />
     <Compile Include="DataStructures\UnionFind.cs" />
+    <Compile Include="Planar\Triangulation.cs" />
     <Compile Include="Polynomials\FactoredRational.cs" />
     <Compile Include="Polynomials\GraphPolynomial.cs" />
     <Compile Include="Polynomials\Normalizer.cs" />

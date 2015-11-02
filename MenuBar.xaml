@@ -179,6 +179,13 @@
                 </menu:ContextMenu>
             </menu:ContextMenuService.ContextMenu>
         </Button>
+        <Button Content="Planar" Style="{StaticResource MenuButton}" Width="62" Click="MenuTopLevelClick" MouseRightButtonDown="MenuTopLevelRightClick">
+            <menu:ContextMenuService.ContextMenu>
+                <menu:ContextMenu>
+                    <local:SuperMenuItem Header="extend triangulation" Click="MenuItemClick"/>
+                </menu:ContextMenu>
+            </menu:ContextMenuService.ContextMenu>
+        </Button>
         <Button Content="Layout" Style="{StaticResource MenuButton}" Width="62" Click="MenuTopLevelClick" MouseRightButtonDown="MenuTopLevelRightClick">
             <menu:ContextMenuService.ContextMenu>
                 <menu:ContextMenu>

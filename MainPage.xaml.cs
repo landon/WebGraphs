@@ -115,6 +115,8 @@ namespace WebGraphs
             _mainMenu.AnalyzeCurrentBoard += _mainMenu_OnAnalyzeCurrentBoard;
             _mainMenu.GenenerateBoard += _mainMenu_OnGenenerateBoard;
 
+            _mainMenu.ExtendTriangulation += _mainMenu_ExtendTriangulation;
+
             _propertyGrid.SomethingChanged += _propertyGrid_SomethingChanged;
 
             DoAutoLoad();
@@ -1082,6 +1084,36 @@ trash can button.
              }, (Layout.Algorithm)SpindleAnalyzer.RotateDiamondsLayout, locations, data);
         }
 
+        void _mainMenu_ExtendTriangulation()
+        {
+            var blob = AlgorithmBlob.Create(SelectedTabCanvas);
+
+            blob.AlgorithmGraph.VertexWeight = blob.UIGraph.Vertices.Select(v =>
+                {
+                    int d;
+                    if (!int.TryParse(v.Label, out d))
+                        return 0;
+
+                    return d;
+                }).ToList();
+
+            var h = Choosability.Planar.Triangulation.Extend(blob.AlgorithmGraph);
+            if (h == null)
+            {
+                MessageBox.Show("something is not right there");
+            }
+            else
+            {
+                var ui = new Graphs.Graph(h, h.Vertices.Select(vv => new Vector()).ToList(), false);
+                foreach (var v in ui.Vertices)
+                {
+                    if (v.Label == "0")
+                        v.Label = "";
+                }
+                AddTab(ui, "extended " + SelectedTabCanvas.Title, false);
+                DoLaplacianLayout();
+            }
+        }
 
         void ReverseSelectedEdges()
         {

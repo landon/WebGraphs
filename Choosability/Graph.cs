@@ -843,7 +843,10 @@ namespace Choosability
                 adjacent[neighbor, N] = true;
             }
 
-            return new Graph(adjacent);
+            var g = new Graph(adjacent);
+            g.VertexWeight = VertexWeight.ToList();
+            g.VertexWeight.Add(0);
+            return g;
         }
         public static Graph operator +(Graph A, Graph B)
         {

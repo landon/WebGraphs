@@ -19,7 +19,7 @@
     <IISExpressAnonymousAuthentication />
     <IISExpressWindowsAuthentication />
     <IISExpressUseClassicPipelineMode />
-    <SilverlightApplicationList>{B47F291A-7E4C-4A66-9C80-3EEE77CE8CB4}|..\WebGraphs\WebGraphs.csproj|ClientBin|False</SilverlightApplicationList>
+    <SilverlightApplicationList>{B47F291A-7E4C-4A66-9C80-3EEE77CE8CB4}|..\WebGraphs\WebGraphs.csproj|ClientBin|True</SilverlightApplicationList>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
   </PropertyGroup>
@@ -60,7 +60,8 @@
     <Reference Include="System.EnterpriseServices" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="ClientBin\WebGraphs.xap" />
+    <Content Include="ClientBin\Another\WebGraphs.xap" />
+    <Content Include="ClientBin\Debug\WebGraphs.xap" />
     <Content Include="Silverlight.js" />
     <Content Include="Web.config" />
     <Content Include="WebGraphsTestPage.aspx" />

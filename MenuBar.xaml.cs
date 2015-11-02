@@ -81,6 +81,7 @@ namespace WebGraphs
         public event Action OnAddClockSpindle;
         public event Action OnAddCClockSpindle;
         public event Action OnNextDeepestBoard;
+        public event Action ExtendTriangulation;
 
         public event Action<bool, int, FixerBreakerSwapMode, bool, bool, bool, FixerBreakeReductionMode> Analyze;
         public event Action<bool, int, FixerBreakerSwapMode, bool, bool, bool, FixerBreakeReductionMode> AnalyzeCurrentBoard;
@@ -368,6 +369,9 @@ namespace WebGraphs
                 case "all assignments":
                     _nearColoringItem.Header = "near colorings only";
                     SaveSettings();
+                    break;
+                case "extend triangulation":
+                    A(ExtendTriangulation);
                     break;
             }
         }

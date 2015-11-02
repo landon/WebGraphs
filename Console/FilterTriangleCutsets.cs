@@ -27,7 +27,7 @@ namespace Console
             File.Delete(ep);
 
             foreach (var g in path.EnumerateGraph6().FilterNonFacialTrianglesAndWeight())
-                g.AppendToFile(ep);
+                g.AppendWeightStringToFile(ep);
         }
 
         public static IEnumerable<Graph> FilterNonFacialTriangles(this IEnumerable<Graph> graphs)

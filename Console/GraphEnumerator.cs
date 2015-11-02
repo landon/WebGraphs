@@ -49,7 +49,7 @@ namespace Console
 
             foreach (var g in PreviousWinners)
             {
-                g.AppendToFile(WinnersFile);
+                g.AppendWeightStringToFile(WinnersFile);
                 Last = g;
             }
 
@@ -107,7 +107,7 @@ namespace Console
                 output.VertexWeight = g.VertexWeight;
 
             output = output ?? g;
-            output.AppendToFile(WinnersFile);
+            output.AppendWeightStringToFile(WinnersFile);
         }
 
         public IEnumerable<Graph> EnumerateGraph6File(Func<Graph, bool> filter = null, Func<Graph, IEnumerable<Graph>> secondaryEnumerator = null, bool induced = false)

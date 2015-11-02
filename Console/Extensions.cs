@@ -5,6 +5,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using BitLevelGeneration;
+using Choosability;
+using Choosability.Polynomials;
+using Choosability.Utility;
+using System.Threading;
+
 namespace Console
 {
     public static class Extensions
@@ -18,7 +24,7 @@ namespace Console
             }
         }
 
-        public static void AppendToFile(this Choosability.Graph g, string path)
+        public static void AppendWeightStringToFile(this Choosability.Graph g, string path)
         {
             using (var sw = new StreamWriter(path, append: true))
                 sw.WriteLine(g.ToWeightString());
@@ -82,6 +88,107 @@ namespace Console
                     yield return new Choosability.Graph(ew);
                 }
             }
+        }
+
+        public static OrientationResult HasFOrientation(this Graph g, Func<int, int> f)
+        {
+            const int RandomTries = 10;
+            int MaxFails = 100;
+
+            var degreeSequences = new List<int[]>();
+
+            for (int i = 0; i < RandomTries; i++)
+            {
+                var o = g.GenerateRandomOrientation();
+
+                if (Enumerable.Range(0, o.N).Any(v => f(v) <= o.OutDegree(v)))
+                {
+                    i--;
+                    MaxFails--;
+                    if (MaxFails < 0)
+                        break;
+                    continue;
+                }
+
+                var result = CheckOrientation(o, degreeSequences);
+                if (result != null)
+                    return result;
+            }
+
+            var tokenSource = new CancellationTokenSource();
+            var token = tokenSource.Token;
+
+            var tasks = new Task[2];
+            tasks[0] = Task<bool>.Factory.StartNew(() => g.IsOnlineFChoosable(v => f(v), token), token);
+            tasks[1] = Task<OrientationResult>.Factory.StartNew(() =>
+            {
+                foreach (var orientation in g.EnumerateOrientations(v => g.Degree(v) + 1 - f(v)))
+                {
+                    if (token.IsCancellationRequested)
+                        return null;
+                    var result = CheckOrientation(orientation, degreeSequences);
+                    if (result != null)
+                        return result;
+                }
+
+                return null;
+            }, token);
+
+
+            var doneTask = tasks[Task.WaitAny(tasks)];
+            if (doneTask is Task<OrientationResult>)
+            {
+                var result = ((Task<OrientationResult>)doneTask).Result;
+                tokenSource.Cancel();
+
+                return result;
+            }
+            else
+            {
+                if (((Task<bool>)doneTask).Result)
+                {
+                    return ((Task<OrientationResult>)tasks[1]).Result;
+                }
+                else
+                {
+                    tokenSource.Cancel();
+                    return null;
+                }
+            }
+        }
+
+        public static OrientationResult HasFOrientationSkipPaint(this Graph g, Func<int, int> f)
+        {
+            var degreeSequences = new List<int[]>();
+            foreach (var orientation in g.EnumerateOrientations(v => g.Degree(v) + 1 - f(v)))
+            {
+                var result = CheckOrientation(orientation, degreeSequences);
+                if (result != null)
+                    return result;
+            }
+
+            return null;
+        }
+
+        static OrientationResult CheckOrientation(Graph orientation, List<int[]> degreeSequences)
+        {
+            if (degreeSequences.Any(seq => Enumerable.SequenceEqual(seq, orientation.InDegreeSequence.Value)))
+                return null;
+
+            degreeSequences.Add(orientation.InDegreeSequence.Value);
+
+            var c = orientation.GetCoefficient(orientation.Vertices.Select(v => orientation.OutDegree(v)).ToArray());
+            if (c != 0)
+                return new OrientationResult() { Graph = orientation, Even = c, Odd = 0 };
+
+            return null;
+        }
+
+        public class OrientationResult
+        {
+            public Graph Graph { get; set; }
+            public int Even { get; set; }
+            public int Odd { get; set; }
         }
     }
 }

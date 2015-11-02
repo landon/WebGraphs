@@ -69,7 +69,8 @@ namespace Console
           //  MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Another\drawme.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\Planar\AT\5678\10ring\nosink", directed: true, showFactors: false, lowPlus: false, fivePlus: true);
           //  MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\YetAnother\drawme.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\Planar\AT\5678\11ring\nosink", directed: true, showFactors: false, lowPlus: false, fivePlus: true);
 
-            MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\YetAnother\drawme.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\Planar\AT\67\laplace", directed: true, showFactors: false, lowPlus: false, fivePlus: true, useLaplacian: true);
+            MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Debug\goods2.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\Planar\AT\5678\laplace\high", directed: true, showFactors: false, lowPlus: false, fivePlus: true, useLaplacian: true);
+          //  MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\4--15-6--8.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\Planar\AT\4--15-6--8\laplace\test", directed: true, showFactors: false, lowPlus: false, fivePlus: true, useLaplacian: true);
         }
 
         static void MakeNonCon()
