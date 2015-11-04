@@ -15,21 +15,25 @@ namespace Console
 {
     public static class FindChoosablesAdvanced
     {
-        const int MinVertices = 15;
+        const int MinVertices = 4;
         const int MaxVertices = 16;
         const int MinRingSize = 4;
         const int MaxRingSize = 15;
-        const int MinDegree = 6;
+        const int MinDegree = 5;
         const int MaxDegree = 7;
+        const int Colors = 4;
 
         const bool Offline = false;
         const bool AT = true;
         static List<Graph> Winners = new List<Graph>();
 
-        static readonly string WinnersFile = "PreFilterW " + ("ring size " + MinRingSize + " -- " + MaxRingSize) + ("degrees " + MinDegree + " -- " + MaxDegree) + ("planar triangulation") + (AT ? "AT " : "") + (Offline ? "offline " : "") + string.Format("winners.txt");
+        static readonly string WinnersFile = "PreFilterW " + Colors + " " + ("ring size " + MinRingSize + " -- " + MaxRingSize) + ("degrees " + MinDegree + " -- " + MaxDegree) + ("planar triangulation") + (AT ? "AT " : "") + (Offline ? "offline " : "") + string.Format("winners.txt");
         public static void Go()
         {
             File.Delete(WinnersFile);
+
+            if (Colors == 5)
+                Winners.Add(Diamond);
 
             var tokenSource = new CancellationTokenSource();
             var token = tokenSource.Token;
@@ -56,7 +60,7 @@ namespace Console
                         {
                             if (AT)
                             {
-                                var result = g.HasFOrientation(v => g.Degree(v) - g.VertexWeight[v]);
+                                var result = g.HasFOrientation(v => g.Degree(v) - g.VertexWeight[v] - (5 - Colors));
                                 if (result != null)
                                 {
                                     result.Graph.VertexWeight = g.VertexWeight;
@@ -81,7 +85,7 @@ namespace Console
                                 List<List<int>> badAssignment;
                                 var bg = new BitGraph_long(g.GetEdgeWeights());
 
-                                if (bg.IsFChoosable(v => bg.Degree(v) - g.VertexWeight[v], out badAssignment))
+                                if (bg.IsFChoosable(v => bg.Degree(v) - g.VertexWeight[v] - (5 - Colors), out badAssignment))
                                 {
                                     Winners.Add(g);
                                     g.AppendWeightStringToFile(WinnersFile);
@@ -92,7 +96,7 @@ namespace Console
                             }
                             else
                             {
-                                if (g.IsOnlineFChoosable(v => g.Degree(v) - g.VertexWeight[v], token))
+                                if (g.IsOnlineFChoosable(v => g.Degree(v) - g.VertexWeight[v] - (5 - Colors), token))
                                 {
                                     Winners.Add(g);
                                     g.AppendWeightStringToFile(WinnersFile);
@@ -106,7 +110,8 @@ namespace Console
                 }
             }
         }
-
+        
+        static Graph Diamond = "webgraph:7ns$a!,V]9!!#8NJ-:67L_F;!!AFM<&YKY%#@n\\USpV9_$UG\"P!!N?&!<E0#:^)B2!=+(&I\"$HlIK0EgO96D_!BUho2\\:FcIXV".WebgraphToGraph();
         static IEnumerable<Graph> EnumerateWeightings(Graph g)
         {
             var space = g.Vertices.Select(v => Enumerable.Range(MinDegree - 5, Math.Min(g.VertexWeight[v], MaxDegree) - MinDegree + 1).Reverse()).CartesianProduct();

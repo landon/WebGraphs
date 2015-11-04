@@ -45,8 +45,12 @@ namespace Console
             if (weightCondition == null)
                 weightCondition = WeightConditionDown;
 
-            return graphs.Where(g => !excluded.Any(h => g.Contains(h, induced, weightCondition)));
-
+            foreach (var g in graphs)
+            {
+                var qq = excluded.FirstOrDefault(h => g.Contains(h, induced, weightCondition));
+                if (qq == null)
+                    yield return g;
+            }
         }
 
         public static bool WeightConditionEqual(Graph self, Graph A, int selfV, int av)

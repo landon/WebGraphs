@@ -33,12 +33,14 @@ namespace Console
         public bool InDegreeTerms { get; set; }
         public bool IsLowPlus { get; set; }
         public bool IsFivePlus { get; set; }
+        public bool CompressName { get; set; }
 
         public GraphPictureMaker(string graphFile) : this(GraphEnumerator.EnumerateGraphFile(graphFile)) { }
         public GraphPictureMaker(params Graph[] graphs) : this((IEnumerable<Graph>)graphs) { }
         public GraphPictureMaker(IEnumerable<Graph> graphs)
         {
             _graphs = graphs;
+            CompressName = true;
         }
 
         public void DrawAllAndMakeWebpage(string outputDirectory)
@@ -55,7 +57,34 @@ namespace Console
             Directory.CreateDirectory(outputDirectory);
             foreach (var g in _graphs)
             {
-                var name = string.Join("", g.GetEdgeWeights().Select(ew => Math.Abs(ew)));
+                string name;
+                if (CompressName)
+                {
+                    var bytes = new List<byte>();
+                    var bits = g.GetEdgeWeights().Select(ew => Math.Abs(ew)).ToList();
+                    int i = 0;
+                    while (true)
+                    {
+                        byte b = 0;
+                        int j = i;
+                        for (; j < Math.Min(bits.Count, i + 8); j++)
+                        {
+                            b |= (byte)(1 << bits[j - i]);
+                        }
+
+                        bytes.Add(b);
+                        if (j >= bits.Count)
+                            break;
+
+                        i = j;
+                    }
+
+                    name = Convert.ToBase64String(bytes.ToArray());
+                }
+                else
+                {
+                    name = string.Join("", g.GetEdgeWeights().Select(ew => Math.Abs(ew)));
+                }
                 if (g.VertexWeight != null)
                     name += "[" + string.Join(",", g.VertexWeight) + "]";
 

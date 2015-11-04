@@ -9,7 +9,7 @@ namespace GraphsCore
 {
     public static class GraphIO
     {
-        public static string ToAdjacencyMatrix(this List<int> edgeWeights, bool isDirected = false)
+        public static string ToAdjacencyMatrixString(this List<int> edgeWeights, bool isDirected = false)
         {
             var n = (int)((1 + Math.Sqrt(1 + 8 * edgeWeights.Count)) / 2);
             var m = new char[n, n];
@@ -50,6 +50,41 @@ namespace GraphsCore
             }
 
             return s;
+        }
+
+        public static int[,] ToAdjacencyMatrix(this List<int> edgeWeights)
+        {
+            var n = (int)((1 + Math.Sqrt(1 + 8 * edgeWeights.Count)) / 2);
+            var m = new int[n, n];
+
+            int k = 0;
+            for (int i = 0; i < n; i++)
+            {
+                for (int j = i + 1; j < n; j++)
+                {
+                    var ew = edgeWeights[k];
+                    if (ew == 0)
+                        continue;
+
+                    if (ew > 0)
+                    {
+                        m[i, j] = 1;
+                        m[j, i] = -1;
+                    }
+                    else
+                    {
+                        m[i, j] = -1;
+                        m[j, i] = 1;
+                    }
+
+                    k++;
+                }
+            }
+
+            for (int i = 0; i < n; i++)
+                m[i, i] = 0;
+
+            return m;
         }
 
         public static Graphs.Graph GraphFromGraph6(string graph6)

@@ -59,6 +59,20 @@ namespace Console
             return new Choosability.Graph(edgeWeights, vertexWeights);
         }
 
+        public static Graph WebgraphToGraph(this string webgraph)
+        {
+            var uiG = GraphsCore.CompactSerializer.Deserialize(webgraph);
+
+            return new Choosability.Graph(uiG.GetEdgeWeights(), uiG.Vertices.Select(v =>
+            {
+                int d;
+                if (!int.TryParse(v.Label, out d))
+                    return 0;
+
+                return d;
+            }).ToList());
+        }
+
         public static IEnumerable<Choosability.Graph> EnumerateWeightedGraphs(this string path)
         {
             using (var sr = new StreamReader(path))

@@ -62,6 +62,9 @@
   <ItemGroup>
     <Content Include="ClientBin\Another\WebGraphs.xap" />
     <Content Include="ClientBin\Debug\WebGraphs.xap" />
+    <Content Include="ClientBin\OneMore\WebGraphs.xap" />
+    <Content Include="ClientBin\Release\WebGraphs.xap" />
+    <Content Include="ClientBin\YetAnother\WebGraphs.xap" />
     <Content Include="Silverlight.js" />
     <Content Include="Web.config" />
     <Content Include="WebGraphsTestPage.aspx" />

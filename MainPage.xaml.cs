@@ -1212,7 +1212,7 @@ trash can button.
         }
         void DoAdjacencyMatrix()
         {
-            ShowText(SelectedTabCanvas.GraphCanvas.Graph.GetEdgeWeights().ToAdjacencyMatrix(SelectedTabCanvas.GraphCanvas.Graph.IsDirected));
+            ShowText(SelectedTabCanvas.GraphCanvas.Graph.GetEdgeWeights().ToAdjacencyMatrixString(SelectedTabCanvas.GraphCanvas.Graph.IsDirected));
         }
         void DoEdgeWeights()
         {
