@@ -46,15 +46,15 @@ namespace Console
             return edgeWeights + vertexWeights;
         }
 
-        public static Choosability.Graph FromWeightString(this string s)
+        public static Choosability.Graph FromWeightString(this string s, bool removeOrientation = false, int weightAdjustment = 0)
         {
             var parts = s.Split(' ');
-            var edgeWeights = parts.Where(p => !p.StartsWith("[")).Select(x => int.Parse(x)).ToList();
+            var edgeWeights = parts.Where(p => !p.StartsWith("[")).Select(x => removeOrientation ? Math.Abs(int.Parse(x)) : int.Parse(x)).ToList();
 
             List<int> vertexWeights = null;
             var vwp = parts.FirstOrDefault(p => p.StartsWith("["));
             if (vwp != null)
-                vertexWeights = vwp.Trim('[').Trim(']').Split(',').Select(x => int.Parse(x)).ToList();
+                vertexWeights = vwp.Trim('[').Trim(']').Split(',').Select(x => weightAdjustment + int.Parse(x)).ToList();
 
             return new Choosability.Graph(edgeWeights, vertexWeights);
         }
@@ -73,7 +73,7 @@ namespace Console
             }).ToList());
         }
 
-        public static IEnumerable<Choosability.Graph> EnumerateWeightedGraphs(this string path)
+        public static IEnumerable<Choosability.Graph> EnumerateWeightedGraphs(this string path, bool removeOrientation = false, int weightAdjustment = 0)
         {
             using (var sr = new StreamReader(path))
             {
@@ -83,7 +83,7 @@ namespace Console
                     if (string.IsNullOrWhiteSpace(line))
                         break;
 
-                    yield return line.FromWeightString();
+                    yield return line.FromWeightString(removeOrientation, weightAdjustment);
                 }
             }
         }

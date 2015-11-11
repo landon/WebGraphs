@@ -393,7 +393,7 @@ namespace Choosability
             return new Graph(adjacent, vertexWeight);
         }
 
-        static bool MaybeIsomorphic(Graph A, Graph B)
+        public static bool MaybeIsomorphic(Graph A, Graph B)
         {
             if (A.N != B.N) return false;
             if (A.E != B.E) return false;
@@ -519,9 +519,9 @@ namespace Choosability
         #endregion
 
         #region Export
-        public List<int> GetEdgeWeights()
+        public List<int> GetEdgeWeights(bool removeOrientation = false)
         {
-            return GetEdgeWeights(new int[] { }, new Tuple<int, int>[] { });
+            return GetEdgeWeights(new int[] { }, new Tuple<int, int>[] { }, removeOrientation);
         }
 
         public Graph InducedSubgraph(List<int> subgraph)
@@ -569,9 +569,13 @@ namespace Choosability
             return GetEdgeWeights(adjacent, directed, new int[] { }, new Tuple<int, int>[] { });
         }
 
-        List<int> GetEdgeWeights(IEnumerable<int> removedVertices, IEnumerable<Tuple<int, int>> removedEdges)
+        List<int> GetEdgeWeights(IEnumerable<int> removedVertices, IEnumerable<Tuple<int, int>> removedEdges, bool removeOrientation = false)
         {
-            return GetEdgeWeights(_adjacent, Directed, removedVertices, removedEdges);
+            var directed = Directed;
+            if (removeOrientation)
+                directed = new bool[N, N];
+
+            return GetEdgeWeights(_adjacent, directed, removedVertices, removedEdges);
         }
 
         List<int> GetEdgeWeights(bool[,] adjacent, bool[,] directed, IEnumerable<int> removedVertices, IEnumerable<Tuple<int, int>> removedEdges)

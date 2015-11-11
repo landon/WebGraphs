@@ -12,14 +12,13 @@ namespace Console
 {
     static class NewGenerator
     {
-        static int Processed = 0;
-        public static IEnumerable<Graph> EnumerateWeightedNeighborhoods(int d, int dmin, int dmax, int rad)
+        public static List<Graph> GenerateWeightedNeighborhoods(int d, int dmin, int dmax, int rad, List<Graph> excluded = null)
         {
             var degrees = Enumerable.Range(dmin, dmax - dmin + 1);
 
             if (rad <= 0)
             {
-                yield break;
+                return new List<Graph>();
             }
             else if (rad == 1)
             {
@@ -27,39 +26,46 @@ namespace Console
                 g.VertexWeight = new int[g.N].ToList();
                 g = g.AttachNewVertex(g.Vertices);
 
-                var inners = new List<Graph>();
+                var local = new List<Graph>();
                 foreach (var a in Enumerable.Range(0, g.N - 1).Select(i => degrees.ToList()).CartesianProduct())
                 {
                     g.VertexWeight = a.ToList();
                     g.VertexWeight.Add(d);
-                    inners.Add(g.Clone());
+                    local.Add(g.Clone());
                 }
 
-                foreach (var inner in inners.RemoveSelfIsomorphs(true, IsomorphRemover.WeightConditionEqual))
-                    yield return inner;
+                if (excluded != null)
+                    local = local.RemoveIsomorphs(excluded, true, IsomorphRemover.WeightConditionDown);
+
+                return local.RemoveSelfIsomorphs(true, IsomorphRemover.WeightConditionEqual);
             }
             else
             {
-                var inner = EnumerateWeightedNeighborhoods(d, dmin, dmax, rad - 1);
+                var inner = GenerateWeightedNeighborhoods(d, dmin, dmax, rad - 1);
+                var all = new List<Graph>();
                 foreach (var h in inner)
                 {
                     var g = Triangulation.Extend(h);
 
+                    var local = new List<Graph>();
                     foreach (var a in Enumerable.Range(h.N, g.N - h.N).Select(i => degrees.ToList()).CartesianProduct())
                     {
                         var aa = a.ToList();
                         for (int i = h.N; i < g.N; i++)
                             g.VertexWeight[i] = aa[i - h.N];
-                        yield return g.Clone();
 
-                        Processed++;
-
-                        if (Processed % 1000 == 0)
-                        {
-                            System.Console.WriteLine(Processed.ToString());
-                        }
+                        local.Add(g.Clone());
                     }
+
+                    if (excluded != null)
+                        local = local.RemoveIsomorphs(excluded, true, IsomorphRemover.WeightConditionDown);
+
+                    local = local.RemoveSelfIsomorphs(true, IsomorphRemover.WeightConditionEqual);
+
+                    all.AddRange(local);
                 }
+
+                return all;
             }
         }
 

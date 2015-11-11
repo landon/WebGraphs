@@ -90,7 +90,7 @@ namespace Console
                                     Winners.Add(g);
                                     g.AppendWeightStringToFile(WinnersFile);
                                     System.Console.ForegroundColor = ConsoleColor.Green;
-                                    System.Console.WriteLine(string.Format("found {0} paintable graph{1} so far", Winners.Count, Winners.Count > 1 ? "s" : ""));
+                                    System.Console.WriteLine(string.Format("found {0} choosable graph{1} so far", Winners.Count, Winners.Count > 1 ? "s" : ""));
                                     System.Console.ForegroundColor = ConsoleColor.White;
                                 }
                             }
@@ -101,7 +101,7 @@ namespace Console
                                     Winners.Add(g);
                                     g.AppendWeightStringToFile(WinnersFile);
                                     System.Console.ForegroundColor = ConsoleColor.Green;
-                                    System.Console.WriteLine(string.Format("found {0} choosable graph{1} so far", Winners.Count, Winners.Count > 1 ? "s" : ""));
+                                    System.Console.WriteLine(string.Format("found {0} paintable graph{1} so far", Winners.Count, Winners.Count > 1 ? "s" : ""));
                                     System.Console.ForegroundColor = ConsoleColor.White;
                                 }
                             }

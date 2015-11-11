@@ -13,6 +13,31 @@ namespace Console
     {
         static void Main(string[] args)
         {
+           // @"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\OneMore\test.txt".EnumerateWeightedGraphs(removeOrientation: true, weightAdjustment: 5).WriteToWeightFile("test_adjusted.txt");
+            var excluded = @"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\OneMore\test.txt".EnumerateWeightedGraphs(removeOrientation: true, weightAdjustment: 5).Where(g => g.VertexWeight.Max() <= 7).ToList();
+            Discharging.BuildNeighborhoods(5, 5, 7, 2, excluded).WriteToWeightFile("dcharge_test5572.txt");
+
+            //@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\OneMore\test.txt".EnumerateWeightedGraphs().Select(g =>
+            //{
+            //    foreach (var w in g.Vertices.Where(v => g.VertexWeight[v] < g.InDegree(v) - 1 && g.EdgesOn(g.Neighbors[v]) != g.Degree(v)))
+            //        g.VertexWeight[w] = g.InDegree(w) - 1;
+            //    return g;
+            //}).WriteToWeightFile("test_modded.txt");
+
+            //@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\OneMore\test.txt".EnumerateWeightedGraphs().Where(g => g.VertexWeight.Sum() + g.N != g.E).Select(g =>
+            //{
+            //    var modified = false;
+            //    foreach (var w in g.Vertices.Where(v => g.VertexWeight[v] < g.InDegree(v) - 1 && g.EdgesOn(g.Neighbors[v]) != g.Degree(v)))
+            //    {
+            //        modified = true;
+            //        g.VertexWeight[w] = g.InDegree(w) - 1;
+            //    }
+
+            //    if (modified)
+            //        return g;
+            //    return null;
+            //}).Where(g => g != null).WriteToWeightFile("off_modded.txt");
+
             //@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\OneMore\test_paint.txt".EnumerateWeightedGraphs()
             //.RemoveIsomorphs(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\OneMore\test.txt".EnumerateWeightedGraphs(), true, IsomorphRemover.WeightConditionDown)
             //.WriteToWeightFile("removed_down.txt");
@@ -45,7 +70,7 @@ namespace Console
             //}
             
            // SinkEliminator.Go(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\YetAnother\ring size 11 min spread 0 spread 4 planar triangulationAT winners.txt");
-           FindChoosablesAdvanced.Go();
+           //FindChoosablesAdvanced.Go();
           //  MicTester.Go();
            // GenerateWithExcludedSubgraphs.Go();
             //WeaklyFixableTester.Go();

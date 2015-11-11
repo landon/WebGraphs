@@ -9,35 +9,39 @@ namespace Console
 {
     public static class IsomorphRemover
     {
-        public static IEnumerable<Graph> RemoveSelfIsomorphs(this IEnumerable<Graph> graphs, bool induced = true, Func<Graph, Graph, int, int, bool> weightCondition = null)
+        public static List<Graph> RemoveSelfIsomorphs(this IEnumerable<Graph> graphs, bool induced = true, Func<Graph, Graph, int, int, bool> weightCondition = null)
         {
             if (weightCondition == null)
                 weightCondition = WeightConditionDown;
 
             var all = graphs.ToList();
+            var some = new List<Graph>(all.Count);
 
             for (int i = 0; i < all.Count; i++)
             {
                 var g = all[i];
                 var good = true;
-                for (int j = 0; j < all.Count; j++)
+
+                foreach (var h in some)
                 {
-                    if (j == i)
+                    if (!Graph.MaybeIsomorphic(g, h))
                         continue;
 
-                    if (g.Contains(all[j], induced, weightCondition))
+                    if (!g.VertexWeight.OrderBy(x => x).SequenceEqual(h.VertexWeight.OrderBy(x => x)))
+                        continue;
+
+                    if (g.Contains(h, induced, weightCondition))
                     {
-                        if (i < j || !all[j].Contains(g, induced, weightCondition))
-                        {
-                            good = false;
-                            break;
-                        }
+                        good = false;
+                        break;
                     }
                 }
 
                 if (good)
-                    yield return g;
+                    some.Add(g);
             }
+
+            return some;
         }
 
         public static IEnumerable<Graph> RemoveIsomorphs(this IEnumerable<Graph> graphs, IEnumerable<Graph> excluded, bool induced = true, Func<Graph, Graph, int, int, bool> weightCondition = null)
@@ -51,6 +55,14 @@ namespace Console
                 if (qq == null)
                     yield return g;
             }
+        }
+
+        public static List<Graph> RemoveIsomorphs(this List<Graph> graphs, List<Graph> excluded, bool induced = true, Func<Graph, Graph, int, int, bool> weightCondition = null)
+        {
+            if (weightCondition == null)
+                weightCondition = WeightConditionDown;
+
+            return graphs.Where(g => excluded.FirstOrDefault(h => g.Contains(h, induced, weightCondition)) == null).ToList();
         }
 
         public static bool WeightConditionEqual(Graph self, Graph A, int selfV, int av)

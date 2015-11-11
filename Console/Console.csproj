@@ -73,6 +73,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConAndNon.cs" />
+    <Compile Include="Discharging.cs" />
     <Compile Include="DotRenderer.cs" />
     <Compile Include="EliminateDoubleEdgeNotSubdivisions.cs" />
     <Compile Include="EliminateTriangleBlowups.cs" />
