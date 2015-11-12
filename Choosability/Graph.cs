@@ -440,20 +440,30 @@ namespace Choosability
         {
             if (N < A.N) return false;
 
-            var tau = new List<int>();
-            return Contains(A, induced, condition, new int[A.N], tau, 0);
+            var placed = new List<int>();
+            return Contains(A, induced, condition, new int[A.N], placed, 0);
         }
 
-        bool Contains(Graph A, bool induced, Func<Graph, Graph, int, int, bool> condition, int[] tau, List<int> placed, int v)
+        public bool ContainsPrioritized(Graph A, bool induced, Func<Graph, Graph, int, int, int> priority)
+        {
+            if (N < A.N) return false;
+
+            var placed = new List<int>();
+            return ContainsPrioritized(A, induced, priority, new int[A.N], placed, 0);
+        }
+
+        public bool Contains(Graph A, bool induced, Func<Graph, Graph, int, int, bool> condition, int[] tau, List<int> placed, int v)
         {
             if (v == A.N)
                 return true;
 
-            var images = placed.Select(u => tau[u]).OrderBy(t => t).ToList();
-            var requiredNeighbors = A.Neighbors[v].IntersectionSorted(placed).Select(u => tau[u]).OrderBy(t => t).ToList();
+            var images = placed.Select(u => tau[u]).ToList();
+            images.Sort();
+            var requiredNeighbors = A.Neighbors[v].IntersectionSorted(placed).Select(u => tau[u]).ToList();
+            requiredNeighbors.Sort();
             var candidates = Vertices.Except(images)
                                      .Where(w => A.Degree(v) <= Degree(w))
-                                     .Where(w => induced ? requiredNeighbors.SequenceEqual(Neighbors[w].Intersection(images))
+                                     .Where(w => induced ? requiredNeighbors.SequenceEqual(Neighbors[w].IntersectionSorted(images))
                                                          : requiredNeighbors.SubsetEqualSorted(Neighbors[w]))
                                      .Where(w => condition(this, A, w, v));
 
@@ -463,6 +473,38 @@ namespace Choosability
                 placed.Add(v);
 
                 if (Contains(A, induced, condition, tau, placed, v + 1))
+                    return true;
+
+                placed.RemoveAt(placed.Count - 1);
+            }
+
+            return false;
+        }
+
+        public bool ContainsPrioritized(Graph A, bool induced, Func<Graph, Graph, int, int, int> priority, int[] tau, List<int> placed, int v)
+        {
+            if (v == A.N)
+                return true;
+
+            var images = placed.Select(u => tau[u]).ToList();
+            images.Sort();
+            var requiredNeighbors = A.Neighbors[v].IntersectionSorted(placed).Select(u => tau[u]).ToList();
+            requiredNeighbors.Sort();
+            var candidates = Vertices.DifferenceSorted(images)
+                                     .Where(w => A.Degree(v) <= Degree(w))
+                                     .Where(w => induced ? requiredNeighbors.EqualSorted(Neighbors[w].IntersectionSorted(images))
+                                                         : requiredNeighbors.SubsetEqualSorted(Neighbors[w]))
+                                     .Where(w => priority(this, A, w, v) >= 0);
+
+            var prioritizedCandidates = candidates.ToList();
+            prioritizedCandidates.Sort((a, b) => priority(this, A, b, v) - priority(this, A, a, v));
+
+            foreach (var candidate in prioritizedCandidates)
+            {
+                tau[v] = candidate;
+                placed.Add(v);
+
+                if (ContainsPrioritized(A, induced, priority, tau, placed, v + 1))
                     return true;
 
                 placed.RemoveAt(placed.Count - 1);

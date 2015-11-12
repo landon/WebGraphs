@@ -17,6 +17,12 @@ namespace Console
             var excluded = @"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\OneMore\test.txt".EnumerateWeightedGraphs(removeOrientation: true, weightAdjustment: 5).Where(g => g.VertexWeight.Max() <= 7).ToList();
             Discharging.BuildNeighborhoods(5, 5, 7, 2, excluded).WriteToWeightFile("dcharge_test5572.txt");
 
+            //Discharging.BuildNeighborhoods(5, 5, 6, 2, new List<Choosability.Graph>()).Select(g => 
+            //{
+            //    g.VertexWeight = g.Vertices.ToList();
+            //    return g;
+            //}).WriteToWeightFile("ordered_test.txt");
+
             //@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\OneMore\test.txt".EnumerateWeightedGraphs().Select(g =>
             //{
             //    foreach (var w in g.Vertices.Where(v => g.VertexWeight[v] < g.InDegree(v) - 1 && g.EdgesOn(g.Neighbors[v]) != g.Degree(v)))

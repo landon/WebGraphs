@@ -9,11 +9,8 @@ namespace Console
 {
     public static class IsomorphRemover
     {
-        public static List<Graph> RemoveSelfIsomorphs(this IEnumerable<Graph> graphs, bool induced = true, Func<Graph, Graph, int, int, bool> weightCondition = null)
+        public static List<Graph> RemoveSelfIsomorphs(this IEnumerable<Graph> graphs, bool zeroToZero = false)
         {
-            if (weightCondition == null)
-                weightCondition = WeightConditionDown;
-
             var all = graphs.ToList();
             var some = new List<Graph>(all.Count);
 
@@ -24,13 +21,27 @@ namespace Console
 
                 foreach (var h in some)
                 {
-                    if (!Graph.MaybeIsomorphic(g, h))
+                    if (g.N != h.N)
+                        continue;
+                    if (g.E != h.E)
                         continue;
 
                     if (!g.VertexWeight.OrderBy(x => x).SequenceEqual(h.VertexWeight.OrderBy(x => x)))
                         continue;
 
-                    if (g.Contains(h, induced, weightCondition))
+                    bool contains;
+                    if (zeroToZero)
+                    {
+                        var tau = new int[g.N];
+                        tau[0] = 0;
+                        contains = g.ContainsPrioritized(h, true, PriorityEqual, tau, new List<int>() { 0 }, 1);
+                    }
+                    else
+                    {
+                        contains = g.ContainsPrioritized(h, true, PriorityEqual);
+                    }
+
+                    if (contains)
                     {
                         good = false;
                         break;
@@ -44,7 +55,7 @@ namespace Console
             return some;
         }
 
-        public static IEnumerable<Graph> RemoveIsomorphs(this IEnumerable<Graph> graphs, IEnumerable<Graph> excluded, bool induced = true, Func<Graph, Graph, int, int, bool> weightCondition = null)
+        public static IEnumerable<Graph> EnumerateRemoveIsomorphs(this IEnumerable<Graph> graphs, IEnumerable<Graph> excluded, bool induced = true, Func<Graph, Graph, int, int, bool> weightCondition = null)
         {
             if (weightCondition == null)
                 weightCondition = WeightConditionDown;
@@ -65,6 +76,27 @@ namespace Console
             return graphs.Where(g => excluded.FirstOrDefault(h => g.Contains(h, induced, weightCondition)) == null).ToList();
         }
 
+        public static IEnumerable<Graph> EnumerateRemovePrioritizedIsomorphs(this IEnumerable<Graph> graphs, IEnumerable<Graph> excluded, bool induced = true, Func<Graph, Graph, int, int, int> priority = null)
+        {
+            if (priority == null)
+                priority = PriorityDown;
+
+            foreach (var g in graphs)
+            {
+                var qq = excluded.FirstOrDefault(h => g.ContainsPrioritized(h, induced, priority));
+                if (qq == null)
+                    yield return g;
+            }
+        }
+
+        public static List<Graph> RemovePrioritizedIsomorphs(this List<Graph> graphs, List<Graph> excluded, bool induced = true, Func<Graph, Graph, int, int, int> priority = null)
+        {
+            if (priority == null)
+                priority = PriorityDown;
+
+            return graphs.Where(g => excluded.FirstOrDefault(h => g.ContainsPrioritized(h, induced, priority)) == null).ToList();
+        }
+
         public static bool WeightConditionEqual(Graph self, Graph A, int selfV, int av)
         {
             return A.VertexWeight[av] == self.VertexWeight[selfV];
@@ -83,6 +115,20 @@ namespace Console
         public static bool WeightConditionFalse(Graph self, Graph A, int selfV, int av)
         {
             return false;
+        }
+
+        public static int PriorityDown(Graph self, Graph A, int selfV, int av)
+        {
+            var p = A.VertexWeight[av] - self.VertexWeight[selfV];
+            if (p < 0)
+                return -1;
+
+            return 1000 - p;
+        }
+
+        public static int PriorityEqual(Graph self, Graph A, int selfV, int av)
+        {
+            return A.VertexWeight[av] == self.VertexWeight[selfV] ? 0 : -1;
         }
     }
 }

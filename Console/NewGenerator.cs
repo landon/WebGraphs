@@ -14,7 +14,7 @@ namespace Console
     {
         public static List<Graph> GenerateWeightedNeighborhoods(int d, int dmin, int dmax, int rad, List<Graph> excluded = null)
         {
-            var degrees = Enumerable.Range(dmin, dmax - dmin + 1);
+            var degrees = Enumerable.Range(dmin, dmax - dmin + 1).ToList();
 
             if (rad <= 0)
             {
@@ -22,30 +22,35 @@ namespace Console
             }
             else if (rad == 1)
             {
-                var g = Choosability.Graphs.C(d);
+                var g = Choosability.Graphs.K(1);
+                g = g.Join(Choosability.Graphs.C(d));
                 g.VertexWeight = new int[g.N].ToList();
-                g = g.AttachNewVertex(g.Vertices);
 
                 var local = new List<Graph>();
                 foreach (var a in Enumerable.Range(0, g.N - 1).Select(i => degrees.ToList()).CartesianProduct())
                 {
                     g.VertexWeight = a.ToList();
-                    g.VertexWeight.Add(d);
+                    g.VertexWeight.Insert(0, d);
                     local.Add(g.Clone());
                 }
 
+                local = local.RemoveSelfIsomorphs(true);
                 if (excluded != null)
-                    local = local.RemoveIsomorphs(excluded, true, IsomorphRemover.WeightConditionDown);
+                {
+                    local = local.RemovePrioritizedIsomorphs(excluded);
+                    //local = local.RemoveIsomorphs(excluded, true, IsomorphRemover.WeightConditionDown);
+                }
 
-                return local.RemoveSelfIsomorphs(true, IsomorphRemover.WeightConditionEqual);
+                //return local.RemoveSelfIsomorphs(true);
+                return local;
             }
             else
             {
-                var inner = GenerateWeightedNeighborhoods(d, dmin, dmax, rad - 1);
+                var inner = GenerateWeightedNeighborhoods(d, dmin, dmax, rad - 1, excluded);
                 var all = new List<Graph>();
                 foreach (var h in inner)
                 {
-                    var g = Triangulation.Extend(h);
+                    var g = Triangulation.ExtendOrdered(h);
 
                     var local = new List<Graph>();
                     foreach (var a in Enumerable.Range(h.N, g.N - h.N).Select(i => degrees.ToList()).CartesianProduct())
@@ -57,12 +62,22 @@ namespace Console
                         local.Add(g.Clone());
                     }
 
+                    local = local.RemoveSelfIsomorphs(true);
+
                     if (excluded != null)
-                        local = local.RemoveIsomorphs(excluded, true, IsomorphRemover.WeightConditionDown);
+                    {
+                        local = local.RemovePrioritizedIsomorphs(excluded);
+                        //local = local.RemoveIsomorphs(excluded, true, IsomorphRemover.WeightConditionDown);
+                    }
 
-                    local = local.RemoveSelfIsomorphs(true, IsomorphRemover.WeightConditionEqual);
+                   // local = local.RemoveSelfIsomorphs(true);
 
-                    all.AddRange(local);
+                    if (local.Count > 0)
+                    {
+                        System.Console.Write(all.Count + " + " + local.Count);
+                        all.AddRange(local);
+                        System.Console.WriteLine(" = " + all.Count);
+                    }
                 }
 
                 return all;

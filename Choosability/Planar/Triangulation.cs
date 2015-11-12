@@ -56,6 +56,81 @@ namespace Choosability.Planar
             return h;
         }
 
+        public static Graph ExtendOrdered(Graph g)
+        {
+            var h = g.Clone();
+            var remainingVertices = g.Vertices.ToList();
+            int w = -1;
+            while (remainingVertices.Count > 0)
+            {
+                int v;
+                if (w == -1)
+                {
+                    v = remainingVertices.First();
+                }
+                else
+                {
+                    v = h.Neighbors[w].Intersect(remainingVertices).FirstOrDefault();
+                    if (!remainingVertices.Contains(v))
+                        v = remainingVertices.First();
+                }
+
+                w = -1;
+                if (IsWheel(h, v))
+                {
+                    h.VertexWeight[v] = h.Degree(v);
+                }
+                else if (IsGem(h, v))
+                {
+                    var add = h.VertexWeight[v] - h.Degree(v);
+                    if (add >= 0)
+                    {
+                        var ends = GemEnds(h, v);
+                        if (!h[ends[0], h.N - 1])
+                        {
+                            var t = ends[0];
+                            ends[0] = ends[1];
+                            ends[1] = t;
+                        }
+
+                        if (add == 0)
+                        {
+                            h = h.AddEdge(ends[0], ends[1]);
+                        }
+                        else
+                        {
+                            h = h.AttachNewVertex(ends[0], v);
+                            add--;
+                            while (add >= 1)
+                            {
+                                h = h.AttachNewVertex(h.N - 1, v);
+                                add--;
+                            }
+
+                            h = h.AddEdge(h.N - 1, ends[1]);
+                        }
+
+                        h.VertexWeight[v] = h.Degree(v);
+
+                        w = h.N - 1;
+                    }
+                    else
+                    {
+                        h.VertexWeight[v] = 0;
+                        w = v;
+                    }
+                }
+                else
+                {
+                    return null;
+                }
+
+                remainingVertices.Remove(v);
+            }
+
+            return h;
+        }
+
         static bool IsGem(Graph h, int v)
         {
             var degrees = h.Neighbors[v].Select(w => h.DegreeInSubgraph(w, h.Neighbors[v])).ToList();
