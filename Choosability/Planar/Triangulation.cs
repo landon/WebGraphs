@@ -10,55 +10,6 @@ namespace Choosability.Planar
         public static Graph Extend(Graph g)
         {
             var h = g.Clone();
-
-            foreach (var v in h.Vertices)
-            {
-                if (IsWheel(h, v))
-                {
-                    h.VertexWeight[v] = h.Degree(v);
-                }
-                else if (IsGem(h, v))
-                {
-                    var add = h.VertexWeight[v] - h.Degree(v);
-                    if (add >= 0)
-                    {
-                        var ends = GemEnds(h, v);
-                        if (add == 0)
-                        {
-                            h = h.AddEdge(ends[0], ends[1]);
-                        }
-                        else
-                        {
-                            h = h.AttachNewVertex(ends[0], v);
-                            add--;
-                            while (add >= 1)
-                            {
-                                h = h.AttachNewVertex(h.N - 1, v);
-                                add--;
-                            }
-
-                            h = h.AddEdge(h.N - 1, ends[1]);
-                        }
-
-                        h.VertexWeight[v] = h.Degree(v);
-                    }
-                    else
-                    {
-                        h.VertexWeight[v] = 0;
-                    }
-                }
-                else
-                {
-                    return null;
-                }
-            }
-
-            return h;
-        }
-
-        public static Graph ExtendOrdered(Graph g)
-        {
-            var h = g.Clone();
             var remainingVertices = g.Vertices.ToList();
             int w = -1;
             while (remainingVertices.Count > 0)

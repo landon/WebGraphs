@@ -21,7 +21,7 @@ namespace Console
         const int MaxRingSize = 15;
         const int MinDegree = 5;
         const int MaxDegree = 7;
-        const int Colors = 4;
+        const int Colors = 5;
 
         const bool Offline = false;
         const bool AT = true;

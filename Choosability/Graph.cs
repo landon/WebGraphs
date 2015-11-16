@@ -1387,9 +1387,7 @@ namespace Choosability
                 if (V.Count <= 1)
                     continue;
 
-                var maximalIndependentSets = EnumerateMaximalIndependentSets(V).ToList();
-                if (maximalIndependentSets.Count == 1)
-                    continue;
+                var maximalIndependentSets = EnumerateMaximalIndependentSets(V);
 
                 foreach (var v in V)
                     f[v]--;
@@ -1495,9 +1493,7 @@ namespace Choosability
                 if (V.Count <= 1)
                     continue;
 
-                var maximalIndependentSets = EnumerateMaximalIndependentSets(V).ToList();
-                if (maximalIndependentSets.Count == 1)
-                    continue;
+                var maximalIndependentSets = EnumerateMaximalIndependentSets(V);
 
                 foreach (var v in V)
                     f[v]--;

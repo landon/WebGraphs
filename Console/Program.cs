@@ -7,15 +7,24 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using Choosability;
 namespace Console
 {
     class Program
     {
         static void Main(string[] args)
         {
+            @"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\dcharge_test_5_5_7_2_4.txt".EnumerateWeightedGraphs().RemoveSelfIsomorphs(true, IsomorphRemover.PriorityUp, true).WriteToWeightFile("dcharge_test_5_5_7_2_4.txt.cleaned.txt");
+            //for (int i = 0; i < 20; i++)
+            //{
+            //    System.Console.WriteLine("doing " + i + "...");
+            //    Discharging.BuildNeighborhoods(5, 5, 7, 3, i);
+            //}
+            //FindFractionalPaintable.Go();
+
            // @"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\OneMore\test.txt".EnumerateWeightedGraphs(removeOrientation: true, weightAdjustment: 5).WriteToWeightFile("test_adjusted.txt");
-            var excluded = @"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\OneMore\test.txt".EnumerateWeightedGraphs(removeOrientation: true, weightAdjustment: 5).Where(g => g.VertexWeight.Max() <= 7).ToList();
-            Discharging.BuildNeighborhoods(5, 5, 7, 2, excluded).WriteToWeightFile("dcharge_test5572.txt");
+            //var excluded = @"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\OneMore\test.txt".EnumerateWeightedGraphs(removeOrientation: true, weightAdjustment: 5).Where(g => g.VertexWeight.Max() <= 7).ToList();
+            //Discharging.BuildNeighborhoods(5, 5, 7, 2, excluded).WriteToWeightFile("dcharge_test5572.txt");
 
             //Discharging.BuildNeighborhoods(5, 5, 6, 2, new List<Choosability.Graph>()).Select(g => 
             //{
@@ -83,7 +92,7 @@ namespace Console
           //  FixerBreakerTrees.Go();
          //   SuperAbundanceFinder.Go();
           //  FindFixerBreaker.Go();
-           // MakePictures.Go();
+          //  MakePictures.Go();
 
           //  MixedChoosables.Go();
             //EliminiteDoubleEdgeSubdivisions.Go(@"C:\Users\landon\Google Drive\research\graphs\WithLows\Mixed spread 2 AT winners1.txt");

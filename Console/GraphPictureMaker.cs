@@ -167,6 +167,7 @@ namespace Console
             sb.AppendLine("node[fontsize=42, fontname=\"Latin Modern Math\" color=black; shape=circle, penwidth=1, width = .92, height=.92, fixedsize=true];");
             sb.AppendLine("edge[style=bold, color=black, penwidth=2];");
 
+            var needUpped = g.Vertices.Max(vv => g.VertexWeight[vv]) < 5;
             foreach (int v in g.Vertices)
             {
                 int colorIndex;
@@ -210,8 +211,9 @@ namespace Console
                     }
                     else if (isFivePlus)
                     {
-                        label = (g.VertexWeight[v] + 5).ToString();
-                        colorIndex = g.VertexWeight[v] + 2;
+                        var ww = needUpped ? g.VertexWeight[v] + 5 : g.VertexWeight[v];
+                        label = (ww).ToString();
+                        colorIndex = ww - 5 + 2;
                     }
                     else
                     {

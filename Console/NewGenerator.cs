@@ -12,7 +12,7 @@ namespace Console
 {
     static class NewGenerator
     {
-        public static List<Graph> GenerateWeightedNeighborhoods(int d, int dmin, int dmax, int rad, List<Graph> excluded = null)
+        public static List<Graph> GenerateWeightedNeighborhoods(int d, int dmin, int dmax, int rad, List<Graph> excluded = null, int maxHigh = int.MaxValue)
         {
             var degrees = Enumerable.Range(dmin, dmax - dmin + 1).ToList();
 
@@ -29,48 +29,54 @@ namespace Console
                 var local = new List<Graph>();
                 foreach (var a in Enumerable.Range(0, g.N - 1).Select(i => degrees.ToList()).CartesianProduct())
                 {
-                    g.VertexWeight = a.ToList();
+                    var aa = a.ToList();
+                    if (aa.Count(ww => ww == dmax) > maxHigh)
+                        continue;
+
+                    g.VertexWeight = aa;
                     g.VertexWeight.Insert(0, d);
                     local.Add(g.Clone());
                 }
 
-                local = local.RemoveSelfIsomorphs(true);
                 if (excluded != null)
                 {
                     local = local.RemovePrioritizedIsomorphs(excluded);
-                    //local = local.RemoveIsomorphs(excluded, true, IsomorphRemover.WeightConditionDown);
                 }
 
-                //return local.RemoveSelfIsomorphs(true);
-                return local;
+                return local.RemoveSelfIsomorphs(true);
             }
             else
             {
-                var inner = GenerateWeightedNeighborhoods(d, dmin, dmax, rad - 1, excluded);
+                var inner = GenerateWeightedNeighborhoods(d, dmin, dmax, rad - 1, excluded, maxHigh);
                 var all = new List<Graph>();
                 foreach (var h in inner)
                 {
-                    var g = Triangulation.ExtendOrdered(h);
+                    var pre = h.VertexWeight.Count(ww => ww == dmax);
+                    var ld = degrees;
+                    if (pre >= maxHigh)
+                        ld = degrees.Except(new[] { dmax }).ToList();
+
+                    var g = Triangulation.Extend(h);
 
                     var local = new List<Graph>();
-                    foreach (var a in Enumerable.Range(h.N, g.N - h.N).Select(i => degrees.ToList()).CartesianProduct())
+                    foreach (var a in Enumerable.Range(h.N, g.N - h.N).Select(i => ld.ToList()).CartesianProduct())
                     {
                         var aa = a.ToList();
+                        if (pre + aa.Count(ww => ww == dmax) > maxHigh)
+                            continue;
+
                         for (int i = h.N; i < g.N; i++)
                             g.VertexWeight[i] = aa[i - h.N];
 
                         local.Add(g.Clone());
                     }
 
-                    local = local.RemoveSelfIsomorphs(true);
-
                     if (excluded != null)
                     {
                         local = local.RemovePrioritizedIsomorphs(excluded);
-                        //local = local.RemoveIsomorphs(excluded, true, IsomorphRemover.WeightConditionDown);
                     }
 
-                   // local = local.RemoveSelfIsomorphs(true);
+                    local = local.RemoveSelfIsomorphs(true);
 
                     if (local.Count > 0)
                     {

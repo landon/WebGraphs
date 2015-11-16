@@ -9,8 +9,14 @@ namespace Console
 {
     public static class IsomorphRemover
     {
-        public static List<Graph> RemoveSelfIsomorphs(this IEnumerable<Graph> graphs, bool zeroToZero = false)
+        public static List<Graph> RemoveSelfIsomorphs(this IEnumerable<Graph> graphs, bool zeroToZero = false, Func<Graph, Graph, int, int, int> priority = null, bool allowUnequal = false)
         {
+            if (priority == null)
+            {
+                allowUnequal = false;
+                priority = PriorityEqual;
+            }
+
             var all = graphs.ToList();
             var some = new List<Graph>(all.Count);
 
@@ -26,19 +32,22 @@ namespace Console
                     if (g.E != h.E)
                         continue;
 
-                    if (!g.VertexWeight.OrderBy(x => x).SequenceEqual(h.VertexWeight.OrderBy(x => x)))
-                        continue;
+                    if (!allowUnequal)
+                    {
+                        if (!g.VertexWeight.OrderBy(x => x).SequenceEqual(h.VertexWeight.OrderBy(x => x)))
+                            continue;
+                    }
 
                     bool contains;
                     if (zeroToZero)
                     {
                         var tau = new int[g.N];
                         tau[0] = 0;
-                        contains = g.ContainsPrioritized(h, true, PriorityEqual, tau, new List<int>() { 0 }, 1);
+                        contains = g.ContainsPrioritized(h, true, priority, tau, new List<int>() { 0 }, 1);
                     }
                     else
                     {
-                        contains = g.ContainsPrioritized(h, true, PriorityEqual);
+                        contains = g.ContainsPrioritized(h, true, priority);
                     }
 
                     if (contains)
@@ -120,6 +129,15 @@ namespace Console
         public static int PriorityDown(Graph self, Graph A, int selfV, int av)
         {
             var p = A.VertexWeight[av] - self.VertexWeight[selfV];
+            if (p < 0)
+                return -1;
+
+            return 1000 - p;
+        }
+
+        public static int PriorityUp(Graph self, Graph A, int selfV, int av)
+        {
+            var p = self.VertexWeight[selfV] - A.VertexWeight[av];
             if (p < 0)
                 return -1;
 
