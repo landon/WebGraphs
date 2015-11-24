@@ -10,7 +10,7 @@ namespace Console
 {
     public class GraphPictureMaker
     {
-        DotRenderer Renderer = new DotRenderer(@"C:\Program Files (x86)\Graphviz2.38\bin\neato.exe");
+        public DotRenderer Renderer = new DotRenderer(@"C:\Program Files (x86)\Graphviz2.38\bin\neato.exe");
         static readonly List<string> DotColors = new List<string>() { "cadetblue", "brown", "dodgerblue", "turquoise", "orchid", "blue", "red", "green", 
                                                                       "yellow", "cyan",
                                                                       "limegreen",  "pink", 
@@ -167,7 +167,7 @@ namespace Console
             sb.AppendLine("node[fontsize=42, fontname=\"Latin Modern Math\" color=black; shape=circle, penwidth=1, width = .92, height=.92, fixedsize=true];");
             sb.AppendLine("edge[style=bold, color=black, penwidth=2];");
 
-            var needUpped = g.Vertices.Max(vv => g.VertexWeight[vv]) < 5;
+            var needUpped = g.VertexWeight == null ? true : g.Vertices.Max(vv => g.VertexWeight[vv]) < 5;
             foreach (int v in g.Vertices)
             {
                 int colorIndex;

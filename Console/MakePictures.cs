@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -69,8 +70,26 @@ namespace Console
           //  MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Another\drawme.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\Planar\AT\5678\10ring\nosink", directed: true, showFactors: false, lowPlus: false, fivePlus: true);
           //  MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\YetAnother\drawme.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\Planar\AT\5678\11ring\nosink", directed: true, showFactors: false, lowPlus: false, fivePlus: true);
 
-            MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Another\6_5_7_2-.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\Planar\AT\567\62nd_nhbd", directed: false, showFactors: false, lowPlus: false, fivePlus: true, useLaplacian: true);
-          //  MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\4--15-6--8.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\Planar\AT\4--15-6--8\laplace\test", directed: true, showFactors: false, lowPlus: false, fivePlus: true, useLaplacian: true);
+            for (int i = 5; i <= 7; i++)
+            {
+                for (int j = 1; j <= 4; j++)
+                {
+                    var file = string.Format(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\dcharge_test_{0}_5_7_2_{1}.txt.cleaned.txt.cut.txt", i, j);
+                    if (File.Exists(file))
+                    {
+                        System.Console.WriteLine();
+                        System.Console.WriteLine("doing " + file);
+
+                        var output = string.Format(@"C:\Users\landon\Dropbox\Public\Web\GraphData\Planar\AT\567\{0}_2nd_nhbd\{1}", i, j);
+                        MakeWebpage(file, output, directed: false, showFactors: false, lowPlus: false, fivePlus: true, useLaplacian: true);
+                    }
+                    else
+                    {
+                        System.Console.WriteLine();
+                        System.Console.WriteLine("missing " + file);
+                    }
+                }
+            }
         }
 
         static void MakeNonCon()
@@ -90,8 +109,11 @@ namespace Console
 
         public static void MakeWebpage(string graphPath, string outputPath, bool directed = false, bool showFactors = false, bool lowPlus = false, bool fivePlus = false, bool useLaplacian = false)
         {
+            System.Console.ForegroundColor = ConsoleColor.Blue;
+            System.Console.WriteLine("Building webpage at " + graphPath);
             var maker = new GraphPictureMaker(graphPath);
             MakeWebpage(maker, outputPath, directed, showFactors, lowPlus, fivePlus, useLaplacian);
+            System.Console.ForegroundColor = ConsoleColor.White;
         }
 
         public static void MakeWebpage(GraphPictureMaker maker, string outputPath, bool directed = false, bool showFactors = false, bool lowPlus = false, bool fivePlus = false, bool useLaplacian = false)

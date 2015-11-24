@@ -41,7 +41,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>true</Prefer32Bit>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'YetAnother|AnyCPU'">
     <OutputPath>bin\YetAnother\</OutputPath>
@@ -51,7 +51,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>true</Prefer32Bit>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'OneMore|AnyCPU'">
     <OutputPath>bin\OneMore\</OutputPath>
@@ -61,6 +61,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -84,9 +85,11 @@
     <Compile Include="FindChoosableAdvanced.cs" />
     <Compile Include="FindChoosables.cs" />
     <Compile Include="FindFixerBreaker.cs" />
+    <Compile Include="FindFractionalColorable.cs" />
     <Compile Include="FindFractionalPaintable.cs" />
     <Compile Include="FindTarpits.cs" />
     <Compile Include="FixerBreakerTrees.cs" />
+    <Compile Include="Folkman.cs" />
     <Compile Include="GenerateWithExcludedSubgraphs.cs" />
     <Compile Include="GraphEnumerator.cs" />
     <Compile Include="GraphViz.cs" />
@@ -96,6 +99,7 @@
     <Compile Include="MicTester.cs" />
     <Compile Include="MixedChoosables.cs" />
     <Compile Include="NewGenerator.cs" />
+    <Compile Include="NonCrossing.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="GraphPictureMaker.cs" />

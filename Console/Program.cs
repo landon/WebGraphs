@@ -12,9 +12,27 @@ namespace Console
 {
     class Program
     {
+        static Program()
+        {
+            System.Console.ForegroundColor = ConsoleColor.White;
+        }
+
         static void Main(string[] args)
         {
-            @"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\dcharge_test_5_5_7_2_4.txt".EnumerateWeightedGraphs().RemoveSelfIsomorphs(true, IsomorphRemover.PriorityUp, true).WriteToWeightFile("dcharge_test_5_5_7_2_4.txt.cleaned.txt");
+            //NonCrossing.MakePicture(7);
+            NonCrossing.Generate();
+            //Folkman.Go();
+            //@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Another\dcharge_test_7_5_7_2_1.txt.cleaned.txt".EnumerateWeightedGraphs().Where(g => g.VertexWeight.Count(w => w == 7) == 1).WriteToWeightFile("dcharge_test_7_5_7_2_1.txt.cleaned.txt.cut.txt");
+            //@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Another\dcharge_test_7_5_7_2_2.txt.cleaned.txt".EnumerateWeightedGraphs().Where(g => g.VertexWeight.Count(w => w == 7) == 2).WriteToWeightFile("dcharge_test_7_5_7_2_2.txt.cleaned.txt.cut.txt");
+            //@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Another\dcharge_test_5_5_7_2_2.txt.cleaned.txt".EnumerateWeightedGraphs().Where(g => g.VertexWeight.Count(w => w == 7) == 2).WriteToWeightFile("dcharge_test_5_5_7_2_2.txt.cleaned.txt.cut.txt");
+            //@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Another\dcharge_test_5_5_7_2_3.txt.cleaned.txt".EnumerateWeightedGraphs().Where(g => g.VertexWeight.Count(w => w == 7) == 3).WriteToWeightFile("dcharge_test_5_5_7_2_3.txt.cleaned.txt.cut.txt");
+            //@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Debug\dcharge_test_5_5_7_2_4.txt.cleaned.txt".EnumerateWeightedGraphs().Where(g => g.VertexWeight.Count(w => w == 7) == 4).WriteToWeightFile("dcharge_test_5_5_7_2_4.txt.cleaned.txt.cut.txt");
+            //@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Another\dcharge_test_6_5_7_2_1.txt.cleaned.txt".EnumerateWeightedGraphs().Where(g => g.VertexWeight.Count(w => w == 7) == 1).WriteToWeightFile("dcharge_test_6_5_7_2_1.txt.cleaned.txt.cut.txt");
+            //@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Another\dcharge_test_6_5_7_2_2.txt.cleaned.txt".EnumerateWeightedGraphs().Where(g => g.VertexWeight.Count(w => w == 7) == 2).WriteToWeightFile("dcharge_test_6_5_7_2_2.txt.cleaned.txt.cut.txt");
+            //@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\OneMore\dcharge_test_6_5_7_2_3.txt.cleaned.txt".EnumerateWeightedGraphs().Where(g => g.VertexWeight.Count(w => w == 7) == 3).WriteToWeightFile("dcharge_test_6_5_7_2_3.txt.cleaned.txt.cut.txt");
+         //   @"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Debug\dcharge_test_5_5_7_2_4.txt.cleaned.txt".EnumerateWeightedGraphs().OrderBy(g => g.VertexWeight.Count(w => w == 2)).WriteToWeightFile("dcharge_test_5_5_7_2_4.txt.cleaned.txt.ordered.txt");
+         //   System.Console.WriteLine("making pictures");
+         //   @"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Another\dcharge_test_6_5_7_2_3.txt".EnumerateWeightedGraphs().RemoveSelfIsomorphs(true, IsomorphRemover.PriorityUp, true).WriteToWeightFile("dcharge_test_6_5_7_2_3.txt.cleaned.txt");
             //for (int i = 0; i < 20; i++)
             //{
             //    System.Console.WriteLine("doing " + i + "...");
@@ -92,7 +110,7 @@ namespace Console
           //  FixerBreakerTrees.Go();
          //   SuperAbundanceFinder.Go();
           //  FindFixerBreaker.Go();
-          //  MakePictures.Go();
+            //MakePictures.Go();
 
           //  MixedChoosables.Go();
             //EliminiteDoubleEdgeSubdivisions.Go(@"C:\Users\landon\Google Drive\research\graphs\WithLows\Mixed spread 2 AT winners1.txt");
