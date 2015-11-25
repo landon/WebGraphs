@@ -20,11 +20,11 @@ namespace Console
         const int MaxVertices = 16;
         const int MinRingSize = 4;
         const int MaxRingSize = 12;
-        const int C = 9;
-        const int Fold = 2;
+        const int C = 13;
+        const int Fold = 3;
 
         static readonly string WinnersFile = Fold + "-fold " + C + "-coloring" + ("ring size " + MinRingSize + " -- " + MaxRingSize) + ("planar triangulation") + string.Format("winners.txt");
-        const string LookupPath = @"C:\Lookup\assignment_lookup";
+        static readonly string LookupPath = @"C:\Lookup\assignment_lookup" + C + "_" + Fold;
         public static void Go()
         {
             File.Delete(WinnersFile);
@@ -33,7 +33,7 @@ namespace Console
             var w = 0;
 
             var assignmentLookup = LoadLookup();
-            for (var R = MinRingSize; R <= 10; R++)
+            for (var R = MinRingSize; R <= 9; R++)
             {
                 System.Console.WriteLine("generating assignments for ring size " + R + "...");
 
