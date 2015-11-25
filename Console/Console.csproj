@@ -86,6 +86,7 @@
     <Compile Include="FindChoosables.cs" />
     <Compile Include="FindFixerBreaker.cs" />
     <Compile Include="FindFractionalColorable.cs" />
+    <Compile Include="FindFractionalColorableRandomized.cs" />
     <Compile Include="FindFractionalPaintable.cs" />
     <Compile Include="FindTarpits.cs" />
     <Compile Include="FixerBreakerTrees.cs" />

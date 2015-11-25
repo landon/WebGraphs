@@ -16,12 +16,12 @@ namespace Console
 {
     public static class FindFractionalColorable
     {
-        const int MinVertices = 4;
-        const int MaxVertices = 16;
-        const int MinRingSize = 4;
-        const int MaxRingSize = 12;
-        const int C = 13;
-        const int Fold = 3;
+        public const int MinVertices = 4;
+        public const int MaxVertices = 16;
+        public const int MinRingSize = 4;
+        public const int MaxRingSize = 12;
+        public const int C = 9;
+        public const int Fold = 2;
 
         static readonly string WinnersFile = Fold + "-fold " + C + "-coloring" + ("ring size " + MinRingSize + " -- " + MaxRingSize) + ("planar triangulation") + string.Format("winners.txt");
         static readonly string LookupPath = @"C:\Lookup\assignment_lookup" + C + "_" + Fold;
@@ -137,7 +137,7 @@ namespace Console
             }
         }
 
-        static void SaveLookup(Dictionary<Key, List<List<long>>> lookup)
+        public static void SaveLookup(Dictionary<Key, List<List<long>>> lookup)
         {
             if (File.Exists(LookupPath))
                 File.Copy(LookupPath, LookupPath + ".backup", true);
@@ -164,7 +164,7 @@ namespace Console
             }
         }
 
-        static Dictionary<Key, List<List<long>>> LoadLookup()
+        public static Dictionary<Key, List<List<long>>> LoadLookup()
         {
             var lookup = new Dictionary<Key, List<List<long>>>();
             try
@@ -214,7 +214,7 @@ namespace Console
             return lookup;
         }
 
-        static List<int> GetCyclicOrdering(Graph g, List<int> ring)
+        public static List<int> GetCyclicOrdering(Graph g, List<int> ring)
         {
             var cyclic = new List<int>(ring.Count);
 
@@ -230,21 +230,7 @@ namespace Console
             return cyclic;
         }
 
-        static bool ValidColoring(Graph g, List<long> stacks, List<int> subset)
-        {
-            return g.Edges.Value.All(e => 
-                {
-                    var i1 = subset.IndexOf(e.Item1);
-                    var i2 = subset.IndexOf(e.Item2);
-                    if (i1 < 0 || i2 < 0)
-                        return true;
-
-                    return (stacks[i1] & stacks[i2]) == 0;
-                });
-                
-        }
-
-        class Key
+        public class Key
         {
             public int R;
             public List<ulong> Contractions;

@@ -19,7 +19,7 @@ namespace Console
 
         static void Main(string[] args)
         {
-            FindFractionalColorable.Go();
+            FindFractionalColorableRandomized.Go();
             //NonCrossing.MakePicture(7);
           //  NonCrossing.Generate();
             //Folkman.Go();
