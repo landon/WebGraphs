@@ -36,7 +36,7 @@ namespace Console
             var assignmentLookup = FindFractionalColorable.LoadLookup();
 
             System.Console.Write("Loading graphs...");
-            var graphs = Enumerable.Range(MinVertices, MaxVertices - MinVertices + 1).CartesianProduct(Enumerable.Range(MinRingSize, MaxRingSize - MinRingSize + 1)).SelectMany(tup =>
+            var graphs = Enumerable.Range(MinVertices, MaxVertices - MinVertices + 3).CartesianProduct(Enumerable.Range(MinRingSize, MaxRingSize - MinRingSize + 3)).SelectMany(tup =>
                 {
                     var N = tup.Item1;
                     var R = tup.Item2;
@@ -68,7 +68,7 @@ namespace Console
 
             while (graphs.Count > 0)
             {
-                System.Console.Write("checking reducability...");
+                System.Console.Write("checking reducibility...");
                 var count = graphs.Count;
 
                 var lookupCount = assignmentLookup.Count;

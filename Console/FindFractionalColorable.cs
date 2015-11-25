@@ -20,8 +20,8 @@ namespace Console
         public const int MaxVertices = 16;
         public const int MinRingSize = 4;
         public const int MaxRingSize = 12;
-        public const int C = 9;
-        public const int Fold = 2;
+        public const int C = 13;
+        public const int Fold = 3;
 
         static readonly string WinnersFile = Fold + "-fold " + C + "-coloring" + ("ring size " + MinRingSize + " -- " + MaxRingSize) + ("planar triangulation") + string.Format("winners.txt");
         static readonly string LookupPath = @"C:\Lookup\assignment_lookup" + C + "_" + Fold;
