@@ -1237,6 +1237,48 @@ namespace Choosability
             return coloring.Count(c => c != 0);
         }
 
+        public bool IsFoldChoosable(List<long> assignment, int fold)
+        {
+            return IsFoldChoosable(assignment, Vertices, fold);
+        }
+        public bool IsFoldChoosable(List<long> assignment, List<int> subset, int fold)
+        {
+            return IsFoldChoosable(assignment, 0, subset, fold);
+        }
+        bool IsFoldChoosable(List<long> assignment, int v, List<int> subset, int fold)
+        {
+            if (v >= subset.Count)
+                return true;
+
+            var colors = assignment[subset[v]];
+            var color = colors;
+            int k = 0;
+            while (color != 0 && k < fold)
+            {
+                color &= color - 1;
+                k++;
+            }
+
+            if (k < fold)
+                return false;
+
+            color = colors & ~color;
+
+            while (color != 0)
+            {
+                var assignmentCopy = new List<long>(assignment);
+                foreach (var neighbor in _laterNeighbors.Value[subset[v]])
+                    assignmentCopy[neighbor] &= ~color;
+
+                if (IsFoldChoosable(assignmentCopy, v + 1, subset, fold))
+                    return true;
+
+                color = color.NextSubsetOfSameSize(colors);
+            }
+
+            return false;
+        }
+
         public bool IsChoosable(List<long> assignment, List<int> subset)
         {
             return IsChoosable(assignment, 0, subset);

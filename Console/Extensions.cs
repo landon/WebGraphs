@@ -88,6 +88,49 @@ namespace Console
             }
         }
 
+        public static List<List<int>> ToStackList(this IEnumerable<ulong> trace, int count)
+        {
+            var s = trace.ToStackLong(count);
+            return s.Select(aa => aa.ToSet()).ToList();
+        }
+
+        public static List<long> ToStackLong(this IEnumerable<ulong> trace, int count)
+        {
+            var s = new long[count];
+            var traceBits = trace.Select(t => t.ToSet()).ToList();
+            for (int c = 0; c < traceBits.Count; c++)
+            {
+                foreach (var i in traceBits[c])
+                    s[i] |= 1L << c;
+            }
+
+            return s.ToList();
+        }
+
+        public static IEnumerable<List<long>> EnumerateListAssignments(this IEnumerable<int> sizes, int potSize)
+        {
+            var augmented = sizes.Concat(potSize).ToList();
+            return Assignments_ulong.Enumerate(augmented, potSize).Select(ula =>
+                {
+                    var ll = ula.ToStackLong(augmented.Count);
+                    ll.RemoveAt(ll.Count - 1);
+
+                    return ll;
+                });
+        }
+
+        public static List<List<long>> GenerateListAssignments(this IEnumerable<int> sizes, int potSize)
+        {
+            var augmented = sizes.Concat(potSize).ToList();
+            return Assignments_ulong.Generate(augmented, potSize).Select(ula =>
+            {
+                var ll = ula.ToStackLong(augmented.Count);
+                ll.RemoveAt(ll.Count - 1);
+
+                return ll;
+            }).ToList();
+        }
+
         public static IEnumerable<Choosability.Graph> EnumerateGraph6(this string path)
         {
             using (var sr = new StreamReader(path))

@@ -250,5 +250,16 @@ namespace Choosability
         {
             return "{" + string.Join(", ", list) + "}";
         }
+
+        public static long NextSubsetOfSameSize(this long x, long set)
+        {
+            long tmp = x - 1;
+            long rip = set & (tmp + (x & -x) - set);
+            x = tmp & x;
+            for (x = (tmp & x) ^ rip; (x &= x - 1) != 0; rip ^= tmp, set ^= tmp)
+                tmp = set & (-set);
+
+            return rip;
+        }
     }
 }

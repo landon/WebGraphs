@@ -19,8 +19,9 @@ namespace Console
 
         static void Main(string[] args)
         {
+            FindFractionalColorable.Go();
             //NonCrossing.MakePicture(7);
-            NonCrossing.Generate();
+          //  NonCrossing.Generate();
             //Folkman.Go();
             //@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Another\dcharge_test_7_5_7_2_1.txt.cleaned.txt".EnumerateWeightedGraphs().Where(g => g.VertexWeight.Count(w => w == 7) == 1).WriteToWeightFile("dcharge_test_7_5_7_2_1.txt.cleaned.txt.cut.txt");
             //@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Another\dcharge_test_7_5_7_2_2.txt.cleaned.txt".EnumerateWeightedGraphs().Where(g => g.VertexWeight.Count(w => w == 7) == 2).WriteToWeightFile("dcharge_test_7_5_7_2_2.txt.cleaned.txt.cut.txt");

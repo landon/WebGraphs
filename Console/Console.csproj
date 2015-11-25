@@ -108,6 +108,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resource.resx</DependentUpon>
     </Compile>
+    <Compile Include="RingAssignmentGenerator.cs" />
     <Compile Include="SinkEliminator.cs" />
     <Compile Include="SuperAbundanceFinder.cs" />
     <Compile Include="WeaklyFixableTester.cs" />

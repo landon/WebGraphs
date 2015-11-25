@@ -72,7 +72,7 @@ namespace Console
             return gs;
         }
 
-        static List<List<List<int>>> Load(string file)
+        public static List<List<List<int>>> Load(string file)
         {
             string s;
             using (var sr = new StreamReader(file))
@@ -161,7 +161,7 @@ namespace Console
         static List<List<List<int>>> GeneratePartitions(int n)
         {
             var pp = Assignments_ulong.Generate(Enumerable.Repeat(1, n).Concat(n).ToList(), n);
-            return pp.Select(ss => MakePartition(MakeStacks(ss, n + 1).Take(n).SelectMany(t => t).ToList()).ToList()).ToList();
+            return pp.Select(ss => MakePartition(ss.ToStackList(n + 1).Take(n).SelectMany(t => t).ToList()).ToList()).ToList();
         }
 
         static List<List<int>> MakePartition(List<int> t)
@@ -175,16 +175,6 @@ namespace Console
             }
 
             return parts;
-        }
-
-        static List<List<int>> MakeStacks(ulong[] trace, int count)
-        {
-            var s = new long[count];
-            var traceBits = trace.Select(t => t.ToSet()).ToList();
-            for (int c = 0; c < traceBits.Count; c++)
-                foreach (var i in traceBits[c])
-                    s[i] |= 1L << c;
-            return s.Select(aa => aa.ToSet()).ToList();
         }
     }
 }
