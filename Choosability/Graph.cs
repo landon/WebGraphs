@@ -1264,8 +1264,10 @@ namespace Choosability
 
             color = colors & ~color;
 
-            while (color != 0)
+            int totalColors = 0;
+            while (color.PopulationCount() == fold)
             {
+                totalColors++;
                 var assignmentCopy = new List<long>(assignment);
                 foreach (var neighbor in _laterNeighbors.Value[subset[v]])
                     assignmentCopy[neighbor] &= ~color;
@@ -1274,6 +1276,11 @@ namespace Choosability
                     return true;
 
                 color = color.NextSubsetOfSameSize(colors);
+            }
+
+            if (totalColors != Counting.BinomialCoefficient(assignment[subset[v]].PopulationCount(), fold))
+            {
+                throw new Exception("badness!!");
             }
 
             return false;

@@ -18,10 +18,13 @@ namespace Console
     {
         public const int MinVertices = 4;
         public const int MaxVertices = 16;
-        public const int MinRingSize = 4;
-        public const int MaxRingSize = 12;
-        public const int C = 13;
+        public const int MinRingSize = 10;
+        public const int MaxRingSize = 10;
+        public const int C = 14;
         public const int Fold = 3;
+        public const bool SkipLookup = true;
+        public const int InsideLowerLimit = 1;
+        public const int InsideUpperLimit = 4;
 
         static readonly string WinnersFile = Fold + "-fold " + C + "-coloring" + ("ring size " + MinRingSize + " -- " + MaxRingSize) + ("planar triangulation") + string.Format("winners.txt");
         static readonly string LookupPath = @"C:\Lookup\assignment_lookup" + C + "_" + Fold;
@@ -139,6 +142,9 @@ namespace Console
 
         public static void SaveLookup(Dictionary<Key, List<List<long>>> lookup)
         {
+            if (SkipLookup)
+                return;
+
             if (File.Exists(LookupPath))
                 File.Copy(LookupPath, LookupPath + ".backup", true);
 
@@ -167,48 +173,51 @@ namespace Console
         public static Dictionary<Key, List<List<long>>> LoadLookup()
         {
             var lookup = new Dictionary<Key, List<List<long>>>();
-            try
+            if (!SkipLookup)
             {
-                if (File.Exists(LookupPath + ".backup"))
+                try
                 {
-                    if (!File.Exists(LookupPath) || new FileInfo(LookupPath).Length < new FileInfo(LookupPath + ".backup").Length)
+                    if (File.Exists(LookupPath + ".backup"))
                     {
-                        System.Console.WriteLine("Backup is better, using it.");
-                        File.Copy(LookupPath + ".backup", LookupPath, true);
-                    }
-                }
-
-                System.Console.Write("Loading lookup table...");
-                using (var fs = new FileStream(LookupPath, FileMode.Open, FileAccess.Read))
-                using (var br = new BinaryReader(fs))
-                {
-                    var kvpCount = br.ReadInt32();
-                    for (int k = 0; k < kvpCount; k++)
-                    {
-                        var r = br.ReadInt32();
-                        var count = br.ReadInt32();
-                        var contractions = new List<ulong>(count);
-                        for (int i = 0; i < count; i++)
-                            contractions.Add(br.ReadUInt64());
-
-                        var key = new Key(r, contractions);
-
-                        var vcount = br.ReadInt32();
-                        var value = new List<List<long>>(vcount);
-                        for (int i = 0; i < vcount; i++)
+                        if (!File.Exists(LookupPath) || new FileInfo(LookupPath).Length < new FileInfo(LookupPath + ".backup").Length)
                         {
-                            var lcount = br.ReadInt32();
-                            var l = new List<long>(lcount);
-                            for (int j = 0; j < lcount; j++)
-                                l.Add(br.ReadInt64());
-                            value.Add(l);
+                            System.Console.WriteLine("Backup is better, using it.");
+                            File.Copy(LookupPath + ".backup", LookupPath, true);
                         }
+                    }
 
-                        lookup[key] = value;
+                    System.Console.Write("Loading lookup table...");
+                    using (var fs = new FileStream(LookupPath, FileMode.Open, FileAccess.Read))
+                    using (var br = new BinaryReader(fs))
+                    {
+                        var kvpCount = br.ReadInt32();
+                        for (int k = 0; k < kvpCount; k++)
+                        {
+                            var r = br.ReadInt32();
+                            var count = br.ReadInt32();
+                            var contractions = new List<ulong>(count);
+                            for (int i = 0; i < count; i++)
+                                contractions.Add(br.ReadUInt64());
+
+                            var key = new Key(r, contractions);
+
+                            var vcount = br.ReadInt32();
+                            var value = new List<List<long>>(vcount);
+                            for (int i = 0; i < vcount; i++)
+                            {
+                                var lcount = br.ReadInt32();
+                                var l = new List<long>(lcount);
+                                for (int j = 0; j < lcount; j++)
+                                    l.Add(br.ReadInt64());
+                                value.Add(l);
+                            }
+
+                            lookup[key] = value;
+                        }
                     }
                 }
+                catch { }
             }
-            catch { }
 
             System.Console.WriteLine(" found " + lookup.Count);
             return lookup;
