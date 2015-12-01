@@ -9,6 +9,35 @@ namespace Console
 {
     public static class IsomorphRemover
     {
+        public static List<Graph> GetMinimals(this IEnumerable<Graph> graphs, Func<Graph, Graph, int, int, bool> weightCondition = null)
+        {
+            if (weightCondition == null)
+                weightCondition = WeightConditionDown;
+
+            var list = new List<Graph>();
+            var gg = graphs.ToList();
+            for (int i = 0; i < gg.Count; i++)
+            {
+                var good = true;
+                for (int j = 0; j < gg.Count; j++)
+                {
+                    if (j == i)
+                        continue;
+
+                    if (gg[i].Contains(gg[j], false, weightCondition))
+                    {
+                        good = false;
+                        break;
+                    }
+                }
+
+                if (good)
+                    list.Add(gg[i]);
+            }
+
+            return list;
+        }
+
         public static List<Graph> RemoveSelfIsomorphs(this IEnumerable<Graph> graphs, bool zeroToZero = false, Func<Graph, Graph, int, int, int> priority = null, bool allowUnequal = false)
         {
             if (priority == null)

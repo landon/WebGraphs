@@ -70,26 +70,28 @@ namespace Console
           //  MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Another\drawme.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\Planar\AT\5678\10ring\nosink", directed: true, showFactors: false, lowPlus: false, fivePlus: true);
           //  MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\YetAnother\drawme.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\Planar\AT\5678\11ring\nosink", directed: true, showFactors: false, lowPlus: false, fivePlus: true);
 
-            for (int i = 5; i <= 7; i++)
-            {
-                for (int j = 1; j <= 4; j++)
-                {
-                    var file = string.Format(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\dcharge_test_{0}_5_7_2_{1}.txt.cleaned.txt.cut.txt", i, j);
-                    if (File.Exists(file))
-                    {
-                        System.Console.WriteLine();
-                        System.Console.WriteLine("doing " + file);
+            //for (int i = 5; i <= 7; i++)
+            //{
+            //    for (int j = 1; j <= 4; j++)
+            //    {
+            //        var file = string.Format(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\dcharge_test_{0}_5_7_2_{1}.txt.cleaned.txt.cut.txt", i, j);
+            //        if (File.Exists(file))
+            //        {
+            //            System.Console.WriteLine();
+            //            System.Console.WriteLine("doing " + file);
 
-                        var output = string.Format(@"C:\Users\landon\Dropbox\Public\Web\GraphData\Planar\AT\567\{0}_2nd_nhbd\{1}", i, j);
-                        MakeWebpage(file, output, directed: false, showFactors: false, lowPlus: false, fivePlus: true, useLaplacian: true);
-                    }
-                    else
-                    {
-                        System.Console.WriteLine();
-                        System.Console.WriteLine("missing " + file);
-                    }
-                }
-            }
+            //            var output = string.Format(@"C:\Users\landon\Dropbox\Public\Web\GraphData\Planar\AT\567\{0}_2nd_nhbd\{1}", i, j);
+            //            MakeWebpage(file, output, directed: false, showFactors: false, lowPlus: false, fivePlus: true, useLaplacian: true);
+            //        }
+            //        else
+            //        {
+            //            System.Console.WriteLine();
+            //            System.Console.WriteLine("missing " + file);
+            //        }
+            //    }
+            //}
+
+            MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\3_13.txt.cleaned.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\Planar\3\13\4\11", directed: false, showFactors: false, lowPlus: false, fivePlus: true);
         }
 
         static void MakeNonCon()

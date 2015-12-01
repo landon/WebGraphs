@@ -19,7 +19,11 @@ namespace Console
 
         static void Main(string[] args)
         {
-            FindFractionalColorableRandomized.Go();
+            //@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\3_13.txt".EnumerateWeightedGraphs().GetMinimals(WeightConditionTest).WriteToWeightFile("3_13.txt.cleaned.txt");
+
+           // FindFractionalColorableRandomized.Go();
+
+            MakePictures.Go();
             //NonCrossing.MakePicture(7);
           //  NonCrossing.Generate();
             //Folkman.Go();
@@ -93,7 +97,7 @@ namespace Console
           //  FilterTriangleCutsets.FilterGraph6AndMinWeight(@"C:\Users\landon\Google Drive\research\code\plantri\plantri\Debug\triangulation15_6.txt");
            // @"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\OneMore\test.txt".EnumerateWeightedGraphs().EliminateSinks().RemoveSelfIsomorphs().OrderBy(g => g.VertexWeight.Count(x => x == 0)).WriteToWeightFile("goods3.txt");
           //  @"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\4--15-6--8a.txt".EnumerateWeightedGraphs().EliminateSinks().RemoveIsomorphs().WriteToWeightFile("4--15-6--8.txt");
-            //for (int i = 15; i <= 16; i++)
+            //for (int i = 16; i <= 16; i++)
             //{
             //    for (int j = 5; j <= 15; j++)
             //    {
@@ -128,6 +132,11 @@ namespace Console
             System.Console.WriteLine();
             System.Console.WriteLine("done.");
             System.Console.ReadKey();
+        }
+
+        static bool WeightConditionTest(Graph self, Graph A, int selfV, int av)
+        {
+            return A.VertexWeight[av] == 0 || A.VertexWeight[av] == self.VertexWeight[selfV];
         }
     }
 }

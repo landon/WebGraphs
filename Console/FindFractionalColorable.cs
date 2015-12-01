@@ -16,15 +16,15 @@ namespace Console
 {
     public static class FindFractionalColorable
     {
-        public const int MinVertices = 4;
+        public const int MinVertices = 5;
         public const int MaxVertices = 16;
-        public const int MinRingSize = 10;
-        public const int MaxRingSize = 10;
-        public const int C = 14;
-        public const int Fold = 3;
+        public const int MinRingSize = 4;
+        public const int MaxRingSize = 12;
+        public const int C = 4;
+        public const int Fold = 1;
         public const bool SkipLookup = true;
         public const int InsideLowerLimit = 1;
-        public const int InsideUpperLimit = 4;
+        public const int InsideUpperLimit = int.MaxValue;
 
         static readonly string WinnersFile = Fold + "-fold " + C + "-coloring" + ("ring size " + MinRingSize + " -- " + MaxRingSize) + ("planar triangulation") + string.Format("winners.txt");
         static readonly string LookupPath = @"C:\Lookup\assignment_lookup" + C + "_" + Fold;
