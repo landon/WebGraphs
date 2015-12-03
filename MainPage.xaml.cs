@@ -117,6 +117,8 @@ namespace WebGraphs
 
             _mainMenu.ExtendTriangulation += _mainMenu_ExtendTriangulation;
 
+            _mainMenu.OnReverseSelectedEdgeOrientations += ReverseSelectedEdgeOrientations;
+
             _propertyGrid.SomethingChanged += _propertyGrid_SomethingChanged;
 
             DoAutoLoad();
@@ -800,7 +802,6 @@ trash can button.
             FocusSelectedTab();
         }
 
-
         async void _mainMenu_DoListExtraSpindleEdges()
         {
             if (SelectedTabCanvas == null)
@@ -1459,6 +1460,23 @@ trash can button.
                 v.Orientation = Edge.Orientations.None;
             SelectedTabCanvas.Invalidate();
         }
+
+        void ReverseSelectedEdgeOrientations()
+        {
+            var blob = AlgorithmBlob.Create(SelectedTabCanvas);
+            if (blob == null)
+                return;
+
+            foreach (var v in blob.UIGraph.SelectedEdges)
+            {
+                if (v.Orientation == Edge.Orientations.Backward)
+                    v.Orientation = Edge.Orientations.Forward;
+                else if (v.Orientation == Edge.Orientations.Forward)
+                    v.Orientation = Edge.Orientations.Backward;
+            }
+            SelectedTabCanvas.Invalidate();
+        }
+
 
         async void CheckfAT()
         {

@@ -82,6 +82,7 @@ namespace WebGraphs
         public event Action OnAddCClockSpindle;
         public event Action OnNextDeepestBoard;
         public event Action ExtendTriangulation;
+        public event Action OnReverseSelectedEdgeOrientations;
 
         public event Action<bool, int, FixerBreakerSwapMode, bool, bool, bool, FixerBreakeReductionMode> Analyze;
         public event Action<bool, int, FixerBreakerSwapMode, bool, bool, bool, FixerBreakeReductionMode> AnalyzeCurrentBoard;
@@ -372,6 +373,9 @@ namespace WebGraphs
                     break;
                 case "extend triangulation":
                     A(ExtendTriangulation);
+                    break;
+                case "reverse selected edges":
+                    A(OnReverseSelectedEdgeOrientations);
                     break;
             }
         }

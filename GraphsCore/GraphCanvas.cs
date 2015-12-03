@@ -834,41 +834,34 @@ namespace Graphs
             var o = GetHit(x, y);
 
             var graphChanged = false;
-            switch (_state)
+            if (_state == States.Idle && !Canvas.IsControlKeyDown)
             {
-                case States.Idle:
-                case States.DraggingVertex:
-                case States.DraggingSelectionRegion:
-                case States.DraggingSelectedVertices:
+                if (button == MouseButton.Left)
+                {
+                    if (o == null)
                     {
-                        if (button == MouseButton.Left)
-                        {
-                            if (o == null)
-                            {
-                                var v = new Vertex(x, y);
-                                if (_graph.AddVertex(v))
-                                    graphChanged = true;
-                            }
-                            else if (o is Vertex)
-                            {
-                                var endVertex = (Vertex)o;
-                                foreach (var v in _graph.SelectedVertices)
-                                {
-                                    if (_graph.AddEdge(v, endVertex))
-                                        graphChanged = true;
-                                }
-                            }
-                        }
-                        else if (button == MouseButton.Right)
-                        {
-                            if (o is Vertex)
-                            {
-                                if (_graph.RemoveVertex((Vertex)o))
-                                    graphChanged = true;
-                            }
-                        }
-                        break;
+                        var v = new Vertex(x, y);
+                        if (_graph.AddVertex(v))
+                            graphChanged = true;
                     }
+                    else if (o is Vertex)
+                    {
+                        var endVertex = (Vertex)o;
+                        foreach (var v in _graph.SelectedVertices)
+                        {
+                            if (_graph.AddEdge(v, endVertex))
+                                graphChanged = true;
+                        }
+                    }
+                }
+                else if (button == MouseButton.Right)
+                {
+                    if (o is Vertex)
+                    {
+                        if (_graph.RemoveVertex((Vertex)o))
+                            graphChanged = true;
+                    }
+                }
             }
 
             Invalidate();

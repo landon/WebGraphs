@@ -140,6 +140,8 @@
                     <menu:Separator/>
                     <local:SuperMenuItem Header="generate random orientation" Click="MenuItemClick"/>
                     <local:SuperMenuItem Header="generate balanced orientation" Click="MenuItemClick"/>
+                    <menu:Separator/>
+                    <local:SuperMenuItem Header="reverse selected edges" Click="MenuItemClick"/>
                     <local:SuperMenuItem Header="clear orientation" Click="MenuItemClick"/>
                 </menu:ContextMenu>
             </menu:ContextMenuService.ContextMenu>
