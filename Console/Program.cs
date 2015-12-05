@@ -19,13 +19,21 @@ namespace Console
 
         static void Main(string[] args)
         {
+            var P4 = Choosability.Graphs.P(4);
+            P4.VertexWeight = new List<int>() { 5, 5, 5, 5 };
+
+            @"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\OneMore\test.txt"
+                .EnumerateWeightedGraphs(removeOrientation: true, weightAdjustment: 5)
+                .Where(g => g.VertexWeight.Count(w => w == 5) == 4 && g.Contains(P4, true, IsomorphRemover.WeightConditionEqual))
+                .ToWebPage("test");
+
             //@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\3_13.txt".EnumerateWeightedGraphs().GetMinimals(WeightConditionTest).WriteToWeightFile("3_13.txt.cleaned.txt");
 
-           // FindFractionalColorableRandomized.Go();
+            // FindFractionalColorableRandomized.Go();
 
-            MakePictures.Go();
+            //MakePictures.Go();
             //NonCrossing.MakePicture(7);
-          //  NonCrossing.Generate();
+            //  NonCrossing.Generate();
             //Folkman.Go();
             //@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Another\dcharge_test_7_5_7_2_1.txt.cleaned.txt".EnumerateWeightedGraphs().Where(g => g.VertexWeight.Count(w => w == 7) == 1).WriteToWeightFile("dcharge_test_7_5_7_2_1.txt.cleaned.txt.cut.txt");
             //@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Another\dcharge_test_7_5_7_2_2.txt.cleaned.txt".EnumerateWeightedGraphs().Where(g => g.VertexWeight.Count(w => w == 7) == 2).WriteToWeightFile("dcharge_test_7_5_7_2_2.txt.cleaned.txt.cut.txt");
@@ -35,9 +43,9 @@ namespace Console
             //@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Another\dcharge_test_6_5_7_2_1.txt.cleaned.txt".EnumerateWeightedGraphs().Where(g => g.VertexWeight.Count(w => w == 7) == 1).WriteToWeightFile("dcharge_test_6_5_7_2_1.txt.cleaned.txt.cut.txt");
             //@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Another\dcharge_test_6_5_7_2_2.txt.cleaned.txt".EnumerateWeightedGraphs().Where(g => g.VertexWeight.Count(w => w == 7) == 2).WriteToWeightFile("dcharge_test_6_5_7_2_2.txt.cleaned.txt.cut.txt");
             //@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\OneMore\dcharge_test_6_5_7_2_3.txt.cleaned.txt".EnumerateWeightedGraphs().Where(g => g.VertexWeight.Count(w => w == 7) == 3).WriteToWeightFile("dcharge_test_6_5_7_2_3.txt.cleaned.txt.cut.txt");
-         //   @"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Debug\dcharge_test_5_5_7_2_4.txt.cleaned.txt".EnumerateWeightedGraphs().OrderBy(g => g.VertexWeight.Count(w => w == 2)).WriteToWeightFile("dcharge_test_5_5_7_2_4.txt.cleaned.txt.ordered.txt");
-         //   System.Console.WriteLine("making pictures");
-         //   @"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Another\dcharge_test_6_5_7_2_3.txt".EnumerateWeightedGraphs().RemoveSelfIsomorphs(true, IsomorphRemover.PriorityUp, true).WriteToWeightFile("dcharge_test_6_5_7_2_3.txt.cleaned.txt");
+            //   @"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Debug\dcharge_test_5_5_7_2_4.txt.cleaned.txt".EnumerateWeightedGraphs().OrderBy(g => g.VertexWeight.Count(w => w == 2)).WriteToWeightFile("dcharge_test_5_5_7_2_4.txt.cleaned.txt.ordered.txt");
+            //   System.Console.WriteLine("making pictures");
+            //   @"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Another\dcharge_test_6_5_7_2_3.txt".EnumerateWeightedGraphs().RemoveSelfIsomorphs(true, IsomorphRemover.PriorityUp, true).WriteToWeightFile("dcharge_test_6_5_7_2_3.txt.cleaned.txt");
             //for (int i = 0; i < 20; i++)
             //{
             //    System.Console.WriteLine("doing " + i + "...");
@@ -45,7 +53,7 @@ namespace Console
             //}
             //FindFractionalPaintable.Go();
 
-           // @"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\OneMore\test.txt".EnumerateWeightedGraphs(removeOrientation: true, weightAdjustment: 5).WriteToWeightFile("test_adjusted.txt");
+            // @"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\OneMore\test.txt".EnumerateWeightedGraphs(removeOrientation: true, weightAdjustment: 5).WriteToWeightFile("test_adjusted.txt");
             //var excluded = @"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\OneMore\test.txt".EnumerateWeightedGraphs(removeOrientation: true, weightAdjustment: 5).Where(g => g.VertexWeight.Max() <= 7).ToList();
             //Discharging.BuildNeighborhoods(5, 5, 7, 2, excluded).WriteToWeightFile("dcharge_test5572.txt");
 
@@ -80,8 +88,8 @@ namespace Console
             //.RemoveIsomorphs(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\OneMore\test.txt".EnumerateWeightedGraphs(), true, IsomorphRemover.WeightConditionDown)
             //.WriteToWeightFile("removed_down.txt");
 
-          //  var excluded = @"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\YetAnother\goods3.txt".EnumerateWeightedGraphs().Where(g => g.VertexWeight.Max() <= 2).ToList();
-           // var excluded = @"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\YetAnother\goods3.txt".EnumerateWeightedGraphs().ToList();
+            //  var excluded = @"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\YetAnother\goods3.txt".EnumerateWeightedGraphs().Where(g => g.VertexWeight.Max() <= 2).ToList();
+            // var excluded = @"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\YetAnother\goods3.txt".EnumerateWeightedGraphs().ToList();
             //NewGenerator.EnumerateWeightedNeighborhoods(6, 5, 7, 2).Select(g =>
             //    {
             //        var h = g.Clone();
@@ -89,14 +97,14 @@ namespace Console
             //            h.VertexWeight[i] -= 5;
             //        return h;
             //    }).RemoveIsomorphs(excluded, true, IsomorphRemover.WeightConditionDown).WriteToWeightFile("6nbhdtest.txt");
-          //  var min2 = @"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Another\generated.txt".EnumerateWeightedGraphs().Min(g => g.VertexWeight.Count(x => x == 2));
-         //   @"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Another\generated.txt".EnumerateWeightedGraphs().Where(g => g.VertexWeight.Count(x => x == 2) <= min2 + 1).RemoveSelfIsomorphs(true, IsomorphRemover.WeightConditionUp).WriteToWeightFile("generated_min2b.txt");
+            //  var min2 = @"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Another\generated.txt".EnumerateWeightedGraphs().Min(g => g.VertexWeight.Count(x => x == 2));
+            //   @"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Another\generated.txt".EnumerateWeightedGraphs().Where(g => g.VertexWeight.Count(x => x == 2) <= min2 + 1).RemoveSelfIsomorphs(true, IsomorphRemover.WeightConditionUp).WriteToWeightFile("generated_min2b.txt");
             //@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Another\generated.txt".EnumerateWeightedGraphs().RemoveSelfIsomorphs(true, IsomorphRemover.WeightConditionUp).WriteToWeightFile("generated_noiso.txt");
-          //  NewGenerator.Go();
+            //  NewGenerator.Go();
             //FindATCounterexample.Go();
-          //  FilterTriangleCutsets.FilterGraph6AndMinWeight(@"C:\Users\landon\Google Drive\research\code\plantri\plantri\Debug\triangulation15_6.txt");
-           // @"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\OneMore\test.txt".EnumerateWeightedGraphs().EliminateSinks().RemoveSelfIsomorphs().OrderBy(g => g.VertexWeight.Count(x => x == 0)).WriteToWeightFile("goods3.txt");
-          //  @"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\4--15-6--8a.txt".EnumerateWeightedGraphs().EliminateSinks().RemoveIsomorphs().WriteToWeightFile("4--15-6--8.txt");
+            //  FilterTriangleCutsets.FilterGraph6AndMinWeight(@"C:\Users\landon\Google Drive\research\code\plantri\plantri\Debug\triangulation15_6.txt");
+            // @"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\OneMore\test.txt".EnumerateWeightedGraphs().EliminateSinks().RemoveSelfIsomorphs().OrderBy(g => g.VertexWeight.Count(x => x == 0)).WriteToWeightFile("goods3.txt");
+            //  @"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\4--15-6--8a.txt".EnumerateWeightedGraphs().EliminateSinks().RemoveIsomorphs().WriteToWeightFile("4--15-6--8.txt");
             //for (int i = 16; i <= 16; i++)
             //{
             //    for (int j = 5; j <= 15; j++)
@@ -106,29 +114,29 @@ namespace Console
             //            FilterTriangleCutsets.FilterGraph6AndMinWeight(file);
             //    }
             //}
-            
-           // SinkEliminator.Go(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\YetAnother\ring size 11 min spread 0 spread 4 planar triangulationAT winners.txt");
-           //FindChoosablesAdvanced.Go();
-          //  MicTester.Go();
-           // GenerateWithExcludedSubgraphs.Go();
+
+            // SinkEliminator.Go(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\YetAnother\ring size 11 min spread 0 spread 4 planar triangulationAT winners.txt");
+            //FindChoosablesAdvanced.Go();
+            //  MicTester.Go();
+            // GenerateWithExcludedSubgraphs.Go();
             //WeaklyFixableTester.Go();
-          //  FixerBreakerTrees.Go();
-         //   SuperAbundanceFinder.Go();
-          //  FindFixerBreaker.Go();
+            //  FixerBreakerTrees.Go();
+            //   SuperAbundanceFinder.Go();
+            //  FindFixerBreaker.Go();
             //MakePictures.Go();
 
-          //  MixedChoosables.Go();
+            //  MixedChoosables.Go();
             //EliminiteDoubleEdgeSubdivisions.Go(@"C:\Users\landon\Google Drive\research\graphs\WithLows\Mixed spread 2 AT winners1.txt");
-           
-           //  FindTarpits.Go();
-           // FindFixerBreaker.Go();
+
+            //  FindTarpits.Go();
+            // FindFixerBreaker.Go();
             //FindChoosables.Go();
 
-         //   EliminateDoubleEdgeNotSubdivisions.Go(@"C:\Users\landon\Google Drive\research\graphs\WithLows\OneHigh\not 10 vertex Mixed spread 2 max high 1 kappa2 winners1.txt");
+            //   EliminateDoubleEdgeNotSubdivisions.Go(@"C:\Users\landon\Google Drive\research\graphs\WithLows\OneHigh\not 10 vertex Mixed spread 2 max high 1 kappa2 winners1.txt");
 
             //ConAndNon.Go();
 
-           // EliminateTriangleBlowups.Go("not 9 vertex Mixed spread 2 max high 2 kappa2 winners1.txt.not.eliminated.txt");
+            // EliminateTriangleBlowups.Go("not 9 vertex Mixed spread 2 max high 2 kappa2 winners1.txt.not.eliminated.txt");
             System.Console.WriteLine();
             System.Console.WriteLine("done.");
             System.Console.ReadKey();

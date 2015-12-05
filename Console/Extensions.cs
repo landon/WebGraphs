@@ -10,11 +10,27 @@ using Choosability;
 using Choosability.Polynomials;
 using Choosability.Utility;
 using System.Threading;
+using System.Diagnostics;
 
 namespace Console
 {
     public static class Extensions
     {
+        public static void ToWebPage(this IEnumerable<Choosability.Graph> graphs, string relativePath, bool directed = true, bool fivePlus = true)
+        {
+            var maker = new GraphPictureMaker(graphs);
+            var path = Path.Combine(@"C:\Users\landon\Dropbox\Public\Web\GraphData", relativePath);
+
+            MakePictures.MakeWebpage(maker, path, directed: directed, showFactors: false, lowPlus: false, fivePlus: fivePlus, useLaplacian: true);
+
+            Path.Combine(@"https://dl.dropboxusercontent.com/u/8609833/Web/GraphData", relativePath, "index.html").ToBrowser();
+        }
+
+        public static void ToBrowser(this string url)
+        {
+            Process.Start(@"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe", "\"" + url + "\"");
+        }
+
         public static void WriteToWeightFile(this IEnumerable<Choosability.Graph> graphs, string path)
         {
             using (var sw = new StreamWriter(path, append: false))
