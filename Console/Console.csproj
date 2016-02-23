@@ -90,7 +90,7 @@
     <Compile Include="FindFractionalPaintable.cs" />
     <Compile Include="FindTarpits.cs" />
     <Compile Include="FixerBreakerTrees.cs" />
-    <Compile Include="Folkman.cs" />
+    <Compile Include="Potential.cs" />
     <Compile Include="GenerateWithExcludedSubgraphs.cs" />
     <Compile Include="GraphEnumerator.cs" />
     <Compile Include="GraphViz.cs" />

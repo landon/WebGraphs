@@ -20,17 +20,19 @@ namespace Console
         const bool Offline = false;
         const bool AT = true;
         const bool Mic = false;
-        const bool TwoConnectedOnly = true;
+        const bool TwoConnectedOnly = false;
         const int MaxIndependenceNumber = int.MaxValue;
         const int Fold = 1;
         const int Spread = 2;
-        const int MaxHighs = 2;
-        const bool Not = true;
+        const int MaxHighs = int.MaxValue;
+        const bool Not = false;
 
-        const int MaxDegree = int.MaxValue;
+        const int MaxDegree = 4;
+        const int LowMinDegree = 0;
+
         const bool LineGraph = false;
 
-        static readonly string WinnersFile = (Not ? "not " : "") + MaxVertices + " vertex " + "Mixed spread " + Spread + " " + (MaxHighs < int.MaxValue ? "max high " + MaxHighs + " " : "") + (TwoConnectedOnly ? "kappa2 " : "") + (Mic ? "mic " : "") + (MaxIndependenceNumber < int.MaxValue ? "alpha at most " + MaxIndependenceNumber + " " : "") +  (AT ? "AT " : "") + (Offline ? "offline " : "") + (LineGraph ? "line graph " : "") + (MaxDegree < int.MaxValue ? "max degree " + MaxDegree + "_" : "") + string.Format("winners{0}.txt", Fold);
+        static readonly string WinnersFile = (LowMinDegree > 0 ? LowMinDegree + "low min " : "") + (Not ? "not " : "") + MaxVertices + " vertex " + "Mixed spread " + Spread + " " + (MaxHighs < int.MaxValue ? "max high " + MaxHighs + " " : "") + (TwoConnectedOnly ? "kappa2 " : "") + (Mic ? "mic " : "") + (MaxIndependenceNumber < int.MaxValue ? "alpha at most " + MaxIndependenceNumber + " " : "") + (AT ? "AT " : "") + (Offline ? "offline " : "") + (LineGraph ? "line graph " : "") + (MaxDegree < int.MaxValue ? "max degree " + MaxDegree + "_" : "") + string.Format("winners{0}.txt", Fold);
         public static void Go()
         {
             using (var graphEnumerator = new GraphEnumerator(WinnersFile, MinVertices, MaxVertices, false))
@@ -167,8 +169,15 @@ namespace Console
                 if (www.Count(w => w > 0) > MaxHighs)
                     continue;
 
-                if (g.Vertices.Any(v => g.Degree(v) <= www[v] + 1))
+                if (g.Vertices.Any(v => g.Degree(v) - www[v] <= 1))
                     continue;
+
+                if (LowMinDegree > 0)
+                {
+                    var low = www.IndicesWhere(w => w == 0).ToList();
+                    if (g.InducedSubgraph(low).MinDegree < LowMinDegree)
+                        continue;
+                }
 
                 var gg = g.Clone();
                 gg.VertexWeight = www;

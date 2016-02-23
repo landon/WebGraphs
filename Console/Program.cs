@@ -19,13 +19,20 @@ namespace Console
 
         static void Main(string[] args)
         {
-            var P4 = Choosability.Graphs.P(4);
-            P4.VertexWeight = new List<int>() { 5, 5, 5, 5 };
+            @"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Another\5 potentialX at most 24.txt".EnumerateWeightedGraphs().Select(g => { g.VertexWeight = null; return g;}).ToWebPage(@"potential\5\24\X\", false, false, false, false);
+          //  Potential.Go();
+            //@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\9 vertex Mixed spread 2 kappa2 AT max degree 4_winners1.txt"
+            //    .EnumerateWeightedGraphs()
+            //    .Where(g => g.InducedSubgraph(g.Vertices.Where(v => g.VertexWeight[v] == 0).ToList()).MinDegree >= 2)
+            //    .WriteToWeightFile("tttest.txt");
+           // MixedChoosables.Go();
+            //var P4 = Choosability.Graphs.P(4);
+            //P4.VertexWeight = new List<int>() { 5, 5, 5, 5 };
 
-            @"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\OneMore\test.txt"
-                .EnumerateWeightedGraphs(removeOrientation: true, weightAdjustment: 5)
-                .Where(g => g.VertexWeight.Count(w => w == 5) == 4 && g.Contains(P4, true, IsomorphRemover.WeightConditionEqual))
-                .ToWebPage("test");
+            //@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\OneMore\test.txt"
+            //    .EnumerateWeightedGraphs(removeOrientation: true, weightAdjustment: 5)
+            //    .Where(g => g.VertexWeight.Count(w => w == 5) == 4 && g.Contains(P4, true, IsomorphRemover.WeightConditionEqual))
+            //    .ToWebPage("test");
 
             //@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\3_13.txt".EnumerateWeightedGraphs().GetMinimals(WeightConditionTest).WriteToWeightFile("3_13.txt.cleaned.txt");
 

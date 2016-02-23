@@ -92,6 +92,8 @@ namespace Console
             //}
 
             //MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\drawme.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\Planar\5678\dominating", directed: true, showFactors: false, lowPlus: false, fivePlus: true);
+
+            MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\4 potential at most 12.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\potential\4\12", directed: false, showFactors: true);
         }
 
 
