@@ -16,13 +16,13 @@ namespace Console
 {
     public static class Extensions
     {
-        public static void ToWebPage(this IEnumerable<Choosability.Graph> graphs, string relativePath, bool directed = true, bool fivePlus = true, bool useLaplacian = true, bool compressName = true)
+        public static void ToWebPage(this IEnumerable<Choosability.Graph> graphs, string relativePath, bool directed = true, bool fivePlus = true, bool useLaplacian = true, bool compressName = true, bool lowPlus = false)
         {
             var maker = new GraphPictureMaker(graphs);
             maker.CompressName = compressName;
             var path = Path.Combine(@"C:\Users\landon\Dropbox\Public\Web\GraphData", relativePath);
 
-            MakePictures.MakeWebpage(maker, path, directed: directed, showFactors: false, lowPlus: false, fivePlus: fivePlus, useLaplacian : useLaplacian);
+            MakePictures.MakeWebpage(maker, path, directed: directed, showFactors: false, lowPlus: lowPlus, fivePlus: fivePlus, useLaplacian: useLaplacian);
 
             Path.Combine(@"https://dl.dropboxusercontent.com/u/8609833/Web/GraphData", relativePath, "index.html").ToBrowser();
         }

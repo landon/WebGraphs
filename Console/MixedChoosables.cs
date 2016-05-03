@@ -18,28 +18,30 @@ namespace Console
         const int MaxVertices = 9;
 
         const bool Offline = false;
-        const bool AT = true;
+        const bool AT = false;
         const bool Mic = false;
         const bool TwoConnectedOnly = false;
         const int MaxIndependenceNumber = int.MaxValue;
         const int Fold = 1;
-        const int Spread = 2;
-        const int MaxHighs = int.MaxValue;
+        const int Spread = 10;
+        const int MaxHighs = 1;
         const bool Not = false;
 
-        const int MaxDegree = 4;
+        const int MaxDegree = int.MaxValue;
+        const int MinDegree = 0;
         const int LowMinDegree = 0;
+        const bool OddAT = false;
 
         const bool LineGraph = false;
 
-        static readonly string WinnersFile = (LowMinDegree > 0 ? LowMinDegree + "low min " : "") + (Not ? "not " : "") + MaxVertices + " vertex " + "Mixed spread " + Spread + " " + (MaxHighs < int.MaxValue ? "max high " + MaxHighs + " " : "") + (TwoConnectedOnly ? "kappa2 " : "") + (Mic ? "mic " : "") + (MaxIndependenceNumber < int.MaxValue ? "alpha at most " + MaxIndependenceNumber + " " : "") + (AT ? "AT " : "") + (Offline ? "offline " : "") + (LineGraph ? "line graph " : "") + (MaxDegree < int.MaxValue ? "max degree " + MaxDegree + "_" : "") + string.Format("winners{0}.txt", Fold);
+        static readonly string WinnersFile = (OddAT ? "odd AT " : "") + (MinDegree > 0 ? "min deg " + MinDegree : "") + (LowMinDegree > 0 ? LowMinDegree + "low min " : "") + (Not ? "not " : "") + " " + MaxVertices + " vertex " + "Mixed spread " + Spread + " " + (MaxHighs < int.MaxValue ? "max high " + MaxHighs + " " : "") + (TwoConnectedOnly ? "kappa2 " : "") + (Mic ? "mic " : "") + (MaxIndependenceNumber < int.MaxValue ? "alpha at most " + MaxIndependenceNumber + " " : "") + (AT ? "AT " : "") + (Offline ? "offline " : "") + (LineGraph ? "line graph " : "") + (MaxDegree < int.MaxValue ? "max degree " + MaxDegree + "_" : "") + string.Format("winners{0}.txt", Fold);
         public static void Go()
         {
             using (var graphEnumerator = new GraphEnumerator(WinnersFile, MinVertices, MaxVertices, false))
             {
                 graphEnumerator.FileRoot = @"C:\Users\landon\Google Drive\research\Graph6\graph";
                 graphEnumerator.WeightCondition = WeightCondition;
-                graphEnumerator.OnlyExcludeBySpanningSubgraphs = true;
+                graphEnumerator.OnlyExcludeBySpanningSubgraphs = false;
                 foreach (var g in graphEnumerator.EnumerateGraph6File(Filter, EnumerateWeightings, induced: true))
                 {
                     if (MaxIndependenceNumber < int.MaxValue)
@@ -48,7 +50,10 @@ namespace Console
                             continue;
                     }
 
-                    if (MaxDegree < int.MaxValue && g.MaxDegree > MaxDegree)
+                    if (g.MaxDegree > MaxDegree)
+                        continue;
+
+                    if (g.MinDegree < MinDegree)
                         continue;
 
                     if (Mic)
@@ -77,10 +82,27 @@ namespace Console
                             else
                             {
                                 var result = HasFOrientation(g, v => g.Degree(v) - g.VertexWeight[v], true);
+
                                 if (result != null)
                                 {
-                                    graphEnumerator.AddWinner(g, result.Graph);
-                                    System.Console.WriteLine(string.Format(" is f-AT"));
+                                    if (OddAT)
+                                    {
+                                        if (Math.Abs(result.Even - result.Odd) % 2 == 1)
+                                        {
+                                            graphEnumerator.AddWinner(g, result.Graph);
+                                            System.Console.WriteLine(string.Format(" is odd f-AT"));
+                                        }
+                                        else
+                                        {
+                                            System.Console.WriteLine(string.Format(" not odd f-AT"));
+                                        }
+
+                                    }
+                                    else
+                                    {
+                                        graphEnumerator.AddWinner(g, result.Graph);
+                                        System.Console.WriteLine(string.Format(" is f-AT"));
+                                    }
                                 }
                                 else
                                     System.Console.WriteLine(" not AT");
@@ -88,7 +110,9 @@ namespace Console
                         }
                         else
                         {
-                            var good = !g.IsOnlineFGChoosable(v => g.Degree(v) - g.VertexWeight[v], v => 1) || HasFOrientation(g, v => g.Degree(v) - g.VertexWeight[v], true) == null;
+                            var good = !g.IsOnlineFGChoosable(v => g.Degree(v) - g.VertexWeight[v], v => 1);
+                            var result = HasFOrientation(g, v => g.Degree(v) - g.VertexWeight[v], true);
+                            good |= result == null || OddAT && Math.Abs(result.Even - result.Odd) % 2 == 0;
                             if (good)
                             {
                                 graphEnumerator.AddWinner(g);
