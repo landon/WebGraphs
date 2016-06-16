@@ -2024,7 +2024,7 @@ namespace Choosability
 
         bool IsKernelPerfect(List<List<int>> outNeighbors)
         {
-            return Vertices.EnumerateSublists().All(S => HasKernel(S, outNeighbors));
+            return Vertices.EnumerateSublists().OrderByDescending(S => S.Count).All(S => HasKernel(S, outNeighbors));
         }
 
         bool HasKernel(List<int> subgraph, List<List<int>> outNeighbors)
