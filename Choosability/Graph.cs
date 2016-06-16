@@ -2014,9 +2014,7 @@ namespace Choosability
                 }
 
                 if (!IsKernelPerfect(outNeighbors))
-                {
                     return outNeighbors;
-                }
             }
 
             return null;
@@ -2024,7 +2022,13 @@ namespace Choosability
 
         bool IsKernelPerfect(List<List<int>> outNeighbors)
         {
-            return Vertices.EnumerateSublists().OrderByDescending(S => S.Count).All(S => HasKernel(S, outNeighbors));
+            foreach (var S in Vertices.EnumerateSublists().OrderByDescending(S => S.Count))
+            {
+                if (!HasKernel(S, outNeighbors))
+                    return false;
+            }
+
+            return true;
         }
 
         bool HasKernel(List<int> subgraph, List<List<int>> outNeighbors)

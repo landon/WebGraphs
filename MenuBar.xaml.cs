@@ -83,6 +83,7 @@ namespace WebGraphs
         public event Action OnNextDeepestBoard;
         public event Action ExtendTriangulation;
         public event Action OnReverseSelectedEdgeOrientations;
+        public event Action DoCheckKP;
 
         public event Action<bool, int, FixerBreakerSwapMode, bool, bool, bool, FixerBreakeReductionMode> Analyze;
         public event Action<bool, int, FixerBreakerSwapMode, bool, bool, bool, FixerBreakeReductionMode> AnalyzeCurrentBoard;
@@ -208,6 +209,9 @@ namespace WebGraphs
                     break;
                 case "check f-AT (slow)":
                     A(CheckfAT);
+                    break;
+                case "check KP":
+                    A(DoCheckKP);
                     break;
                 case "check f-AT using formula":
                     A(CheckfATUsingFormula);

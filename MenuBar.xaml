@@ -138,6 +138,8 @@
                     <local:SuperMenuItem Header="check f-AT (slow)" Click="MenuItemClick"/>
                     <local:SuperMenuItem Header="check d1-AT (slow)" Click="MenuItemClick"/>                   
                     <menu:Separator/>
+                    <local:SuperMenuItem Header="check KP" Click="MenuItemClick"/>
+                    <menu:Separator/>
                     <local:SuperMenuItem Header="generate random orientation" Click="MenuItemClick"/>
                     <local:SuperMenuItem Header="generate balanced orientation" Click="MenuItemClick"/>
                     <menu:Separator/>

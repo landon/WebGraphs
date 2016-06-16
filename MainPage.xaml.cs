@@ -105,6 +105,7 @@ namespace WebGraphs
             _mainMenu.DoSixFoldWay += _mainMenu_DoSixFoldWay;
             _mainMenu.DoTiling += _mainMenu_DoTiling;
             _mainMenu.DoSpin += _mainMenu_DoSpin;
+            _mainMenu.DoCheckKP += CheckKP;
           
             _mainMenu.OnAddClockSpindle += _mainMenu_OnAddClockSpindle;
             _mainMenu.OnAddCClockSpindle += _mainMenu_OnAddCClockSpindle;
@@ -1343,6 +1344,57 @@ trash can button.
                     SelectedTabCanvas.Invalidate();
 
                     resultWindow.AddChild(new TextBlock() { Text = "is f-AT" + Environment.NewLine + "coefficient:\t\t" + coefficient });
+                }
+            }
+        }
+
+        async void CheckKP()
+        {
+            var blob = AlgorithmBlob.Create(SelectedTabCanvas);
+            if (blob == null)
+                return;
+
+            using (var resultWindow = new ResultWindow())
+            {
+
+                var badOrientation = await Task.Factory.StartNew<List<List<int>>>(() =>
+                {
+                    var symmetricEdges = blob.UIGraph.Edges.IndicesWhere(ee => ee.Multiplicity > 1).ToList();
+                    return blob.AlgorithmGraph.CheckKernelPerfectForAllOrientations(symmetricEdges);
+                });
+
+                if (badOrientation != null)
+                {
+                    var w = new List<int>();
+                    int k = 0;
+                    for (int i = 0; i < blob.AlgorithmGraph.N; i++)
+                    {
+                        for (int j = i + 1; j < blob.AlgorithmGraph.N; j++)
+                        {
+                            if (blob.AlgorithmGraph[i, j])
+                            {
+                                if (badOrientation[j].Contains(i))
+                                    w.Add(-1);
+                                else
+                                    w.Add(1);
+                            }
+                            else
+                            {
+                                w.Add(0);
+                            }
+
+                            k++;
+                        }
+                    }
+
+                    blob.UIGraph.ModifyOrientation(w);
+                    SelectedTabCanvas.Invalidate();
+                    resultWindow.AddChild(new TextBlock() { Text = "not kernel-perfect" });
+                }
+                else
+                {
+                    ClearOrientation();
+                    resultWindow.AddChild(new TextBlock() { Text = "kernel-perfect for all orientations" });
                 }
             }
         }

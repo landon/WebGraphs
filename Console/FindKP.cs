@@ -12,7 +12,7 @@ namespace Console
     public static class FindKP
     {
         const int MinVertices = 5;
-        const int MaxVertices = 20;
+        const int MaxVertices = 7;
         const int MaxDegree = int.MaxValue;
 
         static Dictionary<string, int> BestKP = new Dictionary<string, int>();
@@ -20,7 +20,7 @@ namespace Console
         static Dictionary<string, int> Eg6 = new Dictionary<string, int>();
         static Dictionary<string, int> Micg6 = new Dictionary<string, int>();
 
-        static readonly string WinnersFile = MinVertices + " -- " + MaxVertices + " " + (MaxDegree < int.MaxValue ? "max degree " + MaxDegree + "_" : "") + "winners{0}";
+        static readonly string WinnersFile = MinVertices + " -- " + MaxVertices + " " + (MaxDegree < int.MaxValue ? "max degree " + MaxDegree + "_" : "") + "winners";
         public static void Go()
         {
             using (var swbest = new StreamWriter(WinnersFile + ".best.txt"))
@@ -33,7 +33,7 @@ namespace Console
 
                 using (var graphIO = new GraphEnumerator(WinnersFile + ".blah", MinVertices, MaxVertices))
                 {
-                    // graphIO.FileRoot = @"C:\Users\landon\Google Drive\research\Graph6\graph";
+                  //   graphIO.FileRoot = @"C:\Users\landon\Google Drive\research\Graph6\graph";
                     graphIO.FileRoot = @"C:\Users\landon\Google Drive\research\Graph6\VertexCritical\chi";
 
                     var lastg6 = "";
