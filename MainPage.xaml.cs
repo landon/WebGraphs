@@ -1397,8 +1397,6 @@ trash can button.
                     foreach (var v in badOrientation.Item1)
                         blob.UIGraph.Vertices[v].Color = new ARGB(255, 0, 0);
 
-                    foreach (var vv in blob.UIGraph.Vertices)
-                        vv.Label = blob.UIGraph.Vertices.IndexOf(vv) + "";
                     SelectedTabCanvas.Invalidate();
                     resultWindow.AddChild(new TextBlock() { Text = "not kernel-perfect" });
                 }
