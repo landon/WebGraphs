@@ -52,6 +52,10 @@ namespace Graphs
             }
             else
             {
+                var multiplicity = _Multiplicity;
+                if (_Orientation != Orientations.None)
+                    multiplicity = 1;
+
                 var maxRadius1 = Math.Max(_V1.LocalBounds.Width, _V1.LocalBounds.Height) / 2;
                 var maxRadius2 = Math.Max(_V2.LocalBounds.Width, _V2.LocalBounds.Height) / 2;
 
@@ -68,13 +72,15 @@ namespace Graphs
                 if (double.IsNaN(angle))
                     return;
 
-                var angleStep = Math.PI / 2.0 / _Multiplicity;
-                var evenModifier = (_Multiplicity % 2 == 0) ? 0.5 : 0;
+                var angleStep = Math.PI / 2.0 / multiplicity;
+                var evenModifier = (multiplicity % 2 == 0) ? 0.5 : 0;
 
                 GraphicsLayer.Box topStart = new GraphicsLayer.Box();
                 GraphicsLayer.Box topFinish = new GraphicsLayer.Box();
                 var first = true;
-                for (int i = -(_Multiplicity - 1) / 2; i < Math.Ceiling((_Multiplicity + 1) / 2.0); i++)
+                
+
+                for (int i = -(multiplicity - 1) / 2; i < Math.Ceiling((multiplicity + 1) / 2.0); i++)
                 {
                     var startAngle = angle + angleStep * (i - evenModifier);
                     var finishAngle = angle - angleStep * (i - evenModifier);
@@ -95,24 +101,27 @@ namespace Graphs
                 if (_Orientation != Orientations.None)
                 {
                     var points = new GraphicsLayer.Box[3];
-                    if (_Orientation == Orientations.Forward)
+                    if (_Orientation == Orientations.Forward || _Multiplicity > 1)
                     {
                         var sweep = _V2.Location - Utility.PolarToRectangular(maxRadius2 + 0.025f, angle);
 
                         points[0] = LocalToGlobal(Utility.RotateAroundPoint(sweep, _V2.Location, Math.PI / 180.0 * 10.0), width, height);
                         points[1] = LocalToGlobal(_V2.Location - Utility.PolarToRectangular(maxRadius2 + 0.005f, angle), width, height);
                         points[2] = LocalToGlobal(Utility.RotateAroundPoint(sweep, _V2.Location, -Math.PI / 180.0 * 10.0), width, height);
+
+                        g.FillPolygon(new GraphicsLayer.ARGB(0, 0, 0), points);
                     }
-                    else if (_Orientation == Orientations.Backward)
+
+                    if (_Orientation == Orientations.Backward || _Multiplicity > 1)
                     {
                         var sweep = _V1.Location + Utility.PolarToRectangular(maxRadius1 + 0.025f, angle);
 
                         points[0] = LocalToGlobal(Utility.RotateAroundPoint(sweep, _V1.Location, Math.PI / 180.0 * 10.0), width, height);
                         points[1] = LocalToGlobal(_V1.Location + Utility.PolarToRectangular(maxRadius1 + 0.005f, angle), width, height);
                         points[2] = LocalToGlobal(Utility.RotateAroundPoint(sweep, _V1.Location, -Math.PI / 180.0 * 10.0), width, height);
-                    }
 
-                    g.FillPolygon(new GraphicsLayer.ARGB(0, 0, 0), points);
+                        g.FillPolygon(new GraphicsLayer.ARGB(0, 0, 0), points);
+                    }
                 }
 
                 var label = Label;

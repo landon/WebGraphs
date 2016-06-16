@@ -124,7 +124,9 @@ namespace Console
 
             for (int N = min; N <= MaxVertices; N++)
             {
+                System.Console.ForegroundColor = ConsoleColor.DarkCyan;
                 System.Console.WriteLine("Checking " + N + " vertex graphs...");
+                System.Console.ForegroundColor = ConsoleColor.White;
                 var file = FileRoot + N + (RingSize > 0 ? "_" + RingSize : "") + ".g6";
                 if (!File.Exists(file))
                 {

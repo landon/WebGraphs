@@ -1141,15 +1141,15 @@ namespace Choosability
 
         public IEnumerable<List<int>> EnumerateMaximalIndependentSets(List<int> set)
         {
-            return EnumerateBronKerbosch(set, new List<int>(), new List<int>());
+            return EnumerateBronKerbosch(set, new List<int>(), new List<int>(), ComplementNeighbors);
         }
 
         public IEnumerable<List<int>> EnumerateMaximalIndependentSets()
         {
-            return EnumerateBronKerbosch(Vertices, new List<int>(), new List<int>());
+            return EnumerateBronKerbosch(Vertices, new List<int>(), new List<int>(), ComplementNeighbors);
         }
 
-        IEnumerable<List<int>> EnumerateBronKerbosch(List<int> P, List<int> R, List<int> X)
+        static IEnumerable<List<int>> EnumerateBronKerbosch(List<int> P, List<int> R, List<int> X, List<List<int>> complementNeighbors)
         {
             if (P.Count == 0 && X.Count == 0)
                 yield return R.ToList();
@@ -1158,11 +1158,11 @@ namespace Choosability
                 var PC = P.ToList();
                 var XC = X.ToList();
 
-                var u = TomitaPivot(P, X);
-                foreach (var v in P.Except(ComplementNeighbors[u]))
+                var u = TomitaPivot(P, X, complementNeighbors);
+                foreach (var v in P.Except(complementNeighbors[u]))
                 {
                     R.Add(v);
-                    foreach (var set in EnumerateBronKerbosch(PC.Intersection(ComplementNeighbors[v]), R, XC.Intersection(ComplementNeighbors[v])))
+                    foreach (var set in EnumerateBronKerbosch(PC.Intersection(complementNeighbors[v]), R, XC.Intersection(complementNeighbors[v]), complementNeighbors))
                         yield return set;
 
                     R.Remove(v);
@@ -1172,13 +1172,13 @@ namespace Choosability
             }
         }
 
-        int TomitaPivot(List<int> P, List<int> X)
+        static int TomitaPivot(List<int> P, List<int> X, List<List<int>> complementNeighbors)
         {
             var max = -1;
             var best = -1;
             foreach (var u in P.Concat(X))
             {
-                var n = ComplementNeighbors[u].IntersectionCount(P);
+                var n = complementNeighbors[u].IntersectionCount(P);
                 if (n > max)
                 {
                     max = n;
@@ -1983,6 +1983,65 @@ namespace Choosability
 
             return ancestorLists;
         }
+        public List<List<int>> CheckKernelPerfectForAllOrientations(List<int> symmetricEdges)
+        {
+            var e = Edges.Value;
+            var asymmetricEdges = Enumerable.Range(0, E).Except(symmetricEdges).ToList();
+
+            var outNeighbors = new List<List<int>>();
+            for (int i = 0; i < N; i++)
+                outNeighbors.Add(new List<int>());
+
+            foreach (var backwardEdgeIndices in asymmetricEdges.EnumerateSublists())
+            {
+                for (int i = 0; i < N; i++)
+                    outNeighbors[i].Clear();
+                for (int i = 0; i < e.Count; i++)
+                {
+                    if (symmetricEdges.Contains(i))
+                    {
+                        outNeighbors[e[i].Item1].Add(e[i].Item2);
+                        outNeighbors[e[i].Item2].Add(e[i].Item1);
+                    }
+                    else if (backwardEdgeIndices.Contains(i))
+                    {
+                        outNeighbors[e[i].Item2].Add(e[i].Item1);
+                    }
+                    else
+                    {
+                        outNeighbors[e[i].Item1].Add(e[i].Item2);
+                    }
+                }
+
+                if (!IsKernelPerfect(outNeighbors))
+                {
+                    return outNeighbors;
+                }
+            }
+
+            return null;
+        }
+
+        bool IsKernelPerfect(List<List<int>> outNeighbors)
+        {
+            return Vertices.EnumerateSublists().All(S => HasKernel(S, outNeighbors));
+        }
+
+        bool HasKernel(List<int> subgraph, List<List<int>> outNeighbors)
+        {
+            foreach (var I in EnumerateMaximalIndependentSets(subgraph))
+            {
+                if (IsKernel(subgraph, I, outNeighbors))
+                    return true;
+            }
+
+            return false;
+        }
+
+        static bool IsKernel(List<int> vertices, List<int> I, List<List<int>> outNeighbors)
+        {
+            return vertices.Except(I).All(v => outNeighbors[v].IntersectionCount(I) > 0);
+        }
         #endregion
 
         #region Classic Algorithms
@@ -2003,7 +2062,6 @@ namespace Choosability
 
             return equivalenceRelation;
         }
-
         public bool IsConnected(params Tuple<int, int>[] missingEdges)
         {
             return IsConnected(Vertices, missingEdges);

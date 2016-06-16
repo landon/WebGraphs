@@ -19,7 +19,8 @@ namespace Console
 
         static void Main(string[] args)
         {
-            MixedChoosables.Go();
+            FindKP.Go();
+          //  MixedChoosables.Go();
             //for (int i = 2; i <= 2; i++)
             //{
             //    var ll = @"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\mostlow\Mixed spread 2 offline winners1.txt".EnumerateWeightedGraphs()
