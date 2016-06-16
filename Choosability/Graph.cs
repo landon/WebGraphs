@@ -1983,7 +1983,7 @@ namespace Choosability
 
             return ancestorLists;
         }
-        public List<List<int>> CheckKernelPerfectForAllOrientations(List<int> symmetricEdges)
+        public List<List<int>> CheckKernelPerfectForAllOrientations(List<int> symmetricEdges, out List<int> badSubgraph)
         {
             var e = Edges.Value;
             var asymmetricEdges = Enumerable.Range(0, E).Except(symmetricEdges).ToList();
@@ -2013,19 +2013,24 @@ namespace Choosability
                     }
                 }
 
-                if (!IsKernelPerfect(outNeighbors))
+                if (!IsKernelPerfect(outNeighbors, out badSubgraph))
                     return outNeighbors;
             }
 
+            badSubgraph = null;
             return null;
         }
 
-        bool IsKernelPerfect(List<List<int>> outNeighbors)
+        bool IsKernelPerfect(List<List<int>> outNeighbors, out List<int> badSubgraph)
         {
-            foreach (var S in Vertices.EnumerateSublists().OrderByDescending(S => S.Count))
+            badSubgraph = null;
+            foreach (var S in Vertices.EnumerateSublists())
             {
                 if (!HasKernel(S, outNeighbors))
+                {
+                    badSubgraph = S;
                     return false;
+                }
             }
 
             return true;

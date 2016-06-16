@@ -66,7 +66,8 @@ namespace Console
                         //System.Console.ForegroundColor = ConsoleColor.White;
 
                         var symmetricEdges = g.EdgeWeightsWithMultiplicity.IndicesWhere(w => w == 2).ToList();
-                        var badOrientation = g.CheckKernelPerfectForAllOrientations(symmetricEdges);
+                        List<int> badSubgraph;
+                        var badOrientation = g.CheckKernelPerfectForAllOrientations(symmetricEdges, out badSubgraph);
 
                         if (badOrientation != null)
                         {

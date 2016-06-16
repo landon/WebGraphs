@@ -1356,11 +1356,17 @@ trash can button.
 
             using (var resultWindow = new ResultWindow())
             {
-
-                var badOrientation = await Task.Factory.StartNew<List<List<int>>>(() =>
+                var badOrientation = await Task.Factory.StartNew<Tuple<List<int>, List<List<int>>>>(() =>
                 {
-                    var symmetricEdges = blob.UIGraph.Edges.IndicesWhere(ee => ee.Multiplicity > 1).ToList();
-                    return blob.AlgorithmGraph.CheckKernelPerfectForAllOrientations(symmetricEdges);
+                    var fatEdges = blob.UIGraph.Edges.Where(ee => ee.Multiplicity > 1).ToList();
+                    var symmetricEdges = fatEdges.Select(fe => new int[] { blob.UIGraph.Vertices.IndexOf(fe.V1), blob.UIGraph.Vertices.IndexOf(fe.V2) }.OrderBy(x => x).ToArray()).Select(p => blob.AlgorithmGraph.Edges.Value.FirstIndex(ee => ee.Item1 == p[0] && ee.Item2 == p[1])).ToList();
+                    List<int> badSubgraph;
+                    var oo = blob.AlgorithmGraph.CheckKernelPerfectForAllOrientations(symmetricEdges, out badSubgraph);
+
+                    if (oo == null)
+                        return null;
+
+                    return new Tuple<List<int>, List<List<int>>>(badSubgraph, oo);
                 });
 
                 if (badOrientation != null)
@@ -1373,7 +1379,7 @@ trash can button.
                         {
                             if (blob.AlgorithmGraph[i, j])
                             {
-                                if (badOrientation[j].Contains(i))
+                                if (badOrientation.Item2[j].Contains(i))
                                     w.Add(-1);
                                 else
                                     w.Add(1);
@@ -1388,11 +1394,18 @@ trash can button.
                     }
 
                     blob.UIGraph.ModifyOrientation(w);
+                    foreach (var v in badOrientation.Item1)
+                        blob.UIGraph.Vertices[v].Color = new ARGB(255, 0, 0);
+
+                    foreach (var vv in blob.UIGraph.Vertices)
+                        vv.Label = blob.UIGraph.Vertices.IndexOf(vv) + "";
                     SelectedTabCanvas.Invalidate();
                     resultWindow.AddChild(new TextBlock() { Text = "not kernel-perfect" });
                 }
                 else
                 {
+                    foreach (var vv in blob.UIGraph.Vertices)
+                        vv.ChangeToDefaultColor();
                     ClearOrientation();
                     resultWindow.AddChild(new TextBlock() { Text = "kernel-perfect for all orientations" });
                 }

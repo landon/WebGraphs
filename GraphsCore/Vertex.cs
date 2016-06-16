@@ -105,6 +105,11 @@ namespace Graphs
             return bounds;
         }
 
+        public void ChangeToDefaultColor()
+        {
+            Color = DefaultFillBrushColor;
+        }
+
         [Browsable(false)]
         public GraphicsLayer.ARGB Color { get; set; }
 
