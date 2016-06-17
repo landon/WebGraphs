@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using Choosability.Utility;
 using Choosability.FixerBreaker;
+using BitLevelGeneration;
 
 namespace Choosability
 {
@@ -50,6 +51,7 @@ namespace Choosability
         public List<List<int>> InNeighbors { get { return _inNeighbors.Value; } }
         public List<int> Vertices { get { return _vertices; } }
         public Lazy<int[]> DegreeSequence { get; private set; }
+
         public Lazy<int[]> InDegreeSequence { get; private set; }
         public Lazy<int[]> OutDegreeSequence { get; private set; }
         public Lazy<int[]> NodeInvariantOne { get; private set; }
@@ -1068,10 +1070,37 @@ namespace Choosability
 
             return edges + EdgesOn(intersection);
         }
+
+        public bool HasMonochromaticOddHoleOrCliqueCycle(List<int> edgeColoring, int c)
+        {
+            var w = edgeColoring.IndicesWhere(n => n == c).ToList();
+            var wn = edgeColoring.IndicesWhere(n => n != c).ToList();
+
+            var wc = GetEdgeWeights(new List<int>(), Edges.Value.Where((e, i) => wn.Contains(i)).ToList(), true);
+            var wnc = GetEdgeWeights(new List<int>(), Edges.Value.Where((e, i) => w.Contains(i)).ToList(), true);
+
+            var gc = new Graph(wc);
+            var gnc = new Graph(wnc);
+            var gcb = new BitGraph_long(wc);
+
+            foreach (var S in gnc.EnumerateMaximalIndependentSets())
+            {
+                if (!GraphChoosability_long.IsSubsetTwoColorable(gcb, S.ToInt64()))
+                    return true;
+            }
+
+            foreach (var S in EnumerateMaximalCliques())
+            {
+                if (!gc.IsAcyclic(S))
+                    return true;
+            }
+
+            return false;
+        }
         #endregion
 
         #region Independent sets
-     
+
         IEnumerable<List<int>> IndependentSetsInSubgraph(int firstVertex)
         {
             if (firstVertex >= N) return new List<List<int>>() { new List<int>() };
@@ -1143,10 +1172,18 @@ namespace Choosability
         {
             return EnumerateBronKerbosch(set, new List<int>(), new List<int>(), ComplementNeighbors);
         }
-
         public IEnumerable<List<int>> EnumerateMaximalIndependentSets()
         {
             return EnumerateBronKerbosch(Vertices, new List<int>(), new List<int>(), ComplementNeighbors);
+        }
+
+        public IEnumerable<List<int>> EnumerateMaximalCliques(List<int> set)
+        {
+            return EnumerateBronKerbosch(set, new List<int>(), new List<int>(), Neighbors);
+        }
+        public IEnumerable<List<int>> EnumerateMaximalCliques()
+        {
+            return EnumerateBronKerbosch(Vertices, new List<int>(), new List<int>(), Neighbors);
         }
 
         static IEnumerable<List<int>> EnumerateBronKerbosch(List<int> P, List<int> R, List<int> X, List<List<int>> complementNeighbors)
@@ -1171,7 +1208,6 @@ namespace Choosability
                 }
             }
         }
-
         static int TomitaPivot(List<int> P, List<int> X, List<List<int>> complementNeighbors)
         {
             var max = -1;
@@ -2224,7 +2260,7 @@ namespace Choosability
             var shortestLength = int.MaxValue;
             var shortestCycle = new List<int>();
 
-            foreach (var v in _vertices)
+            foreach (var v in Vertices)
             {
                 var distance = new int[N];
                 var parent = Enumerable.Repeat(-1, N).ToArray();
@@ -2276,6 +2312,28 @@ namespace Choosability
             }
 
             return shortestCycle;
+        }
+
+        public bool IsAcyclic(List<int> subgraph)
+        {
+            while (subgraph.Count > 2)
+            {
+                int w = -1;
+                foreach (var v in subgraph)
+                {
+                    if (ListUtility.IntersectionCount(Neighbors[v], subgraph) <= 1)
+                    {
+                        w = v;
+                        break;
+                    }
+                }
+
+                if (w == -1)
+                    return false;
+                subgraph.Remove(w);
+            }
+
+            return true;
         }
         #endregion
     }

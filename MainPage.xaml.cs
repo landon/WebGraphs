@@ -1354,6 +1354,9 @@ trash can button.
             if (blob == null)
                 return;
 
+            foreach (var vv in blob.UIGraph.Vertices)
+                vv.ChangeToDefaultColor();
+
             using (var resultWindow = new ResultWindow())
             {
                 var badOrientation = await Task.Factory.StartNew<Tuple<List<int>, List<List<int>>>>(() =>
@@ -1402,8 +1405,6 @@ trash can button.
                 }
                 else
                 {
-                    foreach (var vv in blob.UIGraph.Vertices)
-                        vv.ChangeToDefaultColor();
                     ClearOrientation();
                     resultWindow.AddChild(new TextBlock() { Text = "kernel-perfect for all orientations" });
                 }
