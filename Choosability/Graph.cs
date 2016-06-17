@@ -1012,6 +1012,11 @@ namespace Choosability
             return ListUtility.IntersectionCountSorted(Neighbors[v], subgraph);
         }
 
+        public int DegreeInSubgraphUnsorted(int v, List<int> subgraph)
+        {
+            return ListUtility.IntersectionCount(Neighbors[v], subgraph);
+        }
+
         public List<int> NeighborsInSubgraph(int v, List<int> subgraph)
         {
             return ListUtility.IntersectionSorted(Neighbors[v], subgraph);
@@ -1071,6 +1076,22 @@ namespace Choosability
             return edges + EdgesOn(intersection);
         }
 
+        public Graph SubgraphOfEdgeColor(List<int> edgeColoring, int c)
+        {
+            var wn = edgeColoring.IndicesWhere(n => n != c).ToList();
+            var wc = GetEdgeWeights(new List<int>(), Edges.Value.Where((e, i) => wn.Contains(i)).ToList(), true);
+
+            return new Graph(wc);
+        }
+
+        public BitGraph_long BitSubgraphOfEdgeColor(List<int> edgeColoring, int c)
+        {
+            var wn = edgeColoring.IndicesWhere(n => n != c).ToList();
+            var wc = GetEdgeWeights(new List<int>(), Edges.Value.Where((e, i) => wn.Contains(i)).ToList(), true);
+
+            return new BitGraph_long(wc);
+        }
+
         public bool HasMonochromaticOddHoleOrCliqueCycle(List<int> edgeColoring, int c)
         {
             var w = edgeColoring.IndicesWhere(n => n == c).ToList();
@@ -1096,6 +1117,11 @@ namespace Choosability
             }
 
             return false;
+        }
+
+        public bool IsTwoColorable(List<int> edgeColoring, int c)
+        {
+            return GraphChoosability_long.IsSubsetTwoColorable(BitSubgraphOfEdgeColor(edgeColoring, c), Vertices.ToInt64());
         }
         #endregion
 

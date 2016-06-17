@@ -20,7 +20,7 @@ namespace Console
         static Dictionary<string, int> Eg6 = new Dictionary<string, int>();
         static Dictionary<string, int> Micg6 = new Dictionary<string, int>();
 
-        static readonly string WinnersFile = "obvious ex " + MinVertices + " -- " + MaxVertices + " " + (MaxDegree < int.MaxValue ? "max degree " + MaxDegree + "_" : "") + "winners";
+        static readonly string WinnersFile = "obvious ex two colorable singles " + MinVertices + " -- " + MaxVertices + " " + (MaxDegree < int.MaxValue ? "max degree " + MaxDegree + "_" : "") + "winners";
         public static void Go()
         {
             using (var swbest = new StreamWriter(WinnersFile + ".best.txt"))
@@ -41,28 +41,31 @@ namespace Console
                         if (MaxDegree < int.MaxValue && g.MaxDegree > MaxDegree)
                             continue;
 
-                            //if (g.MinDegree < 4)
-                            //    continue;
+                        //if (g.MinDegree < 4)
+                        //    continue;
 
-                            //if (g.EdgeWeightsWithMultiplicity.IndicesWhere(w => w == 1).Count() != 4)
-                            //    continue;
+                        //if (g.EdgeWeightsWithMultiplicity.IndicesWhere(w => w == 1).Count() != 4)
+                        //    continue;
 
-                            //var ec = new Dictionary<int, int>();
-                            //for (int i = 0; i < g.N; i++)
-                            //    ec[i] = 0;
-                            //var qqq = g.EdgeWeightsWithMultiplicity.IndicesWhere(w => w == 1).Select(ii => g.Edges.Value[ii]).ToList();
-                            //foreach (var vvv in qqq)
-                            //{
-                            //    ec[vvv.Item1]++;
-                            //    ec[vvv.Item2]++;
-                            //}
+                        //var ec = new Dictionary<int, int>();
+                        //for (int i = 0; i < g.N; i++)
+                        //    ec[i] = 0;
+                        //var qqq = g.EdgeWeightsWithMultiplicity.IndicesWhere(w => w == 1).Select(ii => g.Edges.Value[ii]).ToList();
+                        //foreach (var vvv in qqq)
+                        //{
+                        //    ec[vvv.Item1]++;
+                        //    ec[vvv.Item2]++;
+                        //}
 
-                            //if (ec.Count(kvp => kvp.Value > 1) <= 1)
-                            //{
-                            //    System.Diagnostics.Debugger.Break();
-                            //}
+                        //if (ec.Count(kvp => kvp.Value > 1) <= 1)
+                        //{
+                        //    System.Diagnostics.Debugger.Break();
+                        //}
 
-                            if (g.HasMonochromaticOddHoleOrCliqueCycle(g.EdgeWeightsWithMultiplicity, 1))
+                        if (!g.IsTwoColorable(g.EdgeWeightsWithMultiplicity, 1))
+                            continue;
+
+                        if (g.HasMonochromaticOddHoleOrCliqueCycle(g.EdgeWeightsWithMultiplicity, 1))
                             continue;
 
                         var g6 = g.ToGraph6();
@@ -93,6 +96,11 @@ namespace Console
 
                         if (badOrientation != null)
                         {
+                            var c1 = g.SubgraphOfEdgeColor(symmetricEdges, 1);
+                            var twos = badSubgraph.Where(v => g.DegreeInSubgraphUnsorted(v, badSubgraph) == 2 && c1.DegreeInSubgraphUnsorted(v, badSubgraph) == 2).ToList();
+                            if (!c1.IsIndependent(twos))
+                                continue;
+
                             var w = new List<int>();
                             int k = 0;
                             for (int i = 0; i < g.N; i++)
