@@ -124,6 +124,7 @@ namespace Console
 
             for (int N = min; N <= MaxVertices; N++)
             {
+                System.Console.WriteLine();
                 System.Console.ForegroundColor = ConsoleColor.DarkCyan;
                 System.Console.WriteLine("Checking " + N + " vertex graphs...");
                 System.Console.ForegroundColor = ConsoleColor.White;

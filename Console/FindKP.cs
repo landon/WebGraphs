@@ -20,7 +20,7 @@ namespace Console
         static Dictionary<string, int> Eg6 = new Dictionary<string, int>();
         static Dictionary<string, int> Micg6 = new Dictionary<string, int>();
 
-        static readonly string WinnersFile = "obvious ex two colorable singles " + MinVertices + " -- " + MaxVertices + " " + (MaxDegree < int.MaxValue ? "max degree " + MaxDegree + "_" : "") + "winners";
+        static readonly string WinnersFile = "obvious ex two colorable singles triangle free half indep " + MinVertices + " -- " + MaxVertices + " " + (MaxDegree < int.MaxValue ? "max degree " + MaxDegree + "_" : "") + "winners";
         public static void Go()
         {
             using (var swbest = new StreamWriter(WinnersFile + ".best.txt"))
@@ -36,38 +36,43 @@ namespace Console
                     graphIO.FileRoot = @"C:\Users\landon\Google Drive\research\Graph6\graph";
 
                     var lastg6 = "";
+                    var lastSkip = "";
+                    var skipCount = 0;
                     foreach (var g in graphIO.EnumerateGraph6File(null, EnumerateEdgeSubsets))
                     {
                         if (MaxDegree < int.MaxValue && g.MaxDegree > MaxDegree)
+                        {
+                            ReportSkip("D", ref skipCount, ref lastSkip);
                             continue;
+                        }
 
-                        //if (g.MinDegree < 4)
-                        //    continue;
-
-                        //if (g.EdgeWeightsWithMultiplicity.IndicesWhere(w => w == 1).Count() != 4)
-                        //    continue;
-
-                        //var ec = new Dictionary<int, int>();
-                        //for (int i = 0; i < g.N; i++)
-                        //    ec[i] = 0;
-                        //var qqq = g.EdgeWeightsWithMultiplicity.IndicesWhere(w => w == 1).Select(ii => g.Edges.Value[ii]).ToList();
-                        //foreach (var vvv in qqq)
-                        //{
-                        //    ec[vvv.Item1]++;
-                        //    ec[vvv.Item2]++;
-                        //}
-
-                        //if (ec.Count(kvp => kvp.Value > 1) <= 1)
-                        //{
-                        //    System.Diagnostics.Debugger.Break();
-                        //}
+                        if (g.IsCliqueNumberAtLeast(3))
+                        {
+                            ReportSkip("T", ref skipCount, ref lastSkip);
+                            continue;
+                        }
 
                         if (!g.IsTwoColorable(g.EdgeWeightsWithMultiplicity, 1))
+                        {
+                            ReportSkip("B", ref skipCount, ref lastSkip);
                             continue;
+                        }
 
                         if (g.HasMonochromaticOddHoleOrCliqueCycle(g.EdgeWeightsWithMultiplicity, 1))
+                        {
+                            ReportSkip("Z", ref skipCount, ref lastSkip);
                             continue;
+                        }
 
+                        if (!AllCyclesHaveFullIndependentset(g))
+                        {
+                            ReportSkip("H", ref skipCount, ref lastSkip);
+                            continue;
+                        }
+                        if (lastSkip != "")
+                            System.Console.WriteLine();
+                        lastSkip = "";
+                        skipCount = 0;
                         var g6 = g.ToGraph6();
                         if (g6 != lastg6)
                         {
@@ -96,7 +101,7 @@ namespace Console
 
                         if (badOrientation != null)
                         {
-                            var c1 = g.SubgraphOfEdgeColor(symmetricEdges, 1);
+                            var c1 = g.SubgraphOfEdgeColor(g.EdgeWeightsWithMultiplicity, 1);
                             var twos = badSubgraph.Where(v => g.DegreeInSubgraphUnsorted(v, badSubgraph) == 2 && c1.DegreeInSubgraphUnsorted(v, badSubgraph) == 2).ToList();
                             if (!c1.IsIndependent(twos))
                                 continue;
@@ -161,6 +166,39 @@ namespace Console
                     }
                 }
             }
+        }
+
+        static void ReportSkip(string name, ref int skipCount, ref string lastSkip)
+        {
+            if (lastSkip == name && skipCount < 200)
+            {
+                skipCount++;
+            }
+            else
+            {
+                System.Console.Write(name + ",");
+                lastSkip = name;
+                skipCount = 0;
+            }
+        }
+
+        static bool AllCyclesHaveFullIndependentset(Graph g)
+        {
+            var c1 = g.SubgraphOfEdgeColor(g.EdgeWeightsWithMultiplicity, 1);
+
+            foreach (var S in g.Vertices.EnumerateSublists())
+            {
+                if (S.Count < 3)
+                    continue;
+                if (c1.EdgesOn(S) != S.Count)
+                    continue;
+                if (!c1.IsConnected(S))
+                    continue;
+                if (g.IndependenceNumber(S) < Math.Ceiling(S.Count / 2.0))
+                    return false;
+            }
+
+            return true;
         }
 
         static List<List<int>> _winnerSets = new List<List<int>>();
