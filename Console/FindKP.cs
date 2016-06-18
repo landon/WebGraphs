@@ -233,9 +233,10 @@ namespace Console
                     continue;
                 if (g.IndependenceNumber(S) >= Math.Ceiling(S.Count / 2.0))
                     continue;
-
                 var X = c1.InducedSubgraph(S);
-                if (X.MinDegree >= 2)
+                if (X.MinDegree < 2)
+                    continue;
+                if (X.Contains(Choosability.Graphs.C(S.Count), false))
                     return false;
             }
 
