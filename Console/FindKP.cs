@@ -12,7 +12,7 @@ namespace Console
     public static class FindKP
     {
         const int MinVertices = 4;
-        const int MaxVertices = 10;
+        const int MaxVertices = 20;
         const int MaxDegree = int.MaxValue;
 
         static Dictionary<string, int> BestKP = new Dictionary<string, int>();
@@ -33,7 +33,8 @@ namespace Console
 
                 using (var graphIO = new GraphEnumerator(WinnersFile + ".blah", MinVertices, MaxVertices))
                 {
-                    graphIO.FileRoot = @"C:\Users\landon\Google Drive\research\Graph6\graph";
+                    // graphIO.FileRoot = @"C:\Users\landon\Google Drive\research\Graph6\graph";
+                    graphIO.FileRoot = @"C:\Users\landon\Google Drive\research\Graph6\trianglefree\geng";
 
                     var lastg6 = "";
                     var lastSkip = "";
@@ -46,11 +47,11 @@ namespace Console
                             continue;
                         }
 
-                        if (g.IsCliqueNumberAtLeast(3))
-                        {
-                            ReportSkip("T", ref skipCount, ref lastSkip);
-                            continue;
-                        }
+                        //if (g.IsCliqueNumberAtLeast(3))
+                        //{
+                        //    ReportSkip("T", ref skipCount, ref lastSkip);
+                        //    continue;
+                        //}
 
                         if (!g.IsTwoColorable(g.EdgeWeightsWithMultiplicity, 1))
                         {
