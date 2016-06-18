@@ -20,7 +20,7 @@ namespace Console
         static Dictionary<string, int> Eg6 = new Dictionary<string, int>();
         static Dictionary<string, int> Micg6 = new Dictionary<string, int>();
 
-        static readonly string WinnersFile = "obvious ex two colorable singles triangle free half indep " + MinVertices + " -- " + MaxVertices + " " + (MaxDegree < int.MaxValue ? "max degree " + MaxDegree + "_" : "") + "winners";
+        static readonly string WinnersFile = "obvious ex two colorable singles half indep no bipartite no pendant XX " + MinVertices + " -- " + MaxVertices + " " + (MaxDegree < int.MaxValue ? "max degree " + MaxDegree + "_" : "") + "winners";
         public static void Go()
         {
             using (var swbest = new StreamWriter(WinnersFile + ".best.txt"))
@@ -33,8 +33,9 @@ namespace Console
 
                 using (var graphIO = new GraphEnumerator(WinnersFile + ".blah", MinVertices, MaxVertices))
                 {
-                    // graphIO.FileRoot = @"C:\Users\landon\Google Drive\research\Graph6\graph";
-                    graphIO.FileRoot = @"C:\Users\landon\Google Drive\research\Graph6\trianglefree\geng";
+                    //   graphIO.FileRoot = @"C:\Users\landon\Google Drive\research\Graph6\graph";
+                    //graphIO.FileRoot = @"C:\Users\landon\Google Drive\research\Graph6\trianglefree\nopendant\geng";
+                    graphIO.FileRoot = @"C:\Users\landon\Google Drive\research\Graph6\nopendant\geng";
 
                     var lastg6 = "";
                     var lastSkip = "";
@@ -53,6 +54,12 @@ namespace Console
                         //    continue;
                         //}
 
+                        if (g.IsTwoColorable())
+                        {
+                            ReportSkip("2", ref skipCount, ref lastSkip);
+                            continue;
+                        }
+
                         if (!g.IsTwoColorable(g.EdgeWeightsWithMultiplicity, 1))
                         {
                             ReportSkip("B", ref skipCount, ref lastSkip);
@@ -68,6 +75,12 @@ namespace Console
                         if (!AllCyclesHaveFullIndependentset(g))
                         {
                             ReportSkip("H", ref skipCount, ref lastSkip);
+                            continue;
+                        }
+
+                        if (!AllHamiltonHaversHaveFullIndependentset(g))
+                        {
+                            ReportSkip("HH", ref skipCount, ref lastSkip);
                             continue;
                         }
                         if (lastSkip != "")
@@ -195,7 +208,34 @@ namespace Console
                     continue;
                 if (!c1.IsConnected(S))
                     continue;
-                if (g.IndependenceNumber(S) < Math.Ceiling(S.Count / 2.0))
+                if (g.IndependenceNumber(S) >= Math.Ceiling(S.Count / 2.0))
+                    continue;
+
+                var X = c1.InducedSubgraph(S);
+                if (X.MaxDegree == 2 && X.MinDegree == 2)
+                    return false;
+            }
+
+            return true;
+        }
+
+        static bool AllHamiltonHaversHaveFullIndependentset(Graph g)
+        {
+            var c1 = g.SubgraphOfEdgeColor(g.EdgeWeightsWithMultiplicity, 1);
+
+            foreach (var S in g.Vertices.EnumerateSublists())
+            {
+                if (S.Count < 3)
+                    continue;
+                if (c1.EdgesOn(S) < S.Count)
+                    continue;
+                if (!c1.IsConnected(S))
+                    continue;
+                if (g.IndependenceNumber(S) >= Math.Ceiling(S.Count / 2.0))
+                    continue;
+
+                var X = c1.InducedSubgraph(S);
+                if (X.MinDegree >= 2)
                     return false;
             }
 

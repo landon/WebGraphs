@@ -1123,6 +1123,11 @@ namespace Choosability
         {
             return GraphChoosability_long.IsSubsetTwoColorable(BitSubgraphOfEdgeColor(edgeColoring, c), Vertices.ToInt64());
         }
+
+        public bool IsTwoColorable()
+        {
+            return GraphChoosability_long.IsSubsetTwoColorable(new BitGraph_long(GetEdgeWeights()), Vertices.ToInt64());
+        }
         #endregion
 
         #region Independent sets
