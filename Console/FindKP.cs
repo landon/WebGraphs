@@ -20,7 +20,7 @@ namespace Console
         static Dictionary<string, int> Eg6 = new Dictionary<string, int>();
         static Dictionary<string, int> Micg6 = new Dictionary<string, int>();
 
-        static readonly string WinnersFile = "obvious ex two colorable singles half indep no bipartite no pendant XX " + MinVertices + " -- " + MaxVertices + " " + (MaxDegree < int.MaxValue ? "max degree " + MaxDegree + "_" : "") + "winners";
+        static readonly string WinnersFile = "obvious ex half indep no pendant bipartite (allow stretch) ZZZZ " + MinVertices + " -- " + MaxVertices + " " + (MaxDegree < int.MaxValue ? "max degree " + MaxDegree + "_" : "") + "winners";
         public static void Go()
         {
             using (var swbest = new StreamWriter(WinnersFile + ".best.txt"))
@@ -42,11 +42,11 @@ namespace Console
                     var skipCount = 0;
                     foreach (var g in graphIO.EnumerateGraph6File(null, EnumerateEdgeSubsets))
                     {
-                        if (MaxDegree < int.MaxValue && g.MaxDegree > MaxDegree)
-                        {
-                            ReportSkip("D", ref skipCount, ref lastSkip);
-                            continue;
-                        }
+                        //if (MaxDegree < int.MaxValue && g.MaxDegree > MaxDegree)
+                        //{
+                        //    ReportSkip("D", ref skipCount, ref lastSkip);
+                        //    continue;
+                        //}
 
                         //if (g.IsCliqueNumberAtLeast(3))
                         //{
@@ -60,23 +60,23 @@ namespace Console
                             continue;
                         }
 
-                        if (!g.IsTwoColorable(g.EdgeWeightsWithMultiplicity, 1))
-                        {
-                            ReportSkip("B", ref skipCount, ref lastSkip);
-                            continue;
-                        }
+                        //if (!g.IsTwoColorable(g.EdgeWeightsWithMultiplicity, 1))
+                        //{
+                        //    ReportSkip("B", ref skipCount, ref lastSkip);
+                        //    continue;
+                        //}
 
-                        if (g.HasMonochromaticOddHoleOrCliqueCycle(g.EdgeWeightsWithMultiplicity, 1))
-                        {
-                            ReportSkip("Z", ref skipCount, ref lastSkip);
-                            continue;
-                        }
+                        //if (g.HasMonochromaticOddHoleOrCliqueCycle(g.EdgeWeightsWithMultiplicity, 1))
+                        //{
+                        //    ReportSkip("Z", ref skipCount, ref lastSkip);
+                        //    continue;
+                        //}
 
-                        if (!AllCyclesHaveFullIndependentset(g))
-                        {
-                            ReportSkip("H", ref skipCount, ref lastSkip);
-                            continue;
-                        }
+                        //if (!AllCyclesHaveFullIndependentset(g))
+                        //{
+                        //    ReportSkip("H", ref skipCount, ref lastSkip);
+                        //    continue;
+                        //}
 
                         if (!AllHamiltonHaversHaveFullIndependentset(g))
                         {
@@ -115,10 +115,10 @@ namespace Console
 
                         if (badOrientation != null)
                         {
-                            var c1 = g.SubgraphOfEdgeColor(g.EdgeWeightsWithMultiplicity, 1);
-                            var twos = badSubgraph.Where(v => g.DegreeInSubgraphUnsorted(v, badSubgraph) == 2 && c1.DegreeInSubgraphUnsorted(v, badSubgraph) == 2).ToList();
-                            if (!c1.IsIndependent(twos))
-                                continue;
+                            //var c1 = g.SubgraphOfEdgeColor(g.EdgeWeightsWithMultiplicity, 1);
+                            //var twos = badSubgraph.Where(v => g.DegreeInSubgraphUnsorted(v, badSubgraph) == 2 && c1.DegreeInSubgraphUnsorted(v, badSubgraph) == 2).ToList();
+                            //if (!c1.IsIndependent(twos))
+                            //    continue;
 
                             var w = new List<int>();
                             int k = 0;
