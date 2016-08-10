@@ -1119,6 +1119,39 @@ namespace Choosability
             return false;
         }
 
+        public bool IsMicKP(List<int> edgeColoring, int c)
+        {
+            var wn = edgeColoring.IndicesWhere(n => n != c).ToList();
+            var wc = GetEdgeWeights(new List<int>(), Edges.Value.Where((e, i) => wn.Contains(i)).ToList(), true);
+            var gc = new Graph(wc);
+
+            foreach (var S in EnumerateMaximalIndependentSets())
+            {
+                if (gc.EdgesOn(Vertices.Difference(S)) <= 0)
+                    return true;
+            }
+
+            return false;
+        }
+
+        public bool IsDisconnected(List<int> edgeColoring, int c)
+        {
+            var wn = edgeColoring.IndicesWhere(n => n != c).ToList();
+            var wc = GetEdgeWeights(new List<int>(), Edges.Value.Where((e, i) => wn.Contains(i)).ToList(), true);
+            var gc = new Graph(wc);
+
+            return !gc.IsConnected();
+        }
+
+        public bool IsTree(List<int> edgeColoring, int c)
+        {
+            var wn = edgeColoring.IndicesWhere(n => n != c).ToList();
+            var wc = GetEdgeWeights(new List<int>(), Edges.Value.Where((e, i) => wn.Contains(i)).ToList(), true);
+            var gc = new Graph(wc);
+
+            return gc.E == gc.N - 1;
+        }
+
         public bool IsTwoColorable(List<int> edgeColoring, int c)
         {
             return GraphChoosability_long.IsSubsetTwoColorable(BitSubgraphOfEdgeColor(edgeColoring, c), Vertices.ToInt64());

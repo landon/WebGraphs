@@ -20,7 +20,7 @@ namespace Console
         static Dictionary<string, int> Eg6 = new Dictionary<string, int>();
         static Dictionary<string, int> Micg6 = new Dictionary<string, int>();
 
-        static readonly string WinnersFile = "obvious ex half indep no pendant bipartite (allow stretch) triangle free ZZZZ22 " + MinVertices + " -- " + MaxVertices + " " + (MaxDegree < int.MaxValue ? "max degree " + MaxDegree + "_" : "") + "winners";
+        static readonly string WinnersFile = "no pendant bipartite clique acyclic no directed odd hole skip KY no tree " + MinVertices + " -- " + MaxVertices + " " + (MaxDegree < int.MaxValue ? "max degree " + MaxDegree + "_" : "") + "winners";
         public static void Go()
         {
             using (var swbest = new StreamWriter(WinnersFile + ".best.txt"))
@@ -34,8 +34,8 @@ namespace Console
                 using (var graphIO = new GraphEnumerator(WinnersFile + ".blah", MinVertices, MaxVertices))
                 {
                     //   graphIO.FileRoot = @"C:\Users\landon\Google Drive\research\Graph6\graph";
-                    graphIO.FileRoot = @"C:\Users\landon\Google Drive\research\Graph6\trianglefree\nopendant\geng";
-                  //  graphIO.FileRoot = @"C:\Users\landon\Google Drive\research\Graph6\nopendant\geng";
+                   // graphIO.FileRoot = @"C:\Users\landon\Google Drive\research\Graph6\trianglefree\nopendant\geng";
+                    graphIO.FileRoot = @"C:\Users\landon\Google Drive\research\Graph6\nopendant\geng";
 
                     var lastg6 = "";
                     var lastSkip = "";
@@ -54,9 +54,27 @@ namespace Console
                         //    continue;
                         //}
 
+                        if (g.IsDisconnected(g.EdgeWeightsWithMultiplicity, 1))
+                        {
+                            ReportSkip("D", ref skipCount, ref lastSkip);
+                            continue;
+                        }
+
+                        if (g.IsTree(g.EdgeWeightsWithMultiplicity, 1))
+                        {
+                            ReportSkip("T", ref skipCount, ref lastSkip);
+                            continue;
+                        }
+
                         if (g.IsTwoColorable())
                         {
                             ReportSkip("2", ref skipCount, ref lastSkip);
+                            continue;
+                        }
+
+                        if (g.IsMicKP(g.EdgeWeightsWithMultiplicity, 1))
+                        {
+                            ReportSkip("M", ref skipCount, ref lastSkip);
                             continue;
                         }
 
@@ -66,11 +84,11 @@ namespace Console
                         //    continue;
                         //}
 
-                        //if (g.HasMonochromaticOddHoleOrCliqueCycle(g.EdgeWeightsWithMultiplicity, 1))
-                        //{
-                        //    ReportSkip("Z", ref skipCount, ref lastSkip);
-                        //    continue;
-                        //}
+                        if (g.HasMonochromaticOddHoleOrCliqueCycle(g.EdgeWeightsWithMultiplicity, 1))
+                        {
+                            ReportSkip("Z", ref skipCount, ref lastSkip);
+                            continue;
+                        }
 
                         //if (!AllCyclesHaveFullIndependentset(g))
                         //{
@@ -78,11 +96,11 @@ namespace Console
                         //    continue;
                         //}
 
-                        if (!AllHamiltonHaversHaveFullIndependentset(g))
-                        {
-                            ReportSkip("HH", ref skipCount, ref lastSkip);
-                            continue;
-                        }
+                        //if (!AllHamiltonHaversHaveFullIndependentset(g))
+                        //{
+                        //    ReportSkip("HH", ref skipCount, ref lastSkip);
+                        //    continue;
+                        //}
                         if (lastSkip != "")
                             System.Console.WriteLine();
                         lastSkip = "";

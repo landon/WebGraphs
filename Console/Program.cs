@@ -19,9 +19,9 @@ namespace Console
 
         static void Main(string[] args)
         {
-            FindFractionalColorableRandomized.Go();
+            //FindFractionalColorableRandomized.Go();
 
-            //   FindKP.Go();
+               FindKP.Go();
             //  MixedChoosables.Go();
             //for (int i = 2; i <= 2; i++)
             //{
