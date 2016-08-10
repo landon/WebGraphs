@@ -133,11 +133,6 @@ namespace Console
 
                         if (badOrientation != null)
                         {
-                            //var c1 = g.SubgraphOfEdgeColor(g.EdgeWeightsWithMultiplicity, 1);
-                            //var twos = badSubgraph.Where(v => g.DegreeInSubgraphUnsorted(v, badSubgraph) == 2 && c1.DegreeInSubgraphUnsorted(v, badSubgraph) == 2).ToList();
-                            //if (!c1.IsIndependent(twos))
-                            //    continue;
-
                             var w = new List<int>();
                             int k = 0;
                             for (int i = 0; i < g.N; i++)
@@ -169,7 +164,9 @@ namespace Console
                             System.Console.ForegroundColor = ConsoleColor.Red;
                             System.Console.WriteLine("bad");
                             System.Console.ForegroundColor = ConsoleColor.White;
-                            swb.WriteLine(webgraph);
+
+                            if (badSubgraph.Count == g.N)
+                                swb.WriteLine(webgraph);
                         }
                         else
                         {
