@@ -19,8 +19,10 @@ namespace Console
 
         static void Main(string[] args)
         {
-            FindKP.Go();
-          //  MixedChoosables.Go();
+            FindFractionalColorableRandomized.Go();
+
+            //   FindKP.Go();
+            //  MixedChoosables.Go();
             //for (int i = 2; i <= 2; i++)
             //{
             //    var ll = @"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\mostlow\Mixed spread 2 offline winners1.txt".EnumerateWeightedGraphs()
@@ -34,12 +36,12 @@ namespace Console
             //    System.Console.WriteLine(ll.Count);
             //}
             //@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Another\5 potentialX at most 24.txt".EnumerateWeightedGraphs().Select(g => { g.VertexWeight = null; return g;}).ToWebPage(@"potential\5\24\X\", false, false, false, false);
-          //  Potential.Go();
+            //  Potential.Go();
             //@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\9 vertex Mixed spread 2 kappa2 AT max degree 4_winners1.txt"
             //    .EnumerateWeightedGraphs()
             //    .Where(g => g.InducedSubgraph(g.Vertices.Where(v => g.VertexWeight[v] == 0).ToList()).MinDegree >= 2)
             //    .WriteToWeightFile("tttest.txt");
-           // MixedChoosables.Go();
+            // MixedChoosables.Go();
             //var P4 = Choosability.Graphs.P(4);
             //P4.VertexWeight = new List<int>() { 5, 5, 5, 5 };
 
@@ -50,7 +52,7 @@ namespace Console
 
             //@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\3_13.txt".EnumerateWeightedGraphs().GetMinimals(WeightConditionTest).WriteToWeightFile("3_13.txt.cleaned.txt");
 
-            // FindFractionalColorableRandomized.Go();
+
 
             //MakePictures.Go();
             //NonCrossing.MakePicture(7);

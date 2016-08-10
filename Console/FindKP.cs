@@ -20,7 +20,7 @@ namespace Console
         static Dictionary<string, int> Eg6 = new Dictionary<string, int>();
         static Dictionary<string, int> Micg6 = new Dictionary<string, int>();
 
-        static readonly string WinnersFile = "obvious ex half indep no pendant bipartite (allow stretch) ZZZZ " + MinVertices + " -- " + MaxVertices + " " + (MaxDegree < int.MaxValue ? "max degree " + MaxDegree + "_" : "") + "winners";
+        static readonly string WinnersFile = "obvious ex half indep no pendant bipartite (allow stretch) triangle free ZZZZ22 " + MinVertices + " -- " + MaxVertices + " " + (MaxDegree < int.MaxValue ? "max degree " + MaxDegree + "_" : "") + "winners";
         public static void Go()
         {
             using (var swbest = new StreamWriter(WinnersFile + ".best.txt"))
@@ -34,8 +34,8 @@ namespace Console
                 using (var graphIO = new GraphEnumerator(WinnersFile + ".blah", MinVertices, MaxVertices))
                 {
                     //   graphIO.FileRoot = @"C:\Users\landon\Google Drive\research\Graph6\graph";
-                    //graphIO.FileRoot = @"C:\Users\landon\Google Drive\research\Graph6\trianglefree\nopendant\geng";
-                    graphIO.FileRoot = @"C:\Users\landon\Google Drive\research\Graph6\nopendant\geng";
+                    graphIO.FileRoot = @"C:\Users\landon\Google Drive\research\Graph6\trianglefree\nopendant\geng";
+                  //  graphIO.FileRoot = @"C:\Users\landon\Google Drive\research\Graph6\nopendant\geng";
 
                     var lastg6 = "";
                     var lastSkip = "";

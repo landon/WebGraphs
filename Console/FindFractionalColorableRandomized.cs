@@ -28,7 +28,7 @@ namespace Console
         static readonly bool OnlyBigContractions = false;
         static readonly Func<int, int> GetMinContractionSize = R => OnlyBigContractions ? R / 2 : 0;
 
-        static readonly string WinnersFile = (OnlyBigContractions ? "only big " : "" ) + (InsideLowerLimit != int.MinValue ? "limit down " + InsideLowerLimit + " " : "") + (InsideUpperLimit != int.MaxValue ? "limit up " + InsideUpperLimit + " " : "") + "random " + Fold + "-fold " + C + "-coloring" + ("ring size " + MinRingSize + " -- " + MaxRingSize) + ("planar triangulation") + string.Format("winners.txt");
+        static readonly string WinnersFile = "i forgot " + (OnlyBigContractions ? "only big " : "" ) + (InsideLowerLimit != int.MinValue ? "limit down " + InsideLowerLimit + " " : "") + (InsideUpperLimit != int.MaxValue ? "limit up " + InsideUpperLimit + " " : "") + "random " + Fold + "-fold " + C + "-coloring" + ("ring size " + MinRingSize + " -- " + MaxRingSize) + ("planar triangulation") + string.Format("winners.txt");
         public static void Go()
         {
             var RNG = new Random(DateTime.Now.Millisecond);
