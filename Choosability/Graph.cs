@@ -1173,6 +1173,11 @@ namespace Choosability
         {
             return GraphChoosability_long.IsSubsetTwoColorable(new BitGraph_long(GetEdgeWeights()), Vertices.ToInt64());
         }
+
+        public List<int> VerticesOfDegree(int d)
+        {
+            return Vertices.Where(v => Degree(v) == d).ToList();
+        }
         #endregion
 
         #region Independent sets
@@ -1230,6 +1235,14 @@ namespace Choosability
             return false;
         }
 
+        public int IndependenceNumberBronKerbosch()
+        {
+            return IndependenceNumberBronKerbosch(Vertices);
+        }
+        public int IndependenceNumberBronKerbosch(IEnumerable<int> subgraph)
+        {
+            return EnumerateMaximalIndependentSets(subgraph.ToList()).Max(s => s.Count);
+        }
         public int IndependenceNumber()
         {
             return IndependenceNumber(Vertices);
