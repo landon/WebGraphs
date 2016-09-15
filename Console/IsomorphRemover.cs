@@ -61,7 +61,7 @@ namespace Console
                     if (g.E != h.E)
                         continue;
 
-                    if (!allowUnequal)
+                    if (!allowUnequal && g.VertexWeight != null && h.VertexWeight != null)
                     {
                         if (!g.VertexWeight.OrderBy(x => x).SequenceEqual(h.VertexWeight.OrderBy(x => x)))
                             continue;
@@ -175,6 +175,8 @@ namespace Console
 
         public static int PriorityEqual(Graph self, Graph A, int selfV, int av)
         {
+            if (A.VertexWeight == null || self.VertexWeight == null)
+                return 0;
             return A.VertexWeight[av] == self.VertexWeight[selfV] ? 0 : -1;
         }
     }

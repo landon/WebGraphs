@@ -16,6 +16,18 @@ namespace Console
 {
     public static class Extensions
     {
+        public static void ToWebPageSimple(this IEnumerable<Choosability.Graph> graphs, string relativePath, int K = 0)
+        {
+            var maker = new GraphPictureMaker(graphs);
+            maker.NameGraph6 = true;
+            maker.K = K;
+            var path = Path.Combine(@"C:\Users\landon\Dropbox\Public\Web\GraphData", relativePath);
+
+            MakePictures.MakeWebpage(maker, path, directed: false, showFactors: false, lowPlus: false, fivePlus: false, useLaplacian: false);
+
+            Path.Combine(@"https://dl.dropboxusercontent.com/u/8609833/Web/GraphData", relativePath, "index.html").ToBrowser();
+        }
+
         public static void ToWebPage(this IEnumerable<Choosability.Graph> graphs, string relativePath, bool directed = true, bool fivePlus = true, bool useLaplacian = true, bool compressName = true, bool lowPlus = false)
         {
             var maker = new GraphPictureMaker(graphs);
@@ -25,6 +37,14 @@ namespace Console
             MakePictures.MakeWebpage(maker, path, directed: directed, showFactors: false, lowPlus: lowPlus, fivePlus: fivePlus, useLaplacian: useLaplacian);
 
             Path.Combine(@"https://dl.dropboxusercontent.com/u/8609833/Web/GraphData", relativePath, "index.html").ToBrowser();
+        }
+
+        public static string LegalizeFileName(this string name)
+        {
+            foreach (var c in Path.GetInvalidFileNameChars())
+                name = name.Replace(c.ToString(), "(" + ASCIIEncoding.ASCII.GetBytes(c.ToString())[0] + ")");
+
+            return name;
         }
 
         public static void ToBrowser(this string url)

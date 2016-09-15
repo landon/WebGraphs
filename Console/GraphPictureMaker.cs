@@ -34,6 +34,8 @@ namespace Console
         public bool IsLowPlus { get; set; }
         public bool IsFivePlus { get; set; }
         public bool CompressName { get; set; }
+        public bool NameGraph6 { get;  set; }
+        public int K { get; set; }
 
         public GraphPictureMaker(string graphFile) : this(GraphEnumerator.EnumerateGraphFile(graphFile)) { }
         public GraphPictureMaker(params Graph[] graphs) : this((IEnumerable<Graph>)graphs) { }
@@ -58,7 +60,11 @@ namespace Console
             foreach (var g in _graphs)
             {
                 string name;
-                if (CompressName)
+                if (NameGraph6)
+                {
+                    name = g.ToGraph6().LegalizeFileName();
+                }
+                else if (CompressName)
                 {
                     var bytes = new List<byte>();
                     var bits = g.GetEdgeWeights().Select(ew => Math.Abs(ew)).ToList();
@@ -108,13 +114,13 @@ namespace Console
                     name += "[" + string.Join(",", g.VertexWeight) + "]";
 
                 using(var sw = new StreamWriter(Path.Combine(outputDirectory, name) + ".dot"))
-                    sw.Write(ToDot(g, Directed, ShowFactors, InDegreeTerms, IsLowPlus, IsFivePlus, UseLaplacian));
+                    sw.Write(ToDot(g, Directed, ShowFactors, InDegreeTerms, IsLowPlus, IsFivePlus, UseLaplacian, K));
             }
         }
 
         string Draw(Graph g, string path, DotRenderType renderType = DotRenderType.png)
         {
-            var imageFile = Renderer.Render(ToDot(g, Directed, ShowFactors, InDegreeTerms, IsLowPlus, IsFivePlus, UseLaplacian), path, renderType);
+            var imageFile = Renderer.Render(ToDot(g, Directed, ShowFactors, InDegreeTerms, IsLowPlus, IsFivePlus, UseLaplacian, K), path, renderType);
          
             if (renderType == DotRenderType.svg)
                 FixSvg(imageFile);
@@ -143,7 +149,7 @@ namespace Console
             }
         }
 
-        static string ToDot(Graph g, bool directed = false, bool showFactors = false, bool inDegreeTerms = false, bool isLowPlus = false, bool isFivePlus = false, bool useLaplacian = false)
+        static string ToDot(Graph g, bool directed = false, bool showFactors = false, bool inDegreeTerms = false, bool isLowPlus = false, bool isFivePlus = false, bool useLaplacian = false, int K = 0)
         {
             if (showFactors)
                 return g.ToDotWithFactors();
@@ -167,6 +173,7 @@ namespace Console
             sb.AppendLine("node[fontsize=42, fontname=\"Latin Modern Math\" color=black; shape=circle, penwidth=1, width = .92, height=.92, fixedsize=true];");
             sb.AppendLine("edge[style=bold, color=black, penwidth=2];");
 
+            var maxDegree = g.MaxDegree;
             var needUpped = g.VertexWeight == null ? true : g.Vertices.Max(vv => g.VertexWeight[vv]) < 5;
             foreach (int v in g.Vertices)
             {
@@ -183,6 +190,8 @@ namespace Console
                     {
                         label = "";
                         colorIndex = 2;
+                        if (g.Degree(v) == K - 1)
+                            colorIndex = 3;
                     }
                     else if (isLowPlus)
                     {

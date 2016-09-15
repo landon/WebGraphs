@@ -21,6 +21,7 @@ namespace Choosability
         Lazy<List<List<int>>> _outNeighbors;
         Lazy<List<List<int>>> _inNeighbors;
         public Lazy<List<List<int>>> _laterNeighbors;
+
         List<int> _vertices;
         Lazy<List<List<int>>> _independentSets;
         Lazy<List<List<int>>> _maximalIndependentSets;
@@ -849,6 +850,17 @@ namespace Choosability
                     adjacent[N + i, N + j] = H[i, j];
 
             return new Graph(adjacent);
+        }
+        public Graph Identify(int v, Graph H, int vh)
+        {
+            var A = DisjointUnion(H);
+            foreach (var w in H.Neighbors[vh])
+            {
+                A._adjacent[v, N + w] = true;
+                A._adjacent[N + w, v] = true;
+            }
+                                   
+            return A.RemoveVertex(N + vh);
         }
         public Graph Join(Graph H)
         {
