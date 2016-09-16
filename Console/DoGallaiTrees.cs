@@ -5,36 +5,132 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Choosability;
 
 namespace Console
 {
     public static class DoGallaiTrees
     {
+        const int MinVertices = 1;
+        const int MaxVertices = 10;
         const int K = 7;
-        const int MaxBlocks = 4;
+        const int MaxBlocks = 5;
         const int MaxOddCycle = 3;
 
         public static void Go()
         {
             var gtg = new GallaiTreeGenerator(K);
+            var gallaiTrees = new List<Choosability.Graph> { Choosability.Graphs.K(1) };
 
-            var gallaiTrees = Enumerable.Empty<Choosability.Graph>();
-            for (int blocks = 1; blocks <= MaxBlocks; blocks++)
+            for (int n = MinVertices; n <= MaxVertices; n++)
             {
-                System.Console.WriteLine("generating " + blocks + " block Gallai trees for K=" + K + "...");
-                gallaiTrees = gallaiTrees.Concat(gtg.EnumerateAll(blocks, MaxOddCycle));
+                foreach (var T in string.Format(@"C:\Users\landon\Google Drive\research\Graph6\trees\trees{0}.g6", n).EnumerateGraph6File())
+                {
+                    var cuts = FindBlockCuts(T);
+                    if (cuts == null)
+                        continue;
+                    if (cuts.Count <= 0)
+                    {
+                        gallaiTrees.AddRange(gtg.EnumerateAll(1, MaxOddCycle));
+                    }
+                    else
+                    {
+                        gallaiTrees.AddRange(gtg.EnumerateAllForBlockTree(T, cuts, MaxOddCycle));
+                    }
+                }
             }
 
+            System.Console.WriteLine("computing invariants...");
             var data = gallaiTrees.Select(g => new GraphInvariantPile()
             {
-                Graph6 = g.ToGraph6(),
+                G = g,
                 N = g.N,
                 E = g.E,
                 Beta = g.IndependenceNumberBronKerbosch(g.VerticesOfDegree(K - 1)),
-                Q = g.Vertices.Count(v => g.Degree(v) == K - 2 && g.IsClique(g.Neighbors[v]))
-            }).DistinctBy(x => x.Key).ToList();
+                Q = g.Vertices.Count(v => g.Degree(v) == K - 2 && g.IsClique(g.Neighbors[v])),
+            }).ToList();
 
+            System.Console.WriteLine("removing duplicates...");
+            data = data.DistinctBy(x => x.Key).ToList();
+
+            foreach (var d in data)
+                d.ComputeRemainingInvariants();
+
+            System.Console.WriteLine("generating glpk...");
             var glpk = MakeCodes(data);
+
+            System.Console.WriteLine("writing file...");
+            using (var sw = new StreamWriter("code.txt"))
+                sw.Write(glpk);
+        }
+
+        static List<int> FindBlockCuts(Graph T)
+        {
+            if (T.N <= 1)
+                return new List<int>();
+
+            var blocks = new HashSet<int>(T.VerticesOfDegree(1));
+            var cuts = new HashSet<int>();
+
+            while (true)
+            {
+                var bc = blocks.Count;
+                var cc = cuts.Count;
+
+                foreach (var b in blocks)
+                {
+                    foreach (var v in T.Neighbors[b])
+                        cuts.Add(v);
+                }
+                foreach (var c in cuts)
+                {
+                    foreach (var v in T.Neighbors[c])
+                        blocks.Add(v);
+                }
+
+                if (bc == blocks.Count && cc == cuts.Count)
+                    break;
+            }
+
+            if (cuts.Count == T.N)
+                return null;
+
+            return cuts.ToList();
+        }
+
+        static void GoSlow()
+        {
+            var gtg = new GallaiTreeGenerator(K);
+
+            var gallaiTrees = new List<Choosability.Graph> { Choosability.Graphs.K(1) };
+            for (int blocks = 1; blocks <= MaxBlocks; blocks++)
+            {
+                System.Console.Write("generating " + blocks + " block Gallai trees for K=" + K + "...");
+                var all = gtg.EnumerateAll(blocks, MaxOddCycle);
+                gallaiTrees.AddRange(all);
+                System.Console.WriteLine(" " + gallaiTrees.Count);
+            }
+
+            System.Console.WriteLine("computing invariants...");
+            var data = gallaiTrees.Select(g => new GraphInvariantPile()
+            {
+                G = g,
+                N = g.N,
+                E = g.E,
+                Beta = g.IndependenceNumberBronKerbosch(g.VerticesOfDegree(K - 1)),
+                Q = g.Vertices.Count(v => g.Degree(v) == K - 2 && g.IsClique(g.Neighbors[v])),
+            }).ToList();
+
+            System.Console.WriteLine("removing duplicates...");
+            data = data.DistinctBy(x => x.Key).ToList();
+
+            foreach (var d in data)
+                d.ComputeRemainingInvariants();
+
+            System.Console.WriteLine("generating glpk...");
+            var glpk = MakeCodes(data);
+
+            System.Console.WriteLine("writing file...");
             using (var sw = new StreamWriter("code.txt"))
                 sw.Write(glpk);
         }
@@ -50,7 +146,11 @@ namespace Console
                 else
                     Ac.Add(0);
                 Ac.Add(-dd.Beta);
-                Ac.Add(-1);
+
+                if (dd.HasKMinusOneClique)
+                    Ac.Add(-1);
+                else
+                    Ac.Add(0);
             }
 
             int hCoefficient;
@@ -112,15 +212,21 @@ namespace Console
 
         public class GraphInvariantPile
         {
-            public string Graph6;
+            public Choosability.Graph G;
             public int N;
             public int E;
             public int Beta;
             public int Q;
+            public bool HasKMinusOneClique;
+
+            public void ComputeRemainingInvariants()
+            {
+                HasKMinusOneClique = G.CliqueNumberBronKerbosch() >= K - 1;
+            }
 
             public override string ToString()
             {
-                return string.Format("{0}, N = {1}, E = {2}, Beta = {3}, Q = {4}", Graph6, N, E, Beta, Q);
+                return string.Format("{0}, N = {1}, E = {2}, Beta = {3}, Q = {4}", G.ToGraph6(), N, E, Beta, Q);
             }
 
             public string Key

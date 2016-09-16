@@ -55,6 +55,25 @@ namespace Console
             }
         }
 
+        public IEnumerable<Graph> EnumerateAllForBlockTree(Graph T, List<int> cuts, int maxOddCycle)
+        {
+            foreach(var w in EnumerateAllBlockTreeWeightings(T, cuts))
+            {
+                foreach (var g in EnumerateAllForWeightedBlockTree(T, w, cuts, maxOddCycle))
+                    yield return g;
+            }
+        }
+
+        IEnumerable<List<int>> EnumerateAllBlockTreeWeightings(Graph T, List<int> cuts)
+        {
+            throw new NotImplementedException();
+        }
+
+        IEnumerable<Graph> EnumerateAllForWeightedBlockTree(Graph T, List<int> w, List<int> cuts, int maxOddCycle)
+        {
+            return null;
+        }
+
         public Graph GenerateRandomBlock(int maxOddCycle = 3)
         {
             return GenerateRandomExtension(Choosability.Graphs.K(1), maxOddCycle);

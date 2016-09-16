@@ -1243,6 +1243,15 @@ namespace Choosability
         {
             return EnumerateMaximalIndependentSets(subgraph.ToList()).Max(s => s.Count);
         }
+        public int CliqueNumberBronKerbosch()
+        {
+            return CliqueNumberBronKerbosch(Vertices);
+        }
+        public int CliqueNumberBronKerbosch(IEnumerable<int> subgraph)
+        {
+            return EnumerateMaximalCliques(subgraph.ToList()).Max(s => s.Count);
+        }
+
         public int IndependenceNumber()
         {
             return IndependenceNumber(Vertices);
