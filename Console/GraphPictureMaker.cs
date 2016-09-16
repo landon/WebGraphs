@@ -63,6 +63,8 @@ namespace Console
                 if (NameGraph6)
                 {
                     name = g.ToGraph6().LegalizeFileName();
+                    foreach (var c in "abcdefghijklmnopqrstuvwxyz".ToCharArray())
+                        name = name.Replace(c.ToString(), "(" + c + ")");
                 }
                 else if (CompressName)
                 {
