@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Choosability.Utility;
 
 namespace Console
 {
@@ -55,23 +56,120 @@ namespace Console
             }
         }
 
-        public IEnumerable<Graph> EnumerateAllForBlockTree(Graph T, List<int> cuts, int maxOddCycle)
+        class CutData
         {
-            foreach(var w in EnumerateAllBlockTreeWeightings(T, cuts))
+            public int W;
+            public int N;
+        }
+
+        public IEnumerable<Graph> EnumerateAllForBlockTree(Graph T, List<int> cutIndices, int maxOddCycle)
+        {
+            var blocks = T.Vertices.Except(cutIndices).ToList();
+            var cut = new Dictionary<int, CutData>();
+            foreach (var c in cutIndices)
+                cut[c] = new CutData() { W = K - 1, N = T.Degree(c) };
+
+            foreach (var w in EnumerateAllBlockTreeWeightings(T, blocks, maxOddCycle, new int[blocks.Count], cut, 0))
             {
-                foreach (var g in EnumerateAllForWeightedBlockTree(T, w, cuts, maxOddCycle))
+                foreach (var g in EnumerateAllForWeightedBlockTree(T, w, blocks, cutIndices, maxOddCycle))
+                {
+                    g.VertexWeight = null;
                     yield return g;
+                }
             }
         }
 
-        IEnumerable<List<int>> EnumerateAllBlockTreeWeightings(Graph T, List<int> cuts)
+        IEnumerable<List<int>> EnumerateAllBlockTreeWeightings(Graph T, List<int> blocks, int maxOddCycle, int[] blockWeights, Dictionary<int, CutData> cut, int i)
         {
-            throw new NotImplementedException();
+            if (i >= blocks.Count)
+            {
+                yield return blockWeights.ToList();
+            }
+            else
+            {
+                var v = blocks[i];
+                var nn = T.Neighbors[v];
+                var max = nn.Min(w =>
+                    {
+                        var c = cut[w];
+                        return c.W - (c.N - 1);
+                    });
+
+                for (int q = 1; q <= max; q++)
+                {
+                    if (q != 2 && q + 1 < nn.Count || q == 2 && maxOddCycle < nn.Count)
+                        continue;
+
+                    blockWeights[i] = q;
+                    foreach (var w in nn)
+                    {
+                        var c = cut[w];
+                        c.N--;
+                        c.W -= q;
+                    }
+
+                    foreach (var bw in EnumerateAllBlockTreeWeightings(T, blocks, maxOddCycle, blockWeights, cut, i + 1))
+                        yield return bw;
+
+                    foreach (var w in nn)
+                    {
+                        var c = cut[w];
+                        c.N++;
+                        c.W += q;
+                    }
+                }
+            }
         }
 
-        IEnumerable<Graph> EnumerateAllForWeightedBlockTree(Graph T, List<int> w, List<int> cuts, int maxOddCycle)
+        IEnumerable<Graph> EnumerateAllForWeightedBlockTree(Graph T, List<int> w, List<int> blocks, List<int> cutIndices, int maxOddCycle)
         {
-            return null;
+            foreach (var tuple in blocks.Select((b, j) =>
+                {
+                    var bb = new List<Graph>();
+                    var blockDegree = w[j];
+                    if (blockDegree == 2)
+                    {
+                        for (int x = 2 * (T.Degree(b) / 2) + 1; x <= maxOddCycle; x += 2)
+                            bb.Add(Choosability.Graphs.C(x));
+                    }
+                    else
+                    {
+                        bb.Add(Choosability.Graphs.K(blockDegree + 1));
+                    }
+
+                    return bb;
+                }).CartesianProduct())
+            {
+                yield return BuildGallaiTree(T, tuple.ToList(), blocks, cutIndices);
+            }
+        }
+
+        Graph BuildGallaiTree(Graph T, List<Graph> list, List<int> blocks, List<int> cutIndices)
+        {
+            foreach(var l in list)
+                l.VertexWeight = new int[l.N].ToList();
+
+            var j = 1;
+            foreach (var p in cutIndices)
+            {
+                var bb = T.Neighbors[p].Select(b => blocks.IndexOf(b)).ToList();
+                foreach (var b in bb)
+                {
+                    for (int q = 0; q < list[b].N; q++)
+                    {
+                        if (list[b].VertexWeight[q] == 0)
+                        {
+                            list[b].VertexWeight[q] = j;
+                            break;
+                        }
+                    }
+                }
+
+                j++;
+            }
+
+            var uber = Graph.DisjointUnion(list);
+            return uber.IdentifyLikeVertexWeights();
         }
 
         public Graph GenerateRandomBlock(int maxOddCycle = 3)

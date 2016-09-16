@@ -836,6 +836,40 @@ namespace Choosability
 
             return tuples;
         }
+        public static Graph DisjointUnion(IEnumerable<Graph> ee)
+        {
+            var list = ee.ToList();
+            var n = list.Sum(G => G.N);
+            
+            List<int> vertexWeight = null;
+            if (list.All(G => G.VertexWeight != null))
+            {
+                vertexWeight = new List<int>();
+                foreach (var G in list)
+                    vertexWeight.AddRange(G.VertexWeight);
+            }
+
+            var adjacent = new bool[n, n];
+            int k = 0;
+            foreach (var G in list)
+            {
+                for (int i = 0; i < G.N; i++)
+                {
+                    for (int j = i + 1; j < G.N; j++)
+                    {
+                        adjacent[k + i, k + j] = adjacent[k + j, k + i] = G[i, j];
+                    }
+                }
+                k += G.N;
+            }
+
+            return new Graph(adjacent, vertexWeight);
+        }
+
+        public static Graph DisjointUnion(params Graph[] list)
+        {
+            return DisjointUnion((IEnumerable<Graph>)list);
+        }
         public Graph DisjointUnion(Graph H)
         {
             int n = N + H.N;
@@ -862,6 +896,57 @@ namespace Choosability
                                    
             return A.RemoveVertex(N + vh);
         }
+        public Graph IdentifyLikeVertexWeights()
+        {
+            if (VertexWeight == null)
+                return Clone();
+
+            var fats = VertexWeight.Select((w, i) => new { W = w, I = i })
+                                   .GroupBy(x => x.W)
+                                   .Where(group => group.Key > 0)
+                                   .Select(group => group.Select(x => x.I).ToList())
+                                   .ToList();
+
+            return IdentifyVertices(fats);
+        }
+
+        public Graph IdentifyVertices(List<List<int>> fats)
+        {
+            var adjacent = new bool[N + fats.Count, N + fats.Count];
+
+            for (int i = 0; i < N; i++)
+            {
+                for (int j = i + 1; j < N; j++)
+                {
+                    adjacent[i, j] = adjacent[j,i] = _adjacent[i, j];
+                }
+            }
+
+            var k = 0;
+            foreach (var fat in fats)
+            {
+                foreach (var nn in fat.SelectMany(v => Neighbors[v]))
+                {
+                    adjacent[N + k, nn] = true;
+                    adjacent[nn, N + k] = true;
+                }
+
+                k++;
+            }
+            for (int i = 0; i < fats.Count; i++)
+            {
+                for (int j = i + 1; j < fats.Count; j++)
+                {
+                    if (fats[j].Any(f => adjacent[N + i, f]))
+                    {
+                        adjacent[N + i, N + j] = adjacent[N + j, N + i] = true;
+                    }
+                }
+            }
+
+            return new Graph(adjacent).InducedSubgraph(Enumerable.Range(0, N + fats.Count).Except(fats.SelectMany(f => f)).ToList());
+        }
+
         public Graph Join(Graph H)
         {
             var G = DisjointUnion(H);
