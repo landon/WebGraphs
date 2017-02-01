@@ -66,6 +66,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Numerics" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -117,6 +118,7 @@
     <Compile Include="RingAssignmentGenerator.cs" />
     <Compile Include="SinkEliminator.cs" />
     <Compile Include="SuperAbundanceFinder.cs" />
+    <Compile Include="UnitDistance.cs" />
     <Compile Include="WeaklyFixableTester.cs" />
   </ItemGroup>
   <ItemGroup>

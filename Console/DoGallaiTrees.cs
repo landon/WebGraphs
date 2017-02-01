@@ -12,7 +12,7 @@ namespace Console
     public static class DoGallaiTrees
     {
         const int MinVertices = 1;
-        const int MaxVertices = 5;
+        const int MaxVertices = 10;
         const int K = 7;
         const int MaxBlocks = 5;
         const int MaxOddCycle = 3;
@@ -41,12 +41,12 @@ namespace Console
                 }
             }
 
-            System.Console.WriteLine("removing isomorphs...");
-            gallaiTrees = gallaiTrees.RemoveSelfIsomorphs();
-            System.Console.WriteLine("generating vector graphics...");
-            gallaiTrees.ToWebPageSimple("gallai\\" + K + "\\" + MaxVertices + "\\" + MaxOddCycle + "\\", K);
+            //System.Console.WriteLine("removing isomorphs...");
+            //gallaiTrees = gallaiTrees.RemoveSelfIsomorphs();
+            //System.Console.WriteLine("generating vector graphics...");
+            //gallaiTrees.ToWebPageSimple("gallai\\" + K + "\\" + MaxVertices + "\\" + MaxOddCycle + "\\", K);
 
-            /*
+            
             System.Console.WriteLine("computing invariants...");
             var data = gallaiTrees.Select(g => new GraphInvariantPile()
             {
@@ -68,7 +68,7 @@ namespace Console
 
             System.Console.WriteLine("writing file...");
             using (var sw = new StreamWriter("code.txt"))
-                sw.Write(glpk);*/
+                sw.Write(glpk);
         }
 
         static List<int> FindBlockCuts(Graph T)
