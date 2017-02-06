@@ -118,6 +118,7 @@
     <Compile Include="RingAssignmentGenerator.cs" />
     <Compile Include="SinkEliminator.cs" />
     <Compile Include="SuperAbundanceFinder.cs" />
+    <Compile Include="TestBGT.cs" />
     <Compile Include="UnitDistance.cs" />
     <Compile Include="WeaklyFixableTester.cs" />
   </ItemGroup>
@@ -125,6 +126,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\BGT\BGT\BGT.csproj">
+      <Project>{eac48eb8-1d40-49ad-95e5-9b496bb610f5}</Project>
+      <Name>BGT</Name>
+    </ProjectReference>
     <ProjectReference Include="..\BitLevelGeneration\BitLevelGeneration.csproj">
       <Project>{fc557259-af5c-461c-9faa-b0fb01f1a947}</Project>
       <Name>BitLevelGeneration</Name>

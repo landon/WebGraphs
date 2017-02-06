@@ -16,8 +16,8 @@ namespace Console
         const int MinVertices = 4;
         const int MaxVertices = 16;
 
-        const bool Offline = false;
-        const bool AT = true;
+        const bool Offline = true;
+        const bool AT = false;
         const int MaxIndependenceNumber = int.MaxValue;
         const int Fold = 1;
         
@@ -62,17 +62,7 @@ namespace Console
                     }
                     else if (Offline)
                     {
-                        List<List<int>> badAssignment;
-                        var bg = new BitGraph_long(g.GetEdgeWeights());
-
                         System.Console.Write("checking " + g.ToGraph6() + "...");
-                        if (bg.IsFChoosable(v => bg.Degree(v) - 1, out badAssignment))
-                        {
-                            graphIO.AddWinner(g);
-                            System.Console.WriteLine(string.Format(" is {0}-fold d_1-choosable", Fold));
-                        }
-                        else
-                            System.Console.WriteLine(" not choosable");
                     }
                     else
                     {

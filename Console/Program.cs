@@ -19,7 +19,8 @@ namespace Console
 
         static void Main(string[] args)
         {
-            UnitDistance.Go();
+            TestBGT.Go();
+           // UnitDistance.Go();
           //  DoGallaiTrees.Go();
           // DoGallaiTrees.Go().RemoveSelfIsomorphs().ToWebPageSimple(@"gallai\test\");
           //FindFractionalColorableRandomized.Go();
