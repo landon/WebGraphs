@@ -19,20 +19,28 @@ namespace Console
 
         static void Main(string[] args)
         {
-            TestBGT.Go();
-           // UnitDistance.Go();
-          //  DoGallaiTrees.Go();
-          // DoGallaiTrees.Go().RemoveSelfIsomorphs().ToWebPageSimple(@"gallai\test\");
-          //FindFractionalColorableRandomized.Go();
-          //  FindKP.Go();
-          //  MixedChoosables.Go();
-          //for (int i = 2; i <= 2; i++)
-          //{
-          //    var ll = @"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\mostlow\Mixed spread 2 offline winners1.txt".EnumerateWeightedGraphs()
-          //        .Where(g => g.VertexWeight.Count(w => w == 1) == i)
-          //        .Where(g => g.Vertices.All(v => g.Degree(v) <= 3 + g.VertexWeight[v]))
-          //        .Where(g => g.IsConnected(g.Vertices.Where(v => g.VertexWeight[v] == 0).ToList()))
-          //        .ToList();
+            GenerateWithExcludedSubgraphs.Go();
+            //Extensions.BrowserPath = @"C:\Program Files (x86)\Mozilla Firefox\firefox.exe";
+            //Extensions.GraphDataWebRoot = @"C:\Users\landon\Dropbox\Public\Web\GraphData";
+            //@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Another\offline winners1.txt"
+            //      .EnumerateWeightedGraphs()
+            //      .ToWebPage("offtst", false, false, false, false, false);
+
+            // FindChoosables.Go();
+            //TestBGT.Go();
+            // UnitDistance.Go();
+            //  DoGallaiTrees.Go();
+            // DoGallaiTrees.Go().RemoveSelfIsomorphs().ToWebPageSimple(@"gallai\test\");
+            //FindFractionalColorableRandomized.Go();
+            //  FindKP.Go();
+            //  MixedChoosables.Go();
+            //for (int i = 2; i <= 2; i++)
+            //{
+            //    var ll = @"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\mostlow\Mixed spread 2 offline winners1.txt".EnumerateWeightedGraphs()
+            //        .Where(g => g.VertexWeight.Count(w => w == 1) == i)
+            //        .Where(g => g.Vertices.All(v => g.Degree(v) <= 3 + g.VertexWeight[v]))
+            //        .Where(g => g.IsConnected(g.Vertices.Where(v => g.VertexWeight[v] == 0).ToList()))
+            //        .ToList();
 
             //    ll.WriteToWeightFile(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\mostlow\filtered mixed spread 2 offline winners1_" + i + ".txt");
             //    (@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\mostlow\filtered mixed spread 2 offline winners1_" + i + ".txt").EnumerateWeightedGraphs().ToWebPage(@"mostlow\list\" + i + @"\connectedlow\", lowPlus: true, directed: false, useLaplacian: false, compressName:false);

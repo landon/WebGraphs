@@ -30,6 +30,7 @@ namespace Console
         {
             using (var graphIO = new GraphEnumerator(WinnersFile, MinVertices, MaxVertices))
             {
+                graphIO.FileRoot = @"C:\Users\landon\Google Drive\research\Graph6\graph";
                 foreach (var g in graphIO.EnumerateGraph6File())
                 {
                     if (MaxIndependenceNumber < int.MaxValue)
@@ -62,7 +63,21 @@ namespace Console
                     }
                     else if (Offline)
                     {
+                        if (g.EnumerateMaximalIndependentSets().Any(I => I.Count > 2))
+                            continue;
                         System.Console.Write("checking " + g.ToGraph6() + "...");
+
+                        List<List<int>> badAssignment;
+                        var bg = new BitGraph_long(g.GetEdgeWeights());
+
+                        System.Console.Write("checking " + g.ToGraph6() + "...");
+                        if (bg.IsFChoosable(v => bg.Degree(v) - 1, out badAssignment))
+                        {
+                            graphIO.AddWinner(g);
+                            System.Console.WriteLine(string.Format(" is {0}-fold d_1-choosable", Fold));
+                        }
+                        else
+                            System.Console.WriteLine(" not choosable");
                     }
                     else
                     {
