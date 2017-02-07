@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using Choosability.Utility;
 using Choosability.FixerBreaker;
+using BitLevelGeneration;
 
 namespace Choosability
 {
@@ -20,6 +21,7 @@ namespace Choosability
         Lazy<List<List<int>>> _outNeighbors;
         Lazy<List<List<int>>> _inNeighbors;
         public Lazy<List<List<int>>> _laterNeighbors;
+
         List<int> _vertices;
         Lazy<List<List<int>>> _independentSets;
         Lazy<List<List<int>>> _maximalIndependentSets;
@@ -50,6 +52,7 @@ namespace Choosability
         public List<List<int>> InNeighbors { get { return _inNeighbors.Value; } }
         public List<int> Vertices { get { return _vertices; } }
         public Lazy<int[]> DegreeSequence { get; private set; }
+
         public Lazy<int[]> InDegreeSequence { get; private set; }
         public Lazy<int[]> OutDegreeSequence { get; private set; }
         public Lazy<int[]> NodeInvariantOne { get; private set; }
@@ -59,6 +62,10 @@ namespace Choosability
 
         public List<List<int>> IndependentSets { get { return _independentSets.Value; } }
         public List<List<int>> MaximalIndependentSets { get { return _maximalIndependentSets.Value; } }
+        public Lazy<List<Tuple<int, int>>> Edges { get; private set; }
+        public Lazy<List<Tuple<int, int>>> NonCutEdges { get; private set; }
+        public Lazy<List<Tuple<int, int>>> PendantEdges { get; private set; }
+        public Lazy<Graph> LineGraph { get; private set; }
 
         public Graph FromOutNeighborLists(Dictionary<int, List<int>> outNeighbors)
         {
@@ -298,6 +305,41 @@ namespace Choosability
             _independentThreeSets = new Lazy<List<List<int>>>(() => _independentSets.Value.Where(set => set.Count == 3).ToList(), true);
             _vertexSubsets = new Lazy<List<List<int>>>(() => ListUtility.GenerateSublists(_vertices));
             _maximalIndependentSets = new Lazy<List<List<int>>>(() => ListUtility.MaximalElements(_independentSets.Value), true);
+
+            Edges = new Lazy<List<Tuple<int, int>>>(() =>
+                {
+                    var edges = new List<Tuple<int, int>>();
+                    for (int i = 0; i < N; i++)
+                        for (int j = i + 1; j < N; j++)
+                            if (this[i, j])
+                                edges.Add(new Tuple<int, int>(i, j));
+
+                    return edges;
+                });
+
+            NonCutEdges = new Lazy<List<Tuple<int, int>>>(() =>
+            {
+                return Edges.Value.Where(e => IsConnected(e)).ToList();
+            });
+
+            PendantEdges = new Lazy<List<Tuple<int, int>>>(() =>
+            {
+                return Edges.Value.Where(e => Degree(e.Item1) == 1 || Degree(e.Item2) == 1).ToList();
+            });
+
+            LineGraph = new Lazy<Graph>(() =>
+                {
+                    var meets = new bool[Edges.Value.Count, Edges.Value.Count];
+                    for (int i = 0; i < Edges.Value.Count; i++)
+                        for (int j = i + 1; j < Edges.Value.Count; j++)
+                            if (Edges.Value[i].Item1 == Edges.Value[j].Item1 ||
+                                Edges.Value[i].Item1 == Edges.Value[j].Item2 ||
+                                Edges.Value[i].Item2 == Edges.Value[j].Item1 ||
+                                Edges.Value[i].Item2 == Edges.Value[j].Item2)
+                                meets[i, j] = meets[j, i] = true;
+
+                    return new Graph(meets);
+                });
         }
 
         #region Equality and Isomorphism
@@ -354,7 +396,7 @@ namespace Choosability
             return new Graph(adjacent, vertexWeight);
         }
 
-        static bool MaybeIsomorphic(Graph A, Graph B)
+        public static bool MaybeIsomorphic(Graph A, Graph B)
         {
             if (A.N != B.N) return false;
             if (A.E != B.E) return false;
@@ -401,20 +443,30 @@ namespace Choosability
         {
             if (N < A.N) return false;
 
-            var tau = new List<int>();
-            return Contains(A, induced, condition, new int[A.N], tau, 0);
+            var placed = new List<int>();
+            return Contains(A, induced, condition, new int[A.N], placed, 0);
         }
 
-        bool Contains(Graph A, bool induced, Func<Graph, Graph, int, int, bool> condition, int[] tau, List<int> placed, int v)
+        public bool ContainsPrioritized(Graph A, bool induced, Func<Graph, Graph, int, int, int> priority)
+        {
+            if (N < A.N) return false;
+
+            var placed = new List<int>();
+            return ContainsPrioritized(A, induced, priority, new int[A.N], placed, 0);
+        }
+
+        public bool Contains(Graph A, bool induced, Func<Graph, Graph, int, int, bool> condition, int[] tau, List<int> placed, int v)
         {
             if (v == A.N)
                 return true;
 
-            var images = placed.Select(u => tau[u]).OrderBy(t => t).ToList();
-            var requiredNeighbors = A.Neighbors[v].IntersectionSorted(placed).Select(u => tau[u]).OrderBy(t => t).ToList();
+            var images = placed.Select(u => tau[u]).ToList();
+            images.Sort();
+            var requiredNeighbors = A.Neighbors[v].IntersectionSorted(placed).Select(u => tau[u]).ToList();
+            requiredNeighbors.Sort();
             var candidates = Vertices.Except(images)
                                      .Where(w => A.Degree(v) <= Degree(w))
-                                     .Where(w => induced ? requiredNeighbors.SequenceEqual(Neighbors[w].Intersection(images))
+                                     .Where(w => induced ? requiredNeighbors.SequenceEqual(Neighbors[w].IntersectionSorted(images))
                                                          : requiredNeighbors.SubsetEqualSorted(Neighbors[w]))
                                      .Where(w => condition(this, A, w, v));
 
@@ -424,6 +476,38 @@ namespace Choosability
                 placed.Add(v);
 
                 if (Contains(A, induced, condition, tau, placed, v + 1))
+                    return true;
+
+                placed.RemoveAt(placed.Count - 1);
+            }
+
+            return false;
+        }
+
+        public bool ContainsPrioritized(Graph A, bool induced, Func<Graph, Graph, int, int, int> priority, int[] tau, List<int> placed, int v)
+        {
+            if (v == A.N)
+                return true;
+
+            var images = placed.Select(u => tau[u]).ToList();
+            images.Sort();
+            var requiredNeighbors = A.Neighbors[v].IntersectionSorted(placed).Select(u => tau[u]).ToList();
+            requiredNeighbors.Sort();
+            var candidates = Vertices.DifferenceSorted(images)
+                                     .Where(w => A.Degree(v) <= Degree(w))
+                                     .Where(w => induced ? requiredNeighbors.EqualSorted(Neighbors[w].IntersectionSorted(images))
+                                                         : requiredNeighbors.SubsetEqualSorted(Neighbors[w]))
+                                     .Where(w => priority(this, A, w, v) >= 0);
+
+            var prioritizedCandidates = candidates.ToList();
+            prioritizedCandidates.Sort((a, b) => priority(this, A, b, v) - priority(this, A, a, v));
+
+            foreach (var candidate in prioritizedCandidates)
+            {
+                tau[v] = candidate;
+                placed.Add(v);
+
+                if (ContainsPrioritized(A, induced, priority, tau, placed, v + 1))
                     return true;
 
                 placed.RemoveAt(placed.Count - 1);
@@ -480,9 +564,9 @@ namespace Choosability
         #endregion
 
         #region Export
-        public List<int> GetEdgeWeights()
+        public List<int> GetEdgeWeights(bool removeOrientation = false)
         {
-            return GetEdgeWeights(new int[] { }, new Tuple<int, int>[] { });
+            return GetEdgeWeights(new int[] { }, new Tuple<int, int>[] { }, removeOrientation);
         }
 
         public Graph InducedSubgraph(List<int> subgraph)
@@ -512,7 +596,11 @@ namespace Choosability
                     w.Add(0);
 
                     if (_adjacent[subgraph[i], subgraph[j]] || _adjacent[subgraph[j], subgraph[i]])
+                    {
                         w[k] = 1;
+                        if (Directed[subgraph[j], subgraph[i]])
+                            w[k] = -1;
+                    }
 
                     k++;
                 }
@@ -526,9 +614,13 @@ namespace Choosability
             return GetEdgeWeights(adjacent, directed, new int[] { }, new Tuple<int, int>[] { });
         }
 
-        List<int> GetEdgeWeights(IEnumerable<int> removedVertices, IEnumerable<Tuple<int, int>> removedEdges)
+        List<int> GetEdgeWeights(IEnumerable<int> removedVertices, IEnumerable<Tuple<int, int>> removedEdges, bool removeOrientation = false)
         {
-            return GetEdgeWeights(_adjacent, Directed, removedVertices, removedEdges);
+            var directed = Directed;
+            if (removeOrientation)
+                directed = new bool[N, N];
+
+            return GetEdgeWeights(_adjacent, directed, removedVertices, removedEdges);
         }
 
         List<int> GetEdgeWeights(bool[,] adjacent, bool[,] directed, IEnumerable<int> removedVertices, IEnumerable<Tuple<int, int>> removedEdges)
@@ -682,7 +774,7 @@ namespace Choosability
         }
         public Graph Clone()
         {
-            return new Graph(GetEdgeWeights());
+            return InducedSubgraph(Vertices);
         }
         public Graph Complement()
         {
@@ -744,6 +836,40 @@ namespace Choosability
 
             return tuples;
         }
+        public static Graph DisjointUnion(IEnumerable<Graph> ee)
+        {
+            var list = ee.ToList();
+            var n = list.Sum(G => G.N);
+            
+            List<int> vertexWeight = null;
+            if (list.All(G => G.VertexWeight != null))
+            {
+                vertexWeight = new List<int>();
+                foreach (var G in list)
+                    vertexWeight.AddRange(G.VertexWeight);
+            }
+
+            var adjacent = new bool[n, n];
+            int k = 0;
+            foreach (var G in list)
+            {
+                for (int i = 0; i < G.N; i++)
+                {
+                    for (int j = i + 1; j < G.N; j++)
+                    {
+                        adjacent[k + i, k + j] = adjacent[k + j, k + i] = G[i, j];
+                    }
+                }
+                k += G.N;
+            }
+
+            return new Graph(adjacent, vertexWeight);
+        }
+
+        public static Graph DisjointUnion(params Graph[] list)
+        {
+            return DisjointUnion((IEnumerable<Graph>)list);
+        }
         public Graph DisjointUnion(Graph H)
         {
             int n = N + H.N;
@@ -759,6 +885,68 @@ namespace Choosability
 
             return new Graph(adjacent);
         }
+        public Graph Identify(int v, Graph H, int vh)
+        {
+            var A = DisjointUnion(H);
+            foreach (var w in H.Neighbors[vh])
+            {
+                A._adjacent[v, N + w] = true;
+                A._adjacent[N + w, v] = true;
+            }
+                                   
+            return A.RemoveVertex(N + vh);
+        }
+        public Graph IdentifyLikeVertexWeights()
+        {
+            if (VertexWeight == null)
+                return Clone();
+
+            var fats = VertexWeight.Select((w, i) => new { W = w, I = i })
+                                   .GroupBy(x => x.W)
+                                   .Where(group => group.Key > 0)
+                                   .Select(group => group.Select(x => x.I).ToList())
+                                   .ToList();
+
+            return IdentifyVertices(fats);
+        }
+
+        public Graph IdentifyVertices(List<List<int>> fats)
+        {
+            var adjacent = new bool[N + fats.Count, N + fats.Count];
+
+            for (int i = 0; i < N; i++)
+            {
+                for (int j = i + 1; j < N; j++)
+                {
+                    adjacent[i, j] = adjacent[j,i] = _adjacent[i, j];
+                }
+            }
+
+            var k = 0;
+            foreach (var fat in fats)
+            {
+                foreach (var nn in fat.SelectMany(v => Neighbors[v]))
+                {
+                    adjacent[N + k, nn] = true;
+                    adjacent[nn, N + k] = true;
+                }
+
+                k++;
+            }
+            for (int i = 0; i < fats.Count; i++)
+            {
+                for (int j = i + 1; j < fats.Count; j++)
+                {
+                    if (fats[j].Any(f => adjacent[N + i, f]))
+                    {
+                        adjacent[N + i, N + j] = adjacent[N + j, N + i] = true;
+                    }
+                }
+            }
+
+            return new Graph(adjacent).InducedSubgraph(Enumerable.Range(0, N + fats.Count).Except(fats.SelectMany(f => f)).ToList());
+        }
+
         public Graph Join(Graph H)
         {
             var G = DisjointUnion(H);
@@ -800,7 +988,10 @@ namespace Choosability
                 adjacent[neighbor, N] = true;
             }
 
-            return new Graph(adjacent);
+            var g = new Graph(adjacent);
+            g.VertexWeight = VertexWeight.ToList();
+            g.VertexWeight.Add(0);
+            return g;
         }
         public static Graph operator +(Graph A, Graph B)
         {
@@ -918,6 +1109,11 @@ namespace Choosability
             return ListUtility.IntersectionCountSorted(Neighbors[v], subgraph);
         }
 
+        public int DegreeInSubgraphUnsorted(int v, List<int> subgraph)
+        {
+            return ListUtility.IntersectionCount(Neighbors[v], subgraph);
+        }
+
         public List<int> NeighborsInSubgraph(int v, List<int> subgraph)
         {
             return ListUtility.IntersectionSorted(Neighbors[v], subgraph);
@@ -976,10 +1172,127 @@ namespace Choosability
 
             return edges + EdgesOn(intersection);
         }
+
+        public Graph SubgraphOfEdgeColor(List<int> edgeColoring, int c)
+        {
+            var wn = edgeColoring.IndicesWhere(n => n != c).ToList();
+            var wc = GetEdgeWeights(new List<int>(), Edges.Value.Where((e, i) => wn.Contains(i)).ToList(), true);
+
+            return new Graph(wc);
+        }
+
+        public BitGraph_long BitSubgraphOfEdgeColor(List<int> edgeColoring, int c)
+        {
+            var wn = edgeColoring.IndicesWhere(n => n != c).ToList();
+            var wc = GetEdgeWeights(new List<int>(), Edges.Value.Where((e, i) => wn.Contains(i)).ToList(), true);
+
+            return new BitGraph_long(wc);
+        }
+
+        public bool HasMonochromaticOddHoleOrCliqueCycle(List<int> edgeColoring, int c)
+        {
+            var w = edgeColoring.IndicesWhere(n => n == c).ToList();
+            var wn = edgeColoring.IndicesWhere(n => n != c).ToList();
+
+            var wc = GetEdgeWeights(new List<int>(), Edges.Value.Where((e, i) => wn.Contains(i)).ToList(), true);
+            var wnc = GetEdgeWeights(new List<int>(), Edges.Value.Where((e, i) => w.Contains(i)).ToList(), true);
+
+            var gc = new Graph(wc);
+            var gnc = new Graph(wnc);
+            var gcb = new BitGraph_long(wc);
+
+            foreach (var S in gnc.EnumerateMaximalIndependentSets())
+            {
+                if (!GraphChoosability_long.IsSubsetTwoColorable(gcb, S.ToInt64()))
+                    return true;
+            }
+
+            foreach (var S in EnumerateMaximalCliques())
+            {
+                if (!gc.IsAcyclic(S))
+                    return true;
+            }
+
+            return false;
+        }
+
+        public bool IsMicKP(List<int> edgeColoring, int c)
+        {
+            var wn = edgeColoring.IndicesWhere(n => n != c).ToList();
+            var wc = GetEdgeWeights(new List<int>(), Edges.Value.Where((e, i) => wn.Contains(i)).ToList(), true);
+            var gc = new Graph(wc);
+
+            foreach (var S in EnumerateMaximalIndependentSets())
+            {
+                if (gc.EdgesOn(Vertices.Difference(S)) <= 0)
+                    return true;
+            }
+
+            return false;
+        }
+
+        public bool IsDisconnected(List<int> edgeColoring, int c)
+        {
+            var wn = edgeColoring.IndicesWhere(n => n != c).ToList();
+            var wc = GetEdgeWeights(new List<int>(), Edges.Value.Where((e, i) => wn.Contains(i)).ToList(), true);
+            var gc = new Graph(wc);
+
+            return !gc.IsConnected();
+        }
+
+        public bool IsTree(List<int> edgeColoring, int c)
+        {
+            var wn = edgeColoring.IndicesWhere(n => n != c).ToList();
+            var wc = GetEdgeWeights(new List<int>(), Edges.Value.Where((e, i) => wn.Contains(i)).ToList(), true);
+            var gc = new Graph(wc);
+
+            return gc.E == gc.N - 1;
+        }
+
+        public bool IsTwoColorable(List<int> edgeColoring, int c)
+        {
+            return GraphChoosability_long.IsSubsetTwoColorable(BitSubgraphOfEdgeColor(edgeColoring, c), Vertices.ToInt64());
+        }
+
+        public bool IsTwoColorable()
+        {
+            return GraphChoosability_long.IsSubsetTwoColorable(new BitGraph_long(GetEdgeWeights()), Vertices.ToInt64());
+        }
+
+        public bool IsTwoColorableSlow()
+        {
+            var Q = new Queue<int>();
+            Q.Enqueue(0);
+
+            var c = new int[N];
+
+            while (Q.Count > 0)
+            {
+                var v = Q.Dequeue();
+                if (c[v] == 0)
+                    c[v] = -1;
+                foreach (var w in Neighbors[v])
+                {
+                    if (c[w] == c[v])
+                        return false;
+                    if (c[w] != 0)
+                        continue;
+                    c[w] = -c[v];
+                    Q.Enqueue(w);
+                }
+            }
+
+            return true;
+        }
+
+        public List<int> VerticesOfDegree(int d)
+        {
+            return Vertices.Where(v => Degree(v) == d).ToList();
+        }
         #endregion
 
         #region Independent sets
-     
+
         IEnumerable<List<int>> IndependentSetsInSubgraph(int firstVertex)
         {
             if (firstVertex >= N) return new List<List<int>>() { new List<int>() };
@@ -1033,6 +1346,23 @@ namespace Choosability
             return false;
         }
 
+        public int IndependenceNumberBronKerbosch()
+        {
+            return IndependenceNumberBronKerbosch(Vertices);
+        }
+        public int IndependenceNumberBronKerbosch(IEnumerable<int> subgraph)
+        {
+            return EnumerateMaximalIndependentSets(subgraph.ToList()).Max(s => s.Count);
+        }
+        public int CliqueNumberBronKerbosch()
+        {
+            return CliqueNumberBronKerbosch(Vertices);
+        }
+        public int CliqueNumberBronKerbosch(IEnumerable<int> subgraph)
+        {
+            return EnumerateMaximalCliques(subgraph.ToList()).Max(s => s.Count);
+        }
+
         public int IndependenceNumber()
         {
             return IndependenceNumber(Vertices);
@@ -1049,15 +1379,23 @@ namespace Choosability
 
         public IEnumerable<List<int>> EnumerateMaximalIndependentSets(List<int> set)
         {
-            return EnumerateBronKerbosch(set, new List<int>(), new List<int>());
+            return EnumerateBronKerbosch(set, new List<int>(), new List<int>(), ComplementNeighbors);
         }
-
         public IEnumerable<List<int>> EnumerateMaximalIndependentSets()
         {
-            return EnumerateBronKerbosch(Vertices, new List<int>(), new List<int>());
+            return EnumerateBronKerbosch(Vertices, new List<int>(), new List<int>(), ComplementNeighbors);
         }
 
-        IEnumerable<List<int>> EnumerateBronKerbosch(List<int> P, List<int> R, List<int> X)
+        public IEnumerable<List<int>> EnumerateMaximalCliques(List<int> set)
+        {
+            return EnumerateBronKerbosch(set, new List<int>(), new List<int>(), Neighbors);
+        }
+        public IEnumerable<List<int>> EnumerateMaximalCliques()
+        {
+            return EnumerateBronKerbosch(Vertices, new List<int>(), new List<int>(), Neighbors);
+        }
+
+        static IEnumerable<List<int>> EnumerateBronKerbosch(List<int> P, List<int> R, List<int> X, List<List<int>> complementNeighbors)
         {
             if (P.Count == 0 && X.Count == 0)
                 yield return R.ToList();
@@ -1066,11 +1404,11 @@ namespace Choosability
                 var PC = P.ToList();
                 var XC = X.ToList();
 
-                var u = TomitaPivot(P, X);
-                foreach (var v in P.Except(ComplementNeighbors[u]))
+                var u = TomitaPivot(P, X, complementNeighbors);
+                foreach (var v in P.Except(complementNeighbors[u]))
                 {
                     R.Add(v);
-                    foreach (var set in EnumerateBronKerbosch(PC.Intersection(ComplementNeighbors[v]), R, XC.Intersection(ComplementNeighbors[v])))
+                    foreach (var set in EnumerateBronKerbosch(PC.Intersection(complementNeighbors[v]), R, XC.Intersection(complementNeighbors[v]), complementNeighbors))
                         yield return set;
 
                     R.Remove(v);
@@ -1079,14 +1417,13 @@ namespace Choosability
                 }
             }
         }
-
-        int TomitaPivot(List<int> P, List<int> X)
+        static int TomitaPivot(List<int> P, List<int> X, List<List<int>> complementNeighbors)
         {
             var max = -1;
             var best = -1;
             foreach (var u in P.Concat(X))
             {
-                var n = ComplementNeighbors[u].IntersectionCount(P);
+                var n = complementNeighbors[u].IntersectionCount(P);
                 if (n > max)
                 {
                     max = n;
@@ -1143,6 +1480,55 @@ namespace Choosability
             }
 
             return coloring.Count(c => c != 0);
+        }
+
+        public bool IsFoldChoosable(List<long> assignment, int fold)
+        {
+            return IsFoldChoosable(assignment, Vertices, fold);
+        }
+        public bool IsFoldChoosable(List<long> assignment, List<int> subset, int fold)
+        {
+            return IsFoldChoosable(assignment, 0, subset, fold);
+        }
+        bool IsFoldChoosable(List<long> assignment, int v, List<int> subset, int fold)
+        {
+            if (v >= subset.Count)
+                return true;
+
+            var colors = assignment[subset[v]];
+            var color = colors;
+            int k = 0;
+            while (color != 0 && k < fold)
+            {
+                color &= color - 1;
+                k++;
+            }
+
+            if (k < fold)
+                return false;
+
+            color = colors & ~color;
+
+            int totalColors = 0;
+            while (color.PopulationCount() == fold)
+            {
+                totalColors++;
+                var assignmentCopy = new List<long>(assignment);
+                foreach (var neighbor in _laterNeighbors.Value[subset[v]])
+                    assignmentCopy[neighbor] &= ~color;
+
+                if (IsFoldChoosable(assignmentCopy, v + 1, subset, fold))
+                    return true;
+
+                color = color.NextSubsetOfSameSize(colors);
+            }
+
+            if (totalColors != Counting.BinomialCoefficient(assignment[subset[v]].PopulationCount(), fold))
+            {
+                throw new Exception("badness!!");
+            }
+
+            return false;
         }
 
         public bool IsChoosable(List<long> assignment, List<int> subset)
@@ -1219,7 +1605,7 @@ namespace Choosability
 
             return mic;
         }
-        public bool IsOnlineFChoosable(Func<int, int> f)
+        public bool IsOnlineFChoosable(Func<int, int> f, CancellationToken cancellationToken)
         {
             NodesVisited = 0;
             CacheHits = 0;
@@ -1230,10 +1616,19 @@ namespace Choosability
 
             var cache = new Dictionary<OnlineChoiceHashGraph, bool>();
 
-            return IsOnlineFChoosable(fTrace, Enumerable.Repeat(1, N).ToArray(), cache);
+            try
+            {
+                return IsOnlineFChoosable(fTrace, Enumerable.Repeat(1, N).ToArray(), cache, cancellationToken);
+            }
+            catch (OperationCanceledException oce)
+            {
+                return false;
+            }
         }
-        bool IsOnlineFChoosable(int[] f, int[] g, Dictionary<OnlineChoiceHashGraph, bool> cache)
+        bool IsOnlineFChoosable(int[] f, int[] g, Dictionary<OnlineChoiceHashGraph, bool> cache, CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             Interlocked.Increment(ref NodesVisited);
 
             OnlineChoiceHashGraph key = null;
@@ -1281,20 +1676,15 @@ namespace Choosability
                 goto done;
             }
 
-            var independentSets = _independentSets.Value.Where(set => set.Count >= 1 && ListUtility.SubsetEqualSorted(set, liveVertices)).ToList();
-
             foreach (var V in ListUtility.EnumerateSublists(liveVertices))
             {
                 if (V.Count <= 1)
                     continue;
 
-                if (independentSets.Any(ss => ListUtility.SubsetEqualSorted(V, ss)))
-                    continue;
+                var maximalIndependentSets = EnumerateMaximalIndependentSets(V);
 
                 foreach (var v in V)
                     f[v]--;
-
-                var maximalIndependentSets = ListUtility.MaximalElementsSorted(independentSets.Where(set => ListUtility.SubsetEqualSorted(set, V)).ToList());
 
                 var choosable = false;
                 foreach (var C in maximalIndependentSets)
@@ -1302,7 +1692,7 @@ namespace Choosability
                     foreach (var v in C)
                         g[v]--;
 
-                    choosable = IsOnlineFChoosable(f, g, cache);
+                    choosable = IsOnlineFChoosable(f, g, cache, cancellationToken);
 
                     foreach (var v in C)
                         g[v]++;
@@ -1392,20 +1782,15 @@ namespace Choosability
                 goto done;
             }
 
-            var independentSets = _independentSets.Value.Where(set => set.Count >= 1 && ListUtility.SubsetEqualSorted(set, liveVertices)).ToList();
-
             foreach (var V in ListUtility.EnumerateSublists(liveVertices))
             {
                 if (V.Count <= 1)
                     continue;
 
-                if (independentSets.Any(ss => ListUtility.SubsetEqualSorted(V, ss)))
-                    continue;
+                var maximalIndependentSets = EnumerateMaximalIndependentSets(V);
 
                 foreach (var v in V)
                     f[v]--;
-
-                var maximalIndependentSets = ListUtility.MaximalElementsSorted(independentSets.Where(set => ListUtility.SubsetEqualSorted(set, V)).ToList());
 
                 var choosable = false;
                 foreach (var C in maximalIndependentSets)
@@ -1843,6 +2228,74 @@ namespace Choosability
 
             return ancestorLists;
         }
+        public List<List<int>> CheckKernelPerfectForAllOrientations(List<int> symmetricEdges, out List<int> badSubgraph)
+        {
+            var e = Edges.Value;
+            var asymmetricEdges = Enumerable.Range(0, E).Except(symmetricEdges).ToList();
+
+            var outNeighbors = new List<List<int>>();
+            for (int i = 0; i < N; i++)
+                outNeighbors.Add(new List<int>());
+
+            foreach (var backwardEdgeIndices in asymmetricEdges.EnumerateSublists())
+            {
+                for (int i = 0; i < N; i++)
+                    outNeighbors[i].Clear();
+                for (int i = 0; i < e.Count; i++)
+                {
+                    if (symmetricEdges.Contains(i))
+                    {
+                        outNeighbors[e[i].Item1].Add(e[i].Item2);
+                        outNeighbors[e[i].Item2].Add(e[i].Item1);
+                    }
+                    else if (backwardEdgeIndices.Contains(i))
+                    {
+                        outNeighbors[e[i].Item2].Add(e[i].Item1);
+                    }
+                    else
+                    {
+                        outNeighbors[e[i].Item1].Add(e[i].Item2);
+                    }
+                }
+
+                if (!IsKernelPerfect(outNeighbors, out badSubgraph))
+                    return outNeighbors;
+            }
+
+            badSubgraph = null;
+            return null;
+        }
+
+        bool IsKernelPerfect(List<List<int>> outNeighbors, out List<int> badSubgraph)
+        {
+            badSubgraph = null;
+            foreach (var S in Vertices.EnumerateSublists())
+            {
+                if (!HasKernel(S, outNeighbors))
+                {
+                    badSubgraph = S;
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        bool HasKernel(List<int> subgraph, List<List<int>> outNeighbors)
+        {
+            foreach (var I in EnumerateMaximalIndependentSets(subgraph))
+            {
+                if (IsKernel(subgraph, I, outNeighbors))
+                    return true;
+            }
+
+            return false;
+        }
+
+        static bool IsKernel(List<int> vertices, List<int> I, List<List<int>> outNeighbors)
+        {
+            return vertices.Except(I).All(v => outNeighbors[v].IntersectionCount(I) > 0);
+        }
         #endregion
 
         #region Classic Algorithms
@@ -1863,35 +2316,38 @@ namespace Choosability
 
             return equivalenceRelation;
         }
-        public EquivalenceRelation<int> FindComponents()
+        public bool IsConnected(params Tuple<int, int>[] missingEdges)
         {
-            var equivalenceRelation = new Choosability.Utility.EquivalenceRelation<int>();
-
-            for (int i = 0; i < N; i++)
-            {
-                equivalenceRelation.AddElement(i);
-
-                for (int j = i + 1; j < N; j++)
-                {
-                    if (_adjacent[i, j])
-                        equivalenceRelation.Relate(i, j);
-                }
-            }
-
-            return equivalenceRelation;
+            return IsConnected(Vertices, missingEdges);
         }
-        public EquivalenceRelation<int> FindComponents(List<int> v)
+        public bool IsConnected(IEnumerable<Tuple<int, int>> missingEdges = null)
         {
+            return IsConnected(Vertices, missingEdges);
+        }
+        public bool IsConnected(List<int> subgraphVertices, IEnumerable<Tuple<int, int>> missingEdges = null)
+        {
+            return FindComponents(subgraphVertices, missingEdges).GetEquivalenceClasses().Count() == 1;
+        }
+        public EquivalenceRelation<int> FindComponents(IEnumerable<Tuple<int,int>> missingEdges = null)
+        {
+            return FindComponents(Vertices, missingEdges);
+        }
+        public EquivalenceRelation<int> FindComponents(List<int> subgraphVertices, IEnumerable<Tuple<int, int>> missingEdges = null)
+        {
+            var me = missingEdges == null ? new List<Tuple<int, int>>() : missingEdges.ToList();
+
             var equivalenceRelation = new Choosability.Utility.EquivalenceRelation<int>();
-
-            for (int i = 0; i < v.Count; i++)
+            for (int i = 0; i < subgraphVertices.Count; i++)
             {
-                equivalenceRelation.AddElement(v[i]);
+                equivalenceRelation.AddElement(subgraphVertices[i]);
 
-                for (int j = i + 1; j < v.Count; j++)
+                for (int j = i + 1; j < subgraphVertices.Count; j++)
                 {
-                    if (_adjacent[v[i], v[j]])
-                        equivalenceRelation.Relate(v[i], v[j]);
+                    if (_adjacent[subgraphVertices[i], subgraphVertices[j]])
+                    {
+                        if (!me.Any(e => e.Item1 == i && e.Item2 == j || e.Item1 == j && e.Item2 == i))
+                            equivalenceRelation.Relate(subgraphVertices[i], subgraphVertices[j]);
+                    }
                 }
             }
 
@@ -2013,7 +2469,7 @@ namespace Choosability
             var shortestLength = int.MaxValue;
             var shortestCycle = new List<int>();
 
-            foreach (var v in _vertices)
+            foreach (var v in Vertices)
             {
                 var distance = new int[N];
                 var parent = Enumerable.Repeat(-1, N).ToArray();
@@ -2065,6 +2521,28 @@ namespace Choosability
             }
 
             return shortestCycle;
+        }
+
+        public bool IsAcyclic(List<int> subgraph)
+        {
+            while (subgraph.Count > 2)
+            {
+                int w = -1;
+                foreach (var v in subgraph)
+                {
+                    if (ListUtility.IntersectionCount(Neighbors[v], subgraph) <= 1)
+                    {
+                        w = v;
+                        break;
+                    }
+                }
+
+                if (w == -1)
+                    return false;
+                subgraph.Remove(w);
+            }
+
+            return true;
         }
         #endregion
     }

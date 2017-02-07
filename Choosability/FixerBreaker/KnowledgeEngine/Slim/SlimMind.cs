@@ -19,7 +19,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim
         public Board BreakerWonBoard { get; private set; }
 
         public bool FixerWonAllNearlyColorableBoards { get; set; }
-        public int TotalPositions { get; private set; }
+        public int TotalBoards { get; private set; }
 
         Knowledge Knowledge { get; set; }
         ColoringAnalyzer ColoringAnalyzer {get; set;}
@@ -59,7 +59,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim
                 if (foundAtLeastOneBoard && BoardLookup.Count <= 0)
                     break;
 
-                TotalPositions = BoardLookup.Count;
+                TotalBoards = BoardLookup.Count;
                 foundAtLeastOneBoard = true;
                 RemainingBoardIDs = BoardLookup.Keys.ToList();
 

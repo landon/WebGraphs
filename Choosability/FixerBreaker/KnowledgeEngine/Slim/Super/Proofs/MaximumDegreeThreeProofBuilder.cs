@@ -19,7 +19,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
         public override string WriteProof()
         {
             var length = Mind.ColorableBoards[0].ToXYZ().Length;
-            var allBoards = Mind.ColorableBoards.Union(Mind.NonColorableBoards).ToList();
+            var allBoards = Mind.ColorableBoards.Union(Mind.PlayableBoards).ToList();
 
             var comparer = new SequenceGeneralizer<int>.VectorComparer();
             var sg = new SequenceGeneralizer<int>(length, new List<int> { 0, 1, 2 });

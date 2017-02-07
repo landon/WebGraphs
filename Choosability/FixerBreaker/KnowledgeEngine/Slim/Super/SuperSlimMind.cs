@@ -5,287 +5,321 @@ using System.Text;
 
 namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
 {
+    public enum FixerBreakerSwapMode
+    {
+        Original,
+        SingleSwap,
+        MultiSwap
+    }
+
+    public enum FixerBreakeReductionMode
+    {
+        None,
+        Superabundant,
+        Definite
+    }
+
     public class SuperSlimMind : IMind
     {
         List<SuperSlimBoard> _remainingBoards;
-        HashSet<SuperSlimBoard> _wonBoards;
         SuperSlimSwapAnalyzer _swapAnalyzer;
         SuperSlimColoringAnalyzer _coloringAnalyzer;
-        Graph _graph;
-        Graph _lineGraph;
-        public List<Tuple<int, int>> _edges;
-        int _totalPositions;
+        int _lastProgress;
+
+        public Graph G { get; private set; }
+        Graph _lineG;
+        List<Tuple<int, int>> _edges;
 
         public int MinPot { get; set; }
         public int MaxPot { get; set; }
-        public bool FixerWonAllNearlyColorableBoards { get; private set; }
-        public bool HasNonSuperabundantBoardThatIsNearlyColorable { get; private set; }
-        public int TotalPositions { get { return _totalPositions; } }
-        public SuperSlimBoard BreakerWonBoard { get; private set; }
+
+        public int TotalBoards { get; private set; }
         public List<int> BoardCounts { get; private set; }
-        public List<List<int>> BoardCountsList { get; private set; }
         public bool OnlyConsiderNearlyColorableBoards { get; set; }
         public bool ExcludeNonNearlyColorableNonSuperabundantBoards { get; set; }
         public int MissingEdgeIndex { get; set; }
-        public bool SuperabundantOnly { get; set; }
-        public bool ThinkHarder { get; set; }
-
-        public SuperSlimColoringAnalyzer ColoringAnalyzer { get { return _coloringAnalyzer; } }
-        public List<SuperSlimBoard> NonColorableBoards { get; private set; }
-        public List<SuperSlimBoard> ColorableBoards { get; private set; }
-        public List<SuperSlimBoard> BreakerWonBoards { get; private set; }
-        public HashSet<SuperSlimBoard> FixerWonBoards { get { return _wonBoards; } }
-        public Dictionary<int, List<SuperSlimBoard>> BoardsOfDepth { get; private set; }
+        public bool OnlySuperabundantBoards { get; set; }
+        public bool AllIntermediateBoardsInRestrictedClass { get; set; }
         public int ExtraPsi { get; set; }
 
-        public SuperSlimMind(Graph g, bool proofFindingMode = false, bool weaklyFixable = false)
+        public SuperSlimColoringAnalyzer ColoringAnalyzer { get { return _coloringAnalyzer; } }
+        public List<SuperSlimBoard> PlayableBoards { get; private set; }
+        public List<SuperSlimBoard> ColorableBoards { get; private set; }
+        public List<SuperSlimBoard> NearlyColorableBoards { get; private set; }
+        public List<SuperSlimBoard> SuperabundantBoards { get; private set; }
+        public List<SuperSlimBoard> SuperabundantWithExtraPsiBoards { get; private set; }
+        public List<SuperSlimBoard> BreakerWonBoards { get; private set; }
+        public List<SuperSlimBoard> ReducibleBoards { get; private set; }
+        public HashSet<SuperSlimBoard> FixerWonBoards { get; private set; }
+        public List<SuperSlimBoard> DeepestBoards { get; private set; }
+
+        public int NonSuperabundantBoardCount { get; private set; }
+        public int NonSuperabundantExtraPsiBoardCount { get; private set; }
+        public int NonNearlyColorableBoardCount { get; private set; }
+        public bool ProofFindingMode { get; private set; }
+        public FixerBreakerSwapMode SwapMode { get; private set; }
+        public FixerBreakeReductionMode ReductionMode { get; private set; }
+        public Func<SuperSlimMind, SuperSlimBoard, SuperSlimBoard, int> PartialOrderOnBoards { get; set; }
+
+        Lazy<SubFixableMind> SubFixableMind { get; set; }
+
+        public SuperSlimMind(Graph g, bool proofFindingMode = false, FixerBreakerSwapMode swapMode = FixerBreakerSwapMode.SingleSwap, FixerBreakeReductionMode reductionMode = FixerBreakeReductionMode.None)
         {
-            _graph = g;
+            G = g;
             BuildLineGraph();
 
-            _coloringAnalyzer = new SuperSlimColoringAnalyzer(_lineGraph, GetEdgeColorList);
-            _swapAnalyzer = new SuperSlimSwapAnalyzer(g.N, proofFindingMode, proofFindingMode || weaklyFixable);
-            _wonBoards = new HashSet<SuperSlimBoard>();
-            _remainingBoards = new List<SuperSlimBoard>();
+            ProofFindingMode = proofFindingMode;
+            SwapMode = swapMode;
+            ReductionMode = reductionMode;
+
+            _coloringAnalyzer = new SuperSlimColoringAnalyzer(_lineG, GetEdgeColorList);
+            _swapAnalyzer = new SuperSlimSwapAnalyzer(g.N, proofFindingMode, swapMode);
+            SubFixableMind = new Lazy<SubFixableMind>(() => new SubFixableMind() { Mind = this, ForbiddenEdge = OnlyConsiderNearlyColorableBoards && MissingEdgeIndex >= 0 ? _edges[MissingEdgeIndex] : null });
 
             MissingEdgeIndex = -1;
         }
 
         public bool Analyze(Template template, Action<Tuple<string, int>> progress = null)
         {
-            _wonBoards.Clear();
-            _remainingBoards.Clear();
-            BoardCountsList = new List<List<int>>();
-            BreakerWonBoard = null;
-            NonColorableBoards = new List<SuperSlimBoard>();
-            ColorableBoards = new List<SuperSlimBoard>();
+            _lastProgress = -1;
+            _remainingBoards = new List<SuperSlimBoard>();
+            FixerWonBoards = new HashSet<SuperSlimBoard>();
             BreakerWonBoards = new List<SuperSlimBoard>();
-
-            FixerWonAllNearlyColorableBoards = true;
-
+            ReducibleBoards = new List<SuperSlimBoard>();
+            BoardCounts = new List<int>();
+            PlayableBoards = new List<SuperSlimBoard>();
+            ColorableBoards = new List<SuperSlimBoard>();
+            NearlyColorableBoards = new List<SuperSlimBoard>();
+            SuperabundantBoards = new List<SuperSlimBoard>();
+            SuperabundantWithExtraPsiBoards = new List<SuperSlimBoard>();
+            SubFixableMind.Value.Progress = progress;
+            
             var minimumColorCount = Math.Max(MinPot, template.Sizes.Max());
             var maximumColorCount = Math.Min(MaxPot, template.Sizes.Sum());
 
-            var foundAtLeastOneBoard = false;
-            var fixerWin = true;
             for (int colorCount = minimumColorCount; colorCount <= maximumColorCount; colorCount++)
+                _remainingBoards.AddRange(EnumerateAllBoards(template, colorCount, progress));
+
+            TotalBoards = _remainingBoards.Count;
+            FindColorableBoards(progress);
+            FindNearlyColorableBoards(progress);
+            FindSuperabundantBoards(progress);
+            FindReducibleBoards(progress);
+            DoOrdering();
+
+            PlayableBoards.AddRange(_remainingBoards);
+            Analyze(progress);
+
+            var leftover = BreakerWonBoards.Union(_remainingBoards);
+            if (OnlyConsiderNearlyColorableBoards)
+                leftover = leftover.Intersect(NearlyColorableBoards);
+            if (OnlySuperabundantBoards)
             {
-                GenerateAllBoards(template, colorCount, progress);
-                if (OnlyConsiderNearlyColorableBoards)
-                {
-                    if (MissingEdgeIndex >= 0)
-                        _remainingBoards.RemoveAll(b => !NearlyColorableForEdge(b, MissingEdgeIndex));
-                    else
-                        _remainingBoards.RemoveAll(b => !NearlyColorableForSomeEdge(b));
-                }
-
-                if (foundAtLeastOneBoard && _remainingBoards.Count <= 0)
-                    break;
-
-                _totalPositions = _remainingBoards.Count + _wonBoards.Count;
-                foundAtLeastOneBoard = true;
-
-                fixerWin &= Analyze(progress);
+                if (ExtraPsi <= 0)
+                    leftover = leftover.Intersect(SuperabundantBoards);
+                else
+                    leftover = leftover.Intersect(SuperabundantWithExtraPsiBoards);
             }
 
-            return fixerWin;
+            BreakerWonBoards = leftover.ToList();
+            return BreakerWonBoards.Count <= 0;
         }
 
-        bool Analyze(Action<Tuple<string, int>> progress = null)
+        void DoOrdering()
         {
-            int winLength = 0;
-            var totalBoards = _remainingBoards.Count;
-            var lastP = -1;
+            var order = PartialOrderOnBoards;
+            if (order == null)
+                return;
 
-            BoardsOfDepth = new Dictionary<int, List<SuperSlimBoard>>();
-            BoardCounts = new List<int>();
-            BoardCountsList.Add(BoardCounts);
-            BoardCounts.Add(_remainingBoards.Count);
+            _remainingBoards.Sort((a, b) => order(this, a, b));
+        }
 
+        void FindColorableBoards(Action<Tuple<string, int>> progress)
+        {
             for (int i = _remainingBoards.Count - 1; i >= 0; i--)
             {
                 var b = _remainingBoards[i];
                 if (_coloringAnalyzer.Analyze(b))
                 {
                     _remainingBoards.RemoveAt(i);
-                    _wonBoards.Add(b);
+                    FixerWonBoards.Add(b);
                     ColorableBoards.Add(b);
                 }
 
-                if (progress != null)
-                {
-                    var p = 100 * (totalBoards - _remainingBoards.Count) / totalBoards;
-                    if (p > lastP)
-                    {
-                        progress(new Tuple<string, int>("Finding all colorable positions...", p));
-                        lastP = p;
-                    }
-                }
+                DoProgress(progress, "Finding all colorable positions...");
             }
 
-            BoardsOfDepth[winLength] = _wonBoards.ToList();
-            BoardCounts.Add(_remainingBoards.Count);
+            BoardCounts.Add(ColorableBoards.Count);
+        }
 
-            var nonSuperabundantBoards = new List<SuperSlimBoard>();
+        void FindReducibleBoards(Action<Tuple<string, int>> progress)
+        {
+            if (ReductionMode == FixerBreakeReductionMode.None)
+                return;
 
             for (int i = _remainingBoards.Count - 1; i >= 0; i--)
             {
                 var b = _remainingBoards[i];
-                if (!IsSuperabundant(b))
-                {
-                    if (OnlyConsiderNearlyColorableBoards && MissingEdgeIndex >= 0)
-                    {
-                        HasNonSuperabundantBoardThatIsNearlyColorable = true;
-                        BreakerWonBoard = b;
-                        return false;
-                    }
 
+                var reduction = CheckReducibility(b);
+                if (reduction != null)
+                {
                     _remainingBoards.RemoveAt(i);
-                    nonSuperabundantBoards.Add(b);
+                    FixerWonBoards.Add(b);
+                    ReducibleBoards.Add(b);
                 }
 
-                if (progress != null)
+                DoProgress(progress, "Finding all reducible positions...");
+            }
+        }
+
+        void FindNearlyColorableBoards(Action<Tuple<string, int>> progress)
+        {
+            NonNearlyColorableBoardCount = 0;
+
+            if (!OnlyConsiderNearlyColorableBoards)
+                return;
+            
+            for (int i = _remainingBoards.Count - 1; i >= 0; i--)
+            {
+                var b = _remainingBoards[i];
+                var nearlyColorable = MissingEdgeIndex >= 0 ? NearlyColorableForEdge(b, MissingEdgeIndex) : NearlyColorableForSomeEdge(b);
+
+                if (nearlyColorable)
+                    NearlyColorableBoards.Add(b);
+                else
                 {
-                    var p = 100 * (totalBoards - _remainingBoards.Count) / totalBoards;
-                    if (p > lastP)
+                    NonNearlyColorableBoardCount++;
+                    if (AllIntermediateBoardsInRestrictedClass)
                     {
-                        progress(new Tuple<string, int>("Finding all non-superabundant positions...", p));
-                        lastP = p;
+                        _remainingBoards.RemoveAt(i);
+                        DoProgress(progress, "Finding all nearly colorable positions...");
                     }
                 }
             }
+        }
 
-            if (nonSuperabundantBoards.Count > 0 && !SuperabundantOnly)
+        void FindSuperabundantBoards(Action<Tuple<string, int>> progress)
+        {
+            NonSuperabundantBoardCount = 0;
+            NonSuperabundantExtraPsiBoardCount = 0;
+
+            if (!OnlySuperabundantBoards)
+                return;
+
+            for (int i = _remainingBoards.Count - 1; i >= 0; i--)
             {
-                if (!OnlyConsiderNearlyColorableBoards && !ExcludeNonNearlyColorableNonSuperabundantBoards)
-                {
-                    FixerWonAllNearlyColorableBoards = false;
-                    BreakerWonBoard = nonSuperabundantBoards[0];
-                    BreakerWonBoards.AddRange(nonSuperabundantBoards);
-                    return false;
-                }
-                else if (ExistsNearlyColorableBoardForEachEdge(nonSuperabundantBoards))
-                {
-                    FixerWonAllNearlyColorableBoards = false;
-                    HasNonSuperabundantBoardThatIsNearlyColorable = true;
-                    BreakerWonBoard = nonSuperabundantBoards[0];
-                    BreakerWonBoards.AddRange(nonSuperabundantBoards);
-                    return false;
-                }
-            }
+                var b = _remainingBoards[i];
+                var superabundant = IsSuperabundantForGraph(b, G, 0);
 
-            BoardCounts.Add(_remainingBoards.Count);
-            NonColorableBoards.AddRange(_remainingBoards);
-
-            while (_remainingBoards.Count > 0)
-            {
-                var count = _remainingBoards.Count;
-
-                if (ThinkHarder)
+                if (superabundant)
                 {
-                    while (true)
+                    SuperabundantBoards.Add(b);
+
+                    if (ExtraPsi > 0)
                     {
-                        winLength++;
-
-                        var minWinChildCount = int.MaxValue;
-                        var bestBoardIndices = new List<int>();
-                        for (int i = _remainingBoards.Count - 1; i >= 0; i--)
+                        if (ComputeAbundanceSurplus(b) >= ExtraPsi)
                         {
-                            if (_swapAnalyzer.Analyze(_remainingBoards[i], _wonBoards))
-                            {
-                                if (_swapAnalyzer.LastWinChildCount < minWinChildCount)
-                                {
-                                    bestBoardIndices.Clear();
-                                    minWinChildCount = _swapAnalyzer.LastWinChildCount;
-                                }
-
-                                if (_swapAnalyzer.LastWinChildCount <= minWinChildCount)
-                                    bestBoardIndices.Add(i);
-                            }
-                        }
-
-                        if (bestBoardIndices.Count > 0)
-                        {
-                            foreach (var i in bestBoardIndices)
-                                _wonBoards.Add(_remainingBoards[i]);
-                            foreach (var i in bestBoardIndices)
-                                _remainingBoards.RemoveAt(i);
-
-                            if (progress != null)
-                            {
-                                var p = 100 * (totalBoards - _remainingBoards.Count) / totalBoards;
-                                if (p > lastP)
-                                {
-                                    progress(new Tuple<string, int>(string.Format("Finding all {0} move wins...", winLength), p));
-                                    lastP = p;
-                                }
-                            }
+                            SuperabundantWithExtraPsiBoards.Add(b);
                         }
                         else
                         {
-                            break;
-                        }
+                            NonSuperabundantExtraPsiBoardCount++;
 
-                        BoardCounts.Add(_remainingBoards.Count);
+                            if (AllIntermediateBoardsInRestrictedClass)
+                            {
+                                _remainingBoards.RemoveAt(i);
+                                DoProgress(progress, "Finding all superabundant positions with extra psi...");
+                            }
+                        }
                     }
                 }
                 else
                 {
-                    winLength++;
-                    var wonBoards = new List<SuperSlimBoard>();
-                    for (int i = _remainingBoards.Count - 1; i >= 0; i--)
-                    {
-                        var b = _remainingBoards[i];
-                        if (_swapAnalyzer.Analyze(b, _wonBoards))
-                        {
-                            _remainingBoards.RemoveAt(i);
-                            wonBoards.Add(b);
+                    NonSuperabundantBoardCount++;
 
-                            if (progress != null)
-                            {
-                                var p = 100 * (totalBoards - _remainingBoards.Count) / totalBoards;
-                                if (p > lastP)
-                                {
-                                    progress(new Tuple<string, int>(string.Format("Finding all {0} move wins...", winLength), p));
-                                    lastP = p;
-                                }
-                            }
-                        }
-                    }
-
-                    foreach (var b in wonBoards)
-                        _wonBoards.Add(b);
-
-                    BoardsOfDepth[winLength] = wonBoards;
-                }
-                
-                BoardCounts.Add(_remainingBoards.Count);
-
-                if (_remainingBoards.Count == count)
-                {
-                    BreakerWonBoards.AddRange(_remainingBoards);
-
-                    if (BreakerWonBoard == null)
-                        BreakerWonBoard = _remainingBoards[0];
-
-                    if (OnlyConsiderNearlyColorableBoards && MissingEdgeIndex >= 0)
-                    {
-                        FixerWonAllNearlyColorableBoards = false;
-                    }
-                    else if (ExistsNearlyColorableBoardForEachEdge(_remainingBoards))
-                    {
-                        FixerWonAllNearlyColorableBoards = false;
-                        BreakerWonBoard = _remainingBoards.FirstOrDefault(b => _coloringAnalyzer.ColorableWithoutEdge(b, 0));
-
-                        if (BreakerWonBoard == null)
-                            BreakerWonBoard = _remainingBoards.First(b => _coloringAnalyzer.ColorableWithoutEdge(b, 0));
-                    }
-
-                    return false;
+                    BreakerWonBoards.Add(b);
+                    
+                    _remainingBoards.RemoveAt(i);
+                    DoProgress(progress, "Finding all superabundant positions...");
                 }
             }
+        }
 
-            return true;
+        void Analyze(Action<Tuple<string, int>> progress)
+        {
+            while (_remainingBoards.Count > 0)
+            {
+                var wonBoards = new List<SuperSlimBoard>();
+                for (int i = _remainingBoards.Count - 1; i >= 0; i--)
+                {
+                    var b = _remainingBoards[i];
+                    var lastThisRound = i >= 1 && CheckOrdering(b, _remainingBoards[i - 1]);
+
+                    if (_swapAnalyzer.Analyze(b, FixerWonBoards))
+                    {
+                        _remainingBoards.RemoveAt(i);
+                        wonBoards.Add(b);
+
+                        DoProgress(progress, string.Format("Finding all {0} move wins...", BoardCounts.Count));
+                    }
+
+                    if (lastThisRound)
+                    {
+                        break;
+                    }
+                }
+
+                if (wonBoards.Count > 0)
+                {
+                    BoardCounts.Add(wonBoards.Count);
+
+                    foreach (var b in wonBoards)
+                        FixerWonBoards.Add(b);
+
+                    if (_remainingBoards.Count <= 0)
+                        DeepestBoards = wonBoards.ToList();
+                }
+                else
+                {
+                    BoardCounts.Add(0);
+                    break;
+                }
+            }
+        }
+
+        bool CheckOrdering(SuperSlimBoard a, SuperSlimBoard b)
+        {
+            var order = PartialOrderOnBoards;
+            if (order == null)
+                return false;
+
+            return order(this, a, b) > 0;
+        }
+
+        void DoProgress(Action<Tuple<string, int>> progress, string message)
+        {
+            if (progress != null)
+            {
+                var p = 100 * (TotalBoards - _remainingBoards.Count) / TotalBoards;
+                if (p > _lastProgress)
+                {
+                    progress(new Tuple<string, int>(message, p));
+                    _lastProgress = p;
+                }
+            }
+        }
+
+        public Reduction CheckReducibility(SuperSlimBoard board, Action<Tuple<string, int>> progress = null)
+        {
+            if (ReductionMode == FixerBreakeReductionMode.None)
+                return null;
+
+            SubFixableMind.Value.Progress = progress;
+            if (ReductionMode == FixerBreakeReductionMode.Superabundant)
+                return SubFixableMind.Value.CanReduceToSuperabundant(G, board, ExtraPsi);
+
+            return SubFixableMind.Value.CanReduceToWin(G, board);
         }
 
         bool NearlyColorableForEdge(SuperSlimBoard board, int edgeIndex)
@@ -295,21 +329,20 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
 
         bool ExistsNearlyColorableBoardForEachEdge(List<SuperSlimBoard> boards)
         {
-            return Enumerable.Range(0, _lineGraph.N).All(e => boards.Any(b => NearlyColorableForEdge(b, e)));
+            return Enumerable.Range(0, _lineG.N).All(e => boards.Any(b => NearlyColorableForEdge(b, e)));
         }
 
         public bool NearlyColorableForSomeEdge(SuperSlimBoard board)
         {
-            return Enumerable.Range(0, _lineGraph.N).Any(e => NearlyColorableForEdge(board, e));
-        }
-
-        void LookAtSuperabundance()
-        {
-            var packs = Enumerable.Range(0, _lineGraph.N).Select(e => _remainingBoards.Where(b => _coloringAnalyzer.ColorableWithoutEdge(b, e)).ToList()).ToList();
-            var goodPacks = packs.Where(pack => pack.All(ssb => IsSuperabundant(ssb))).ToList();
+            return Enumerable.Range(0, _lineG.N).Any(e => NearlyColorableForEdge(board, e));
         }
 
         public bool IsSuperabundant(SuperSlimBoard b)
+        {
+            return IsSuperabundantForGraph(b, G);
+        }
+
+        public static bool IsSuperabundantForGraph(SuperSlimBoard b, Graph g, int extraPsi = 0)
         {
             ulong subset = 0;
 
@@ -320,15 +353,15 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
                 for (int i = 0; i < b._length; i++)
                     total += (subset & b._trace[i]).PopulationCount() / 2;
 
-                var e = _graph.EdgesOn(subset.ToSet());
+                var e = g.EdgesOn(subset.ToSet());
                 if (total < e)
                     return false;
 
                 subset++;
             }
 
-            if (ExtraPsi > 0)
-                return total >= _graph.E + ExtraPsi;
+            if (extraPsi > 0)
+                return total >= g.E + extraPsi;
 
             return true;
         }
@@ -339,74 +372,21 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
             for (int i = 0; i < b._length; i++)
                 total += b._trace[i].PopulationCount() / 2;
 
-            return total - _graph.E;
+            return total - G.E;
         }
 
-        List<int> ComputeMatchingAbundanceShadow(SuperSlimBoard b)
-        {
-            var shadow = new List<int>();
-
-            ulong subset = 0;
-            while (subset < (1UL << b._stackCount))
-            {
-                int e;
-                if (!IsMatchingAbundant(b, subset, out e))
-                    shadow.Add(e);
-                subset++;
-            }
-
-            shadow.Sort();
-
-            return shadow;
-        }
-
-        bool IsMatchingAbundant(SuperSlimBoard b, ulong subset, out int e)
-        {
-            e = _graph.EdgesOn(subset.ToSet());
-
-            int total = 0;
-            for (int i = 0; i < b._length; i++)
-            {
-                var vc = (subset & b._trace[i]).ToSet();
-                total += _lineGraph.IndependenceNumber(_graph.EdgeIndicesOn(vc));
-            }
-
-            return total >= e;
-        }
-
-        void GenerateAllBoards(Template template, int colorCount, Action<Tuple<string, int>> progress = null)
+        IEnumerable<SuperSlimBoard> EnumerateAllBoards(Template template, int colorCount, Action<Tuple<string, int>> progress = null)
         {
             if (progress != null)
                 progress(new Tuple<string, int>("Finding all positions...", 0));
 
-            foreach (var t in BitLevelGeneration.Assignments_ulong.Generate(template.Sizes, colorCount))
-            {
-                var b = new SuperSlimBoard(t, template.Sizes.Count);
-                _remainingBoards.Add(b);
-            }
+            return BitLevelGeneration.Assignments_ulong.Generate(template.Sizes, colorCount).Select(t => new SuperSlimBoard(t, template.Sizes.Count));
         }
 
         void BuildLineGraph()
         {
-            var adjacent = _graph.Adjacent;
-            int n = adjacent.GetUpperBound(0) + 1;
-
-            _edges = new List<Tuple<int, int>>();
-            for (int i = 0; i < n; i++)
-                for (int j = i + 1; j < n; j++)
-                    if (adjacent[i, j])
-                        _edges.Add(new Tuple<int, int>(i, j));
-
-            var meets = new bool[_edges.Count, _edges.Count];
-            for (int i = 0; i < _edges.Count; i++)
-                for (int j = i + 1; j < _edges.Count; j++)
-                    if (_edges[i].Item1 == _edges[j].Item1 ||
-                        _edges[i].Item1 == _edges[j].Item2 ||
-                        _edges[i].Item2 == _edges[j].Item1 ||
-                        _edges[i].Item2 == _edges[j].Item2)
-                        meets[i, j] = meets[j, i] = true;
-
-            _lineGraph = new Graph(meets);
+            _edges = G.Edges.Value;
+            _lineG = G.LineGraph.Value;
         }
 
         long GetEdgeColorList(SuperSlimBoard b, int e)
@@ -438,12 +418,16 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
             tree.IsColorable = _coloringAnalyzer.Analyze(board);
             tree.IsSuperabundant = win || IsSuperabundant(board);
             tree.GameTreeIndex = _gameTreeIndex;
+            tree.Reduction = CheckReducibility(board);
             _gameTreeIndex++;
 
             if (tree.IsColorable)
                 return tree;
 
             if (!tree.IsSuperabundant)
+                return tree;
+
+            if (tree.Reduction != null)
                 return tree;
 
             var treeInfo = win ? _swapAnalyzer.WinTreeInfo[board] : _swapAnalyzer.LossTreeInfo[board];

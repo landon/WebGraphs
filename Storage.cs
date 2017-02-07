@@ -20,7 +20,7 @@ namespace WebGraphs
         static object _token = new object();
         public static void Save(Graph g, string name)
         {
-            /*try
+            try
             {
                 lock (_token)
                 {
@@ -32,12 +32,12 @@ namespace WebGraphs
             }
             catch (Exception ex) 
             { 
-            }*/
+            }
         }
 
         public static void Delete(string name)
         {
-           /* lock (_token)
+            lock (_token)
             {
                 using (var store = IsolatedStorageFile.GetUserStoreForApplication())
                 {
@@ -48,25 +48,25 @@ namespace WebGraphs
                     }
                     catch { }
                 }
-            }*/
+            }
         }
 
         public static Graph Load(string name)
         {
-          /*  lock (_token)
+            lock (_token)
             {
                 using (var store = IsolatedStorageFile.GetUserStoreForApplication())
                 using (var file = store.OpenFile(name, FileMode.Open))
                 using (var sr = new StreamReader(file))
                     return Graph.Deserialize(sr.ReadToEnd());
-            }*/
+            }
 
             return null;
         }
 
         public static IEnumerable<string> GetFileNames(string searchPattern = null)
         {
-           /* try
+            try
             {
                 lock (_token)
                 {
@@ -78,7 +78,7 @@ namespace WebGraphs
                     }
                 }
             }
-            catch { }*/
+            catch { }
 
             return new List<string>();
         }

@@ -87,6 +87,17 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <NoConfig>true</NoConfig>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'OneMore|AnyCPU'">
+    <OutputPath>bin\OneMore\</OutputPath>
+    <DefineConstants>TRACE;SILVERLIGHT</DefineConstants>
+    <Optimize>true</Optimize>
+    <NoStdLib>true</NoStdLib>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <NoConfig>true</NoConfig>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="MathNet.Numerics, Version=3.2.3.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -252,6 +263,10 @@
     <Content Include="images\zoom out.png" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\BGT\BGT\BGT.csproj">
+      <Project>{eac48eb8-1d40-49ad-95e5-9b496bb610f5}</Project>
+      <Name>BGT</Name>
+    </ProjectReference>
     <ProjectReference Include="BitLevelGeneration\BitLevelGeneration.csproj">
       <Project>{fc557259-af5c-461c-9faa-b0fb01f1a947}</Project>
       <Name>BitLevelGeneration</Name>

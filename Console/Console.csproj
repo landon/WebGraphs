@@ -41,7 +41,7 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>true</Prefer32Bit>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'YetAnother|AnyCPU'">
     <OutputPath>bin\YetAnother\</OutputPath>
@@ -51,11 +51,22 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>true</Prefer32Bit>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'OneMore|AnyCPU'">
+    <OutputPath>bin\OneMore\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Numerics" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -64,18 +75,38 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConAndNon.cs" />
+    <Compile Include="Discharging.cs" />
+    <Compile Include="DoGallaiTrees.cs" />
     <Compile Include="DotRenderer.cs" />
     <Compile Include="EliminateDoubleEdgeNotSubdivisions.cs" />
+    <Compile Include="EliminateTriangleBlowups.cs" />
     <Compile Include="EliminiteDoubleEdgeSubdivisions.cs" />
+    <Compile Include="Extensions.cs" />
+    <Compile Include="FilterTriangleCutsets.cs" />
+    <Compile Include="FindATCounterexample.cs" />
+    <Compile Include="FindChoosableAdvanced.cs" />
     <Compile Include="FindChoosables.cs" />
     <Compile Include="FindFixerBreaker.cs" />
+    <Compile Include="FindFractionalColorable.cs" />
+    <Compile Include="FindFractionalColorableRandomized.cs" />
+    <Compile Include="FindFractionalPaintable.cs" />
+    <Compile Include="FindKP.cs" />
     <Compile Include="FindTarpits.cs" />
     <Compile Include="FixerBreakerTrees.cs" />
+    <Compile Include="GallaiTreeGenerator.cs" />
+    <Compile Include="LFP.cs" />
+    <Compile Include="Matrix.cs" />
+    <Compile Include="Potential.cs" />
+    <Compile Include="GenerateWithExcludedSubgraphs.cs" />
     <Compile Include="GraphEnumerator.cs" />
     <Compile Include="GraphViz.cs" />
+    <Compile Include="IsomorphRemover.cs" />
     <Compile Include="LocalGraphExtensions.cs" />
     <Compile Include="MakePictures.cs" />
+    <Compile Include="MicTester.cs" />
     <Compile Include="MixedChoosables.cs" />
+    <Compile Include="NewGenerator.cs" />
+    <Compile Include="NonCrossing.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="GraphPictureMaker.cs" />
@@ -84,13 +115,21 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resource.resx</DependentUpon>
     </Compile>
+    <Compile Include="RingAssignmentGenerator.cs" />
+    <Compile Include="SinkEliminator.cs" />
     <Compile Include="SuperAbundanceFinder.cs" />
+    <Compile Include="TestBGT.cs" />
+    <Compile Include="UnitDistance.cs" />
     <Compile Include="WeaklyFixableTester.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\BGT\BGT\BGT.csproj">
+      <Project>{eac48eb8-1d40-49ad-95e5-9b496bb610f5}</Project>
+      <Name>BGT</Name>
+    </ProjectReference>
     <ProjectReference Include="..\BitLevelGeneration\BitLevelGeneration.csproj">
       <Project>{fc557259-af5c-461c-9faa-b0fb01f1a947}</Project>
       <Name>BitLevelGeneration</Name>

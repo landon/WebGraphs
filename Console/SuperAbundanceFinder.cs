@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Choosability.FixerBreaker.KnowledgeEngine.Slim.Super;
 
 namespace Console
 {
@@ -35,9 +36,9 @@ namespace Console
                     var winners = new List<Choosability.Graph>();
                     foreach (var g in weightings)
                     {
-                        var mind = new Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.SuperSlimMind(g, false, true);
+                        var mind = new Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.SuperSlimMind(g, false, FixerBreakerSwapMode.SingleSwap);
                         mind.MaxPot = int.MaxValue;
-                        mind.SuperabundantOnly = true;
+                        mind.OnlySuperabundantBoards = true;
                         mind.ExtraPsi = ExtraPsi;
                         mind.OnlyConsiderNearlyColorableBoards = NearColorings;
 

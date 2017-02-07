@@ -12,7 +12,8 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
         public bool IsSuperabundant { get; set; }
         public int GameTreeIndex { get; set; }
         public int SameAsIndex { get; set; }
-        public BreakerChoiceInfo Info {get; set;}
+        public BreakerChoiceInfo Info { get; set; }
+        public Reduction Reduction { get; set; }
 
         public void AddChild(GameTree tree, BreakerChoiceInfo info)
         {

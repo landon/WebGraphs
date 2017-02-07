@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Choosability.Utility;
 using Choosability.FixerBreaker.KnowledgeEngine;
 using System.IO;
+using Choosability.FixerBreaker.KnowledgeEngine.Slim.Super;
 
 namespace Console
 {
@@ -18,13 +19,13 @@ namespace Console
         static bool TreesOrTreesPlusEdgeOnly = false;
         static bool Planar = false;
         static bool LowGirth = false;
-        static bool WeaklyFixable = false;
+        static FixerBreakerSwapMode SwapMode = FixerBreakerSwapMode.SingleSwap;
         const bool NearColorings = true;
 
         static bool MakeWebPage = false;
         static string WebpageRoot = @"C:\Users\landon\Dropbox\Public\Web\GraphData\Fixable\Automated";
 
-        static readonly string WinnersFile = (WeaklyFixable ? "weakly " : "") + (LowGirth ? "low girth induced " : "") + (Planar ? "planar " : "") + (TreesOrTreesPlusEdgeOnly ? "trees or trees plus edge only " : "") + (TriangleFree ? "triangle-free " : "") + (TreesOnly ? "trees only " : "") + (NearColorings ? "near colorings " : "") + "FixerBreaker winners Delta=" + Delta + ".txt";
+        static readonly string WinnersFile = (SwapMode.ToString() + " ") + (LowGirth ? "low girth induced " : "") + (Planar ? "planar " : "") + (TreesOrTreesPlusEdgeOnly ? "trees or trees plus edge only " : "") + (TriangleFree ? "triangle-free " : "") + (TreesOnly ? "trees only " : "") + (NearColorings ? "near colorings " : "") + "FixerBreaker winners Delta=" + Delta + ".txt";
 
         public static void Go()
         {
@@ -43,7 +44,7 @@ namespace Console
                 {
                     System.Console.Write("checking " + g.ToGraph6() + " with degrees [" + string.Join(",", g.VertexWeight) + "] ...");
 
-                    var mind = new Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.SuperSlimMind(g, false, WeaklyFixable);
+                    var mind = new Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.SuperSlimMind(g, false, SwapMode);
                     mind.MaxPot = Delta;
                     mind.OnlyConsiderNearlyColorableBoards = NearColorings;
 

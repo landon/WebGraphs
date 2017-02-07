@@ -76,6 +76,15 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'OneMore|AnyCPU'">
+    <OutputPath>bin\OneMore\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -91,6 +100,7 @@
     <Compile Include="FixerBreaker\Chronicle\ChronicledBranch.cs" />
     <Compile Include="FixerBreaker\KnowledgeEngine\IMind.cs" />
     <Compile Include="FixerBreaker\KnowledgeEngine\Slim\SortedIntList.cs" />
+    <Compile Include="FixerBreaker\KnowledgeEngine\Slim\Super\BoardOrderings.cs" />
     <Compile Include="FixerBreaker\KnowledgeEngine\Slim\Super\GameTree.cs" />
     <Compile Include="FixerBreaker\KnowledgeEngine\Slim\Super\GameTreeInfo.cs" />
     <Compile Include="FixerBreaker\KnowledgeEngine\Slim\Super\Hashing.cs" />
@@ -100,6 +110,7 @@
     <Compile Include="FixerBreaker\KnowledgeEngine\Slim\Super\Proofs\ProofBuilder.cs" />
     <Compile Include="FixerBreaker\KnowledgeEngine\Slim\Super\Proofs\ProofCase.cs" />
     <Compile Include="FixerBreaker\KnowledgeEngine\Slim\Super\Proofs\PermutationAwareProofBuilder.cs" />
+    <Compile Include="FixerBreaker\KnowledgeEngine\Slim\Super\SubFixableMind.cs" />
     <Compile Include="FixerBreaker\KnowledgeEngine\Slim\Super\SuperSlimBoard.cs" />
     <Compile Include="FixerBreaker\KnowledgeEngine\Slim\Super\SuperSlimColoringAnalyzer.cs" />
     <Compile Include="FixerBreaker\KnowledgeEngine\Slim\Super\SuperSlimMind.cs" />
@@ -108,6 +119,7 @@
     <Compile Include="IndependenceRatio\MinorFinder.cs" />
     <Compile Include="OneFactorizationsOfCompleteGraph.cs" />
     <Compile Include="DataStructures\UnionFind.cs" />
+    <Compile Include="Planar\Triangulation.cs" />
     <Compile Include="Polynomials\FactoredRational.cs" />
     <Compile Include="Polynomials\GraphPolynomial.cs" />
     <Compile Include="Polynomials\Normalizer.cs" />
@@ -194,7 +206,6 @@
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
-  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

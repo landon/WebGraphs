@@ -221,11 +221,11 @@ namespace Graphs
 
             int width = Width;
             int height = Height;
-            var bounds = _graph.BoundingRectangle;
+            var bounds = _graph.SelectedBoundingRectangle;
             var c = new Vector(bounds.Left + bounds.Width / 2, bounds.Top + bounds.Height / 2);
 
             var actual = Math.Min(width, height);
-            Zoom = 0.9 * actual / Math.Max(bounds.Width, bounds.Height) / BaseViewScale;
+            Zoom = 0.8 * actual / Math.Max(bounds.Width, bounds.Height) / BaseViewScale;
 
             var center = new Vector((double)width / (double)_viewScale * 0.5, (double)height / (double)_viewScale * 0.5);
             _graph.Translate(center - c);
@@ -834,41 +834,34 @@ namespace Graphs
             var o = GetHit(x, y);
 
             var graphChanged = false;
-            switch (_state)
+            if (_state == States.Idle && !Canvas.IsControlKeyDown)
             {
-                case States.Idle:
-                case States.DraggingVertex:
-                case States.DraggingSelectionRegion:
-                case States.DraggingSelectedVertices:
+                if (button == MouseButton.Left)
+                {
+                    if (o == null)
                     {
-                        if (button == MouseButton.Left)
-                        {
-                            if (o == null)
-                            {
-                                var v = new Vertex(x, y);
-                                if (_graph.AddVertex(v))
-                                    graphChanged = true;
-                            }
-                            else if (o is Vertex)
-                            {
-                                var endVertex = (Vertex)o;
-                                foreach (var v in _graph.SelectedVertices)
-                                {
-                                    if (_graph.AddEdge(v, endVertex))
-                                        graphChanged = true;
-                                }
-                            }
-                        }
-                        else if (button == MouseButton.Right)
-                        {
-                            if (o is Vertex)
-                            {
-                                if (_graph.RemoveVertex((Vertex)o))
-                                    graphChanged = true;
-                            }
-                        }
-                        break;
+                        var v = new Vertex(x, y);
+                        if (_graph.AddVertex(v))
+                            graphChanged = true;
                     }
+                    else if (o is Vertex)
+                    {
+                        var endVertex = (Vertex)o;
+                        foreach (var v in _graph.SelectedVertices)
+                        {
+                            if (_graph.AddEdge(v, endVertex))
+                                graphChanged = true;
+                        }
+                    }
+                }
+                else if (button == MouseButton.Right)
+                {
+                    if (o is Vertex)
+                    {
+                        if (_graph.RemoveVertex((Vertex)o))
+                            graphChanged = true;
+                    }
+                }
             }
 
             Invalidate();

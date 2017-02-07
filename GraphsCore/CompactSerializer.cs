@@ -71,9 +71,10 @@ namespace GraphsCore
 
             return null;
         }
-
+        
         static Graph DeserializeFromByteArray(byte[] bytes)
         {
+            
             using(var m = new MemoryStream(bytes))
             using (var br = new BinaryReader(m, Encoding.UTF8))
             {

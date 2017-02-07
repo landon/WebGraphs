@@ -10,7 +10,7 @@ namespace Console
 {
     public class GraphPictureMaker
     {
-        static readonly DotRenderer Renderer = new DotRenderer(@"C:\Program Files (x86)\Graphviz2.38\bin\neato.exe");
+        public DotRenderer Renderer = new DotRenderer(@"C:\Program Files (x86)\Graphviz2.38\bin\neato.exe");
         static readonly List<string> DotColors = new List<string>() { "cadetblue", "brown", "dodgerblue", "turquoise", "orchid", "blue", "red", "green", 
                                                                       "yellow", "cyan",
                                                                       "limegreen",  "pink", 
@@ -18,16 +18,31 @@ namespace Console
 
         IEnumerable<Graph> _graphs;
 
+        bool _useLaplacian = false;
+        public bool UseLaplacian
+        {
+            get { return _useLaplacian; }
+            set
+            {
+                _useLaplacian = value;
+               // Renderer.SkipLayout = _useLaplacian;
+            }
+        }
         public bool Directed { get; set; }
         public bool ShowFactors { get; set; }
         public bool InDegreeTerms { get; set; }
         public bool IsLowPlus { get; set; }
+        public bool IsFivePlus { get; set; }
+        public bool CompressName { get; set; }
+        public bool NameGraph6 { get;  set; }
+        public int K { get; set; }
 
         public GraphPictureMaker(string graphFile) : this(GraphEnumerator.EnumerateGraphFile(graphFile)) { }
         public GraphPictureMaker(params Graph[] graphs) : this((IEnumerable<Graph>)graphs) { }
         public GraphPictureMaker(IEnumerable<Graph> graphs)
         {
             _graphs = graphs;
+            CompressName = true;
         }
 
         public void DrawAllAndMakeWebpage(string outputDirectory)
@@ -44,7 +59,40 @@ namespace Console
             Directory.CreateDirectory(outputDirectory);
             foreach (var g in _graphs)
             {
-                var name = string.Join("", g.GetEdgeWeights().Select(ew => Math.Abs(ew)));
+                string name;
+                if (NameGraph6)
+                {
+                    name = g.ToGraph6().LegalizeFileName();
+                    foreach (var c in "abcdefghijklmnopqrstuvwxyz".ToCharArray())
+                        name = name.Replace(c.ToString(), "(" + c + ")");
+                }
+                else if (CompressName)
+                {
+                    var bytes = new List<byte>();
+                    var bits = g.GetEdgeWeights().Select(ew => Math.Abs(ew)).ToList();
+                    int i = 0;
+                    while (true)
+                    {
+                        byte b = 0;
+                        int j = i;
+                        for (; j < Math.Min(bits.Count, i + 8); j++)
+                        {
+                            b |= (byte)(1 << bits[j - i]);
+                        }
+
+                        bytes.Add(b);
+                        if (j >= bits.Count)
+                            break;
+
+                        i = j;
+                    }
+
+                    name = Convert.ToBase64String(bytes.ToArray());
+                }
+                else
+                {
+                    name = string.Join("", g.GetEdgeWeights().Select(ew => Math.Abs(ew)));
+                }
                 if (g.VertexWeight != null)
                     name += "[" + string.Join(",", g.VertexWeight) + "]";
 
@@ -68,13 +116,13 @@ namespace Console
                     name += "[" + string.Join(",", g.VertexWeight) + "]";
 
                 using(var sw = new StreamWriter(Path.Combine(outputDirectory, name) + ".dot"))
-                    sw.Write(ToDot(g, Directed, ShowFactors));
+                    sw.Write(ToDot(g, Directed, ShowFactors, InDegreeTerms, IsLowPlus, IsFivePlus, UseLaplacian, K));
             }
         }
 
         string Draw(Graph g, string path, DotRenderType renderType = DotRenderType.png)
         {
-            var imageFile = Renderer.Render(ToDot(g, Directed, ShowFactors, InDegreeTerms, IsLowPlus), path, renderType);
+            var imageFile = Renderer.Render(ToDot(g, Directed, ShowFactors, InDegreeTerms, IsLowPlus, IsFivePlus, UseLaplacian, K), path, renderType);
          
             if (renderType == DotRenderType.svg)
                 FixSvg(imageFile);
@@ -103,10 +151,17 @@ namespace Console
             }
         }
 
-        static string ToDot(Graph g, bool directed = false, bool showFactors = false, bool inDegreeTerms = false, bool isLowPlus = false)
+        static string ToDot(Graph g, bool directed = false, bool showFactors = false, bool inDegreeTerms = false, bool isLowPlus = false, bool isFivePlus = false, bool useLaplacian = false, int K = 0)
         {
             if (showFactors)
                 return g.ToDotWithFactors();
+
+            List<Graphs.Vector> fixedPositions = null;
+            if (useLaplacian)
+            {
+                fixedPositions = GraphsCore.Layout.GetLaplacianLayout(g);
+                //fixedPositions = GraphsCore.Layout.GetSpringsLayout(g);
+            }
 
             var sb = new StringBuilder();
 
@@ -120,11 +175,13 @@ namespace Console
             sb.AppendLine("node[fontsize=42, fontname=\"Latin Modern Math\" color=black; shape=circle, penwidth=1, width = .92, height=.92, fixedsize=true];");
             sb.AppendLine("edge[style=bold, color=black, penwidth=2];");
 
+            var maxDegree = g.MaxDegree;
+            var needUpped = g.VertexWeight == null ? true : g.Vertices.Max(vv => g.VertexWeight[vv]) < 5;
             foreach (int v in g.Vertices)
             {
                 int colorIndex;
                 var label = "";
-                if (directed)
+                if (directed && !isFivePlus)
                 {
                     label = g.InDegree(v).ToString();
                     colorIndex = g.InDegree(v);
@@ -135,6 +192,8 @@ namespace Console
                     {
                         label = "";
                         colorIndex = 2;
+                        if (g.Degree(v) == K - 1)
+                            colorIndex = 3;
                     }
                     else if (isLowPlus)
                     {
@@ -161,6 +220,12 @@ namespace Console
                         //  colorIndex = dd + 2;
                         colorIndex = DotColors.Count + 1;
                     }
+                    else if (isFivePlus)
+                    {
+                        var ww = needUpped ? g.VertexWeight[v] + 5 : g.VertexWeight[v];
+                        label = (ww).ToString();
+                        colorIndex = ww - 5 + 2;
+                    }
                     else
                     {
                         label = g.VertexWeight[v].ToString();
@@ -173,7 +238,14 @@ namespace Console
                 if (colorIndex < 0)
                     colorIndex += 13;
 
-                sb.AppendLine(string.Format(@"{0} [label = ""{2}"", style = filled, fillcolor = ""{1}""];", v, DotColors[colorIndex % DotColors.Count], label));
+                if (fixedPositions != null)
+                {
+                    sb.AppendLine(string.Format(@"{0} [label = ""{2}"", style = filled, fillcolor = ""{1}"", pos = ""{3},{4}""];", v, DotColors[colorIndex % DotColors.Count], label, fixedPositions[v].X, fixedPositions[v].Y));
+                }
+                else
+                {
+                    sb.AppendLine(string.Format(@"{0} [label = ""{2}"", style = filled, fillcolor = ""{1}""];", v, DotColors[colorIndex % DotColors.Count], label));
+                }
             }
 
             for (int i = 0; i < g.N; i++)
@@ -196,5 +268,7 @@ namespace Console
             sb.AppendLine("}");
             return sb.ToString();
         }
+
+        
     }
 }

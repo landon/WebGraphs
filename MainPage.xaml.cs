@@ -35,6 +35,12 @@ namespace WebGraphs
 {
     public partial class MainPage : UserControl
     {
+        Random RNG = new Random(DateTime.Now.Millisecond);
+        List<SuperSlimBoard> _lastGeneratedBoards;
+        Choosability.Graph _lastGenerationGraph;
+        int _lastGenerationIndex;
+        List<int> _lastGenerationSizes;
+
         public MainPage()
         {
             InitializeComponent();
@@ -63,8 +69,6 @@ namespace WebGraphs
             _mainMenu.Check2FoldD1Paintable += Check2FoldD1Paintable;
             _mainMenu.FindPaintNumber += FindPaintNumber;
             _mainMenu.ExportTeX += ExportTeX;
-            _mainMenu.AnalyzeFixerBreaker += AnalyzeFixerBreaker;
-            _mainMenu.AnalyzeFixerBreakerWeaklyFixable += AnalyzeFixerBreakerWeaklyFixable;
             _mainMenu.DoMozhan += DoMozhan;
             _mainMenu.DoWebLink += ExportWebLink;
             _mainMenu.DoLightWebLink += ExportLightWebLink;
@@ -86,8 +90,7 @@ namespace WebGraphs
             _mainMenu.LabelWithOutDegreesPlusOneClicked += LabelWithOutDegreesPlusOne;
             _mainMenu.ComputeSignSum += ComputeSignSum;
             _mainMenu.ClearOrientation += ClearOrientation;
-            _mainMenu.AnalyzeOnlyNearColorings += AnalyzeOnlyNearColorings;
-            _mainMenu.AnalyzeOnlyNearColoringsForSelectedEdge += AnalyzeOnlyNearColoringsForSelectedEdge;
+          
             _mainMenu.CheckFGPaintable += CheckFGPaintable;
             _mainMenu.DoLaplacianLayout += DoLaplacianLayout;
             _mainMenu.DoWalkMatrixLayout += DoWalkMatrixLayout;
@@ -102,15 +105,20 @@ namespace WebGraphs
             _mainMenu.DoSixFoldWay += _mainMenu_DoSixFoldWay;
             _mainMenu.DoTiling += _mainMenu_DoTiling;
             _mainMenu.DoSpin += _mainMenu_DoSpin;
-            _mainMenu.DoSuperabundantOnly += AnalyzeSuperabundantOnly;
-            _mainMenu.DoSuperabundantOnlyWeakly += AnalyzeSuperabundantOnlyWeakly;
-            _mainMenu.DoGenerateProof += _mainMenu_DoGenerateProof;
-            _mainMenu.DoGenerateProofSelectedEdge += _mainMenu_DoGenerateProofSelectedEdge;
-            _mainMenu.OnToggleFixerBreakerThinkHarder += _mainMenu_OnToggleFixerBreakerThinkHarder;
-            _mainMenu.DoSuperabundantOnlyNearColorings += _mainMenu_DoSuperabundantOnlyNearColorings;
+            _mainMenu.DoCheckKP += CheckKP;
+          
             _mainMenu.OnAddClockSpindle += _mainMenu_OnAddClockSpindle;
             _mainMenu.OnAddCClockSpindle += _mainMenu_OnAddCClockSpindle;
-            _mainMenu.OnAnalyzeCurrentBoard += _mainMenu_OnAnalyzeCurrentBoard;
+
+            _mainMenu.OnNextDeepestBoard += GoNextDeepestBoard;
+
+            _mainMenu.Analyze += AnalyzeFixerBreaker;
+            _mainMenu.AnalyzeCurrentBoard += _mainMenu_OnAnalyzeCurrentBoard;
+            _mainMenu.GenenerateBoard += _mainMenu_OnGenenerateBoard;
+
+            _mainMenu.ExtendTriangulation += _mainMenu_ExtendTriangulation;
+
+            _mainMenu.OnReverseSelectedEdgeOrientations += ReverseSelectedEdgeOrientations;
 
             _propertyGrid.SomethingChanged += _propertyGrid_SomethingChanged;
 
@@ -368,6 +376,8 @@ namespace WebGraphs
                 case Key.A:
                     break;
                 case Key.Add:
+                    if (Keyboard.Modifiers == ModifierKeys.Control)
+                        ZoomIn();
                     break;
                 case Key.Alt:
                     break;
@@ -520,6 +530,8 @@ namespace WebGraphs
                 case Key.Space:
                     break;
                 case Key.Subtract:
+                    if (Keyboard.Modifiers == ModifierKeys.Control)
+                        ZoomOut();
                     break;
                 case Key.T:
                     break;
@@ -790,7 +802,6 @@ trash can button.
 
             FocusSelectedTab();
         }
-
 
         async void _mainMenu_DoListExtraSpindleEdges()
         {
@@ -1075,6 +1086,36 @@ trash can button.
              }, (Layout.Algorithm)SpindleAnalyzer.RotateDiamondsLayout, locations, data);
         }
 
+        void _mainMenu_ExtendTriangulation()
+        {
+            var blob = AlgorithmBlob.Create(SelectedTabCanvas);
+
+            blob.AlgorithmGraph.VertexWeight = blob.UIGraph.Vertices.Select(v =>
+                {
+                    int d;
+                    if (!int.TryParse(v.Label, out d))
+                        return 0;
+
+                    return d;
+                }).ToList();
+
+            var h = Choosability.Planar.Triangulation.Extend(blob.AlgorithmGraph);
+            if (h == null)
+            {
+                MessageBox.Show("something is not right there");
+            }
+            else
+            {
+                var ui = new Graphs.Graph(h, h.Vertices.Select(vv => new Vector()).ToList(), false);
+                foreach (var v in ui.Vertices)
+                {
+                    if (v.Label == "0")
+                        v.Label = "";
+                }
+                AddTab(ui, "extended " + SelectedTabCanvas.Title, false);
+                DoLaplacianLayout();
+            }
+        }
 
         void ReverseSelectedEdges()
         {
@@ -1173,7 +1214,7 @@ trash can button.
         }
         void DoAdjacencyMatrix()
         {
-            ShowText(SelectedTabCanvas.GraphCanvas.Graph.GetEdgeWeights().ToAdjacencyMatrix(SelectedTabCanvas.GraphCanvas.Graph.IsDirected));
+            ShowText(SelectedTabCanvas.GraphCanvas.Graph.GetEdgeWeights().ToAdjacencyMatrixString(SelectedTabCanvas.GraphCanvas.Graph.IsDirected));
         }
         void DoEdgeWeights()
         {
@@ -1307,6 +1348,69 @@ trash can button.
             }
         }
 
+        async void CheckKP()
+        {
+            var blob = AlgorithmBlob.Create(SelectedTabCanvas);
+            if (blob == null)
+                return;
+
+            foreach (var vv in blob.UIGraph.Vertices)
+                vv.ChangeToDefaultColor();
+
+            using (var resultWindow = new ResultWindow())
+            {
+                var badOrientation = await Task.Factory.StartNew<Tuple<List<int>, List<List<int>>>>(() =>
+                {
+                    var fatEdges = blob.UIGraph.Edges.Where(ee => ee.Multiplicity > 1).ToList();
+                    var symmetricEdges = fatEdges.Select(fe => new int[] { blob.UIGraph.Vertices.IndexOf(fe.V1), blob.UIGraph.Vertices.IndexOf(fe.V2) }.OrderBy(x => x).ToArray()).Select(p => blob.AlgorithmGraph.Edges.Value.FirstIndex(ee => ee.Item1 == p[0] && ee.Item2 == p[1])).ToList();
+                    List<int> badSubgraph;
+                    var oo = blob.AlgorithmGraph.CheckKernelPerfectForAllOrientations(symmetricEdges, out badSubgraph);
+
+                    if (oo == null)
+                        return null;
+
+                    return new Tuple<List<int>, List<List<int>>>(badSubgraph, oo);
+                });
+
+                if (badOrientation != null)
+                {
+                    var w = new List<int>();
+                    int k = 0;
+                    for (int i = 0; i < blob.AlgorithmGraph.N; i++)
+                    {
+                        for (int j = i + 1; j < blob.AlgorithmGraph.N; j++)
+                        {
+                            if (blob.AlgorithmGraph[i, j])
+                            {
+                                if (badOrientation.Item2[j].Contains(i))
+                                    w.Add(-1);
+                                else
+                                    w.Add(1);
+                            }
+                            else
+                            {
+                                w.Add(0);
+                            }
+
+                            k++;
+                        }
+                    }
+
+                    blob.UIGraph.ModifyOrientation(w);
+                    foreach (var v in badOrientation.Item1)
+                        blob.UIGraph.Vertices[v].Color = new ARGB(255, 0, 0);
+
+                    SelectedTabCanvas.Invalidate();
+                    resultWindow.AddChild(new TextBlock() { Text = "not kernel-perfect" });
+                }
+                else
+                {
+                    ClearOrientation();
+                    resultWindow.AddChild(new TextBlock() { Text = "kernel-perfect for all orientations" });
+                }
+            }
+        }
+
         bool ParseListAndDemandSizes(AlgorithmBlob blob, ResultWindow resultWindow, out List<int> f, out List<int> g)
         {
             f = new List<int>();
@@ -1421,6 +1525,23 @@ trash can button.
             SelectedTabCanvas.Invalidate();
         }
 
+        void ReverseSelectedEdgeOrientations()
+        {
+            var blob = AlgorithmBlob.Create(SelectedTabCanvas);
+            if (blob == null)
+                return;
+
+            foreach (var v in blob.UIGraph.SelectedEdges)
+            {
+                if (v.Orientation == Edge.Orientations.Backward)
+                    v.Orientation = Edge.Orientations.Forward;
+                else if (v.Orientation == Edge.Orientations.Forward)
+                    v.Orientation = Edge.Orientations.Backward;
+            }
+            SelectedTabCanvas.Invalidate();
+        }
+
+
         async void CheckfAT()
         {
             var blob = AlgorithmBlob.Create(SelectedTabCanvas);
@@ -1475,13 +1596,15 @@ trash can button.
             if (blob == null)
                 return;
 
+            var tokenSource = new CancellationTokenSource();
+            var token = tokenSource.Token;
             using (var resultWindow = new ResultWindow())
             {
                 var paintable = false;
                 await Task.Factory.StartNew(() =>
                 {
-                    paintable = blob.AlgorithmGraph.IsOnlineFChoosable(v => blob.AlgorithmGraph.Degree(v) - (blob.UIGraph.Vertices[v].IsSelected ? 0 : 1) - blob.UIGraph.Vertices[v].Modifier);
-                });
+                    paintable = blob.AlgorithmGraph.IsOnlineFChoosable(v => blob.AlgorithmGraph.Degree(v) - (blob.UIGraph.Vertices[v].IsSelected ? 0 : 1) - blob.UIGraph.Vertices[v].Modifier, token);
+                }, token);
 
                 resultWindow.AddChild(new TextBlock() { Text = (paintable ? "is d1-paintable" : "not d1-paintable") + Environment.NewLine + Choosability.Graph.NodesVisited + " nodes visited" + Environment.NewLine + Choosability.Graph.CacheHits + " cache hits" });
             }
@@ -1492,6 +1615,8 @@ trash can button.
             if (blob == null)
                 return;
 
+            var tokenSource = new CancellationTokenSource();
+            var token = tokenSource.Token;
             using (var resultWindow = new ResultWindow())
             {
                 var listSizes = ParseListSizes(blob, resultWindow);
@@ -1501,8 +1626,8 @@ trash can button.
                 var paintable = false;
                 await Task.Factory.StartNew(() =>
                 {
-                    paintable = blob.AlgorithmGraph.IsOnlineFChoosable(v => listSizes[v]);
-                });
+                    paintable = blob.AlgorithmGraph.IsOnlineFChoosable(v => listSizes[v], token);
+                }, token);
 
                 resultWindow.AddChild(new TextBlock() { Text = (paintable ? "is f-paintable" : "not f-paintable") + Environment.NewLine + Choosability.Graph.NodesVisited + " nodes visited" + Environment.NewLine + Choosability.Graph.CacheHits + " cache hits" });
             }
@@ -1660,7 +1785,106 @@ trash can button.
         {
         }
 
-        async void _mainMenu_OnAnalyzeCurrentBoard()
+        void GoNextDeepestBoard()
+        {
+            var blob = AlgorithmBlob.Create(SelectedTabCanvas);
+
+            if (_lastGeneratedBoards != null)
+            {
+                var board = _lastGeneratedBoards[_lastGenerationIndex];
+                _lastGenerationIndex = (_lastGenerationIndex + 1) % _lastGeneratedBoards.Count;
+
+                for (int j = 0; j < blob.UIGraph.Vertices.Count; j++)
+                {
+                    blob.UIGraph.Vertices[j].Label = string.Join(",", board.Stacks.Value[j].ToSet());
+                }
+            }
+
+            SelectedTabCanvas.Invalidate();
+        }
+
+        async void _mainMenu_OnGenenerateBoard(bool nearColoring, int extraPsi, FixerBreakerSwapMode swapMode, bool allowAllIntermediateBoards, bool superabundantOnly, bool generateProof, FixerBreakeReductionMode reductionMode)
+        {
+            var blob = AlgorithmBlob.Create(SelectedTabCanvas);
+            var G = blob.AlgorithmGraph;
+            var missingEdgeIndex = GetMissingEdgeIndex(nearColoring);
+
+            var sizes = G.Vertices.Select(v => blob.UIGraph.Vertices[v].Label.TryParseInt().Value).ToList();
+            using (var resultWindow = new ResultWindow(true, false))
+            {
+                int maxDepth = 0;
+                resultWindow.Show();
+                _lastGeneratedBoards = await Task.Factory.StartNew<List<SuperSlimBoard>>(() =>
+                    {
+                        var extraPsiBoards = new List<SuperSlimBoard>();
+                        var template = new Template(sizes);
+
+                        var mind = new SuperSlimMind(G, true, swapMode, reductionMode);
+                        mind.OnlySuperabundantBoards = true;
+                        mind.ExtraPsi = extraPsi;
+                        mind.OnlyConsiderNearlyColorableBoards = nearColoring;
+                        mind.MaxPot = int.MaxValue;
+                        mind.MissingEdgeIndex = missingEdgeIndex;
+                        mind.AllIntermediateBoardsInRestrictedClass = !allowAllIntermediateBoards;
+                        mind.PartialOrderOnBoards = BoardOrderings.OrderingFunc;
+
+                        var win = mind.Analyze(template, resultWindow.OnProgress);
+
+                        if (win)
+                        {
+                            List<SuperSlimBoard> deepestBoards;
+                            if (mind.DeepestBoards == null)
+                            {
+                                IEnumerable<SuperSlimBoard> allWins = mind.FixerWonBoards.ToList();
+                                if (mind.OnlyConsiderNearlyColorableBoards)
+                                    allWins = allWins.Intersect(mind.NearlyColorableBoards);
+                                if (mind.OnlySuperabundantBoards)
+                                {
+                                    if (mind.ExtraPsi <= 0)
+                                        allWins = allWins.Intersect(mind.SuperabundantBoards);
+                                    else
+                                        allWins = allWins.Intersect(mind.SuperabundantWithExtraPsiBoards);
+                                }
+
+                                var gameTrees = allWins.Select(bb => mind.BuildGameTree(bb)).ToList();
+
+                                maxDepth = gameTrees.Max(gt => gt.GetDepth());
+                                deepestBoards = gameTrees.Where(gt => gt.GetDepth() == maxDepth).Select(gt => gt.Board).ToList();
+                            }
+                            else
+                            {
+                                deepestBoards = mind.DeepestBoards;
+                            }
+
+                            return deepestBoards;
+                        }
+                        else
+                            return null;
+                    });
+
+                _lastGenerationIndex = 0;
+                resultWindow.ClearChildren();
+
+                var t = new TextBox();
+
+                if (_lastGeneratedBoards == null)
+                {
+                    t.Text = "Breaker wins under these conditions.";
+                }
+                else
+                {
+                    t.Text = "Here is a deepest board (depth " + maxDepth + ").  There are " + _lastGeneratedBoards.Count + " of them.";
+                }
+
+                resultWindow.AddChild(t);
+            }
+
+            _lastGenerationGraph = G;
+
+            GoNextDeepestBoard();
+        }
+
+        async void _mainMenu_OnAnalyzeCurrentBoard(bool nearColoring, int extraPsi, FixerBreakerSwapMode swapMode, bool allowAllIntermediateBoards, bool superabundantOnly, bool generateProof, FixerBreakeReductionMode reductionMode)
         {
             var blob = AlgorithmBlob.Create(SelectedTabCanvas);
             var G = blob.AlgorithmGraph;
@@ -1692,12 +1916,16 @@ trash can button.
 
             var pot = lists.SelectMany(l => l).Distinct().ToList();
 
-            var mind = new Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.SuperSlimMind(G, true, true);
+            var mind = new Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.SuperSlimMind(G, true, swapMode, reductionMode);
             mind.MaxPot = pot.Count;
-            mind.SuperabundantOnly = true;
-            mind.OnlyConsiderNearlyColorableBoards = false;
+            mind.OnlySuperabundantBoards = true;
+            mind.ExtraPsi = extraPsi;
+            mind.OnlyConsiderNearlyColorableBoards = nearColoring;
+            mind.MissingEdgeIndex = GetMissingEdgeIndex(nearColoring);
+            mind.AllIntermediateBoardsInRestrictedClass = !allowAllIntermediateBoards;
+            mind.PartialOrderOnBoards = BoardOrderings.OrderingFunc;
 
-            var boardAndNumbering = SuperSlimBoard.Create(lists);
+            var boardAndNumbering = SuperSlimBoard.CreateAndNumber(lists);
             var board = boardAndNumbering.Item1;
             var numbering = boardAndNumbering.Item2;
 
@@ -1708,14 +1936,19 @@ trash can button.
                 resultWindow.Show();
                 var result = await Task.Factory.StartNew<string>(() =>
                 {
-                    mind.Analyze(template, resultWindow.OnProgress);
+                    var reduction = mind.CheckReducibility(board, resultWindow.OnProgress);
+                    if (reduction == null)
+                        mind.Analyze(template, resultWindow.OnProgress);
 
                     var sb = new StringBuilder();
                     sb.AppendLine("Ψ - E = " + mind.ComputeAbundanceSurplus(board));
                     sb.AppendLine();
 
-                    
-                    if (mind.FixerWonBoards.Contains(board))
+                    if (reduction != null)
+                    {
+                        sb.AppendLine("Fixer can reduce to a smaller board.");
+                    }
+                    else if (mind.FixerWonBoards.Contains(board))
                     {
                         if (mind.ColorableBoards.Contains(board))
                         {
@@ -1749,7 +1982,7 @@ trash can button.
                     var treeBuilder = new TreeBuilder();
 
                     var tc = AddTab(treeBuilder.BuildWinTree(blob.UIGraph, mind, board, numbering), blob.UIGraph.Name + " win tree");
-                    tc.GraphCanvas.SetZoomDelta(0.04);
+                    tc.GraphCanvas.SetZoomDelta(0.015);
                     tc.GraphCanvas.SnapToGrid = false;
                     tc.GraphCanvas.DrawGrid = false;
                     tc.GraphCanvas.ZoomFitNextPaint();
@@ -1757,86 +1990,28 @@ trash can button.
             }
         }
 
-        bool _useFixerBreakerWildCards = false;
-        bool _fixerBreakerThinkHarder = false;
-        void _mainMenu_OnToggleFixerBreakerThinkHarder()
+        int GetMissingEdgeIndex(bool nearColoring)
         {
-            _fixerBreakerThinkHarder = !_fixerBreakerThinkHarder;
-        }
+            if (!nearColoring)
+                return -1;
 
-        async void _mainMenu_DoGenerateProofSelectedEdge()
-        {
             var blob = AlgorithmBlob.Create(SelectedTabCanvas);
             if (blob == null)
-                return;
-
+                return -1;
             if (blob.SelectedEdgeIndices.Count <= 0)
-            {
-                MessageBox.Show("no edges selected");
-                return;
-            }
+                return -1;
             if (blob.SelectedEdgeIndices.Count >= 2)
-            {
-                MessageBox.Show("too many edges selected");
-                return;
-            }
+                return -1;
 
-            await AnalyzeFixerBreaker(true, blob.SelectedEdgeIndices.First(), false, true);
+            return blob.SelectedEdgeIndices.First();
         }
 
-        async void _mainMenu_DoGenerateProof()
+        async void AnalyzeFixerBreaker(bool nearColoring, int extraPsi, FixerBreakerSwapMode swapMode, bool allowAllIntermediateBoards, bool superabundantOnly, bool generateProof, FixerBreakeReductionMode reductionMode)
         {
-            await AnalyzeFixerBreaker(false, -1, false, true);
+            await AnalyzeFixerBreaker(nearColoring, GetMissingEdgeIndex(nearColoring), superabundantOnly, generateProof, swapMode, extraPsi, allowAllIntermediateBoards, reductionMode);
         }
 
-        async void AnalyzeSuperabundantOnly()
-        {
-            await AnalyzeFixerBreaker(false, -1, true, false, false);
-        }
-
-        async void _mainMenu_DoSuperabundantOnlyNearColorings()
-        {
-            await AnalyzeFixerBreaker(true, -1, true, false, false);
-        }
-
-        async void AnalyzeSuperabundantOnlyWeakly()
-        {
-            await AnalyzeFixerBreaker(false, -1, true, false, true);
-        }
-
-        async void AnalyzeOnlyNearColoringsForSelectedEdge()
-        {
-            var blob = AlgorithmBlob.Create(SelectedTabCanvas);
-            if (blob == null)
-                return;
-
-            if (blob.SelectedEdgeIndices.Count <= 0)
-            {
-                MessageBox.Show("no edges selected");
-                return;
-            }
-            if (blob.SelectedEdgeIndices.Count >= 2)
-            {
-                MessageBox.Show("too many edges selected");
-                return;
-            }
-
-            await AnalyzeFixerBreaker(true, blob.SelectedEdgeIndices.First());
-        }
-        async void AnalyzeOnlyNearColorings()
-        {
-            await AnalyzeFixerBreaker(true);
-        }
-        async void AnalyzeFixerBreaker()
-        {
-            await AnalyzeFixerBreaker(false);
-        }
-        async void AnalyzeFixerBreakerWeaklyFixable()
-        {
-            await AnalyzeFixerBreaker(false, -1, false, false, true);
-        }
-
-        async Task<string> AnalyzeFixerBreaker(bool onlyNearColorings, int missingEdgeIndex = -1, bool superAbundantOnly = false, bool generateProof = false, bool weaklyFixable = false)
+        async Task<string> AnalyzeFixerBreaker(bool onlyNearColorings, int missingEdgeIndex, bool superAbundantOnly, bool generateProof, FixerBreakerSwapMode swapMode, int extraPsi, bool allowAllIntermediateBoards, FixerBreakeReductionMode reductionMode)
         {
             var proof = "";
             var blob = AlgorithmBlob.Create(SelectedTabCanvas);
@@ -1867,12 +2042,14 @@ trash can button.
                 template = new Template(G.Vertices.Select(v => potSize + G.Degree(v) - blob.UIGraph.Vertices[v].Label.TryParseInt().Value).ToList());
             }
 
-            var mind = new Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.SuperSlimMind(G, generateProof, weaklyFixable);
+            var mind = new Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.SuperSlimMind(G, generateProof, swapMode, reductionMode);
             mind.MaxPot = potSize;
-            mind.SuperabundantOnly = superAbundantOnly;
+            mind.OnlySuperabundantBoards = superAbundantOnly;
             mind.OnlyConsiderNearlyColorableBoards = onlyNearColorings;
             mind.MissingEdgeIndex = missingEdgeIndex;
-            mind.ThinkHarder = _fixerBreakerThinkHarder;
+            mind.ExtraPsi = extraPsi;
+            mind.AllIntermediateBoardsInRestrictedClass = !allowAllIntermediateBoards;
+            mind.PartialOrderOnBoards = BoardOrderings.OrderingFunc;
             
             using (var resultWindow = new ResultWindow(true))
             {
@@ -1888,9 +2065,10 @@ trash can button.
                     try
                     {
                         var win = mind.Analyze(template, resultWindow.OnProgress);
+                        var stats = GetStats(mind);
+
                         if (superAbundantOnly)
                         {
-                            var stats = GetStats(mind.BoardCountsList);
                             if (win)
                                 return "Fixer wins\n\n" + stats;
 
@@ -1898,55 +2076,45 @@ trash can button.
                         }
                         else
                         {
-                            var stats = GetStats(mind.BoardCountsList);
-
-                            if (mind.HasNonSuperabundantBoardThatIsNearlyColorable)
+                            if (generateProof)
                             {
-                                return "Breaker wins since there is a non-superabundant nearly colorable board";
+                                var sb = new StringBuilder();
+                                var gg = blob.UIGraph.Clone();
+                                int i = 1;
+                                foreach (var vv in gg.Vertices)
+                                {
+                                    if (template.Sizes[gg.Vertices.IndexOf(vv)] == potSize)
+                                    {
+                                        vv.Label = "";
+                                    }
+                                    else
+                                    {
+                                        vv.Label = "" + i;
+                                        i++;
+                                    }
+                                }
+
+                                if (mind.OnlyConsiderNearlyColorableBoards)
+                                {
+                                    foreach (var e in blob.UIGraph.SelectedEdges)
+                                        gg.Edges[blob.UIGraph.Edges.IndexOf(e)].Label = "e";
+                                }
+
+                                var tikz = TeXConverter.ToTikz(gg);
+                                var pb = new ArbitraryDegreeProofBuilder(mind, tikz);
+                                pb.UseWildCards = false;
+                                sb.AppendLine(pb.WriteProof());
+
+                                return sb.ToString();
                             }
                             else
                             {
-                                if (generateProof)
-                                {
-                                    var sb = new StringBuilder();
-                                    var gg = blob.UIGraph.Clone();
-                                    int i = 1;
-                                    foreach (var vv in gg.Vertices)
-                                    {
-                                        if (template.Sizes[gg.Vertices.IndexOf(vv)] == potSize)
-                                        {
-                                            vv.Label = "";
-                                        }
-                                        else
-                                        {
-                                            vv.Label = "" + i;
-                                            i++;
-                                        }
-                                    }
+                                if (win)
+                                    return "Fixer wins\n\n" + stats;
 
-                                    if (mind.OnlyConsiderNearlyColorableBoards)
-                                    {
-                                        foreach (var e in blob.UIGraph.SelectedEdges)
-                                            gg.Edges[blob.UIGraph.Edges.IndexOf(e)].Label = "e";
-                                    }
-
-                                    var tikz = TeXConverter.ToTikz(gg);
-                                    var pb = new ArbitraryDegreeProofBuilder(mind, tikz);
-                                    pb.UseWildCards = _useFixerBreakerWildCards;
-                                    sb.AppendLine(pb.WriteProof());
-
-                                    return sb.ToString();
-                                }
-                                else
-                                {
-                                    if (win)
-                                        return "Fixer wins\n\n" + stats;
-                                    if (mind.FixerWonAllNearlyColorableBoards)
-                                        return "Fixer wins on all nearly colorable boards (for some edge)\n\n" + stats;
-
-                                    return "Breaker wins\n\n" + stats;
-                                }
+                                return "Breaker wins\n\n" + stats;
                             }
+
                         }
                     }
                     catch (Exception ex) 
@@ -1961,11 +2129,11 @@ trash can button.
                 t.Text = result;
                 resultWindow.AddChild(t);
 
-                if (!generateProof && mind.BreakerWonBoard != null)
+                if (!generateProof && mind.BreakerWonBoards.Count > 0)
                 {
                     var gr = blob.UIGraph.Clone();
                     for (int i = 0; i < gr.Vertices.Count; i++)
-                        gr.Vertices[i].Label = string.Join(", ", mind.BreakerWonBoard.Stacks.Value[i].ToSet());
+                        gr.Vertices[i].Label = string.Join(", ", mind.BreakerWonBoards[0].Stacks.Value[i].ToSet());
 
                     AddTab(gr, ((TabItem)_tabControl.SelectedItem).Header + " (Breaker win)");
                 }
@@ -1974,40 +2142,29 @@ trash can button.
             return proof;
         }
 
-        static string GetStats(List<List<int>> boardCountsList)
+        static string GetStats(SuperSlimMind mind)
         {
-            if (boardCountsList == null)
-                return "";
-
-            var boardCounts = new List<int>();
-            foreach (var bc in boardCountsList)
+            var sb = new StringBuilder();
+            sb.AppendLine(mind.TotalBoards + " total boards");
+            sb.AppendLine(mind.ColorableBoards.Count + " colorable boards");
+            if (mind.OnlyConsiderNearlyColorableBoards && mind.AllIntermediateBoardsInRestrictedClass)
+                sb.AppendLine(mind.NonNearlyColorableBoardCount + " non-nearly-colorable boards");
+            if (mind.OnlySuperabundantBoards)
             {
-                for (int i = 0; i < bc.Count; i++)
-                {
-                    if (i >= boardCounts.Count)
-                    {
-                        boardCounts.Add(bc[i]);
-                    }
-                    else
-                    {
-                        boardCounts[i] += bc[i];
-                    }
-                }
+                sb.AppendLine(mind.NonSuperabundantBoardCount + " non-superabundant boards");
+                if (mind.ExtraPsi > 0 && mind.AllIntermediateBoardsInRestrictedClass)
+                    sb.AppendLine(mind.NonSuperabundantExtraPsiBoardCount + " non-extra-psi boards");
             }
 
-            if (boardCounts.Count <= 2)
-                return boardCounts[0] + " total boards\n" + (boardCounts[0] - boardCounts[1]) + " colorable boards\n";
+            sb.AppendLine(mind.ReducibleBoards.Count + " reducible boards");
 
-            var stats = boardCounts[0] + " total boards\n" + (boardCounts[0] - boardCounts[1]) + " colorable boards\n" + (boardCounts[1] - boardCounts[2]) + " non-superabundant boards (none nearly colorable)\n";
-            for (int i = 3; i < boardCounts.Count - 1; i++)
-                stats += (boardCounts[i - 1] - boardCounts[i]) + " depth " + (i - 2) + " boards\n";
+            for (int depth = 1; depth < mind.BoardCounts.Count; depth++)
+                sb.AppendLine(mind.BoardCounts[depth] + " depth " + depth + " boards");
 
-            var finalDifference = boardCounts[boardCounts.Count - 2] - boardCounts[boardCounts.Count - 1];
-            if (finalDifference == 0)
-                stats += boardCounts[boardCounts.Count - 1] + " lost boards";
-            else
-                stats += finalDifference + " depth " + (boardCounts.Count - 3) + " boards\n";
-            return stats;
+            if (mind.BreakerWonBoards.Count > 0)
+                sb.AppendLine(mind.BreakerWonBoards.Count + " breaker won boards");
+
+            return sb.ToString();
         }
 
         void OnThoughtProgress(ThoughtProgress p, VisualizationWindow w, GraphCanvas graphCanvas)

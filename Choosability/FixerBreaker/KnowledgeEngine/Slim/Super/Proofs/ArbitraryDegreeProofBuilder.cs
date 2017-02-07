@@ -218,7 +218,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
 
         void GeneralizeAllBoards(StringBuilder sb)
         {
-            _allBoards = Mind.ColorableBoards.Union(Mind.NonColorableBoards).Union(Mind.BreakerWonBoards).ToList();
+            _allBoards = Mind.ColorableBoards.Union(Mind.PlayableBoards).Union(Mind.BreakerWonBoards).ToList();
             _sequenceComparer = new SequenceGeneralizer<int>.VectorComparer();
             _sequenceGeneralizer = new SequenceGeneralizer<int>(_activeIndices.Count, _possibleListIndices);
 

@@ -27,6 +27,8 @@ namespace Console
         public bool DoNotUsePreviousWinners { get; set; }
         public bool OnlyExcludeBySpanningSubgraphs { get; set; }
 
+        public int RingSize { get; set; }
+
         public GraphEnumerator(string winnersFile, int minVertices, int maxVertices, bool usePreviousWinners = true)
         {
             FileRoot = GraphFileRoot;
@@ -47,7 +49,7 @@ namespace Console
 
             foreach (var g in PreviousWinners)
             {
-                WriteGraph(g);
+                g.AppendWeightStringToFile(WinnersFile);
                 Last = g;
             }
 
@@ -105,7 +107,7 @@ namespace Console
                 output.VertexWeight = g.VertexWeight;
 
             output = output ?? g;
-            WriteGraph(output);
+            output.AppendWeightStringToFile(WinnersFile);
         }
 
         public IEnumerable<Graph> EnumerateGraph6File(Func<Graph, bool> filter = null, Func<Graph, IEnumerable<Graph>> secondaryEnumerator = null, bool induced = false)
@@ -122,8 +124,11 @@ namespace Console
 
             for (int N = min; N <= MaxVertices; N++)
             {
+                System.Console.WriteLine();
+                System.Console.ForegroundColor = ConsoleColor.DarkCyan;
                 System.Console.WriteLine("Checking " + N + " vertex graphs...");
-                var file = FileRoot + N + ".g6";
+                System.Console.ForegroundColor = ConsoleColor.White;
+                var file = FileRoot + N + (RingSize > 0 ? "_" + RingSize : "") + ".g6";
                 if (!File.Exists(file))
                 {
                     System.Console.WriteLine(file + " does not exist, skipping.");
@@ -201,17 +206,6 @@ namespace Console
         public static bool WeightConditionFalse(Graph self, Graph A, int selfV, int av)
         {
             return false;
-        }
-
-        void WriteGraph(Graph g)
-        {
-            var edgeWeights = string.Join(" ", g.GetEdgeWeights().Select(x => x.ToString()));
-            var vertexWeights = "";
-            if (g.VertexWeight != null)
-                vertexWeights = " [" + string.Join(",", g.VertexWeight) + "]";
-
-            using (var sw = new StreamWriter(WinnersFile, append: true))
-                sw.WriteLine(edgeWeights + vertexWeights);
         }
 
         public void Dispose()

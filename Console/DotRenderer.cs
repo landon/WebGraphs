@@ -24,6 +24,8 @@ namespace Console
     public class DotRenderer
     {
         string _dotPath;
+        public bool SkipLayout { get; set; }
+
         public DotRenderer(string dotPath)
         {
             _dotPath = dotPath;
@@ -40,7 +42,16 @@ namespace Console
             using (var sw = new StreamWriter(tempFile))
                 sw.Write(dot);
 
-            var info = new ProcessStartInfo(_dotPath, string.Format(@"-T{0} ""{2}"" -o ""{1}""", renderType, fileName, tempFile));
+            string arguments;
+            if (SkipLayout)
+            {
+                arguments = string.Format(@"-n -T{0} ""{2}"" -o ""{1}""", renderType, fileName, tempFile);
+            }
+            else
+            {
+                arguments = string.Format(@"-T{0} ""{2}"" -o ""{1}""", renderType, fileName, tempFile);
+            }
+            var info = new ProcessStartInfo(_dotPath, arguments);
             info.UseShellExecute = false;
             info.CreateNoWindow = true;
 

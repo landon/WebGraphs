@@ -15,7 +15,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
         public int _stackCount;
         int _hashCode;
 
-        public static Tuple<SuperSlimBoard, Bijection<int, T>> Create<T>(List<List<T>> lists)
+        public static Tuple<SuperSlimBoard, Bijection<int, T>> CreateAndNumber<T>(List<List<T>> lists)
         {
             var pot = lists.SelectMany(l => l).Distinct().ToList();
             var numbering = pot.NumberObjects();
@@ -32,6 +32,34 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
             Array.Sort(trace);
             return new Tuple<SuperSlimBoard, Bijection<int, T>>(new SuperSlimBoard(trace, lists.Count), numbering);
         }
+
+        public SuperSlimBoard(IEnumerable<long> ss)
+        {
+            var stacks = ss.ToList();
+            var trace = new List<ulong>();
+
+            for (int i = 0; i < stacks.Count; i++)
+            {
+                var bit = 1UL << i;
+                foreach (var c in stacks[i].ToSet())
+                {
+                    while (trace.Count <= c)
+                        trace.Add(0);
+
+                    trace[c] |= bit;
+                }
+            }
+
+            _trace = trace.Where(t => t != 0).ToArray();
+            Array.Sort(_trace);
+
+            _length = _trace.Length;
+            _stackCount = stacks.Count;
+            _hashCode = Hashing.Hash(_trace, _length);
+
+            MakeLazyStacks();
+        }
+
 
         public SuperSlimBoard(ulong[] trace, int stackCount)
         {

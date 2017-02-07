@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -51,14 +52,50 @@ namespace Console
 
             //MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\not 10 vertex Mixed spread 2 max high 1 kappa2 winners1.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\WithLows\OneHigh\NotPaintDegreesOK10", directed: false, showFactors: false, lowPlus: true);
             //MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\not 8 vertex Mixed spread 2 max high 1 kappa2 winners1.txt.eliminated.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\WithLows\OneHigh\NotPaintDegreesOKelim", directed: false, showFactors: false, lowPlus: true);
-            MakePdfs(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\K_4.txt", @"C:\Users\landon\Documents\GitHub\Research\MixedChoosables\pictures", lowPlus:true);
+          //  MakePdfs(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\K_4.txt", @"C:\Users\landon\Documents\GitHub\Research\MixedChoosables\pictures", lowPlus:true);
 
            // MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\YetAnother\not 8 vertex Mixed spread 2 max high 1 kappa2 winners1.txt.not.eliminated.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\WithLows\OneHigh\NotPaintDegreesOK8Eliminated", directed: false, showFactors: false, lowPlus: true);
             //MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\YetAnother\not 7 vertex Mixed spread 2 max high 2 kappa2 AT winners1.txt.not.eliminated.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\WithLows\TwoHigh\NotATDegreesOK7Eliminated", directed: false, showFactors: false, lowPlus: true);
 
+            
+
             //MakeWebpage(@"C:\Users\landon\Google Drive\research\graphs\WithLows\OneHigh\not 10 vertex Mixed spread 2 max high 1 kappa2 winners1.txt.not.eliminated.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\WithLows\OneHigh\NotPaintDegreesOK10-Eliminated", directed: false, showFactors: false, lowPlus: true);
 
+            //MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Another\not 9 vertex Mixed spread 2 max high 2 kappa2 winners1.txt.not.eliminated.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\WithLows\TwoHigh\NotPaintDegreesOK9Eliminated", directed: false, showFactors: false, lowPlus: true);
+
+            //MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\YetAnother\not 9 vertex Mixed spread 2 max high 2 kappa2 winners1.txt.not.eliminated.txt.triangle_eliminated.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\WithLows\TwoHigh\NotPaintDegreesOK9TrianglesEliminated", directed: false, showFactors: false, lowPlus: true);
+
+          //  MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\drawme.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\Planar\AT\5or6\2c", directed: true, showFactors: false, lowPlus: false, fivePlus: true);
+           
+          //  MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Another\drawme.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\Planar\AT\5678\10ring\nosink", directed: true, showFactors: false, lowPlus: false, fivePlus: true);
+          //  MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\YetAnother\drawme.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\Planar\AT\5678\11ring\nosink", directed: true, showFactors: false, lowPlus: false, fivePlus: true);
+
+            //for (int i = 5; i <= 7; i++)
+            //{
+            //    for (int j = 1; j <= 4; j++)
+            //    {
+            //        var file = string.Format(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\dcharge_test_{0}_5_7_2_{1}.txt.cleaned.txt.cut.txt", i, j);
+            //        if (File.Exists(file))
+            //        {
+            //            System.Console.WriteLine();
+            //            System.Console.WriteLine("doing " + file);
+
+            //            var output = string.Format(@"C:\Users\landon\Dropbox\Public\Web\GraphData\Planar\AT\567\{0}_2nd_nhbd\{1}", i, j);
+            //            MakeWebpage(file, output, directed: false, showFactors: false, lowPlus: false, fivePlus: true, useLaplacian: true);
+            //        }
+            //        else
+            //        {
+            //            System.Console.WriteLine();
+            //            System.Console.WriteLine("missing " + file);
+            //        }
+            //    }
+            //}
+
+            //MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\drawme.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\Planar\5678\dominating", directed: true, showFactors: false, lowPlus: false, fivePlus: true);
+
+            MakeWebpage(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\Release\4 potential at most 12.txt", @"C:\Users\landon\Dropbox\Public\Web\GraphData\potential\4\12", directed: false, showFactors: true);
         }
+
 
         static void MakeNonCon()
         {
@@ -66,25 +103,31 @@ namespace Console
             gpm.DrawAllAndMakeWebpage(@"C:\Users\landon\Dropbox\Public\Web\GraphData\ConNon");
         }
 
-        public static void MakePdfs(string graphPath, string outputPath, bool superabundance = false, bool lowPlus = false)
+        public static void MakePdfs(string graphPath, string outputPath, bool superabundance = false, bool lowPlus = false, bool fivePlus = false, bool useLaplacian = false)
         {
             var maker = new GraphPictureMaker(graphPath);
             maker.InDegreeTerms = superabundance;
             maker.IsLowPlus = lowPlus;
+            maker.IsFivePlus = fivePlus;
             maker.DrawAll(outputPath, DotRenderType.pdf);
         }
 
-        public static void MakeWebpage(string graphPath, string outputPath, bool directed = false, bool showFactors = false, bool lowPlus = false)
+        public static void MakeWebpage(string graphPath, string outputPath, bool directed = false, bool showFactors = false, bool lowPlus = false, bool fivePlus = false, bool useLaplacian = false)
         {
+            System.Console.ForegroundColor = ConsoleColor.Blue;
+            System.Console.WriteLine("Building webpage at " + graphPath);
             var maker = new GraphPictureMaker(graphPath);
-            MakeWebpage(maker, outputPath, directed, showFactors, lowPlus);
+            MakeWebpage(maker, outputPath, directed, showFactors, lowPlus, fivePlus, useLaplacian);
+            System.Console.ForegroundColor = ConsoleColor.White;
         }
 
-        public static void MakeWebpage(GraphPictureMaker maker, string outputPath, bool directed = false, bool showFactors = false, bool lowPlus = false)
+        public static void MakeWebpage(GraphPictureMaker maker, string outputPath, bool directed = false, bool showFactors = false, bool lowPlus = false, bool fivePlus = false, bool useLaplacian = false)
         {
             maker.Directed = directed;
             maker.ShowFactors = showFactors;
             maker.IsLowPlus = lowPlus;
+            maker.IsFivePlus = fivePlus;
+            maker.UseLaplacian = useLaplacian;
             maker.DrawAllAndMakeWebpage(outputPath);
         }
     }
