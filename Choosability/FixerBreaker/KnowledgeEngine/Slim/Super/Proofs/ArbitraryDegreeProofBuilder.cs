@@ -48,7 +48,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
             for (int caseNumber = 1; caseNumber <= Cases.Count; caseNumber++)
             {
                 var c = Cases[caseNumber - 1];
-                var boards = c.Boards.OrderBy(b => b.ToListStringInLexOrder()).ToList();
+                var boards = c.Boards.OrderBy(b => b.ToListStringInLexOrder(_maxPot)).ToList();
                 
                 List<SuperSlimBoard> thisClaimBoards;
                 if (caseNumber > 1 && !c.BreakerWin)
@@ -110,14 +110,14 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
                                 }
 
                                 sb.Append("$\\K_{" + alpha + "" + beta + ",\\infty}(" + listString + "," + groups.OrderBy(gg => gg.Key).Select(gg => gg.Key.GetActiveListIndex(b, _maxPot) + 1).Listify(null) + ")");
-                                sb.AppendLine("\\Rightarrow $ " + groups.OrderBy(gg => gg.Key).Select(gg => "$" + GetChildBoardName(b, gg.First()) + "$").Listify(null) + " (Case " + treeInfo.Select(bc => GetHandledCaseNumber(b, bc)).Distinct().OrderBy(xx => xx).Listify() + ").");
+                                sb.AppendLine("\\Rightarrow $ " + groups.OrderBy(gg => gg.Key).Select(gg => "$" + GetChildBoardName(b, gg.First()) + "$ (Case " + GetHandledCaseNumber(b, gg.First()) + ")").Listify(null) + " (Case " + treeInfo.Select(bc => GetHandledCaseNumber(b, bc)).Distinct().OrderBy(xx => xx).Listify() + ").");
                                 sb.AppendLine();
 
                                 if (_permutationLinked[b].Count > 0)
                                 {
                                     sb.AppendLine();
                                     sb.AppendLine();
-                                    sb.AppendLine("Free by vertex permutation: " + _permutationLinked[b].Select(ppp => "$" + ppp.Item1 + "\\Rightarrow " + ppp.Item2.ToListStringInLexOrder() + "$").Listify());
+                                    sb.AppendLine("Free by vertex permutation: " + _permutationLinked[b].Select(ppp => "$" + ppp.Item1 + "\\Rightarrow " + ppp.Item2.ToListStringInLexOrder(_maxPot) + "$").Listify());
                                     sb.AppendLine();
                                     sb.AppendLine();
                                 }
@@ -164,7 +164,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
                                         sb.Append("," + handled.Where(bc => bc.SwapVertices.Count > 1).OrderBy(bc => bc.SwapVertices.Except(commonestSwapper).First()).Select(bc => bc.SwapVertices.Except(commonestSwapper).First().GetActiveListIndex(b, _maxPot) + 1).Listify(null));
                                     sb.Append(")");
 
-                                    sb.AppendLine("\\Rightarrow $ " + handled.OrderBy(bc => bc.SwapVertices.Count == 1 ? -1 : bc.SwapVertices.Except(commonestSwapper).First()).Select(bc => "$" + GetChildBoardName(b, bc) + "$").Listify(null) + " (Case " + handled.Select(bc => GetHandledCaseNumber(b, bc)).Distinct().OrderBy(xx => xx).Listify() + ").");
+                                    sb.AppendLine("\\Rightarrow $ " + handled.OrderBy(bc => bc.SwapVertices.Count == 1 ? -1 : bc.SwapVertices.Except(commonestSwapper).First()).Select(bc => "$" + GetChildBoardName(b, bc) + "$ (Case " + GetHandledCaseNumber(b, bc) + ")").Listify(null) + " (Case " + handled.Select(bc => GetHandledCaseNumber(b, bc)).Distinct().OrderBy(xx => xx).Listify() + ").");
                                     sb.AppendLine();
 
                                     foreach (var bc in handledAll)
@@ -175,7 +175,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
                                 {
                                     sb.AppendLine();
                                     sb.AppendLine();
-                                    sb.AppendLine("Free by vertex permutation: " + _permutationLinked[b].Select(ppp => "$" + ppp.Item1 + "\\Rightarrow " + ppp.Item2.ToListStringInLexOrder() + "$").Listify());
+                                    sb.AppendLine("Free by vertex permutation: " + _permutationLinked[b].Select(ppp => "$" + ppp.Item1 + "\\Rightarrow " + ppp.Item2.ToListStringInLexOrder(_maxPot) + "$").Listify());
                                     sb.AppendLine();
                                     sb.AppendLine();
                                 }
@@ -214,7 +214,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
         string GetChildBoardName(SuperSlimBoard b, BreakerChoiceInfo bc)
         {
             var childBoard = new SuperSlimBoard(b._trace, bc.Alpha, bc.Beta, bc.Response, b._stackCount);
-            return childBoard.ToListStringInLexOrder();
+            return childBoard.ToListStringInLexOrder(_maxPot);
         }
 
         void GeneralizeAllBoards(StringBuilder sb)
@@ -249,7 +249,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
                 return generalized.Select(gg => "$" + string.Join("|", gg.Select((_, i) => _.ToTex(_possibleLists, _activeListSizes[i]))) + "$").Listify("and");
             }
 
-            return boards.Select(b => b.ToListStringInLexOrder()).OrderBy(x => x).Select(s => "$" + s + "$").Listify("and");
+            return boards.Select(b => b.ToListStringInLexOrder(_maxPot)).OrderBy(x => x).Select(s => "$" + s + "$").Listify("and");
         }
 
         List<int> ToListIndices(SuperSlimBoard b)
