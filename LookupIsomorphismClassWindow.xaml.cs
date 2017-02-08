@@ -32,8 +32,8 @@ namespace WebGraphs
                 var s = _termBox.Text;
 
                 var lists = s.Split('|').Select(a => Enumerable.Range(0, a.Length).Select(i => int.Parse(a[i].ToString())).ToList()).ToList();
-                var boardAndNumbering = SuperSlimBoard.Create(lists);
-                _isomorphismClass.Text = boardAndNumbering.Item1.ToString();
+                var board = SuperSlimBoard.FromLists(lists);
+                _isomorphismClass.Text = board.ToListStringInLexOrder();
             }
             catch
             {

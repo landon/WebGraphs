@@ -48,7 +48,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
             for (int caseNumber = 1; caseNumber <= Cases.Count; caseNumber++)
             {
                 var c = Cases[caseNumber - 1];
-                var boards = c.Boards.OrderBy(b => ToListString(b)).ToList();
+                var boards = c.Boards.OrderBy(b => b.ToListStringInLexOrder()).ToList();
                 
                 List<SuperSlimBoard> thisClaimBoards;
                 if (caseNumber > 1 && !c.BreakerWin)
@@ -95,7 +95,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
                             foreach (var b in swapCountGroup)
                             {
                                 Permutation pp;
-                                var listString = ToListString(b, out pp);
+                                var listString = b.ToListStringInLexOrder(out pp);
 
                                 var treeInfo = Mind.GetWinTreeInfo(b);
                                 var alpha = Math.Min(pp[treeInfo.First().Alpha], pp[treeInfo.First().Beta]);
@@ -117,7 +117,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
                                 {
                                     sb.AppendLine();
                                     sb.AppendLine();
-                                    sb.AppendLine("Free by vertex permutation: " + _permutationLinked[b].Select(ppp => "$" + ppp.Item1 + "\\Rightarrow " + ToListString(ppp.Item2) + "$").Listify());
+                                    sb.AppendLine("Free by vertex permutation: " + _permutationLinked[b].Select(ppp => "$" + ppp.Item1 + "\\Rightarrow " + ppp.Item2.ToListStringInLexOrder() + "$").Listify());
                                     sb.AppendLine();
                                     sb.AppendLine();
                                 }
@@ -134,7 +134,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
                             foreach (var b in swapCountGroup)
                             {
                                 Permutation pp;
-                                var listString = ToListString(b, out pp);
+                                var listString = b.ToListStringInLexOrder(out pp);
 
                                 var treeInfo = Mind.GetWinTreeInfo(b);
                                 var alpha = Math.Min(pp[treeInfo.First().Alpha], pp[treeInfo.First().Beta]);
@@ -175,7 +175,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
                                 {
                                     sb.AppendLine();
                                     sb.AppendLine();
-                                    sb.AppendLine("Free by vertex permutation: " + _permutationLinked[b].Select(ppp => "$" + ppp.Item1 + "\\Rightarrow " + ToListString(ppp.Item2) + "$").Listify());
+                                    sb.AppendLine("Free by vertex permutation: " + _permutationLinked[b].Select(ppp => "$" + ppp.Item1 + "\\Rightarrow " + ppp.Item2.ToListStringInLexOrder() + "$").Listify());
                                     sb.AppendLine();
                                     sb.AppendLine();
                                 }
@@ -214,7 +214,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
         string GetChildBoardName(SuperSlimBoard b, BreakerChoiceInfo bc)
         {
             var childBoard = new SuperSlimBoard(b._trace, bc.Alpha, bc.Beta, bc.Response, b._stackCount);
-            return ToListString(childBoard);
+            return childBoard.ToListStringInLexOrder();
         }
 
         void GeneralizeAllBoards(StringBuilder sb)
@@ -249,49 +249,13 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
                 return generalized.Select(gg => "$" + string.Join("|", gg.Select((_, i) => _.ToTex(_possibleLists, _activeListSizes[i]))) + "$").Listify("and");
             }
 
-            return boards.Select(b => ToListString(b)).OrderBy(x => x).Select(s => "$" + s + "$").Listify("and");
+            return boards.Select(b => b.ToListStringInLexOrder()).OrderBy(x => x).Select(s => "$" + s + "$").Listify("and");
         }
 
         List<int> ToListIndices(SuperSlimBoard b)
         {
             var stacks = b.Stacks.Value.Select(l => l.ToSet()).Where(s => s.Count < _maxPot).ToList();
             return stacks.Select(s => _possibleLists.FirstIndex(ss => ss.SequenceEqual(s))).ToList();
-        }
-
-        string ToListString(SuperSlimBoard b)
-        {
-            Permutation pp;
-            return ToListString(b, out pp);
-        }
-
-        string ToListString(SuperSlimBoard b, out Permutation pp)
-        {
-            var stacks = b.Stacks.Value.Select(l => l.ToSet()).Where(s => s.Count < _maxPot).ToList();
-            return ApplyOrderFilter(string.Join("|", stacks.Select(s => string.Join("", s.OrderBy(x => x)))), out pp);
-        }
-
-        string ApplyOrderFilter(string stacksString, out Permutation pp)
-        {
-            pp = null;
-            string lexSmallest;
-            if (!_orderFilter.TryGetValue(stacksString, out lexSmallest))
-            {
-                var stacks = stacksString.Split('|').Select(s => s.ToCharArray().Select(c => int.Parse(c.ToString())).ToList()).ToList();
-                lexSmallest = stacksString;
-
-                var h = _maxPot - 1;
-                foreach (var p in Permutation.EnumerateAll(_maxPot))
-                {
-                    var permutedString = string.Join("|", stacks.Select(s => string.Join("", s.Select(a => p[a]).OrderBy(x => x))));
-                    if (permutedString.CompareTo(lexSmallest) <= 0)
-                    {
-                        lexSmallest = permutedString;
-                        pp = p;
-                    }
-                }
-            }
-
-            return lexSmallest;
         }
 
         void GeneratePossibleLists()

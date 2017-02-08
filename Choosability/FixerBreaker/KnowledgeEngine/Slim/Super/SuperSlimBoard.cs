@@ -33,6 +33,54 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
             return new Tuple<SuperSlimBoard, Bijection<int, T>>(new SuperSlimBoard(trace, lists.Count), numbering);
         }
 
+        public static SuperSlimBoard FromLists(List<List<int>> lists)
+        {
+            var pot = lists.SelectMany(l => l).Distinct().ToList();
+            var trace = new ulong[pot.Count];
+
+            for (int i = 0; i < pot.Count; i++)
+                trace[i] = lists.IndicesWhere(ll => ll.Contains(i)).ToUInt64();
+
+            Array.Sort(trace);
+            return new SuperSlimBoard(trace, lists.Count);
+        }
+
+        public string ToListStringInLexOrder()
+        {
+            Permutation pp;
+            return ToListStringInLexOrder(out pp);
+        }
+
+        public string ToListStringInLexOrder(out Permutation pp)
+        {
+            var lists = Stacks.Value.Select(l => l.ToSet()).ToList();
+            var pot = lists.SelectMany(l => l).Distinct().ToList();
+            var stacks = Stacks.Value.Select(l => l.ToSet()).Where(s => s.Count < pot.Count).ToList();
+            return ToLexOrder(string.Join("|", stacks.Select(s => string.Join("", s.OrderBy(x => x)))), out pp);
+        }
+
+        string ToLexOrder(string stacksString, out Permutation pp)
+        {
+            pp = null;
+            string lexSmallest;
+            var stacks = stacksString.Split('|').Select(s => s.ToCharArray().Select(c => int.Parse(c.ToString())).ToList()).ToList();
+            lexSmallest = stacksString;
+
+            var pot = stacks.SelectMany(l => l).Distinct().ToList();
+
+            foreach (var p in Permutation.EnumerateAll(pot.Count))
+            {
+                var permutedString = string.Join("|", stacks.Select(s => string.Join("", s.Select(a => p[a]).OrderBy(x => x))));
+                if (permutedString.CompareTo(lexSmallest) <= 0)
+                {
+                    lexSmallest = permutedString;
+                    pp = p;
+                }
+            }
+
+            return lexSmallest;
+        }
+
         public SuperSlimBoard(ulong[] trace, int stackCount)
         {
             _trace = trace;
