@@ -9,10 +9,12 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
     {
         public SuperSlimMind Mind { get; private set; }
         public List<ProofCase> Cases { get; protected set; }
+        public bool UsePermutations { get; set; }
 
-        public ProofBuilder(SuperSlimMind mind)
+        public ProofBuilder(SuperSlimMind mind, bool usePermutations = false)
         {
             Mind = mind;
+            UsePermutations = usePermutations;
             ExtractCases();
         }
 

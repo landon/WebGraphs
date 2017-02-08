@@ -12,6 +12,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
     {
         public bool UseWildCards { get; set; }
 
+        
         string _figureTikz;
         int _maxPot;
         List<int> _activeIndices;
@@ -24,8 +25,8 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
         Dictionary<string, string> _orderFilter = new Dictionary<string, string>();
         bool _isWin;
 
-        public ArbitraryDegreeProofBuilder(SuperSlimMind mind, string figureTikz = "")
-            : base(mind)
+        public ArbitraryDegreeProofBuilder(SuperSlimMind mind, string figureTikz = "", bool usePermutations = false)
+            : base(mind, usePermutations)
         {
             _figureTikz = figureTikz;
             _maxPot = mind.MaxPot;
@@ -62,7 +63,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
 
                 sb.AppendLine();
                 sb.AppendLine("\\bigskip");
-                sb.AppendLine(string.Format("\\case{{{0}}}{{$B$ is one of " + thisClaimBoardsTex + ".}}", caseNumber));
+                sb.AppendLine(string.Format("\\case{{{0}}}{{$B$ is one of the {1} following boards:\n " + thisClaimBoardsTex + ".}}",caseNumber, thisClaimBoards.Count));
                 sb.AppendLine();
                 sb.AppendLine("\\bigskip");
 

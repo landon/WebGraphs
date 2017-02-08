@@ -83,11 +83,14 @@ namespace WebGraphs
         public event Action DoSuperabundantOnlyWeakly;
         public event Action DoGenerateProof;
         public event Action DoGenerateProofSelectedEdge;
+        public event Action DoGenerateProofSelectedEdgeUsePermutations;
         public event Action OnToggleFixerBreakerThinkHarder;
         public event Action DoSuperabundantOnlyNearColorings;
         public event Action OnAddClockSpindle;
         public event Action OnAddCClockSpindle;
         public event Action OnAnalyzeCurrentBoard;
+        public event Action LookupIsomorphismClass;
+        
 
         public MenuBar()
         {
@@ -326,6 +329,9 @@ namespace WebGraphs
                 case "generate proof only near colorings for selected edge":
                     A(DoGenerateProofSelectedEdge);
                     break;
+                case "generate proof only near colorings for selected edge (use permutation magic)":
+                    A(DoGenerateProofSelectedEdgeUsePermutations);
+                    break;
                 case "think harder":
                     ThinkHarderItem.Header = "think softer";
                     A(OnToggleFixerBreakerThinkHarder);
@@ -342,6 +348,9 @@ namespace WebGraphs
                     break;
                 case "analyze current board":
                     A(OnAnalyzeCurrentBoard);
+                    break;
+                case "lookup isomorphism class":
+                    A(LookupIsomorphismClass);
                     break;
             }
         }

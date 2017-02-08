@@ -92,9 +92,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>packages\MathNet.Numerics.3.2.3\lib\portable-net45+sl5+netcore45+MonoAndroid1+MonoTouch1\MathNet.Numerics.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.CompilerServices.AsyncTargetingPack.Silverlight5">
-      <HintPath>packages\Microsoft.CompilerServices.AsyncTargetingPack.1.0.1\lib\sl50\Microsoft.CompilerServices.AsyncTargetingPack.Silverlight5.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.CSharp, Version=5.0.5.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.Threading.Tasks, Version=1.0.12.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -158,6 +155,9 @@
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
     <Compile Include="BoardInfo.cs" />
+    <Compile Include="LookupIsomorphismClassWindow.xaml.cs">
+      <DependentUpon>LookupIsomorphismClassWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ChooseTermWindow.xaml.cs">
       <DependentUpon>ChooseTermWindow.xaml</DependentUpon>
     </Compile>
@@ -193,6 +193,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </ApplicationDefinition>
+    <Page Include="LookupIsomorphismClassWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="ChooseTermWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

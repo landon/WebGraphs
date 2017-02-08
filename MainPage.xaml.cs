@@ -105,17 +105,21 @@ namespace WebGraphs
             _mainMenu.DoSuperabundantOnly += AnalyzeSuperabundantOnly;
             _mainMenu.DoSuperabundantOnlyWeakly += AnalyzeSuperabundantOnlyWeakly;
             _mainMenu.DoGenerateProof += _mainMenu_DoGenerateProof;
-            _mainMenu.DoGenerateProofSelectedEdge += _mainMenu_DoGenerateProofSelectedEdge;
+            _mainMenu.DoGenerateProofSelectedEdge += _mainMenu_DoDoGenerateProofSelectedEdge;
+            _mainMenu.DoGenerateProofSelectedEdgeUsePermutations += _mainMenu_DoDoGenerateProofSelectedEdgeUsePermutations; 
             _mainMenu.OnToggleFixerBreakerThinkHarder += _mainMenu_OnToggleFixerBreakerThinkHarder;
             _mainMenu.DoSuperabundantOnlyNearColorings += _mainMenu_DoSuperabundantOnlyNearColorings;
             _mainMenu.OnAddClockSpindle += _mainMenu_OnAddClockSpindle;
             _mainMenu.OnAddCClockSpindle += _mainMenu_OnAddCClockSpindle;
             _mainMenu.OnAnalyzeCurrentBoard += _mainMenu_OnAnalyzeCurrentBoard;
+            _mainMenu.LookupIsomorphismClass += _mainMenu_LookupIsomorphismClass;
 
             _propertyGrid.SomethingChanged += _propertyGrid_SomethingChanged;
 
             DoAutoLoad();
         }
+
+        
 
         void DoAutoLoad()
         {
@@ -1660,6 +1664,12 @@ trash can button.
         {
         }
 
+        void _mainMenu_LookupIsomorphismClass()
+        {
+            var f = new LookupIsomorphismClassWindow();
+            f.Show();
+        }
+
         async void _mainMenu_OnAnalyzeCurrentBoard()
         {
             var blob = AlgorithmBlob.Create(SelectedTabCanvas);
@@ -1764,7 +1774,7 @@ trash can button.
             _fixerBreakerThinkHarder = !_fixerBreakerThinkHarder;
         }
 
-        async void _mainMenu_DoGenerateProofSelectedEdge()
+        async void _mainMenu_DoDoGenerateProofSelectedEdge()
         {
             var blob = AlgorithmBlob.Create(SelectedTabCanvas);
             if (blob == null)
@@ -1781,7 +1791,27 @@ trash can button.
                 return;
             }
 
-            await AnalyzeFixerBreaker(true, blob.SelectedEdgeIndices.First(), false, true);
+            await AnalyzeFixerBreaker(true, blob.SelectedEdgeIndices.First(), false, true, false, false);
+        }
+
+        async void _mainMenu_DoDoGenerateProofSelectedEdgeUsePermutations()
+        {
+            var blob = AlgorithmBlob.Create(SelectedTabCanvas);
+            if (blob == null)
+                return;
+
+            if (blob.SelectedEdgeIndices.Count <= 0)
+            {
+                MessageBox.Show("no edges selected");
+                return;
+            }
+            if (blob.SelectedEdgeIndices.Count >= 2)
+            {
+                MessageBox.Show("too many edges selected");
+                return;
+            }
+
+            await AnalyzeFixerBreaker(true, blob.SelectedEdgeIndices.First(), false, true, false, true);
         }
 
         async void _mainMenu_DoGenerateProof()
@@ -1836,7 +1866,7 @@ trash can button.
             await AnalyzeFixerBreaker(false, -1, false, false, true);
         }
 
-        async Task<string> AnalyzeFixerBreaker(bool onlyNearColorings, int missingEdgeIndex = -1, bool superAbundantOnly = false, bool generateProof = false, bool weaklyFixable = false)
+        async Task<string> AnalyzeFixerBreaker(bool onlyNearColorings, int missingEdgeIndex = -1, bool superAbundantOnly = false, bool generateProof = false, bool weaklyFixable = false, bool usePermutationsInProof = false)
         {
             var proof = "";
             var blob = AlgorithmBlob.Create(SelectedTabCanvas);
@@ -1931,7 +1961,7 @@ trash can button.
                                     }
 
                                     var tikz = TeXConverter.ToTikz(gg);
-                                    var pb = new ArbitraryDegreeProofBuilder(mind, tikz);
+                                    var pb = new ArbitraryDegreeProofBuilder(mind, tikz, usePermutationsInProof);
                                     pb.UseWildCards = _useFixerBreakerWildCards;
                                     sb.AppendLine(pb.WriteProof());
 

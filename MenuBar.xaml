@@ -159,8 +159,11 @@
                     <local:SuperMenuItem x:Name="ThinkHarderItem" Header="think harder" Click="MenuItemClick"/>
                     <local:SuperMenuItem Header="generate proof" Click="MenuItemClick"/>
                     <local:SuperMenuItem Header="generate proof only near colorings for selected edge" Click="MenuItemClick"/>
+                    <local:SuperMenuItem Header="generate proof only near colorings for selected edge (use permutation magic)" Click="MenuItemClick"/>
                     <menu:Separator/>
                     <local:SuperMenuItem Header="analyze current board" Click="MenuItemClick"/>
+                    <menu:Separator/>
+                    <local:SuperMenuItem Header="lookup isomorphism class" Click="MenuItemClick"/>
                 </menu:ContextMenu>
             </menu:ContextMenuService.ContextMenu>
         </Button>

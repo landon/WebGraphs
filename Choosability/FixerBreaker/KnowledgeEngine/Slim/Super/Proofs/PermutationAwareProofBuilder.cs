@@ -9,10 +9,12 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
     public abstract class PermutationAwareProofBuilder : ProofBuilder
     {
         protected Dictionary<SuperSlimBoard, List<Tuple<Permutation, SuperSlimBoard>>> _permutationLinked;
+        
 
-        public PermutationAwareProofBuilder(SuperSlimMind mind)
-            : base(mind)
+        public PermutationAwareProofBuilder(SuperSlimMind mind, bool usePermutations = false)
+            : base(mind, usePermutations)
         {
+            
         }
 
         protected override void ExtractCases()
@@ -53,26 +55,29 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
                         addedBoards.Add(board);
                         _permutationLinked[board] = new List<Tuple<Permutation, SuperSlimBoard>>();
 
-                        foreach (var p in permutations)
+                        if (UsePermutations)
                         {
-                            var pb = board.Permute(p, indices);
-                            if (wonBoards.Contains(pb) || addedBoards.Contains(pb))
-                                continue;
-
-                            var closed = true;
-                            foreach (var cb in childBoards)
+                            foreach (var p in permutations)
                             {
-                                if (!wonBoards.Contains(cb.Permute(p, indices)))
+                                var pb = board.Permute(p, indices);
+                                if (wonBoards.Contains(pb) || addedBoards.Contains(pb))
+                                    continue;
+
+                                var closed = true;
+                                foreach (var cb in childBoards)
                                 {
-                                    closed = false;
-                                    break;
+                                    if (!wonBoards.Contains(cb.Permute(p, indices)))
+                                    {
+                                        closed = false;
+                                        break;
+                                    }
                                 }
-                            }
 
-                            if (closed)
-                            {
-                                _permutationLinked[board].Add(new Tuple<Permutation, SuperSlimBoard>(p, pb));
-                                addedBoards.Add(pb);
+                                if (closed)
+                                {
+                                    _permutationLinked[board].Add(new Tuple<Permutation, SuperSlimBoard>(p, pb));
+                                    addedBoards.Add(pb);
+                                }
                             }
                         }
                     }
