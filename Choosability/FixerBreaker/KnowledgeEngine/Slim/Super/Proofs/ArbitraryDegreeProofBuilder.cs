@@ -110,7 +110,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
                                 }
 
                                 sb.Append("$\\K_{" + alpha + "" + beta + ",\\infty}(" + listString + "," + groups.OrderBy(gg => gg.Key).Select(gg => gg.Key.GetActiveListIndex(b, _maxPot) + 1).Listify(null) + ")");
-                                sb.AppendLine("\\Rightarrow $ " + groups.OrderBy(gg => gg.Key).Select(gg => "$" + GetChildBoardName(b, gg.First()) + "$ (Case " + GetHandledCaseNumber(b, gg.First()) + ")").Listify(null) + " (Case " + treeInfo.Select(bc => GetHandledCaseNumber(b, bc)).Distinct().OrderBy(xx => xx).Listify() + ").");
+                                sb.AppendLine("\\Rightarrow $ " + groups.OrderBy(gg => gg.Key).Select(gg => "$" + GetChildBoardName(b, gg.First()) + "$ (Case " + GetHandledCaseNumber(b, gg.First()) + ")").Listify(null) + ".");
                                 sb.AppendLine();
 
                                 if (_permutationLinked[b].Count > 0)
@@ -164,7 +164,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.Proofs
                                         sb.Append("," + handled.Where(bc => bc.SwapVertices.Count > 1).OrderBy(bc => bc.SwapVertices.Except(commonestSwapper).First()).Select(bc => bc.SwapVertices.Except(commonestSwapper).First().GetActiveListIndex(b, _maxPot) + 1).Listify(null));
                                     sb.Append(")");
 
-                                    sb.AppendLine("\\Rightarrow $ " + handled.OrderBy(bc => bc.SwapVertices.Count == 1 ? -1 : bc.SwapVertices.Except(commonestSwapper).First()).Select(bc => "$" + GetChildBoardName(b, bc) + "$ (Case " + GetHandledCaseNumber(b, bc) + ")").Listify(null) + " (Case " + handled.Select(bc => GetHandledCaseNumber(b, bc)).Distinct().OrderBy(xx => xx).Listify() + ").");
+                                    sb.AppendLine("\\Rightarrow $ " + handled.OrderBy(bc => bc.SwapVertices.Count == 1 ? -1 : bc.SwapVertices.Except(commonestSwapper).First()).Select(bc => "$" + GetChildBoardName(b, bc) + "$ (Case " + GetHandledCaseNumber(b, bc) + ")").Listify(null) + ".");
                                     sb.AppendLine();
 
                                     foreach (var bc in handledAll)
