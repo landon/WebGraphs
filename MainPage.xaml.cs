@@ -1794,8 +1794,10 @@ trash can button.
 
             var mind = new Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.SuperSlimMind(G, true, true);
             mind.MaxPot = pot.Count;
-            mind.SuperabundantOnly = true;
-            mind.OnlyConsiderNearlyColorableBoards = false;
+            mind.SuperabundantOnly = false;
+            mind.OnlyConsiderNearlyColorableBoards = true;
+            mind.MissingEdgeIndex = blob.SelectedEdgeIndices.First();
+            mind.ThinkHarder = _fixerBreakerThinkHarder;
 
             var boardAndNumbering = SuperSlimBoard.Create(lists);
             var board = boardAndNumbering.Item1;

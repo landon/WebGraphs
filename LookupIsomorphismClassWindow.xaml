@@ -10,6 +10,6 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <TextBox HorizontalAlignment="Left" Height="23" Margin="10,15,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="358" Name="_termBox" TextChanged="_termBox_TextChanged"/>
-        <TextBlock Grid.Row="1" HorizontalAlignment="Center" Name="_isomorphismClass"></TextBlock>
+        <TextBox Grid.Row="1" HorizontalAlignment="Center" Name="_isomorphismClass" IsReadOnly="True"></TextBox>
     </Grid>
 </controls:ChildWindow>
