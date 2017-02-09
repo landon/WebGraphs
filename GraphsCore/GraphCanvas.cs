@@ -221,7 +221,7 @@ namespace Graphs
 
             int width = Width;
             int height = Height;
-            var bounds = _graph.BoundingRectangle;
+            var bounds = _graph.SelectedBoundingRectangle;
             var c = new Vector(bounds.Left + bounds.Width / 2, bounds.Top + bounds.Height / 2);
 
             var actual = Math.Min(width, height);
@@ -698,6 +698,44 @@ namespace Graphs
             }
         }
 
+        public void ToggleEdgeIndices()
+        {
+            _graph.ToggleEdgeIndices();
+
+            Invalidate();
+        }
+
+        public void RotateVertexIndices()
+        {
+            var x = _graph.SelectedVertices;
+            if (x.Count <= 0)
+                x = _graph.Vertices;
+
+            foreach (var a in x)
+                a.RotateIndex();
+
+            Invalidate();
+        }
+
+        public void RotateEdgeIndices()
+        {
+            var x = _graph.SelectedEdges;
+            if (x.Count <= 0)
+                x = _graph.Edges;
+
+            foreach (var a in x)
+                a.RotateIndex();
+
+            Invalidate();
+        }
+
+        public void ToggleVertexIndices()
+        {
+            _graph.ToggleVertexIndices();
+
+            Invalidate();
+        }
+
         public void OnMouseDown(double X, double Y, GraphicsLayer.MouseButton button)
         {
             _controlWasDown = Canvas.IsControlKeyDown;
@@ -834,41 +872,34 @@ namespace Graphs
             var o = GetHit(x, y);
 
             var graphChanged = false;
-            switch (_state)
+            if (_state == States.Idle && !Canvas.IsControlKeyDown)
             {
-                case States.Idle:
-                case States.DraggingVertex:
-                case States.DraggingSelectionRegion:
-                case States.DraggingSelectedVertices:
+                if (button == MouseButton.Left)
+                {
+                    if (o == null)
                     {
-                        if (button == MouseButton.Left)
-                        {
-                            if (o == null)
-                            {
-                                var v = new Vertex(x, y);
-                                if (_graph.AddVertex(v))
-                                    graphChanged = true;
-                            }
-                            else if (o is Vertex)
-                            {
-                                var endVertex = (Vertex)o;
-                                foreach (var v in _graph.SelectedVertices)
-                                {
-                                    if (_graph.AddEdge(v, endVertex))
-                                        graphChanged = true;
-                                }
-                            }
-                        }
-                        else if (button == MouseButton.Right)
-                        {
-                            if (o is Vertex)
-                            {
-                                if (_graph.RemoveVertex((Vertex)o))
-                                    graphChanged = true;
-                            }
-                        }
-                        break;
+                        var v = new Vertex(x, y);
+                        if (_graph.AddVertex(v))
+                            graphChanged = true;
                     }
+                    else if (o is Vertex)
+                    {
+                        var endVertex = (Vertex)o;
+                        foreach (var v in _graph.SelectedVertices)
+                        {
+                            if (_graph.AddEdge(v, endVertex))
+                                graphChanged = true;
+                        }
+                    }
+                }
+                else if (button == MouseButton.Right)
+                {
+                    if (o is Vertex)
+                    {
+                        if (_graph.RemoveVertex((Vertex)o))
+                            graphChanged = true;
+                    }
+                }
             }
 
             Invalidate();

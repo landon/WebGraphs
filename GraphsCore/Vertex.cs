@@ -11,13 +11,18 @@ namespace Graphs
     public class Vertex : GraphicsLayer.IPaintable, IHittable
     {
         static readonly GraphicsLayer.Font LabelFont = new GraphicsLayer.Font("Times New Roman", 12);
+        static readonly GraphicsLayer.Font IndexFont = new GraphicsLayer.Font("System", 8);
         static readonly GraphicsLayer.ARGB LabelBrushColor = new GraphicsLayer.ARGB(0, 0, 0);
+        static readonly GraphicsLayer.ARGB IndexBrushColor = new GraphicsLayer.ARGB(200, 0, 0, 200);
         static readonly GraphicsLayer.ARGB BoundaryPenColor = new GraphicsLayer.ARGB(0, 0, 0);
         static readonly GraphicsLayer.ARGB BoundarySelectedPenColor = new GraphicsLayer.ARGB(120, 0, 255, 0);
         static readonly int BoundarySelectedPenWidth = 5;
         static readonly GraphicsLayer.ARGB DefaultFillBrushColor = new GraphicsLayer.ARGB(120, 0, 0, 0);
         static readonly GraphicsLayer.ARGB UniversalVertexFillBrushColor = new GraphicsLayer.ARGB(120, 0, 0, 255);
         static readonly GraphicsLayer.ARGB SelectedFillBrushColor = new GraphicsLayer.ARGB(255, 0, 255, 127);
+
+        public int ParentIndex { get; set; }
+        public double IndexAngle { get; set; }
 
         public Vertex(double x, double y)
             : this(x, y, "")
@@ -75,6 +80,15 @@ namespace Graphs
                     g.FillEllipse(Color, bounds);
 
                 g.DrawEllipse(_IsSelected ? BoundarySelectedPenColor : BoundaryPenColor, bounds, _IsSelected ? BoundarySelectedPenWidth : 1);
+            }
+
+            if (_showIndex)
+            {
+                var cx = (bounds.Left + bounds.Right) / 2;
+                var cy = (bounds.Bottom + bounds.Top) / 2;
+                var r = Math.Max(bounds.Width, bounds.Height) / 2 + 5;
+                var bb = new GraphicsLayer.Box(cx + r * Math.Cos(IndexAngle) - 5, cy + r * Math.Sin(IndexAngle) - 5, 10, 10);
+                g.DrawString(ParentIndex.ToString(), IndexFont, IndexBrushColor, bb);
             }
         }
 
@@ -247,5 +261,18 @@ namespace Graphs
 
         float _padding = 1.0f / 100.0f;
         GraphicsLayer.Box _LocalBounds = GraphicsLayer.Box.Empty;
+        bool _showIndex = false;
+
+        internal void RotateIndex()
+        {
+            IndexAngle += Math.PI / 16;
+            if (IndexAngle >= 2 * Math.PI)
+                IndexAngle = 0;
+        }
+
+        internal void ToggleIndex()
+        {
+            _showIndex = !_showIndex;
+        }
     }
 }

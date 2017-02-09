@@ -460,15 +460,25 @@ namespace WebGraphs
                 case Key.Home:
                     break;
                 case Key.I:
+                    if (Keyboard.Modifiers == ModifierKeys.Control)
+                        ToggleVertexIndices();
+                    else if (Keyboard.Modifiers == ModifierKeys.Shift)
+                        RotateVertexIndices();
                     break;
                 case Key.Insert:
                     break;
                 case Key.J:
+                    if (Keyboard.Modifiers == ModifierKeys.Control)
+                        ToggleEdgeIndices();
+                    else if (Keyboard.Modifiers == ModifierKeys.Shift)
+                        RotateEdgeIndices();
                     break;
                 case Key.K:
                     break;
                 case Key.L:
-                    break;
+                    
+
+                        break;
                 case Key.Left:
                     break;
                 case Key.M:
@@ -556,6 +566,38 @@ namespace WebGraphs
                 default:
                     break;
             }
+        }
+
+        void RotateEdgeIndices()
+        {
+            var tabCanvas = SelectedTabCanvas;
+            if (tabCanvas == null)
+                return;
+            tabCanvas.GraphCanvas.RotateEdgeIndices();
+        }
+
+        void ToggleEdgeIndices()
+        {
+            var tabCanvas = SelectedTabCanvas;
+            if (tabCanvas == null)
+                return;
+            tabCanvas.GraphCanvas.ToggleEdgeIndices();
+        }
+
+        void RotateVertexIndices()
+        {
+            var tabCanvas = SelectedTabCanvas;
+            if (tabCanvas == null)
+                return;
+            tabCanvas.GraphCanvas.RotateVertexIndices();
+        }
+
+        void ToggleVertexIndices()
+        {
+            var tabCanvas = SelectedTabCanvas;
+            if (tabCanvas == null)
+                return;
+            tabCanvas.GraphCanvas.ToggleVertexIndices();
         }
 
         #region menu actions

@@ -83,6 +83,35 @@ namespace Graphs
             }
         }
 
+        public GraphicsLayer.Box SelectedBoundingRectangle
+        {
+            get
+            {
+                var sv = SelectedVertices.ToList();
+                if (sv.Count <= 0)
+                    return BoundingRectangle;
+
+                lock (_ModifyListsToken)
+                {
+                    var left = double.MaxValue;
+                    var right = double.MinValue;
+                    var top = double.MaxValue;
+                    var bottom = double.MinValue;
+
+                    foreach (var v in sv)
+                    {
+                        left = Math.Min(left, v.LocalBounds.Left);
+                        right = Math.Max(right, v.LocalBounds.Right);
+                        top = Math.Min(top, v.LocalBounds.Top);
+                        bottom = Math.Max(bottom, v.LocalBounds.Bottom);
+                    }
+
+                    return new GraphicsLayer.Box(left, top, right - left, bottom - top);
+                }
+            }
+        }
+
+
         public string Name
         {
             get
@@ -181,10 +210,19 @@ namespace Graphs
                     ParametersDirty = false;
                 }
 
+                var jj = 0;
                 foreach (var v in _vertices)
+                {
+                    v.ParentIndex = jj++;
                     v.Paint(g, width, height);
+                }
+
+                jj = 0;
                 foreach (var e in _edges)
+                {
+                    e.ParentIndex = jj++;
                     e.Paint(g, width, height);
+                }
             }
 
             if (graph != null)
@@ -390,6 +428,8 @@ namespace Graphs
         }
         public bool AddVertex(Vertex v)
         {
+            if (_showVertexIndices)
+                v.ToggleIndex();
             lock (_ModifyListsToken)
                 _vertices.Add(v);
 
@@ -433,6 +473,8 @@ namespace Graphs
                     edge.Thickness = thickness;
                     edge.Style = style;
                     edge.Label = label;
+                    if (_showEdgeIndices)
+                        edge.ToggleIndex();
                     _edges.Add(edge);
                     ParametersDirty = true;
 
@@ -561,6 +603,22 @@ namespace Graphs
                     v.Y += offset.Y;
                 }
             }
+        }
+
+        bool _showVertexIndices;
+        bool _showEdgeIndices;
+        public void ToggleEdgeIndices()
+        {
+            _showEdgeIndices = !_showEdgeIndices;
+            foreach (var a in Edges)
+                a.ToggleIndex();
+        }
+
+        public void ToggleVertexIndices()
+        {
+            _showVertexIndices = !_showVertexIndices;
+            foreach (var a in Vertices)
+                a.ToggleIndex();
         }
     }
 }

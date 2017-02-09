@@ -13,6 +13,11 @@ namespace Graphs
     {
         static readonly GraphicsLayer.Font LabelFont = new GraphicsLayer.Font("Times New Roman", 18);
         static readonly GraphicsLayer.ARGB LabelBrushColor = new GraphicsLayer.ARGB(120, 0, 0, 255);
+        static readonly GraphicsLayer.Font IndexFont = new GraphicsLayer.Font("System", 8);
+        static readonly GraphicsLayer.ARGB IndexBrushColor = new GraphicsLayer.ARGB(200, 200, 0, 0);
+
+        public int ParentIndex { get; set; }
+        public double IndexAngle { get; set; }
 
         public enum Orientations
         {
@@ -121,6 +126,16 @@ namespace Graphs
                     var box = g.MeasureString(label, LabelFont);
                     var bounds = new GraphicsLayer.Box(topStart.X + (topFinish.X - topStart.X) / 2 - box.Width / 2 - 0.75 * box.Width * sin, topStart.Y + (topFinish.Y - topStart.Y) / 2 - box.Height / 2 + 0.75 * box.Height * cos, box.Width, box.Height);
                     g.DrawString(label, LabelFont, LabelBrushColor, bounds);
+                }
+
+                if (_showIndex)
+                {
+                    var bounds = new GraphicsLayer.Box(topStart.X + (topFinish.X - topStart.X) / 2, topStart.Y + (topFinish.Y - topStart.Y) / 2, 10, 10);
+                    var cx = (bounds.Left + bounds.Right) / 2;
+                    var cy = (bounds.Bottom + bounds.Top) / 2;
+                    var r = Math.Max(bounds.Width, bounds.Height) / 2 + 5;
+                    var bb = new GraphicsLayer.Box(cx + r * Math.Cos(IndexAngle) - 5, cy + r * Math.Sin(IndexAngle) - 5, 10, 10);
+                    g.DrawString(ParentIndex.ToString(), IndexFont, IndexBrushColor, bb);
                 }
             }
         }
@@ -317,6 +332,19 @@ namespace Graphs
         bool _IsSelected;
         int _Multiplicity;
         string _style;
+        bool _showIndex = false;
+
+        internal void ToggleIndex()
+        {
+            _showIndex = !_showIndex;
+        }
+
+        internal void RotateIndex()
+        {
+            IndexAngle += Math.PI / 16;
+            if (IndexAngle >= 2 * Math.PI)
+                IndexAngle = 0;
+        }
     }
 }
 
