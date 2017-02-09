@@ -390,24 +390,44 @@ namespace WebGraphs
                 case Key.D:
                     break;
                 case Key.D0:
+                    if (Keyboard.Modifiers == ModifierKeys.Control)
+                        SetIndex(0);
                     break;
                 case Key.D1:
+                    if (Keyboard.Modifiers == ModifierKeys.Control)
+                        SetIndex(1);
                     break;
                 case Key.D2:
+                    if (Keyboard.Modifiers == ModifierKeys.Control)
+                        SetIndex(2);
                     break;
                 case Key.D3:
+                    if (Keyboard.Modifiers == ModifierKeys.Control)
+                        SetIndex(3);
                     break;
                 case Key.D4:
+                    if (Keyboard.Modifiers == ModifierKeys.Control)
+                        SetIndex(4);
                     break;
                 case Key.D5:
+                    if (Keyboard.Modifiers == ModifierKeys.Control)
+                        SetIndex(5);
                     break;
                 case Key.D6:
+                    if (Keyboard.Modifiers == ModifierKeys.Control)
+                        SetIndex(6);
                     break;
                 case Key.D7:
+                    if (Keyboard.Modifiers == ModifierKeys.Control)
+                        SetIndex(7);
                     break;
                 case Key.D8:
+                    if (Keyboard.Modifiers == ModifierKeys.Control)
+                        SetIndex(8);
                     break;
                 case Key.D9:
+                    if (Keyboard.Modifiers == ModifierKeys.Control)
+                        SetIndex(9);
                     break;
                 case Key.Decimal:
                     break;
@@ -492,24 +512,44 @@ namespace WebGraphs
                 case Key.None:
                     break;
                 case Key.NumPad0:
+                    if (Keyboard.Modifiers == ModifierKeys.Control)
+                        SetIndex(0);
                     break;
                 case Key.NumPad1:
+                    if (Keyboard.Modifiers == ModifierKeys.Control)
+                        SetIndex(1);
                     break;
                 case Key.NumPad2:
+                    if (Keyboard.Modifiers == ModifierKeys.Control)
+                        SetIndex(2);
                     break;
                 case Key.NumPad3:
+                    if (Keyboard.Modifiers == ModifierKeys.Control)
+                        SetIndex(3);
                     break;
                 case Key.NumPad4:
+                    if (Keyboard.Modifiers == ModifierKeys.Control)
+                        SetIndex(4);
                     break;
                 case Key.NumPad5:
+                    if (Keyboard.Modifiers == ModifierKeys.Control)
+                        SetIndex(5);
                     break;
                 case Key.NumPad6:
+                    if (Keyboard.Modifiers == ModifierKeys.Control)
+                        SetIndex(6);
                     break;
                 case Key.NumPad7:
+                    if (Keyboard.Modifiers == ModifierKeys.Control)
+                        SetIndex(7);
                     break;
                 case Key.NumPad8:
+                    if (Keyboard.Modifiers == ModifierKeys.Control)
+                        SetIndex(8);
                     break;
                 case Key.NumPad9:
+                    if (Keyboard.Modifiers == ModifierKeys.Control)
+                        SetIndex(9);
                     break;
                 case Key.O:
                     break;
@@ -566,6 +606,14 @@ namespace WebGraphs
                 default:
                     break;
             }
+        }
+
+        void SetIndex(int n)
+        {
+            var tabCanvas = SelectedTabCanvas;
+            if (tabCanvas == null)
+                return;
+            tabCanvas.GraphCanvas.SetIndex(n);
         }
 
         void RotateEdgeIndices()

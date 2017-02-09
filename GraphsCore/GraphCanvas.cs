@@ -729,6 +729,59 @@ namespace Graphs
             Invalidate();
         }
 
+        public void SetIndex(int n)
+        {
+            var x = _graph.SelectedVertices;
+            if (x.Count == 1)
+            {
+                var v = x[0];
+                var i = _graph.Vertices.IndexOf(v);
+                if (i != n)
+                {
+                    _graph.Vertices.Remove(v);
+                    if (n >= _graph.Vertices.Count)
+                    {
+                        _graph.Vertices.Add(v);
+                    }
+                    else if (n < i)
+                    {
+                        _graph.Vertices.Insert(n, v);
+                    }
+                    else
+                    {
+                        _graph.Vertices.Insert(n, v);
+                    }
+                }
+            }
+            else
+            {
+                var y = _graph.SelectedEdges;
+                if (y.Count == 1)
+                {
+                    var v = y[0];
+                    var i = _graph.Edges.IndexOf(v);
+                    if (i != n)
+                    {
+                        _graph.Edges.Remove(v);
+                        if (n >= _graph.Edges.Count)
+                        {
+                            _graph.Edges.Add(v);
+                        }
+                        else if (n < i)
+                        {
+                            _graph.Edges.Insert(n, v);
+                        }
+                        else
+                        {
+                            _graph.Edges.Insert(n, v);
+                        }
+                    }
+                }
+            }
+
+            Invalidate();
+        }
+
         public void ToggleVertexIndices()
         {
             _graph.ToggleVertexIndices();
