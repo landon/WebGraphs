@@ -2081,6 +2081,24 @@ trash can button.
 
                 var t = new TextBox();
                 t.Text = result;
+                t.KeyUp += (s, e) =>
+                {
+                    if (Keyboard.Modifiers == ModifierKeys.Control)
+                    {
+                        if (e.Key == Key.D)
+                        {
+                            if (t.Text.Contains("|"))
+                            {
+                                t.Text = result.Replace('|', ',');
+                            }
+                            else
+                            {
+                                t.Text = result;
+                            }
+                        }
+                    }
+                };
+               
                 resultWindow.AddChild(t);
 
                 if (!generateProof && mind.BreakerWonBoard != null)
