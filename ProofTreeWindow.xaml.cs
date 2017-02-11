@@ -33,10 +33,9 @@ namespace WebGraphs
             : this()
         {
             _blob = blob;
-            BuildTree();
         }
 
-        async void BuildTree()
+        public async Task BuildTree()
         {
             var potSize = _blob.UIGraph.Vertices.Max(v => v.Label.TryParseInt().Value);
 
@@ -50,30 +49,48 @@ namespace WebGraphs
             _mind.MissingEdgeIndex = _blob.SelectedEdgeIndices.First();
             _mind.ThinkHarder = false;
 
-            var win = await Task.Factory.StartNew<bool>(() => _mind.Analyze(template, null));
-            
-            if (!win)
-                return;
+            using (var resultWindow = new ResultWindow(true))
+            {
+                var win = await Task.Factory.StartNew<bool>(() => _mind.Analyze(template, resultWindow.OnProgress));
 
-            _boardToTree = _mind.NonColorableBoards.Select(b => new { Board = b, Tree = _mind.BuildGameTree(b, win) }).ToDictionary(x => x.Board, x => x.Tree);
+                resultWindow.Close();
+
+                if (!win)
+                {
+                    MessageBox.Show("Fixer loses!");
+                    Close();
+                    return;
+                }
+            }
+
+            _boardToTree = _mind.NonColorableBoards.Select(b => new { Board = b, Tree = _mind.BuildGameTree(b, true) }).ToDictionary(x => x.Board, x => x.Tree);
 
             foreach (var kvp in _boardToTree.OrderByDescending(kv => kv.Value.GetDepth()))
             {
                 var treeItem = new TreeViewItem();
-                AddTreeItems(treeItem, kvp.Value);
+                InitializeTreeItem(treeItem, kvp.Value);
                 _theTree.Items.Add(treeItem);
+                AddTreeItems(treeItem, kvp.Value);
             }
         }
 
         void AddTreeItems(TreeViewItem item, GameTree tree)
         {
-            InitializeTreeItem(item, tree);
             foreach (var child in tree.Children.OrderByDescending(kv => kv.GetDepth()))
             {
                 var childItem = new TreeViewItem();
-                AddTreeItems(childItem, child);
+                InitializeTreeItem(childItem, child);
                 item.Items.Add(childItem);
             }
+
+            item.Expanded += (s, e) =>
+            {
+                foreach(TreeViewItem it in item.Items)
+                {
+                    if (it.Items.Count <= 0)
+                        AddTreeItems(it, it.Tag as GameTree);
+                }
+            };
         }
 
         void InitializeTreeItem(TreeViewItem item, GameTree tree)
@@ -96,6 +113,10 @@ namespace WebGraphs
             Dispatcher.BeginInvoke(() =>
             {
                 var g = new Graphics(_theCanvas);
+                graphCanvas.Paint(g, (int)_theCanvas.ActualWidth, (int)_theCanvas.ActualHeight);
+                graphCanvas.DoZoomFit();
+
+                g = new Graphics(_theCanvas);
                 graphCanvas.Paint(g, (int)_theCanvas.ActualWidth, (int)_theCanvas.ActualHeight);
                 graphCanvas.DoZoomFit();
             });
@@ -162,6 +183,12 @@ namespace WebGraphs
                     clone.Vertices[q].Label = string.Join(",", lists[q].OrderBy(x => x));
                 }
             }
+        }
+
+        protected override void OnClosed(EventArgs e)
+        {
+            base.OnClosed(e);
+            Application.Current.RootVisual.SetValue(Control.IsEnabledProperty, true);
         }
     }
 }

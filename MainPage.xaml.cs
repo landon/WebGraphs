@@ -1755,10 +1755,24 @@ trash can button.
         {
         }
 
-        void _mainMenu_LaunchProofExplorer()
+        async void _mainMenu_LaunchProofExplorer()
         {
             var blob = AlgorithmBlob.Create(SelectedTabCanvas);
-            new ProofTreeWindow(blob).Show();
+
+            if (blob.SelectedEdgeIndices.Count <= 0)
+            {
+                MessageBox.Show("no edges selected");
+                return;
+            }
+            if (blob.SelectedEdgeIndices.Count >= 2)
+            {
+                MessageBox.Show("too many edges selected");
+                return;
+            }
+
+            var ptw = new ProofTreeWindow(blob);
+            await ptw.BuildTree();
+            ptw.Show();
         }
 
         void _mainMenu_LookupIsomorphismClass()

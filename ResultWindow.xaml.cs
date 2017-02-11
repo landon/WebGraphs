@@ -61,6 +61,12 @@ namespace WebGraphs
             return c;
         }
 
+        protected override void OnClosed(EventArgs e)
+        {
+            base.OnClosed(e);
+            Application.Current.RootVisual.SetValue(Control.IsEnabledProperty, true);
+        }
+
         public void Dispose()
         {
             _layoutRoot.Children.Remove(_progressIndicator);
