@@ -13,7 +13,7 @@ namespace Graphs
         static readonly GraphicsLayer.Font LabelFont = new GraphicsLayer.Font("Times New Roman", 12);
         static readonly GraphicsLayer.Font IndexFont = new GraphicsLayer.Font("System", 8);
         static readonly GraphicsLayer.ARGB LabelBrushColor = new GraphicsLayer.ARGB(0, 0, 0);
-        static readonly GraphicsLayer.ARGB IndexBrushColor = new GraphicsLayer.ARGB(200, 0, 0, 200);
+        static readonly GraphicsLayer.ARGB IndexBrushColor = new GraphicsLayer.ARGB(200, 200, 0, 0);
         static readonly GraphicsLayer.ARGB BoundaryPenColor = new GraphicsLayer.ARGB(0, 0, 0);
         static readonly GraphicsLayer.ARGB BoundarySelectedPenColor = new GraphicsLayer.ARGB(120, 0, 255, 0);
         static readonly int BoundarySelectedPenWidth = 5;

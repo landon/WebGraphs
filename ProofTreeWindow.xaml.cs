@@ -1,6 +1,7 @@
 ﻿using Choosability;
 using Choosability.FixerBreaker.KnowledgeEngine;
 using Choosability.FixerBreaker.KnowledgeEngine.Slim.Super;
+using Choosability.Utility;
 using Graphs;
 using System;
 using System.Collections.Generic;
@@ -23,6 +24,8 @@ namespace WebGraphs
         AlgorithmBlob _blob;
         SuperSlimMind _mind;
         Dictionary<SuperSlimBoard, GameTree> _boardToTree;
+        Graphs.Graph _visualizationGraph;
+        GraphCanvas _graphCanvas;
 
         public ProofTreeWindow()
         {
@@ -103,22 +106,42 @@ namespace WebGraphs
         void Item_Selected(object sender, RoutedEventArgs e)
         {
             var gameTree = (sender as TreeViewItem).Tag as GameTree;
-            var visualizationGraph = _blob.UIGraph.Clone();
-            var graphCanvas = new GraphCanvas(visualizationGraph);
-            graphCanvas.SnapToGrid = false;
-            graphCanvas.DrawGrid = false;
-            graphCanvas.DoClearLabels();
+            _visualizationGraph = _blob.UIGraph.Clone();
+            _graphCanvas = new GraphCanvas(_visualizationGraph);
+            _graphCanvas.SnapToGrid = false;
+            _graphCanvas.DrawGrid = false;
+            _graphCanvas.DoClearLabels();
 
-            ColorGraph(gameTree, visualizationGraph);
+            if (gameTree.Info != null)
+            {
+                Permutation pp;
+                var listString = gameTree.Board.ToListStringInLexOrder(out pp);
+
+                var alpha = Math.Min(pp[gameTree.Info.Alpha], pp[gameTree.Info.Beta]);
+                var beta = Math.Max(pp[gameTree.Info.Alpha], pp[gameTree.Info.Beta]);
+
+                _swapInfoLabel.Text = alpha + " <--> " + beta + " at " + gameTree.Info.SwapVertices.ToSetString();
+            }
+            else
+            {
+                _swapInfoLabel.Text = "";
+            }
+
+            ColorGraph(gameTree, _visualizationGraph);
+            RepaintCanvas();
+        }
+
+        void RepaintCanvas()
+        {
             Dispatcher.BeginInvoke(() =>
             {
                 var g = new Graphics(_theCanvas);
-                graphCanvas.Paint(g, (int)_theCanvas.ActualWidth, (int)_theCanvas.ActualHeight);
-                graphCanvas.DoZoomFit();
+                _graphCanvas.Paint(g, (int)_theCanvas.ActualWidth, (int)_theCanvas.ActualHeight);
+                _graphCanvas.DoZoomFit();
 
                 g = new Graphics(_theCanvas);
-                graphCanvas.Paint(g, (int)_theCanvas.ActualWidth, (int)_theCanvas.ActualHeight);
-                graphCanvas.DoZoomFit();
+                _graphCanvas.Paint(g, (int)_theCanvas.ActualWidth, (int)_theCanvas.ActualHeight);
+                _graphCanvas.DoZoomFit();
             });
         }
 
@@ -189,6 +212,15 @@ namespace WebGraphs
         {
             base.OnClosed(e);
             Application.Current.RootVisual.SetValue(Control.IsEnabledProperty, true);
+        }
+
+        void OnToggleShowIndices(object sender, RoutedEventArgs e)
+        {
+            if (_visualizationGraph != null)
+            {
+                _visualizationGraph.ToggleVertexIndices();
+                RepaintCanvas();
+            }
         }
     }
 }
