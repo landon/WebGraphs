@@ -113,13 +113,14 @@ namespace WebGraphs
             _mainMenu.OnAddCClockSpindle += _mainMenu_OnAddCClockSpindle;
             _mainMenu.OnAnalyzeCurrentBoard += _mainMenu_OnAnalyzeCurrentBoard;
             _mainMenu.LookupIsomorphismClass += _mainMenu_LookupIsomorphismClass;
+            _mainMenu.LaunchProofExplorer += _mainMenu_LaunchProofExplorer;
 
             _propertyGrid.SomethingChanged += _propertyGrid_SomethingChanged;
 
             DoAutoLoad();
         }
 
-        
+     
 
         void DoAutoLoad()
         {
@@ -1752,6 +1753,12 @@ trash can button.
         }
         void FindPaintNumber()
         {
+        }
+
+        void _mainMenu_LaunchProofExplorer()
+        {
+            var blob = AlgorithmBlob.Create(SelectedTabCanvas);
+            new ProofTreeWindow(blob).Show();
         }
 
         void _mainMenu_LookupIsomorphismClass()

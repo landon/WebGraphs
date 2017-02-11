@@ -164,6 +164,7 @@
                     <local:SuperMenuItem Header="analyze current board" Click="MenuItemClick"/>
                     <menu:Separator/>
                     <local:SuperMenuItem Header="lookup isomorphism class" Click="MenuItemClick"/>
+                    <local:SuperMenuItem Header="proof explorer" Click="MenuItemClick"/>
                 </menu:ContextMenu>
             </menu:ContextMenuService.ContextMenu>
         </Button>

@@ -155,6 +155,9 @@
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
     <Compile Include="BoardInfo.cs" />
+    <Compile Include="ProofTreeWindow.xaml.cs">
+      <DependentUpon>ProofTreeWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="LookupIsomorphismClassWindow.xaml.cs">
       <DependentUpon>LookupIsomorphismClassWindow.xaml</DependentUpon>
     </Compile>
@@ -193,6 +196,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </ApplicationDefinition>
+    <Page Include="ProofTreeWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="LookupIsomorphismClassWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

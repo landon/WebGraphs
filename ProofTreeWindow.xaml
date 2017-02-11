@@ -1,0 +1,17 @@
+﻿<controls:ChildWindow x:Class="WebGraphs.ProofTreeWindow"
+           xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
+           xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
+           xmlns:controls="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls"
+           Width="1079.567" Height="631.453" 
+           Title="proof explorer">
+    <Grid x:Name="LayoutRoot">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="300"/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Grid Grid.Column="0">
+            <controls:TreeView Name="_theTree" ></controls:TreeView>
+        </Grid>
+                <Canvas Grid.Column="1" Background="WhiteSmoke" Name="_theCanvas"></Canvas>
+    </Grid>
+</controls:ChildWindow>

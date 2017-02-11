@@ -90,7 +90,9 @@ namespace WebGraphs
         public event Action OnAddCClockSpindle;
         public event Action OnAnalyzeCurrentBoard;
         public event Action LookupIsomorphismClass;
-        
+        public event Action LaunchProofExplorer;
+
+
 
         public MenuBar()
         {
@@ -351,6 +353,9 @@ namespace WebGraphs
                     break;
                 case "lookup isomorphism class":
                     A(LookupIsomorphismClass);
+                    break;
+                case "proof explorer":
+                    A(LaunchProofExplorer);
                     break;
             }
         }
