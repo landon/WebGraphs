@@ -53,36 +53,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
 
         public string ToListStringInLexOrder(out Permutation pp, int maxPot = -1)
         {
-            var lists = Stacks.Value.Select(l => l.ToSet()).ToList();
-            var pot = lists.SelectMany(l => l).Distinct().Count();
-            if (maxPot > 0)
-                pot = maxPot;
-            var stacks = Stacks.Value.Select(l => l.ToSet()).Where(s => s.Count < pot).ToList();
-            return ToLexOrder(string.Join("|", stacks.Select(s => string.Join("", s.OrderBy(x => x)))), out pp, maxPot);
-        }
-
-        string ToLexOrder(string stacksString, out Permutation pp, int maxPot = -1)
-        {
-            pp = null;
-            string lexSmallest;
-            var stacks = stacksString.Split('|').Select(s => s.ToCharArray().Select(c => int.Parse(c.ToString())).ToList()).ToList();
-            lexSmallest = stacksString;
-
-            var pot = stacks.SelectMany(l => l).Distinct().Count();
-            if (maxPot > 0)
-                pot = maxPot;
-
-            foreach (var p in Permutation.EnumerateAll(pot))
-            {
-                var permutedString = string.Join("|", stacks.Select(s => string.Join("", s.Select(a => p[a]).OrderBy(x => x))));
-                if (permutedString.CompareTo(lexSmallest) <= 0)
-                {
-                    lexSmallest = permutedString;
-                    pp = p;
-                }
-            }
-
-            return lexSmallest;
+            return BoardLexifier.ToListStringInLexOrder(Stacks.Value, out pp, maxPot);
         }
 
         public SuperSlimBoard(ulong[] trace, int stackCount)
