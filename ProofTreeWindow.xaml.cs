@@ -68,7 +68,17 @@ namespace WebGraphs
 
             _boardToTree = _mind.NonColorableBoards.Select(b => new { Board = b, Tree = _mind.BuildGameTree(b, true) }).ToDictionary(x => x.Board, x => x.Tree);
 
-            foreach (var kvp in _boardToTree.OrderByDescending(kv => kv.Value.GetDepth()))
+            var ll = _boardToTree.ToList();
+            ll.Sort((t1, t2) =>
+            {
+                var cc = t1.Value.GetDepth().CompareTo(t2.Value.GetDepth());
+                if (cc > 0)
+                    return -1;
+                if (cc < 0)
+                    return 1;
+                return t1.Value.Board.ToListStringInLexOrder(_mind.MaxPot).CompareTo(t2.Value.Board.ToListStringInLexOrder(_mind.MaxPot));
+            });
+            foreach (var kvp in ll)
             {
                 var treeItem = new TreeViewItem();
                 InitializeTreeItem(treeItem, kvp.Value);
@@ -79,7 +89,17 @@ namespace WebGraphs
 
         void AddTreeItems(TreeViewItem item, GameTree tree)
         {
-            foreach (var child in tree.Children.OrderByDescending(kv => kv.GetDepth()))
+            var ll = tree.Children.ToList();
+            ll.Sort((t1, t2) =>
+            {
+                var cc = t1.GetDepth().CompareTo(t2.GetDepth());
+                if (cc > 0)
+                    return -1;
+                if (cc < 0)
+                    return 1;
+                return t1.Board.ToListStringInLexOrder(_mind.MaxPot).CompareTo(t2.Board.ToListStringInLexOrder(_mind.MaxPot));
+            });
+            foreach (var child in ll)
             {
                 var childItem = new TreeViewItem();
                 InitializeTreeItem(childItem, child);
@@ -111,11 +131,12 @@ namespace WebGraphs
             _graphCanvas.SnapToGrid = false;
             _graphCanvas.DrawGrid = false;
             _graphCanvas.DoClearLabels();
+            _visualizationGraph.ToggleVertexIndices();
 
             if (gameTree.Info != null)
             {
                 Permutation pp;
-                var listString = gameTree.Board.ToListStringInLexOrder(out pp);
+                var listString = gameTree.Board.ToListStringInLexOrder(out pp, _mind.MaxPot);
 
                 var alpha = Math.Min(pp[gameTree.Info.Alpha], pp[gameTree.Info.Beta]);
                 var beta = Math.Max(pp[gameTree.Info.Alpha], pp[gameTree.Info.Beta]);
@@ -148,6 +169,8 @@ namespace WebGraphs
         void ColorGraph(GameTree tree, Graphs.Graph clone)
         {
             var lists = tree.Board.Stacks.Value.Select(s => s.ToSet()).ToList();
+            Permutation pp;
+            var listString = tree.Board.ToListStringInLexOrder(out pp, _mind.MaxPot);
 
             if (tree.IsColorable)
             {
@@ -170,7 +193,7 @@ namespace WebGraphs
                     lists[v2].Remove(c);
 
                     var e = clone.Edges.First(ee => Choosability.Utility.ListUtility.Equal(new List<int>() { clone.Vertices.IndexOf(ee.V1), clone.Vertices.IndexOf(ee.V2) }, new List<int>() { v1, v2 }));
-                    e.Label = c.ToString();
+                    e.Label = pp[c].ToString();
                 }
             }
             else
@@ -198,12 +221,12 @@ namespace WebGraphs
                     lists[v2].Remove(c);
 
                     var e = clone.Edges.First(ee => Choosability.Utility.ListUtility.Equal(new List<int>() { clone.Vertices.IndexOf(ee.V1), clone.Vertices.IndexOf(ee.V2) }, new List<int>() { v1, v2 }));
-                    e.Label = c.ToString();
+                    e.Label = pp[c].ToString();
                 }
 
                 for (int q = 0; q < lists.Count; q++)
                 {
-                    clone.Vertices[q].Label = string.Join(",", lists[q].OrderBy(x => x));
+                    clone.Vertices[q].Label = string.Join(",", lists[q].Select(x => pp[x]).OrderBy(x => x));
                 }
             }
         }
