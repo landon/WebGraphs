@@ -66,7 +66,7 @@ namespace WebGraphs
                 }
             }
 
-            _boardToTree = _mind.NonColorableBoards.Select(b => new { Board = b, Tree = _mind.BuildGameTree(b, true) }).ToDictionary(x => x.Board, x => x.Tree);
+            _boardToTree = _mind.NonColorableBoards.Concat(_mind.ColorableBoards).Select(b => new { Board = b, Tree = _mind.BuildGameTree(b, true) }).ToDictionary(x => x.Board, x => x.Tree);
 
             var ll = _boardToTree.ToList();
             ll.Sort((t1, t2) =>
@@ -244,6 +244,33 @@ namespace WebGraphs
                 _visualizationGraph.ToggleVertexIndices();
                 RepaintCanvas();
             }
+        }
+
+        void _searchBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            var s = _searchBox.Text;
+            var x = _theTree.Items.FirstOrDefault(ii => ((GameTree)((TreeViewItem)ii).Tag).Board.ToListStringInLexOrder(_mind.MaxPot).StartsWith(s)) as TreeViewItem;
+            if (x != null)
+            {
+                _theTree.SelectItem(x);
+                x.IsExpanded = true;
+                return;
+            }
+
+            try
+            {
+                var lists = s.Split(new[] { "|", "," }, StringSplitOptions.RemoveEmptyEntries).Select(a => Enumerable.Range(0, a.Length).Select(i => int.Parse(a[i].ToString())).ToList()).ToList();
+                var board = SuperSlimBoard.FromLists(lists);
+                var ss = board.ToListStringInLexOrder();
+
+                x = _theTree.Items.FirstOrDefault(ii => ((GameTree)((TreeViewItem)ii).Tag).Board.ToListStringInLexOrder(_mind.MaxPot).StartsWith(ss)) as TreeViewItem;
+                if (x != null)
+                {
+                    _theTree.SelectItem(x);
+                    x.IsExpanded = true;
+                }
+            }
+            catch { }
         }
     }
 }

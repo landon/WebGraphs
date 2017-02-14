@@ -16,7 +16,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
             if (pot <= 0)
                 pot = lists.SelectMany(l => l).Distinct().Count();
 
-            var stacks = lists.Where(s => s.Count < pot).ToList();
+            var stacks = lists.Where(s => s.Count <= pot).ToList();
             return ToLexOrder(string.Join("|", stacks.Select(s => string.Join("", s.OrderBy(x => x)))), out pp, maxPot);
         }
 

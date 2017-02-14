@@ -10,7 +10,12 @@
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
         <Grid Grid.Column="0">
-            <controls:TreeView Name="_theTree" ></controls:TreeView>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <TextBox Background="AliceBlue" TextAlignment="Center" VerticalAlignment="Stretch" FontSize="20" Foreground="Gray" Name="_searchBox" TextChanged="_searchBox_TextChanged"></TextBox>
+            <controls:TreeView Name="_theTree" Grid.Row="1"></controls:TreeView>
         </Grid>
         <Grid Grid.Column="1">
             <Grid.RowDefinitions>
