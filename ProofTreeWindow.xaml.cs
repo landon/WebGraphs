@@ -136,7 +136,7 @@ namespace WebGraphs
             if (gameTree.Info != null)
             {
                 Permutation pp;
-                var listString = gameTree.Board.ToListStringInLexOrder(out pp, _mind.MaxPot);
+                var listString = gameTree.Parent.Board.ToListStringInLexOrder(out pp, _mind.MaxPot);
 
                 var alpha = Math.Min(pp[gameTree.Info.Alpha], pp[gameTree.Info.Beta]);
                 var beta = Math.Max(pp[gameTree.Info.Alpha], pp[gameTree.Info.Beta]);
@@ -194,6 +194,11 @@ namespace WebGraphs
 
                     var e = clone.Edges.First(ee => Choosability.Utility.ListUtility.Equal(new List<int>() { clone.Vertices.IndexOf(ee.V1), clone.Vertices.IndexOf(ee.V2) }, new List<int>() { v1, v2 }));
                     e.Label = pp[c].ToString();
+                }
+
+                for (int q = 0; q < lists.Count; q++)
+                {
+                    clone.Vertices[q].Label = string.Join(",", lists[q].Select(x => pp[x]).OrderBy(x => x));
                 }
             }
             else
