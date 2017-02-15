@@ -253,6 +253,7 @@ namespace WebGraphs
 
         void _searchBox_TextChanged(object sender, TextChangedEventArgs e)
         {
+            _infoBox.Text = "";
             var s = _searchBox.Text;
             var x = _theTree.Items.FirstOrDefault(ii => ((GameTree)((TreeViewItem)ii).Tag).Board.ToListStringInLexOrder(_mind.MaxPot).StartsWith(s)) as TreeViewItem;
             if (x != null)
@@ -273,9 +274,12 @@ namespace WebGraphs
                 {
                     _theTree.SelectItem(x);
                     x.IsExpanded = true;
+                    return;
                 }
             }
             catch { }
+
+            _infoBox.Text = "no match found";
         }
     }
 }
