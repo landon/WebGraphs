@@ -452,15 +452,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
                 var childBoard = new SuperSlimBoard(board._trace, bc.Alpha, bc.Beta, bc.Response, board._stackCount);
                 int index;
                 if (seenBoards.TryGetValue(childBoard, out index))
-                {
-                    var ct = new GameTree() { Board = childBoard };
-                    ct.IsColorable = _coloringAnalyzer.Analyze(childBoard);
-                    ct.IsSuperabundant = win || IsSuperabundant(board);
-                    ct.GameTreeIndex = _gameTreeIndex++;
-                    ct.SameAsIndex = index;
-                    tree.AddChild(ct, bc);
                     continue;
-                }
 
                 var childTree = BuildGameTree(childBoard, seenBoards, win);
                 tree.AddChild(childTree, bc);
