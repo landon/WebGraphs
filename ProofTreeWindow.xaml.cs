@@ -26,16 +26,18 @@ namespace WebGraphs
         Dictionary<SuperSlimBoard, GameTree> _boardToTree;
         Graphs.Graph _visualizationGraph;
         GraphCanvas _graphCanvas;
+        bool _thinkHarder;
 
         public ProofTreeWindow()
         {
             InitializeComponent();
         }
 
-        public ProofTreeWindow(AlgorithmBlob blob)
+        public ProofTreeWindow(AlgorithmBlob blob, bool thinkHarder = false)
             : this()
         {
             _blob = blob;
+            _thinkHarder = thinkHarder;
         }
 
         public async Task BuildTree()
@@ -50,7 +52,7 @@ namespace WebGraphs
             _mind.SuperabundantOnly = false;
             _mind.OnlyConsiderNearlyColorableBoards = true;
             _mind.MissingEdgeIndex = _blob.SelectedEdgeIndices.First();
-            _mind.ThinkHarder = false;
+            _mind.ThinkHarder = _thinkHarder;
 
             using (var resultWindow = new ResultWindow(true))
             {

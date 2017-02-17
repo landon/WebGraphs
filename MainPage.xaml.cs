@@ -1770,7 +1770,7 @@ trash can button.
                 return;
             }
 
-            var ptw = new ProofTreeWindow(blob);
+            var ptw = new ProofTreeWindow(blob, _fixerBreakerThinkHarder);
             await ptw.BuildTree();
             ptw.Show();
         }
