@@ -37,6 +37,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
         public HashSet<SuperSlimBoard> FixerWonBoards { get { return _wonBoards; } }
         public Dictionary<int, List<SuperSlimBoard>> BoardsOfDepth { get; private set; }
         public int ExtraPsi { get; set; }
+        IWinFilter WinFilter { get; set; }
 
         public SuperSlimMind(Graph g, bool proofFindingMode = false, bool weaklyFixable = false)
         {
@@ -60,6 +61,9 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
             NonColorableBoards = new List<SuperSlimBoard>();
             ColorableBoards = new List<SuperSlimBoard>();
             BreakerWonBoards = new List<SuperSlimBoard>();
+
+            if (WinFilter == null)
+                WinFilter = new GreedyWinFilter(_swapAnalyzer);
 
             FixerWonAllNearlyColorableBoards = true;
 
@@ -180,85 +184,27 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
             while (_remainingBoards.Count > 0)
             {
                 var count = _remainingBoards.Count;
+                winLength++;
 
-                if (ThinkHarder)
+                var boardIndicesToAdd = WinFilter.Filter(_remainingBoards, _wonBoards).OrderByDescending(x => x).ToList();
+                var wonBoards = _remainingBoards.Where((b, i) => boardIndicesToAdd.Contains(i)).ToList();
+                foreach (var b in wonBoards)
+                    _wonBoards.Add(b);
+                BoardsOfDepth[winLength] = wonBoards;
+
+                foreach (var i in boardIndicesToAdd)
+                    _remainingBoards.RemoveAt(i);
+
+                if (progress != null)
                 {
-                    while (true)
+                    var p = 100 * (totalBoards - _remainingBoards.Count) / totalBoards;
+                    if (p > lastP)
                     {
-                        winLength++;
-
-                        var minWinChildCount = int.MaxValue;
-                        var bestBoardIndices = new List<int>();
-                        for (int i = _remainingBoards.Count - 1; i >= 0; i--)
-                        {
-                            if (_swapAnalyzer.Analyze(_remainingBoards[i], _wonBoards))
-                            {
-                                if (_swapAnalyzer.LastWinChildCount < minWinChildCount)
-                                {
-                                    bestBoardIndices.Clear();
-                                    minWinChildCount = _swapAnalyzer.LastWinChildCount;
-                                }
-
-                                if (_swapAnalyzer.LastWinChildCount <= minWinChildCount)
-                                    bestBoardIndices.Add(i);
-                            }
-                        }
-
-                        if (bestBoardIndices.Count > 0)
-                        {
-                            foreach (var i in bestBoardIndices)
-                                _wonBoards.Add(_remainingBoards[i]);
-                            foreach (var i in bestBoardIndices)
-                                _remainingBoards.RemoveAt(i);
-
-                            if (progress != null)
-                            {
-                                var p = 100 * (totalBoards - _remainingBoards.Count) / totalBoards;
-                                if (p > lastP)
-                                {
-                                    progress(new Tuple<string, int>(string.Format("Finding all {0} move wins...", winLength), p));
-                                    lastP = p;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            break;
-                        }
-
-                        BoardCounts.Add(_remainingBoards.Count);
+                        progress(new Tuple<string, int>(string.Format("Finding all {0} move wins...", winLength), p));
+                        lastP = p;
                     }
                 }
-                else
-                {
-                    winLength++;
-                    var wonBoards = new List<SuperSlimBoard>();
-                    for (int i = _remainingBoards.Count - 1; i >= 0; i--)
-                    {
-                        var b = _remainingBoards[i];
-                        if (_swapAnalyzer.Analyze(b, _wonBoards))
-                        {
-                            _remainingBoards.RemoveAt(i);
-                            wonBoards.Add(b);
 
-                            if (progress != null)
-                            {
-                                var p = 100 * (totalBoards - _remainingBoards.Count) / totalBoards;
-                                if (p > lastP)
-                                {
-                                    progress(new Tuple<string, int>(string.Format("Finding all {0} move wins...", winLength), p));
-                                    lastP = p;
-                                }
-                            }
-                        }
-                    }
-
-                    foreach (var b in wonBoards)
-                        _wonBoards.Add(b);
-
-                    BoardsOfDepth[winLength] = wonBoards;
-                }
-                
                 BoardCounts.Add(_remainingBoards.Count);
 
                 if (_remainingBoards.Count == count)
