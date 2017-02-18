@@ -7,23 +7,20 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
 {
     public class SmartFilter : IWinFilter
     {
-        public Dictionary<SuperSlimBoard, GameTreeInfo> WinTreeInfo { get; private set; }
-        public Dictionary<SuperSlimBoard, GameTreeInfo> LossTreeInfo { get; private set; }
-
-        ulong[] _fixerResponses;
-        int _fixerResponseCount;
-        Dictionary<ulong, List<List<ulong>>> _breakerChoicesCache = new Dictionary<ulong, List<List<ulong>>>();
-
-        public SmartFilter()
-        {
-            _fixerResponses = new ulong[8192];
-            WinTreeInfo = new Dictionary<SuperSlimBoard, GameTreeInfo>();
-            LossTreeInfo = new Dictionary<SuperSlimBoard, GameTreeInfo>();
-        }
-
         public override IEnumerable<int> Filter(List<SuperSlimBoard> R, HashSet<SuperSlimBoard> W)
         {
             throw new NotImplementedException();
+        }
+
+        IEnumerable<ColorPairOutcome> Analyze(SuperSlimBoard board)
+        {
+            var colorPairs = new List<Tuple<int, int>>();
+            for (int i = 0; i < board._length; i++)
+                for (int j = i + 1; j < board._length; j++)
+                    colorPairs.Add(new Tuple<int, int>(i, j));
+
+            return colorPairs.OrderBy(cp => (board._trace[cp.Item1] ^ board._trace[cp.Item2]).PopulationCount())
+                             .Select(cp => new ColorPairOutcome() { Colors = cp, FixerOutcomes = AnalyzeColorPair(cp, board) });
         }
 
         IEnumerable<FixerOutcome> AnalyzeColorPair(Tuple<int, int> colors, SuperSlimBoard board)
@@ -44,27 +41,10 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
             }
         }
 
-        bool Analyze(SuperSlimBoard board, HashSet<SuperSlimBoard> wonBoards)
-        {
-            var winInfo = new GameTreeInfo();
-            WinTreeInfo[board] = winInfo;
-
-            var lossInfo = new GameTreeInfo();
-            LossTreeInfo[board] = lossInfo;
-
-            var colorPairs = new List<Tuple<int, int>>();
-            for (int i = 0; i < board._length; i++)
-                for (int j = i + 1; j < board._length; j++)
-                    colorPairs.Add(new Tuple<int, int>(i, j));
-
-            foreach (var cp in colorPairs.OrderBy(cp => (board._trace[cp.Item1] ^ board._trace[cp.Item2]).PopulationCount()))
-            {
-                AnalyzeColorPair(cp, board);
-            }
-
-            return false;
-        }
-
+        #region guts
+        ulong[] _fixerResponses = new ulong[8192];
+        int _fixerResponseCount;
+        Dictionary<ulong, List<List<ulong>>> _breakerChoicesCache = new Dictionary<ulong, List<List<ulong>>>();
         void GetFixerResponses(List<ulong> possibleMoves)
         {
             _fixerResponseCount = 1 << possibleMoves.Count;
@@ -116,6 +96,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
             }
 
             return choices;
-        }
+        } 
+        #endregion
     }
 }

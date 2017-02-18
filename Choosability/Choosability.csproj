@@ -91,6 +91,7 @@
     <Compile Include="FixerBreaker\Chronicle\ChronicledBranch.cs" />
     <Compile Include="FixerBreaker\KnowledgeEngine\IMind.cs" />
     <Compile Include="FixerBreaker\KnowledgeEngine\Slim\SortedIntList.cs" />
+    <Compile Include="FixerBreaker\KnowledgeEngine\Slim\Super\ColorPairOutcome.cs" />
     <Compile Include="FixerBreaker\KnowledgeEngine\Slim\Super\FixerOutcome.cs" />
     <Compile Include="FixerBreaker\KnowledgeEngine\Slim\Super\GreedyWinFilter.cs" />
     <Compile Include="FixerBreaker\KnowledgeEngine\Slim\Super\IWinFilter.cs" />
