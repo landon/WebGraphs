@@ -91,6 +91,7 @@
     <Compile Include="FixerBreaker\Chronicle\ChronicledBranch.cs" />
     <Compile Include="FixerBreaker\KnowledgeEngine\IMind.cs" />
     <Compile Include="FixerBreaker\KnowledgeEngine\Slim\SortedIntList.cs" />
+    <Compile Include="FixerBreaker\KnowledgeEngine\Slim\Super\FixerOutcome.cs" />
     <Compile Include="FixerBreaker\KnowledgeEngine\Slim\Super\GreedyWinFilter.cs" />
     <Compile Include="FixerBreaker\KnowledgeEngine\Slim\Super\IWinFilter.cs" />
     <Compile Include="FixerBreaker\KnowledgeEngine\Slim\Super\BoardLexifier.cs" />
@@ -103,6 +104,7 @@
     <Compile Include="FixerBreaker\KnowledgeEngine\Slim\Super\Proofs\ProofBuilder.cs" />
     <Compile Include="FixerBreaker\KnowledgeEngine\Slim\Super\Proofs\ProofCase.cs" />
     <Compile Include="FixerBreaker\KnowledgeEngine\Slim\Super\Proofs\PermutationAwareProofBuilder.cs" />
+    <Compile Include="FixerBreaker\KnowledgeEngine\Slim\Super\SmartFilter.cs" />
     <Compile Include="FixerBreaker\KnowledgeEngine\Slim\Super\SuperSlimBoard.cs" />
     <Compile Include="FixerBreaker\KnowledgeEngine\Slim\Super\SuperSlimColoringAnalyzer.cs" />
     <Compile Include="FixerBreaker\KnowledgeEngine\Slim\Super\SuperSlimMind.cs" />
