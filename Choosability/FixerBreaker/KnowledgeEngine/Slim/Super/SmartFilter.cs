@@ -59,7 +59,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
 
             foreach (var cp in colorPairs.OrderBy(cp => (board._trace[cp.Item1] ^ board._trace[cp.Item2]).PopulationCount()))
             {
-                
+                AnalyzeColorPair(cp, board);
             }
 
             return false;
