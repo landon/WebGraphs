@@ -16,7 +16,7 @@
                 <RowDefinition Height="20"/>
             </Grid.RowDefinitions>
             <TextBox Background="AliceBlue" TextAlignment="Center" VerticalAlignment="Stretch" FontSize="20" Foreground="Gray" Name="_searchBox" TextChanged="_searchBox_TextChanged"></TextBox>
-            <controls:TreeView Name="_theTree" Grid.Row="1"></controls:TreeView>
+            <controls:TreeView Name="_theTree" Grid.Row="1" KeyUp="_theTree_KeyUp"></controls:TreeView>
             <TextBlock Grid.Row="2" Name="_infoBox" HorizontalAlignment="Center" VerticalAlignment="Center"></TextBlock>
         </Grid>
         <Grid Grid.Column="1">

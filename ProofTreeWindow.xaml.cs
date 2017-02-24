@@ -283,6 +283,20 @@ namespace WebGraphs
 
             _infoBox.Text = "no match found";
         }
+
+        void _theTree_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.C)
+            {
+                var source = e.OriginalSource as TreeViewItem;
+                if (source != null)
+                {
+                    var gt = source.Tag as GameTree;
+                    if (gt != null)
+                        Clipboard.SetText(gt.Board.ToListStringInLexOrder());
+                }
+            }
+        }
     }
 }
 
