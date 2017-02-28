@@ -393,16 +393,19 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
                 return tree;
 
             var treeInfo = win ? _swapAnalyzer.WinTreeInfo[board] : _swapAnalyzer.LossTreeInfo[board];
+
+            var localSeenBoards = new HashSet<SuperSlimBoard>();
             foreach (var bc in treeInfo)
             {
                 var childBoard = new SuperSlimBoard(board._trace, bc.Alpha, bc.Beta, bc.Response, board._stackCount);
-                int index;
-                if (seenBoards.TryGetValue(childBoard, out index))
+                if (localSeenBoards.Contains(childBoard))
                     continue;
+                localSeenBoards.Add(childBoard);
 
                 var childTree = BuildGameTree(childBoard, seenBoards, win);
                 tree.AddChild(childTree, bc);
             }
+
 
             return tree;
         }
