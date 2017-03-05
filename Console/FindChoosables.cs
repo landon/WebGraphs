@@ -16,8 +16,8 @@ namespace Console
         const int MinVertices = 4;
         const int MaxVertices = 16;
 
-        const bool Offline = false;
-        const bool AT = true;
+        const bool Offline = true;
+        const bool AT = false;
         const int MaxIndependenceNumber = int.MaxValue;
         const int Fold = 1;
         
@@ -30,6 +30,7 @@ namespace Console
         {
             using (var graphIO = new GraphEnumerator(WinnersFile, MinVertices, MaxVertices))
             {
+                graphIO.FileRoot = @"C:\Users\landon\Google Drive\research\Graph6\graph";
                 foreach (var g in graphIO.EnumerateGraph6File())
                 {
                     if (MaxIndependenceNumber < int.MaxValue)
@@ -62,6 +63,10 @@ namespace Console
                     }
                     else if (Offline)
                     {
+                        if (g.EnumerateMaximalIndependentSets().Any(I => I.Count > 2))
+                            continue;
+                        System.Console.Write("checking " + g.ToGraph6() + "...");
+
                         List<List<int>> badAssignment;
                         var bg = new BitGraph_long(g.GetEdgeWeights());
 

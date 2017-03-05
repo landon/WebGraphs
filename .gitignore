@@ -159,3 +159,4 @@ New Text Document.txt
 #NuGet
 packages
 !packages/repositories.config
+.vs/config/applicationhost.config

@@ -1264,6 +1264,32 @@ namespace Choosability
             return GraphChoosability_long.IsSubsetTwoColorable(new BitGraph_long(GetEdgeWeights()), Vertices.ToInt64());
         }
 
+        public bool IsTwoColorableSlow()
+        {
+            var Q = new Queue<int>();
+            Q.Enqueue(0);
+
+            var c = new int[N];
+
+            while (Q.Count > 0)
+            {
+                var v = Q.Dequeue();
+                if (c[v] == 0)
+                    c[v] = -1;
+                foreach (var w in Neighbors[v])
+                {
+                    if (c[w] == c[v])
+                        return false;
+                    if (c[w] != 0)
+                        continue;
+                    c[w] = -c[v];
+                    Q.Enqueue(w);
+                }
+            }
+
+            return true;
+        }
+
         public List<int> VerticesOfDegree(int d)
         {
             return Vertices.Where(v => Degree(v) == d).ToList();

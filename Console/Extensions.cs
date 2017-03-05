@@ -16,6 +16,8 @@ namespace Console
 {
     public static class Extensions
     {
+        public static string BrowserPath = @"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe";
+        public static string GraphDataWebRoot = @"https://dl.dropboxusercontent.com/u/8609833/Web/GraphData";
         public static void ToWebPageSimple(this IEnumerable<Choosability.Graph> graphs, string relativePath, int K = 0)
         {
             var maker = new GraphPictureMaker(graphs);
@@ -25,7 +27,7 @@ namespace Console
 
             MakePictures.MakeWebpage(maker, path, directed: false, showFactors: false, lowPlus: false, fivePlus: false, useLaplacian: false);
 
-            Path.Combine(@"https://dl.dropboxusercontent.com/u/8609833/Web/GraphData", relativePath, "index.html").ToBrowser();
+            Path.Combine(GraphDataWebRoot, relativePath, "index.html").ToBrowser();
         }
 
         public static void ToWebPage(this IEnumerable<Choosability.Graph> graphs, string relativePath, bool directed = true, bool fivePlus = true, bool useLaplacian = true, bool compressName = true, bool lowPlus = false)
@@ -36,7 +38,7 @@ namespace Console
 
             MakePictures.MakeWebpage(maker, path, directed: directed, showFactors: false, lowPlus: lowPlus, fivePlus: fivePlus, useLaplacian: useLaplacian);
 
-            Path.Combine(@"https://dl.dropboxusercontent.com/u/8609833/Web/GraphData", relativePath, "index.html").ToBrowser();
+            Path.Combine(GraphDataWebRoot, relativePath, "index.html").ToBrowser();
         }
 
         public static string LegalizeFileName(this string name)
@@ -57,7 +59,7 @@ namespace Console
 
         public static void ToBrowser(this string url)
         {
-            Process.Start(@"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe", "\"" + url + "\"");
+            Process.Start(BrowserPath, "\"" + url + "\"");
         }
 
         public static void WriteToWeightFile(this IEnumerable<Choosability.Graph> graphs, string path)
