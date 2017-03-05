@@ -117,6 +117,7 @@
     <Compile Include="RingAssignmentGenerator.cs" />
     <Compile Include="SinkEliminator.cs" />
     <Compile Include="SuperAbundanceFinder.cs" />
+    <Compile Include="SuperDuperLocal.cs" />
     <Compile Include="WeaklyFixableTester.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -1096,6 +1096,11 @@ namespace Choosability
         {
             return Neighbors[v].Count;
         }
+
+        public int Omega(int v)
+        {
+            return CliqueNumberBronKerbosch(Neighbors[v]) + 1;
+        }
         public int OutDegree(int v)
         {
             return OutNeighbors[v].Count;

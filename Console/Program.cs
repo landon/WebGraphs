@@ -19,7 +19,8 @@ namespace Console
 
         static void Main(string[] args)
         {
-            DoGallaiTrees.Go();
+            SuperDuperLocal.Go();
+           // DoGallaiTrees.Go();
            // DoGallaiTrees.Go().RemoveSelfIsomorphs().ToWebPageSimple(@"gallai\test\");
             //FindFractionalColorableRandomized.Go();
             //  FindKP.Go();
