@@ -29,6 +29,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
         public int MissingEdgeIndex { get; set; }
         public bool SuperabundantOnly { get; set; }
         public bool ThinkHarder { get; set; }
+        public bool PerformCompleteAnalysis { get; set; }
 
         public SuperSlimColoringAnalyzer ColoringAnalyzer { get { return _coloringAnalyzer; } }
         public List<SuperSlimBoard> NonColorableBoards { get; private set; }
@@ -141,7 +142,9 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
                     {
                         HasNonSuperabundantBoardThatIsNearlyColorable = true;
                         BreakerWonBoard = b;
-                        return false;
+
+                        if (!PerformCompleteAnalysis)
+                            return false;
                     }
 
                     _remainingBoards.RemoveAt(i);
@@ -166,7 +169,9 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
                     FixerWonAllNearlyColorableBoards = false;
                     BreakerWonBoard = nonSuperabundantBoards[0];
                     BreakerWonBoards.AddRange(nonSuperabundantBoards);
-                    return false;
+
+                    if (!PerformCompleteAnalysis)
+                        return false;
                 }
                 else if (ExistsNearlyColorableBoardForEachEdge(nonSuperabundantBoards))
                 {
@@ -174,7 +179,8 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
                     HasNonSuperabundantBoardThatIsNearlyColorable = true;
                     BreakerWonBoard = nonSuperabundantBoards[0];
                     BreakerWonBoards.AddRange(nonSuperabundantBoards);
-                    return false;
+                    if (!PerformCompleteAnalysis)
+                        return false;
                 }
             }
 

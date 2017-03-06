@@ -1813,12 +1813,11 @@ trash can button.
 
             var pot = lists.SelectMany(l => l).Distinct().ToList();
 
-            var mind = new Choosability.FixerBreaker.KnowledgeEngine.Slim.Super.SuperSlimMind(G, true, true);
+            var mind = new SuperSlimMind(G, true, true);
             mind.MaxPot = pot.Count;
-            mind.SuperabundantOnly = false;
-            mind.OnlyConsiderNearlyColorableBoards = true;
-            mind.MissingEdgeIndex = blob.SelectedEdgeIndices.First();
-            mind.ThinkHarder = _fixerBreakerThinkHarder;
+            mind.SuperabundantOnly = true;
+            mind.ThinkHarder = false;
+            mind.PerformCompleteAnalysis = true;
 
             var boardAndNumbering = SuperSlimBoard.Create(lists);
             var board = boardAndNumbering.Item1;
@@ -1836,9 +1835,8 @@ trash can button.
                     var sb = new StringBuilder();
                     sb.AppendLine("Ψ - E = " + mind.ComputeAbundanceSurplus(board));
                     sb.AppendLine();
-
                     
-                    if (mind.FixerWonBoards.Contains(board))
+                    if (!mind.BreakerWonBoards.Contains(board))
                     {
                         if (mind.ColorableBoards.Contains(board))
                         {
