@@ -40,52 +40,75 @@ namespace WebGraphs
             _thinkHarder = thinkHarder;
         }
 
-        public async Task BuildTree()
+        public async Task BuildTree(SuperSlimMind mindFinishedAnalyzing = null, SuperSlimBoard board = null, int potSize = 0)
         {
-            var potSize = _blob.UIGraph.Vertices.Max(v => v.Label.TryParseInt().Value);
+            if (potSize == 0)
+                potSize = _blob.UIGraph.Vertices.Max(v => v.Label.TryParseInt().Value);
 
             var G = _blob.AlgorithmGraph;
-            var template = new Template(G.Vertices.Select(v => potSize + G.Degree(v) - _blob.UIGraph.Vertices[v].Label.TryParseInt().Value).ToList());
 
-            _mind = new SuperSlimMind(G, true, true);
-            _mind.MaxPot = potSize;
-            _mind.SuperabundantOnly = false;
-            _mind.OnlyConsiderNearlyColorableBoards = true;
-            _mind.MissingEdgeIndex = _blob.SelectedEdgeIndices.First();
-            _mind.ThinkHarder = _thinkHarder;
-
-            using (var resultWindow = new ResultWindow(true))
+            if (mindFinishedAnalyzing == null)
             {
-                var win = await Task.Factory.StartNew<bool>(() => _mind.Analyze(template, resultWindow.OnProgress));
+                var template = new Template(G.Vertices.Select(v => potSize + G.Degree(v) - _blob.UIGraph.Vertices[v].Label.TryParseInt().Value).ToList());
 
-                resultWindow.Close();
+                _mind = new SuperSlimMind(G, true, true);
+                _mind.MaxPot = potSize;
+                _mind.SuperabundantOnly = false;
+                _mind.OnlyConsiderNearlyColorableBoards = true;
+                _mind.MissingEdgeIndex = _blob.SelectedEdgeIndices.First();
+                _mind.ThinkHarder = _thinkHarder;
 
-                if (!win)
+                using (var resultWindow = new ResultWindow(true))
                 {
-                    MessageBox.Show("Fixer loses!");
-                    Close();
-                    return;
+                    var win = await Task.Factory.StartNew<bool>(() => _mind.Analyze(template, resultWindow.OnProgress));
+
+                    resultWindow.Close();
+
+                    if (!win)
+                    {
+                        MessageBox.Show("Fixer loses!");
+                        Close();
+                        return;
+                    }
                 }
             }
-
-            _boardToTree = _mind.NonColorableBoards.Concat(_mind.ColorableBoards).Select(b => new { Board = b, Tree = _mind.BuildGameTree(b, true) }).ToDictionary(x => x.Board, x => x.Tree);
-
-            var ll = _boardToTree.ToList();
-            ll.Sort((t1, t2) =>
+            else
             {
-                var cc = t1.Value.GetDepth().CompareTo(t2.Value.GetDepth());
-                if (cc > 0)
-                    return -1;
-                if (cc < 0)
-                    return 1;
-                return t1.Value.Board.ToListStringInLexOrder(_mind.MaxPot).CompareTo(t2.Value.Board.ToListStringInLexOrder(_mind.MaxPot));
-            });
-            foreach (var kvp in ll)
+                _mind = mindFinishedAnalyzing;
+            }
+
+            if (board != null)
             {
+                var gt = _mind.BuildGameTree(board, !_mind.BreakerWonBoards.Contains(board));
+                if (gt == null)
+                    return;
                 var treeItem = new TreeViewItem();
-                InitializeTreeItem(treeItem, kvp.Value);
+                InitializeTreeItem(treeItem, gt);
                 _theTree.Items.Add(treeItem);
-                AddTreeItems(treeItem, kvp.Value);
+                AddTreeItems(treeItem, gt);
+            }
+            else
+            {
+                _boardToTree = _mind.NonColorableBoards.Concat(_mind.ColorableBoards).Select(b => new { Board = b, Tree = _mind.BuildGameTree(b, true) }).ToDictionary(x => x.Board, x => x.Tree);
+
+                var ll = _boardToTree.ToList();
+                ll.Sort((t1, t2) =>
+                {
+                    var cc = t1.Value.GetDepth().CompareTo(t2.Value.GetDepth());
+                    if (cc > 0)
+                        return -1;
+                    if (cc < 0)
+                        return 1;
+                    return t1.Value.Board.ToListStringInLexOrder(_mind.MaxPot).CompareTo(t2.Value.Board.ToListStringInLexOrder(_mind.MaxPot));
+                });
+
+                foreach (var kvp in ll)
+                {
+                    var treeItem = new TreeViewItem();
+                    InitializeTreeItem(treeItem, kvp.Value);
+                    _theTree.Items.Add(treeItem);
+                    AddTreeItems(treeItem, kvp.Value);
+                }
             }
         }
 

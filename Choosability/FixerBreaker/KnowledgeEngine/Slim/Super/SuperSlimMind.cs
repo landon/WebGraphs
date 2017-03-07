@@ -378,9 +378,15 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
         int _gameTreeIndex;
         public GameTree BuildGameTree(SuperSlimBoard board, bool win = true)
         {
-            var seenBoards =  new Dictionary<SuperSlimBoard, int>();
-            _gameTreeIndex = 1;
-            return BuildGameTree(board, seenBoards, win);
+            try
+            {
+                var seenBoards = new Dictionary<SuperSlimBoard, int>();
+                _gameTreeIndex = 1;
+                return BuildGameTree(board, seenBoards, win);
+            }
+            catch { }
+
+            return null;
         }
 
         GameTree BuildGameTree(SuperSlimBoard board, Dictionary<SuperSlimBoard, int> seenBoards, bool win = true)

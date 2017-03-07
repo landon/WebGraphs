@@ -1815,7 +1815,7 @@ trash can button.
 
             var mind = new SuperSlimMind(G, true, true);
             mind.MaxPot = pot.Count;
-            mind.SuperabundantOnly = true;
+            mind.SuperabundantOnly = false;
             mind.ThinkHarder = false;
             mind.PerformCompleteAnalysis = true;
 
@@ -1845,7 +1845,10 @@ trash can button.
                         else
                         {
                             var gameTree = mind.BuildGameTree(board, true);
-                            sb.AppendLine("Fixer wins in " + gameTree.GetDepth() + " moves.");
+                            if (gameTree == null)
+                                sb.AppendLine("board is not itself");
+                            else
+                              sb.AppendLine("Fixer wins in " + gameTree.GetDepth() + " moves.");
                         }
                     }
                     else
@@ -1859,21 +1862,17 @@ trash can button.
                     return sb.ToString();
                 });
 
-                resultWindow.ClearChildren();
+                resultWindow.Close();
 
-                var t = new TextBox();
-                t.Text = result;
-                resultWindow.AddChild(t);
-
-                if (result.Contains("Fixer"))
+                if (!mind.BreakerWonBoards.Contains(board))
                 {
-                    var treeBuilder = new TreeBuilder();
-
-                    var tc = AddTab(treeBuilder.BuildWinTree(blob.UIGraph, mind, board, numbering), blob.UIGraph.Name + " win tree");
-                    tc.GraphCanvas.SetZoomDelta(0.04);
-                    tc.GraphCanvas.SnapToGrid = false;
-                    tc.GraphCanvas.DrawGrid = false;
-                    tc.GraphCanvas.ZoomFitNextPaint();
+                    var ptw = new ProofTreeWindow(blob, _fixerBreakerThinkHarder);
+                    await ptw.BuildTree(mind, board, pot.Count);
+                    ptw.Show();
+                }
+                else
+                {
+                    MessageBox.Show("Breaker wins");
                 }
             }
         }
