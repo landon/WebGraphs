@@ -63,8 +63,6 @@ namespace WebGraphs
                 if (!win)
                 {
                     MessageBox.Show("Fixer loses!");
-                    Close();
-                    return;
                 }
             }
 
