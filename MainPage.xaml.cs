@@ -1772,7 +1772,6 @@ trash can button.
 
             var ptw = new ProofTreeWindow(blob, _fixerBreakerThinkHarder);
             await ptw.BuildTree();
-            ptw.Show();
         }
 
         void _mainMenu_LookupIsomorphismClass()
