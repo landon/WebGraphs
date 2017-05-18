@@ -10,6 +10,7 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
         public SuperSlimBoard Board { get; set; }
         public bool IsColorable { get; set; }
         public bool IsSuperabundant { get; set; }
+        public bool IsFixerWin { get; set; }
         public int GameTreeIndex { get; set; }
         public int SameAsIndex { get; set; }
         public BreakerChoiceInfo Info {get; set;}

@@ -62,6 +62,13 @@ namespace WebGraphs
 
                 resultWindow.OnProgress(new Tuple<string, int>("building tree", 50));
                 _boardToTree = _mind.NonColorableBoards.Concat(_mind.ColorableBoards).Select(b => new { Board = b, Tree = _mind.BuildGameTree(b, true) }).ToDictionary(x => x.Board, x => x.Tree);
+                if (!win)
+                {
+                    foreach(var b in _mind.BreakerWonBoards)
+                    {
+                        _boardToTree[b] = _mind.BuildGameTree(b, false);
+                    }
+                }
 
                 var ll = _boardToTree.ToList();
                 ll.Sort((t1, t2) =>
@@ -116,11 +123,17 @@ namespace WebGraphs
             };
         }
 
+        SolidColorBrush _breakerWinBrush = new SolidColorBrush(Color.FromArgb(25, 200, 0, 0));
+        SolidColorBrush _fixerWinBrush = new SolidColorBrush(Color.FromArgb(25, 0, 0, 200));
         void InitializeTreeItem(TreeViewItem item, GameTree tree)
         {
             item.Header = tree.Board.ToListStringInLexOrder(_mind.MaxPot);
             item.Tag = tree;
             item.Selected += Item_Selected;
+            if (tree.IsFixerWin)
+                item.Background = _fixerWinBrush;
+            else
+                item.Background = _breakerWinBrush;
         }
 
         void Item_Selected(object sender, RoutedEventArgs e)
@@ -205,28 +218,29 @@ namespace WebGraphs
             {
                 var selected = _blob.SelectedEdgeIndices.First();
                 Dictionary<int, long> coloring;
-                _mind.ColoringAnalyzer.AnalyzeWithoutEdge(tree.Board, out coloring, selected);
-
-                for (int jj = 0; jj < clone.Edges.Count; jj++)
+                if (_mind.ColoringAnalyzer.AnalyzeWithoutEdge(tree.Board, out coloring, selected))
                 {
-                    if (jj == selected)
-                        continue;
+                    for (int jj = 0; jj < clone.Edges.Count; jj++)
+                    {
+                        if (jj == selected)
+                            continue;
 
-                    var v1 = _mind._edges[jj].Item1;
-                    var v2 = _mind._edges[jj].Item2;
+                        var v1 = _mind._edges[jj].Item1;
+                        var v2 = _mind._edges[jj].Item2;
 
-                    var c = coloring[jj].LeastSignificantBit();
+                        var c = coloring[jj].LeastSignificantBit();
 
-                    if (!lists[v1].Contains(c))
-                        System.Diagnostics.Debugger.Break();
-                    if (!lists[v2].Contains(c))
-                        System.Diagnostics.Debugger.Break();
+                        if (!lists[v1].Contains(c))
+                            System.Diagnostics.Debugger.Break();
+                        if (!lists[v2].Contains(c))
+                            System.Diagnostics.Debugger.Break();
 
-                    lists[v1].Remove(c);
-                    lists[v2].Remove(c);
+                        lists[v1].Remove(c);
+                        lists[v2].Remove(c);
 
-                    var e = clone.Edges.First(ee => Choosability.Utility.ListUtility.Equal(new List<int>() { clone.Vertices.IndexOf(ee.V1), clone.Vertices.IndexOf(ee.V2) }, new List<int>() { v1, v2 }));
-                    e.Label = pp[c].ToString();
+                        var e = clone.Edges.First(ee => Choosability.Utility.ListUtility.Equal(new List<int>() { clone.Vertices.IndexOf(ee.V1), clone.Vertices.IndexOf(ee.V2) }, new List<int>() { v1, v2 }));
+                        e.Label = pp[c].ToString();
+                    }
                 }
 
                 for (int q = 0; q < lists.Count; q++)
