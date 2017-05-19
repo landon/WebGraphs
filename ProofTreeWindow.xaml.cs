@@ -76,11 +76,11 @@ namespace WebGraphs
             var ll = _boardToTree.ToList();
             ll.Sort((t1, t2) =>
             {
-                var cc = t1.Value.GetDepth().CompareTo(t2.Value.GetDepth());
+                /*var cc = t1.Value.GetDepth().CompareTo(t2.Value.GetDepth());
                 if (cc > 0)
                     return -1;
                 if (cc < 0)
-                    return 1;
+                    return 1;*/
                 return t1.Value.Board.ToListStringInLexOrder(_mind.MaxPot).CompareTo(t2.Value.Board.ToListStringInLexOrder(_mind.MaxPot));
             });
 
