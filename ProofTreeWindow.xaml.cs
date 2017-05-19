@@ -55,43 +55,56 @@ namespace WebGraphs
             _mind.ThinkHarder = _thinkHarder;
 
             var win = false;
-            using (var resultWindow = new ResultWindow(true))
+            using (var resultWindow = new ResultWindow(false))
             {
                 win = await Task.Factory.StartNew<bool>(() => _mind.Analyze(template, resultWindow.OnProgress));
+
                 Title = win ? "Fixer win" : "Breaker win";
+                resultWindow.OnProgress(new Tuple<string, int>("building Fixer win trees", 50));
 
-                resultWindow.OnProgress(new Tuple<string, int>("building tree", 50));
-                resultWindow.Close();         
-            }
-
-            _boardToTree = _mind.NonColorableBoards.Concat(_mind.ColorableBoards).Select(b => new { Board = b, Tree = _mind.BuildGameTree(b, true) }).ToDictionary(x => x.Board, x => x.Tree);
-            if (!win)
-            {
-                foreach (var b in _mind.BreakerWonBoards)
+                List<KeyValuePair<SuperSlimBoard, GameTree>> ll = null;
+                await Task.Factory.StartNew(() =>
                 {
-                    _boardToTree[b] = _mind.BuildGameTree(b, false);
-                }
+                    _boardToTree = _mind.NonColorableBoards.Concat(_mind.ColorableBoards).Select(b => new { Board = b, Tree = _mind.BuildGameTree(b, true) }).ToDictionary(x => x.Board, x => x.Tree);
+                    if (!win)
+                    {
+                        resultWindow.OnProgress(new Tuple<string, int>("building Breaker win trees", 75));
+
+                        foreach (var b in _mind.BreakerWonBoards)
+                        {
+                            _boardToTree[b] = _mind.BuildGameTree(b, false);
+                        }
+                    }
+
+                    ll = _boardToTree.ToList();
+                    ll.Sort((t1, t2) =>
+                    {
+                        return t1.Value.Board.ToListStringInLexOrder(_mind.MaxPot).CompareTo(t2.Value.Board.ToListStringInLexOrder(_mind.MaxPot));
+                    });
+
+                    resultWindow.OnProgress(new Tuple<string, int>("building gui", 75));
+                });
+
+                await Dispatcher.InvokeAsync(() =>
+                {
+                    int xx = 0;
+                    int cc = ll.Count;
+                    foreach (var kvp in ll)
+                    {
+                        var treeItem = new TreeViewItem();
+                        InitializeTreeItem(treeItem, kvp.Value);
+                        _theTree.Items.Add(treeItem);
+                        AddTreeItems(treeItem, kvp.Value);
+
+                        resultWindow.OnProgress(new Tuple<string, int>("building gui", 100 * xx / cc));
+                        xx++;
+                    }
+
+                    Show();
+                });
+
+                resultWindow.Close();
             }
-
-            var ll = _boardToTree.ToList();
-            ll.Sort((t1, t2) =>
-            {
-                /*var cc = t1.Value.GetDepth().CompareTo(t2.Value.GetDepth());
-                if (cc > 0)
-                    return -1;
-                if (cc < 0)
-                    return 1;*/
-                return t1.Value.Board.ToListStringInLexOrder(_mind.MaxPot).CompareTo(t2.Value.Board.ToListStringInLexOrder(_mind.MaxPot));
-            });
-
-            foreach (var kvp in ll)
-            {
-                var treeItem = new TreeViewItem();
-                InitializeTreeItem(treeItem, kvp.Value);
-                _theTree.Items.Add(treeItem);
-                AddTreeItems(treeItem, kvp.Value);
-            }
-
         }
 
         void AddTreeItems(TreeViewItem item, GameTree tree)
@@ -106,6 +119,7 @@ namespace WebGraphs
                     return 1;
                 return t1.Board.ToListStringInLexOrder(_mind.MaxPot).CompareTo(t2.Board.ToListStringInLexOrder(_mind.MaxPot));
             });
+
             foreach (var child in ll)
             {
                 var childItem = new TreeViewItem();
