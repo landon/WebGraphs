@@ -69,9 +69,9 @@ namespace Graphs
             var sb = new StringBuilder();
             sb.AppendLine("\\begin{tikzpicture}[scale = " + scale + "]");
             sb.AppendLine(@"\tikzstyle{VertexStyle} = []");
-            sb.AppendLine(@"\tikzstyle{EdgeStyle} = []");
-            sb.AppendLine(string.Format(@"\tikzstyle{{labeledStyle}}=[shape = circle, minimum size = 6pt, inner sep = 1.2pt, draw]"));
-            sb.AppendLine(string.Format(@"\tikzstyle{{unlabeledStyle}}=[shape = circle, minimum size = 6pt, inner sep = 1.2pt, draw, fill]"));
+            sb.AppendLine(@"\tikzstyle{EdgeStyle} = [line width=3pt]");
+            sb.AppendLine(string.Format(@"\tikzstyle{{labeledStyle}}=[shape = circle, minimum size = 6pt, inner sep = 5pt, outer sep = 5pt, draw]"));
+            sb.AppendLine(string.Format(@"\tikzstyle{{unlabeledStyle}}=[shape = circle, minimum size = 6pt, inner sep = 5pt, outer sep = 5pt, draw, fill]"));
 
             var vertexStyleLookup = new Dictionary<string, string>();
             var edgeStyleLookup = new Dictionary<string, string>();
@@ -91,7 +91,9 @@ namespace Graphs
                     if (!style.Contains("minimum size"))
                         s += "minimum size = 6pt,";
                     if (!style.Contains("inner sep"))
-                        s += "inner sep = 1.2pt,";
+                        s += "inner sep = 5pt,";
+                    if (!style.Contains("outer sep"))
+                        s += "outer sep = 5pt,";
 
                     s += "draw,";
                     s += style;

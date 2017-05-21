@@ -91,6 +91,7 @@ namespace WebGraphs
         public event Action OnAnalyzeCurrentBoard;
         public event Action LookupIsomorphismClass;
         public event Action LaunchProofExplorer;
+        public event Action DoChiColor;
 
 
 
@@ -356,6 +357,9 @@ namespace WebGraphs
                     break;
                 case "proof explorer":
                     A(LaunchProofExplorer);
+                    break;
+                case "chi color":
+                    A(DoChiColor);
                     break;
             }
         }

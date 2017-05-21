@@ -1097,6 +1097,38 @@ namespace Choosability
             return best;
         }
 
+        public List<List<int>> FindChiColoring()
+        {
+            for (int K = 0; K < int.MaxValue; K++)
+            {
+                var c = FindKColoring(Vertices, K);
+                if (c != null)
+                    return c;
+            }
+
+            return null;
+        }
+
+        public List<List<int>> FindKColoring(List<int> subgraph, int K)
+        {
+            if (subgraph.Count <= 0)
+                return new List<List<int>>();
+            if (K <= 0)
+                return null;
+
+            foreach (var I in EnumerateMaximalIndependentSets(subgraph))
+            {
+                var c = FindKColoring(subgraph.Difference(I), K - 1);
+                if (c != null)
+                {
+                    c.Insert(0, I);
+                    return c;
+                }
+            }
+
+            return null;
+        }
+
         #endregion
 
         #region List coloring

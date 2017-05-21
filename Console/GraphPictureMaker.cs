@@ -16,12 +16,15 @@ namespace Console
                                                                       "limegreen",  "pink", 
                                                                       "orange",  "goldenrod", "aquamarine", "black", "white"};
 
+        static readonly List<int> ColoringMap = new List<int>() { 6, 5, 7, 8, 0, 1, 2, 3, 4, 9, 10, 11, 12, 13, 14, 15, 16 };
+
         IEnumerable<Graph> _graphs;
 
         public bool Directed { get; set; }
         public bool ShowFactors { get; set; }
         public bool InDegreeTerms { get; set; }
         public bool IsLowPlus { get; set; }
+        public bool ProperColor { get; set; }
 
         public GraphPictureMaker(string graphFile) : this(GraphEnumerator.EnumerateGraphFile(graphFile)) { }
         public GraphPictureMaker(params Graph[] graphs) : this((IEnumerable<Graph>)graphs) { }
@@ -48,6 +51,8 @@ namespace Console
                 if (g.VertexWeight != null)
                     name += "[" + string.Join(",", g.VertexWeight) + "]";
 
+                if (name == "")
+                    name = "0";
                 var path = Path.Combine(outputDirectory, name);
                 var imageFile = Draw(g, path, renderType);
 
@@ -74,7 +79,7 @@ namespace Console
 
         string Draw(Graph g, string path, DotRenderType renderType = DotRenderType.png)
         {
-            var imageFile = Renderer.Render(ToDot(g, Directed, ShowFactors, InDegreeTerms, IsLowPlus), path, renderType);
+            var imageFile = Renderer.Render(ToDot(g, Directed, ShowFactors, InDegreeTerms, IsLowPlus, ProperColor), path, renderType);
          
             if (renderType == DotRenderType.svg)
                 FixSvg(imageFile);
@@ -103,7 +108,7 @@ namespace Console
             }
         }
 
-        static string ToDot(Graph g, bool directed = false, bool showFactors = false, bool inDegreeTerms = false, bool isLowPlus = false)
+        static string ToDot(Graph g, bool directed = false, bool showFactors = false, bool inDegreeTerms = false, bool isLowPlus = false, bool properColor = false)
         {
             if (showFactors)
                 return g.ToDotWithFactors();
@@ -120,58 +125,71 @@ namespace Console
             sb.AppendLine("node[fontsize=42, fontname=\"Latin Modern Math\" color=black; shape=circle, penwidth=1, width = .92, height=.92, fixedsize=true];");
             sb.AppendLine("edge[style=bold, color=black, penwidth=2];");
 
+            List<List<int>> coloring = null;
+            if (properColor)
+                coloring = g.FindChiColoring();
+
             foreach (int v in g.Vertices)
             {
-                int colorIndex;
+                int colorIndex = 0;
                 var label = "";
-                if (directed)
+
+                if (properColor)
                 {
-                    label = g.InDegree(v).ToString();
-                    colorIndex = g.InDegree(v);
+                    var ii = coloring.FindIndex(I => I.Contains(v));
+                    colorIndex = ColoringMap[ii % ColoringMap.Count];
                 }
                 else
                 {
-                    if (g.VertexWeight == null)
+                    if (directed)
                     {
-                        label = "";
-                        colorIndex = 2;
-                    }
-                    else if (isLowPlus)
-                    {
-                        label = g.VertexWeight[v].ToString();
-                        colorIndex = g.VertexWeight[v] + 2;
-                    }
-                    else if (inDegreeTerms)
-                    {
-                        var dd = g.VertexWeight[v] - g.Degree(v);
-
-                        if (dd == 0)
-                        {
-                            label = "d";
-                        }
-                        else
-                        {
-                            label = "d+";
-                        }
-                        //label = "d";
-                        //if (dd > 0)
-                        //    label = "+" + dd;
-
-
-                        //  colorIndex = dd + 2;
-                        colorIndex = DotColors.Count + 1;
+                        label = g.InDegree(v).ToString();
+                        colorIndex = g.InDegree(v);
                     }
                     else
                     {
-                        label = g.VertexWeight[v].ToString();
-                        //colorIndex = g.VertexWeight[v];
-                        colorIndex = DotColors.Count + 1;
-                    }
-                }
+                        if (g.VertexWeight == null)
+                        {
+                            label = "";
+                            colorIndex = 2;
+                        }
+                        else if (isLowPlus)
+                        {
+                            label = g.VertexWeight[v].ToString();
+                            colorIndex = g.VertexWeight[v] + 2;
+                        }
+                        else if (inDegreeTerms)
+                        {
+                            var dd = g.VertexWeight[v] - g.Degree(v);
 
-                colorIndex -= 2;
-                if (colorIndex < 0)
-                    colorIndex += 13;
+                            if (dd == 0)
+                            {
+                                label = "d";
+                            }
+                            else
+                            {
+                                label = "d+";
+                            }
+                            //label = "d";
+                            //if (dd > 0)
+                            //    label = "+" + dd;
+
+
+                            //  colorIndex = dd + 2;
+                            colorIndex = DotColors.Count + 1;
+                        }
+                        else
+                        {
+                            label = g.VertexWeight[v].ToString();
+                            //colorIndex = g.VertexWeight[v];
+                            colorIndex = DotColors.Count + 1;
+                        }
+                    }
+
+                    colorIndex -= 2;
+                    if (colorIndex < 0)
+                        colorIndex += 13;
+                }
 
                 sb.AppendLine(string.Format(@"{0} [label = ""{2}"", style = filled, fillcolor = ""{1}""];", v, DotColors[colorIndex % DotColors.Count], label));
             }

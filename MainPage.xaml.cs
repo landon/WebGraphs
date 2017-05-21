@@ -35,6 +35,11 @@ namespace WebGraphs
 {
     public partial class MainPage : UserControl
     {
+        static List<ARGB> Colors = new List<ARGB>() {
+            new ARGB(255, 0, 0), new ARGB(0, 0, 255), new ARGB(0, 255, 0),
+            new ARGB(255, 255, 0), new ARGB(95, 158, 160), new ARGB(139, 69, 19),
+            new ARGB(30, 144, 255), new ARGB(64, 224, 208), new ARGB(218, 112, 214) };
+
         public MainPage()
         {
             InitializeComponent();
@@ -114,13 +119,12 @@ namespace WebGraphs
             _mainMenu.OnAnalyzeCurrentBoard += _mainMenu_OnAnalyzeCurrentBoard;
             _mainMenu.LookupIsomorphismClass += _mainMenu_LookupIsomorphismClass;
             _mainMenu.LaunchProofExplorer += _mainMenu_LaunchProofExplorer;
+            _mainMenu.DoChiColor += _mainMenu_DoChiColor;
 
             _propertyGrid.SomethingChanged += _propertyGrid_SomethingChanged;
 
             DoAutoLoad();
         }
-
-     
 
         void DoAutoLoad()
         {
@@ -1513,6 +1517,26 @@ trash can button.
 
             foreach (var v in blob.UIGraph.Edges)
                 v.Orientation = Edge.Orientations.None;
+            SelectedTabCanvas.Invalidate();
+        }
+
+        async void _mainMenu_DoChiColor()
+        {
+            var blob = AlgorithmBlob.Create(SelectedTabCanvas);
+            if (blob == null)
+                return;
+
+            var cc = await Task.Factory.StartNew<List<List<int>>>(() => blob.AlgorithmGraph.FindChiColoring());
+
+            int i = 0;
+            foreach (var v in blob.UIGraph.Vertices)
+            {
+                var c = cc.FirstIndex(l => l.Contains(i));
+                v.Color = Colors[c % Colors.Count];
+                v.Style = string.Format("fill={{rgb,255:red,{0}; green,{1}; blue,{2}}}", v.Color.R, v.Color.G, v.Color.B);
+                i++;
+            }
+
             SelectedTabCanvas.Invalidate();
         }
 
