@@ -123,7 +123,7 @@ namespace Console
             sb.AppendLine("splines=true;");
             sb.AppendLine("sep=0.0;");
             sb.AppendLine("node[fontsize=42, fontname=\"Latin Modern Math\" color=black; shape=circle, penwidth=1, width = .92, height=.92, fixedsize=true];");
-            sb.AppendLine("edge[style=bold, color=black, penwidth=2];");
+            sb.AppendLine("edge[style=bold, color=black, penwidth=6];");
 
             List<List<int>> coloring = null;
             if (properColor)

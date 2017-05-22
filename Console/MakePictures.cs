@@ -81,7 +81,7 @@ namespace Console
             maker.InDegreeTerms = superabundance;
             maker.IsLowPlus = lowPlus;
             maker.ProperColor = properColor;
-            maker.DrawAll(outputPath, DotRenderType.pdf);
+            maker.DrawAll(outputPath, DotRenderType.xdot);
         }
 
         public static void MakeWebpage(string graphPath, string outputPath, bool directed = false, bool showFactors = false, bool lowPlus = false)
