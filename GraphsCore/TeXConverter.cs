@@ -69,7 +69,7 @@ namespace Graphs
             var sb = new StringBuilder();
             sb.AppendLine("\\begin{tikzpicture}[scale = " + scale + "]");
             sb.AppendLine(@"\tikzstyle{VertexStyle} = []");
-            sb.AppendLine(@"\tikzstyle{EdgeStyle} = [line width=3pt]");
+            sb.AppendLine(@"\tikzstyle{EdgeStyle} = [line width=2pt]");
             sb.AppendLine(string.Format(@"\tikzstyle{{labeledStyle}}=[shape = circle, minimum size = 6pt, inner sep = 5pt, outer sep = 5pt, draw]"));
             sb.AppendLine(string.Format(@"\tikzstyle{{unlabeledStyle}}=[shape = circle, minimum size = 6pt, inner sep = 5pt, outer sep = 5pt, draw, fill]"));
 
