@@ -134,9 +134,9 @@ namespace Graphs
                 double y = 1.0 - v.Y;
 
                 if (string.IsNullOrEmpty(v.Style))
-                    sb.AppendLine(string.Format(@"\Vertex[style = {4}, x = {0:0.000}, y = {1:0.000}, L = \tiny {{{2}}}]{{{3}}}", x, y, Mathify(v.Label), vertexName, string.IsNullOrEmpty(v.Label) ? "unlabeledStyle" : "labeledStyle"));
+                    sb.AppendLine(string.Format(@"\Vertex[style = {4}, x = {0:0.000}, y = {1:0.000}, L = \small {{{2}}}]{{{3}}}", x, y, Mathify(v.Label), vertexName, string.IsNullOrEmpty(v.Label) ? "unlabeledStyle" : "labeledStyle"));
                 else
-                    sb.AppendLine(string.Format(@"\Vertex[style = {4}, x = {0:0.000}, y = {1:0.000}, L = \tiny {{{2}}}]{{{3}}}", x, y, Mathify(v.Label), vertexName, vertexStyleLookup[v.Style.Trim()]));
+                    sb.AppendLine(string.Format(@"\Vertex[style = {4}, x = {0:0.000}, y = {1:0.000}, L = \small {{{2}}}]{{{3}}}", x, y, Mathify(v.Label), vertexName, vertexStyleLookup[v.Style.Trim()]));
 
                 vertexCount++;
             }
@@ -144,9 +144,9 @@ namespace Graphs
             foreach (var e in graph.Edges)
             {
                 if (string.IsNullOrEmpty(e.Style))
-                    sb.AppendLine(string.Format(@"\Edge[label = \tiny {{{2}}}, labelstyle={{auto=right, fill=none}}]({0})({1})", vertexNameMap[e.V1], vertexNameMap[e.V2], Mathify(e.Label)));
+                    sb.AppendLine(string.Format(@"\Edge[label = \small {{{2}}}, labelstyle={{auto=right, fill=none}}]({0})({1})", vertexNameMap[e.V1], vertexNameMap[e.V2], Mathify(e.Label)));
                 else
-                    sb.AppendLine(string.Format(@"\Edge[style = {2}, label = \tiny {{{3}}}, labelstyle={{auto=right, fill=none}}]({0})({1})", vertexNameMap[e.V1], vertexNameMap[e.V2], edgeStyleLookup[e.Style.Trim()], Mathify(e.Label)));
+                    sb.AppendLine(string.Format(@"\Edge[style = {2}, label = \small {{{3}}}, labelstyle={{auto=right, fill=none}}]({0})({1})", vertexNameMap[e.V1], vertexNameMap[e.V2], edgeStyleLookup[e.Style.Trim()], Mathify(e.Label)));
             }
 
             sb.AppendLine(@"\end{tikzpicture}");
