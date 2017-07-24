@@ -1982,6 +1982,25 @@ namespace Choosability
                 strongComponents.Add(component);
             }
         }
+
+        public int ComputeDiameter()
+        {
+            int[,] distance;
+            int[,] next;
+            FloydWarshall(out distance, out next);
+            int diameter = 0;
+            foreach (var v in Vertices)
+            {
+                foreach (var w in Vertices)
+                {
+                    if (distance[v, w] > diameter)
+                        diameter = distance[v, w];
+                }
+            }
+
+            return diameter;
+        }
+
         public void FloydWarshall(out int[,] distance, out int[,] next)
         {
             distance = new int[N, N];

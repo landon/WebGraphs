@@ -12,6 +12,8 @@ namespace Console
     {
         public static IEnumerable<Graph> EnumerateGraph6File(this string graph6File)
         {
+            if (!File.Exists(graph6File))
+                yield break;
             using (var sr = new StreamReader(graph6File))
             {
                 while (true)

@@ -121,8 +121,10 @@ namespace Console
                 sb.AppendLine("graph G {");
             sb.AppendLine("overlap = false;");
             sb.AppendLine("splines=true;");
-            sb.AppendLine("sep=0.0;");
-            sb.AppendLine("node[fontsize=42, fontname=\"Latin Modern Math\" color=black; shape=circle, penwidth=1, width = .92, height=.92, fixedsize=true];");
+            sb.AppendLine("overlap=scale;");
+            var sep = 1.0 * g.E / g.N / (g.N - 1);
+            sb.AppendLine("sep=" + sep + ";");
+            sb.AppendLine("node[fontsize=42 fontname=\"Latin Modern Math\" color=black; shape=circle, penwidth=6, width = .92, height=.92, fixedsize=true];");
             sb.AppendLine("edge[style=bold, color=black, penwidth=6];");
 
             List<List<int>> coloring = null;

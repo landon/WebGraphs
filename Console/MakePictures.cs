@@ -63,7 +63,14 @@ namespace Console
                     .Concat(@"C:\Users\landon\Google Drive\research\Graph6\graph3.g6".EnumerateGraph6File())
                     .Concat(@"C:\Users\landon\Google Drive\research\Graph6\graph4.g6".EnumerateGraph6File())
                     .Concat(@"C:\Users\landon\Google Drive\research\Graph6\graph5.g6".EnumerateGraph6File())
-                    .Concat(@"C:\Users\landon\Google Drive\research\Graph6\graph6.g6".EnumerateGraph6File()), @"C:\Users\landon\Documents\GitHub\books\graph coloring tools\graphs\all", properColor: true);
+                    .Concat(@"C:\Users\landon\Google Drive\research\Graph6\graph6.g6".EnumerateGraph6File())
+                    .Concat(@"C:\Users\landon\Google Drive\research\Graph6\graph7.g6".EnumerateGraph6File())
+                    .Concat(@"C:\Users\landon\Google Drive\research\Graph6\graph8.g6".EnumerateGraph6File())
+                    .Concat(@"C:\Users\landon\Google Drive\research\Graph6\graph9.g6".EnumerateGraph6File())
+                    .Concat(@"C:\Users\landon\Google Drive\research\Graph6\graph10.g6".EnumerateGraph6File()), @"C: \Users\landon\Documents\GitHub\books\colored graphs\graphs", properColor: true);
+
+            // var gpm = new GraphPictureMaker(@"C:\Users\landon\Documents\GitHub\WebGraphs\Console\bin\debug\diam3.txt".EnumerateGraph6File());
+            //  MakeWebpage(gpm, @"C:\Users\landon\Documents\GitHub\landon.github.io\graphdata\distinguishingcoloring\vertextransitive\cubic\girth5", directed: false, showFactors: false, lowPlus: false);
         }
 
         public static void MakePdfs(string graphPath, string outputPath, bool superabundance = false, bool lowPlus = false, bool properColor = false)
@@ -81,7 +88,7 @@ namespace Console
             maker.InDegreeTerms = superabundance;
             maker.IsLowPlus = lowPlus;
             maker.ProperColor = properColor;
-            maker.DrawAll(outputPath, DotRenderType.xdot);
+            maker.DrawAll(outputPath, DotRenderType.pdf);
         }
 
         public static void MakeWebpage(string graphPath, string outputPath, bool directed = false, bool showFactors = false, bool lowPlus = false)
