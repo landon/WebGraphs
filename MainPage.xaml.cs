@@ -94,6 +94,7 @@ namespace WebGraphs
             _mainMenu.AnalyzeOnlyNearColorings += AnalyzeOnlyNearColorings;
             _mainMenu.AnalyzeOnlyNearColoringsForSelectedEdge += AnalyzeOnlyNearColoringsForSelectedEdge;
             _mainMenu.CheckFGPaintable += CheckFGPaintable;
+            _mainMenu.CheckFGChoosable += CheckFGChoosable;
             _mainMenu.DoLaplacianLayout += DoLaplacianLayout;
             _mainMenu.DoWalkMatrixLayout += DoWalkMatrixLayout;
             _mainMenu.FindGood3Partition += FindGood3Partition;
@@ -1627,6 +1628,44 @@ trash can button.
             }
         }
 
+        async void CheckFGChoosable()
+        {
+            var blob = AlgorithmBlob.Create(SelectedTabCanvas);
+            if (blob == null)
+                return;
+
+            using (var resultWindow = new ResultWindow())
+            {
+                List<int> f;
+                List<int> g;
+                if (!ParseListAndDemandSizes(blob, resultWindow, out f, out g))
+                    return;
+
+                List<List<int>> badAssignment = null;
+                var choosable = false;
+                await Task.Factory.StartNew(() =>
+                {
+                    choosable = blob.AlgorithmGraph.IsOnlineFGChoosable(v => f[v], v => g[v]);
+                    if (!choosable)
+                    {
+                        badAssignment = blob.AlgorithmGraph.CheckFGChoosable(v => f[v], v => g[v]);
+                        if (badAssignment == null)
+                            choosable = true;
+                    }
+                });
+
+                if (badAssignment != null)
+                {
+                    var gr = blob.UIGraph.Clone();
+                    for (int i = 0; i < gr.Vertices.Count; i++)
+                        gr.Vertices[i].Label = string.Join(", ", badAssignment[i]);
+
+                    AddTab(gr, "bad f-assignment");
+                }
+                resultWindow.AddChild(new TextBlock() { Text = (choosable ? "is (f:g)-choosable" : "not (f:g)-choosable") + Environment.NewLine + Choosability.Graph.NodesVisited + " nodes visited" + Environment.NewLine + Choosability.Graph.CacheHits + " cache hits" });
+            }
+        }
+
         async void CheckFGPaintable()
         {
             var blob = AlgorithmBlob.Create(SelectedTabCanvas);
@@ -1758,6 +1797,17 @@ trash can button.
         {
             if (string.IsNullOrEmpty(p))
                 return -1;
+
+            if (!p.Contains("d"))
+            {
+                try
+                {
+                    return int.Parse(p.Trim());
+                }
+                catch { }
+                return -1;
+            }
+            
 
             var code = string.Format("var d = {0};{1};", degree, p);
 

@@ -1237,6 +1237,48 @@ namespace Choosability
 
             return true;
         }
+
+        public List<List<int>> CheckFGChoosable(Func<int, int> f, Func<int, int> g)
+        {
+            var pot = Enumerable.Range(0, Vertices.Sum(v => g(v)) - 1).ToList();
+            var first = Enumerable.Range(0, f(0)).ToList();
+            foreach (var L in new[] { (new[] { first }) }.Concat(Vertices.Skip(1).Select(v => ListUtility.EnumerateSublists(pot, f(v)))).CartesianProduct())
+            {
+                var LL = L.ToList();
+                if (!IsGColorable(LL, g))
+                    return LL;
+            }
+
+            return null;
+        }
+
+        bool IsGColorable(List<List<int>> L, Func<int, int> g)
+        {
+            foreach (var coloring in Vertices.Select(v => ListUtility.EnumerateSublists(L[v], g(v))).CartesianProduct())
+            {
+                if (IsProperColoring(coloring.ToList()))
+                    return true;
+            }
+
+            return false;
+        }
+
+        bool IsProperColoring(List<List<int>> coloring)
+        {
+            for (int v = 0; v < N; v++)
+            {
+                for (int w = v + 1; w < N; w++)
+                {
+                    if (!_adjacent[v, w])
+                        continue;
+
+                    if (coloring[v].IntersectionCount(coloring[w]) > 0)
+                        return false;
+                }
+            }
+
+            return true;
+        } 
         #endregion
 
         #region Online list coloring

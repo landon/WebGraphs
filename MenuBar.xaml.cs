@@ -93,6 +93,7 @@ namespace WebGraphs
         public event Action LaunchProofExplorer;
         public event Action DoChiColor;
 
+        public event Action CheckFGChoosable;
 
 
         public MenuBar()
@@ -277,6 +278,9 @@ namespace WebGraphs
                     break;
                 case "check (f:g)-paintable":
                     A(CheckFGPaintable);
+                    break;
+                case "check (f:g)-choosable":
+                    A(CheckFGChoosable);
                     break;
                 case "laplacian":
                     A(DoLaplacianLayout);
