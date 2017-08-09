@@ -1442,6 +1442,127 @@ namespace Choosability
 
             return result;
         }
+
+        public bool IsOnlineFGChoosableListerRestricted(Func<int, int> f, Func<int, int> g, Func<Graph, Graph, int> comparison)
+        {
+            NodesVisited = 0;
+            CacheHits = 0;
+
+            var cache = new Dictionary<OnlineChoiceHashGraph, bool>();
+            return IsOnlineFGChoosableListerRestricted(_vertices.Select(v => f(v)).ToArray(), _vertices.Select(v => g(v)).ToArray(), cache, this.Clone(), comparison);
+        }
+        bool IsOnlineFGChoosableListerRestricted(int[] f, int[] g, Dictionary<OnlineChoiceHashGraph, bool> cache, Graph lastG, Func<Graph,Graph, int> comparison)
+        {
+            Interlocked.Increment(ref NodesVisited);
+            OnlineChoiceHashGraph key = null;
+
+            var result = true;
+            int[] gClone = new int[g.Length];
+            Array.Copy(g, gClone, g.Length);
+
+            while (true)
+            {
+                var changed = false;
+                foreach (var v in _vertices)
+                {
+                    if (g[v] <= 0)
+                        continue;
+
+                    var need = g[v] + Neighbors[v].Sum(w => g[w]);
+                    if (f[v] >= need)
+                    {
+                        g[v] = 0;
+                        changed = true;
+                    }
+                }
+
+                if (!changed)
+                    break;
+            }
+
+            var liveVertices = g.IndicesWhere(v => v > 0).ToList();
+            if (liveVertices.Count <= 0)
+            {
+                result = true;
+                goto done;
+            }
+            if (liveVertices.Any(v => f[v] < g[v]))
+            {
+                result = false;
+                goto done;
+            }
+
+            key = new OnlineChoiceHashGraph(f, g);
+            bool cachedResult;
+            if (cache.TryGetValue(key, out cachedResult))
+            {
+                Interlocked.Increment(ref CacheHits);
+
+                key = null;
+                result = cachedResult;
+                goto done;
+            }
+
+            var independentSets = _independentSets.Value.Where(set => set.Count >= 1 && ListUtility.SubsetEqualSorted(set, liveVertices)).ToList();
+
+            foreach (var V in ListUtility.EnumerateSublists(liveVertices))
+            {
+                var currentG = InducedSubgraph(V);
+                if (currentG.N > lastG.N)
+                    continue;
+                
+                if (currentG.N == lastG.N)
+                {
+                    if (comparison(currentG, lastG) < 0)
+                        continue;
+                }
+
+                if (V.Count <= 1)
+                    continue;
+
+                if (independentSets.Any(ss => ListUtility.SubsetEqualSorted(V, ss)))
+                    continue;
+
+                foreach (var v in V)
+                    f[v]--;
+
+                var maximalIndependentSets = ListUtility.MaximalElementsSorted(independentSets.Where(set => ListUtility.SubsetEqualSorted(set, V)).ToList());
+
+                var choosable = false;
+                foreach (var C in maximalIndependentSets)
+                {
+                    foreach (var v in C)
+                        g[v]--;
+
+                    choosable = IsOnlineFGChoosableListerRestricted(f, g, cache, currentG, comparison);
+
+                    foreach (var v in C)
+                        g[v]++;
+
+                    if (choosable)
+                        break;
+                }
+
+                foreach (var v in V)
+                    f[v]++;
+
+                if (!choosable)
+                {
+                    result = false;
+                    goto done;
+                }
+            }
+
+        done:
+
+            if (gClone != null)
+                Array.Copy(gClone, g, g.Length);
+
+            if (key != null)
+                cache[key] = result;
+
+            return result;
+        }
         #endregion
         #endregion
 
