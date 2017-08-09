@@ -64,7 +64,7 @@ namespace Console
                     {
                         List<List<int>> badAssignment;
                         var bg = new BitGraph_long(g.GetEdgeWeights());
-
+                       
                         System.Console.Write("checking " + g.ToGraph6() + "...");
                         if (bg.IsFChoosable(v => bg.Degree(v) - 1, out badAssignment))
                         {

@@ -40,75 +40,70 @@ namespace WebGraphs
             _thinkHarder = thinkHarder;
         }
 
-        public async Task BuildTree(SuperSlimMind mindFinishedAnalyzing = null, SuperSlimBoard board = null, int potSize = 0)
+        public async Task BuildTree()
         {
-            if (potSize == 0)
-                potSize = _blob.UIGraph.Vertices.Max(v => v.Label.TryParseInt().Value);
+            var potSize = _blob.UIGraph.Vertices.Max(v => v.Label.TryParseInt().Value);
 
             var G = _blob.AlgorithmGraph;
+            var template = new Template(G.Vertices.Select(v => potSize + G.Degree(v) - _blob.UIGraph.Vertices[v].Label.TryParseInt().Value).ToList());
 
-            if (mindFinishedAnalyzing == null)
+            _mind = new SuperSlimMind(G, true, true);
+            _mind.MaxPot = potSize;
+            _mind.SuperabundantOnly = false;
+            _mind.OnlyConsiderNearlyColorableBoards = true;
+            _mind.MissingEdgeIndex = _blob.SelectedEdgeIndices.First();
+            _mind.ThinkHarder = _thinkHarder;
+
+            var win = false;
+            using (var resultWindow = new ResultWindow(false))
             {
-                var template = new Template(G.Vertices.Select(v => potSize + G.Degree(v) - _blob.UIGraph.Vertices[v].Label.TryParseInt().Value).ToList());
+                win = await Task.Factory.StartNew<bool>(() => _mind.Analyze(template, resultWindow.OnProgress));
 
-                _mind = new SuperSlimMind(G, true, true);
-                _mind.MaxPot = potSize;
-                _mind.SuperabundantOnly = false;
-                _mind.OnlyConsiderNearlyColorableBoards = true;
-                _mind.MissingEdgeIndex = _blob.SelectedEdgeIndices.First();
-                _mind.ThinkHarder = _thinkHarder;
+                Title = win ? "Fixer win" : "Breaker win";
+                resultWindow.OnProgress(new Tuple<string, int>("building Fixer win trees", 50));
 
-                using (var resultWindow = new ResultWindow(true))
+                List<KeyValuePair<SuperSlimBoard, GameTree>> ll = null;
+                await Task.Factory.StartNew(() =>
                 {
-                    var win = await Task.Factory.StartNew<bool>(() => _mind.Analyze(template, resultWindow.OnProgress));
-
-                    resultWindow.Close();
-
+                    _boardToTree = _mind.NonColorableBoards.Concat(_mind.ColorableBoards).Select(b => new { Board = b, Tree = _mind.BuildGameTree(b, true) }).ToDictionary(x => x.Board, x => x.Tree);
                     if (!win)
                     {
-                        MessageBox.Show("Fixer loses!");
-                        Close();
-                        return;
+                        resultWindow.OnProgress(new Tuple<string, int>("building Breaker win trees", 75));
+
+                        foreach (var b in _mind.BreakerWonBoards)
+                        {
+                            _boardToTree[b] = _mind.BuildGameTree(b, false);
+                        }
                     }
-                }
-            }
-            else
-            {
-                _mind = mindFinishedAnalyzing;
-            }
 
-            if (board != null)
-            {
-                var gt = _mind.BuildGameTree(board, !_mind.BreakerWonBoards.Contains(board));
-                if (gt == null)
-                    return;
-                var treeItem = new TreeViewItem();
-                InitializeTreeItem(treeItem, gt);
-                _theTree.Items.Add(treeItem);
-                AddTreeItems(treeItem, gt);
-            }
-            else
-            {
-                _boardToTree = _mind.NonColorableBoards.Concat(_mind.ColorableBoards).Select(b => new { Board = b, Tree = _mind.BuildGameTree(b, true) }).ToDictionary(x => x.Board, x => x.Tree);
+                    ll = _boardToTree.ToList();
+                    ll.Sort((t1, t2) =>
+                    {
+                        return t1.Value.Board.ToListStringInLexOrder(_mind.MaxPot).CompareTo(t2.Value.Board.ToListStringInLexOrder(_mind.MaxPot));
+                    });
 
-                var ll = _boardToTree.ToList();
-                ll.Sort((t1, t2) =>
-                {
-                    var cc = t1.Value.GetDepth().CompareTo(t2.Value.GetDepth());
-                    if (cc > 0)
-                        return -1;
-                    if (cc < 0)
-                        return 1;
-                    return t1.Value.Board.ToListStringInLexOrder(_mind.MaxPot).CompareTo(t2.Value.Board.ToListStringInLexOrder(_mind.MaxPot));
+                    resultWindow.OnProgress(new Tuple<string, int>("building gui", 75));
                 });
 
-                foreach (var kvp in ll)
+                await Dispatcher.InvokeAsync(() =>
                 {
-                    var treeItem = new TreeViewItem();
-                    InitializeTreeItem(treeItem, kvp.Value);
-                    _theTree.Items.Add(treeItem);
-                    AddTreeItems(treeItem, kvp.Value);
-                }
+                    int xx = 0;
+                    int cc = ll.Count;
+                    foreach (var kvp in ll)
+                    {
+                        var treeItem = new TreeViewItem();
+                        InitializeTreeItem(treeItem, kvp.Value);
+                        _theTree.Items.Add(treeItem);
+                        AddTreeItems(treeItem, kvp.Value);
+
+                        resultWindow.OnProgress(new Tuple<string, int>("building gui", 100 * xx / cc));
+                        xx++;
+                    }
+
+                    Show();
+                });
+
+                resultWindow.Close();
             }
         }
 
@@ -124,6 +119,7 @@ namespace WebGraphs
                     return 1;
                 return t1.Board.ToListStringInLexOrder(_mind.MaxPot).CompareTo(t2.Board.ToListStringInLexOrder(_mind.MaxPot));
             });
+
             foreach (var child in ll)
             {
                 var childItem = new TreeViewItem();
@@ -141,11 +137,17 @@ namespace WebGraphs
             };
         }
 
+        SolidColorBrush _breakerWinBrush = new SolidColorBrush(Color.FromArgb(25, 200, 0, 0));
+        SolidColorBrush _fixerWinBrush = new SolidColorBrush(Color.FromArgb(25, 0, 0, 200));
         void InitializeTreeItem(TreeViewItem item, GameTree tree)
         {
             item.Header = tree.Board.ToListStringInLexOrder(_mind.MaxPot);
             item.Tag = tree;
             item.Selected += Item_Selected;
+            if (tree.IsFixerWin)
+                item.Background = _fixerWinBrush;
+            else
+                item.Background = _breakerWinBrush;
         }
 
         void Item_Selected(object sender, RoutedEventArgs e)
@@ -230,28 +232,29 @@ namespace WebGraphs
             {
                 var selected = _blob.SelectedEdgeIndices.First();
                 Dictionary<int, long> coloring;
-                _mind.ColoringAnalyzer.AnalyzeWithoutEdge(tree.Board, out coloring, selected);
-
-                for (int jj = 0; jj < clone.Edges.Count; jj++)
+                if (_mind.ColoringAnalyzer.AnalyzeWithoutEdge(tree.Board, out coloring, selected))
                 {
-                    if (jj == selected)
-                        continue;
+                    for (int jj = 0; jj < clone.Edges.Count; jj++)
+                    {
+                        if (jj == selected)
+                            continue;
 
-                    var v1 = _mind._edges[jj].Item1;
-                    var v2 = _mind._edges[jj].Item2;
+                        var v1 = _mind._edges[jj].Item1;
+                        var v2 = _mind._edges[jj].Item2;
 
-                    var c = coloring[jj].LeastSignificantBit();
+                        var c = coloring[jj].LeastSignificantBit();
 
-                    if (!lists[v1].Contains(c))
-                        System.Diagnostics.Debugger.Break();
-                    if (!lists[v2].Contains(c))
-                        System.Diagnostics.Debugger.Break();
+                        if (!lists[v1].Contains(c))
+                            System.Diagnostics.Debugger.Break();
+                        if (!lists[v2].Contains(c))
+                            System.Diagnostics.Debugger.Break();
 
-                    lists[v1].Remove(c);
-                    lists[v2].Remove(c);
+                        lists[v1].Remove(c);
+                        lists[v2].Remove(c);
 
-                    var e = clone.Edges.First(ee => Choosability.Utility.ListUtility.Equal(new List<int>() { clone.Vertices.IndexOf(ee.V1), clone.Vertices.IndexOf(ee.V2) }, new List<int>() { v1, v2 }));
-                    e.Label = pp[c].ToString();
+                        var e = clone.Edges.First(ee => Choosability.Utility.ListUtility.Equal(new List<int>() { clone.Vertices.IndexOf(ee.V1), clone.Vertices.IndexOf(ee.V2) }, new List<int>() { v1, v2 }));
+                        e.Label = pp[c].ToString();
+                    }
                 }
 
                 for (int q = 0; q < lists.Count; q++)

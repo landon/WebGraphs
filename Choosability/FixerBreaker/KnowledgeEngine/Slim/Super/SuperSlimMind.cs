@@ -378,21 +378,15 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
         int _gameTreeIndex;
         public GameTree BuildGameTree(SuperSlimBoard board, bool win = true)
         {
-            try
-            {
-                var seenBoards = new Dictionary<SuperSlimBoard, int>();
-                _gameTreeIndex = 1;
-                return BuildGameTree(board, seenBoards, win);
-            }
-            catch { }
-
-            return null;
+            var seenBoards =  new Dictionary<SuperSlimBoard, int>();
+            _gameTreeIndex = 1;
+            return BuildGameTree(board, seenBoards, win);
         }
 
-        GameTree BuildGameTree(SuperSlimBoard board, Dictionary<SuperSlimBoard, int> seenBoards, bool win = true)
+        GameTree BuildGameTree(SuperSlimBoard board, Dictionary<SuperSlimBoard, int> seenBoards, bool win = true, int depth = 0)
         {
             seenBoards[board] = _gameTreeIndex;
-            var tree = new GameTree() { Board = board };
+            var tree = new GameTree() { Board = board, IsFixerWin = win };
             tree.IsColorable = _coloringAnalyzer.Analyze(board);
             tree.IsSuperabundant = win || IsSuperabundant(board);
             tree.GameTreeIndex = _gameTreeIndex;
@@ -404,20 +398,29 @@ namespace Choosability.FixerBreaker.KnowledgeEngine.Slim.Super
             if (!tree.IsSuperabundant)
                 return tree;
 
-            var treeInfo = win ? _swapAnalyzer.WinTreeInfo[board] : _swapAnalyzer.LossTreeInfo[board];
+            GameTreeInfo treeInfo;
+            if (win)
+                _swapAnalyzer.WinTreeInfo.TryGetValue(board, out treeInfo);
+            else
+                _swapAnalyzer.LossTreeInfo.TryGetValue(board, out treeInfo);
 
-            var localSeenBoards = new HashSet<SuperSlimBoard>();
-            foreach (var bc in treeInfo)
+            if (treeInfo != null)
             {
-                var childBoard = new SuperSlimBoard(board._trace, bc.Alpha, bc.Beta, bc.Response, board._stackCount);
-                if (localSeenBoards.Contains(childBoard))
-                    continue;
-                localSeenBoards.Add(childBoard);
+                var localSeenBoards = new HashSet<SuperSlimBoard>();
+                foreach (var bc in treeInfo)
+                {
+                    var childBoard = new SuperSlimBoard(board._trace, bc.Alpha, bc.Beta, bc.Response, board._stackCount);
+                    if (localSeenBoards.Contains(childBoard))
+                        continue;
+                    localSeenBoards.Add(childBoard);
 
-                var childTree = BuildGameTree(childBoard, seenBoards, win);
-                tree.AddChild(childTree, bc);
+                    if (!win && seenBoards.ContainsKey(childBoard))
+                        continue;
+
+                    var childTree = BuildGameTree(childBoard, seenBoards, win, depth + 1);
+                    tree.AddChild(childTree, bc);
+                }
             }
-
 
             return tree;
         }

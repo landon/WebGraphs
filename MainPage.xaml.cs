@@ -35,6 +35,11 @@ namespace WebGraphs
 {
     public partial class MainPage : UserControl
     {
+        static List<ARGB> Colors = new List<ARGB>() {
+            new ARGB(255, 0, 0), new ARGB(0, 0, 255), new ARGB(0, 255, 0),
+            new ARGB(255, 255, 0), new ARGB(95, 158, 160), new ARGB(139, 69, 19),
+            new ARGB(30, 144, 255), new ARGB(64, 224, 208), new ARGB(218, 112, 214) };
+
         public MainPage()
         {
             InitializeComponent();
@@ -89,6 +94,7 @@ namespace WebGraphs
             _mainMenu.AnalyzeOnlyNearColorings += AnalyzeOnlyNearColorings;
             _mainMenu.AnalyzeOnlyNearColoringsForSelectedEdge += AnalyzeOnlyNearColoringsForSelectedEdge;
             _mainMenu.CheckFGPaintable += CheckFGPaintable;
+            _mainMenu.CheckFGChoosable += CheckFGChoosable;
             _mainMenu.DoLaplacianLayout += DoLaplacianLayout;
             _mainMenu.DoWalkMatrixLayout += DoWalkMatrixLayout;
             _mainMenu.FindGood3Partition += FindGood3Partition;
@@ -114,13 +120,12 @@ namespace WebGraphs
             _mainMenu.OnAnalyzeCurrentBoard += _mainMenu_OnAnalyzeCurrentBoard;
             _mainMenu.LookupIsomorphismClass += _mainMenu_LookupIsomorphismClass;
             _mainMenu.LaunchProofExplorer += _mainMenu_LaunchProofExplorer;
+            _mainMenu.DoChiColor += _mainMenu_DoChiColor;
 
             _propertyGrid.SomethingChanged += _propertyGrid_SomethingChanged;
 
             DoAutoLoad();
         }
-
-     
 
         void DoAutoLoad()
         {
@@ -1516,6 +1521,26 @@ trash can button.
             SelectedTabCanvas.Invalidate();
         }
 
+        async void _mainMenu_DoChiColor()
+        {
+            var blob = AlgorithmBlob.Create(SelectedTabCanvas);
+            if (blob == null)
+                return;
+
+            var cc = await Task.Factory.StartNew<List<List<int>>>(() => blob.AlgorithmGraph.FindChiColoring());
+
+            int i = 0;
+            foreach (var v in blob.UIGraph.Vertices)
+            {
+                var c = cc.FirstIndex(l => l.Contains(i));
+                v.Color = Colors[c % Colors.Count];
+                v.Style = string.Format("fill={{rgb,255:red,{0}; green,{1}; blue,{2}}}", v.Color.R, v.Color.G, v.Color.B);
+                i++;
+            }
+
+            SelectedTabCanvas.Invalidate();
+        }
+
         async void CheckfAT()
         {
             var blob = AlgorithmBlob.Create(SelectedTabCanvas);
@@ -1600,6 +1625,44 @@ trash can button.
                 });
 
                 resultWindow.AddChild(new TextBlock() { Text = (paintable ? "is f-paintable" : "not f-paintable") + Environment.NewLine + Choosability.Graph.NodesVisited + " nodes visited" + Environment.NewLine + Choosability.Graph.CacheHits + " cache hits" });
+            }
+        }
+
+        async void CheckFGChoosable()
+        {
+            var blob = AlgorithmBlob.Create(SelectedTabCanvas);
+            if (blob == null)
+                return;
+
+            using (var resultWindow = new ResultWindow())
+            {
+                List<int> f;
+                List<int> g;
+                if (!ParseListAndDemandSizes(blob, resultWindow, out f, out g))
+                    return;
+
+                List<List<int>> badAssignment = null;
+                var choosable = false;
+                await Task.Factory.StartNew(() =>
+                {
+                    choosable = blob.AlgorithmGraph.IsOnlineFGChoosable(v => f[v], v => g[v]);
+                    if (!choosable)
+                    {
+                        badAssignment = blob.AlgorithmGraph.CheckFGChoosable(v => f[v], v => g[v]);
+                        if (badAssignment == null)
+                            choosable = true;
+                    }
+                });
+
+                if (badAssignment != null)
+                {
+                    var gr = blob.UIGraph.Clone();
+                    for (int i = 0; i < gr.Vertices.Count; i++)
+                        gr.Vertices[i].Label = string.Join(", ", badAssignment[i]);
+
+                    AddTab(gr, "bad f-assignment");
+                }
+                resultWindow.AddChild(new TextBlock() { Text = (choosable ? "is (f:g)-choosable" : "not (f:g)-choosable") + Environment.NewLine + Choosability.Graph.NodesVisited + " nodes visited" + Environment.NewLine + Choosability.Graph.CacheHits + " cache hits" });
             }
         }
 
@@ -1735,6 +1798,17 @@ trash can button.
             if (string.IsNullOrEmpty(p))
                 return -1;
 
+            if (!p.Contains("d"))
+            {
+                try
+                {
+                    return int.Parse(p.Trim());
+                }
+                catch { }
+                return -1;
+            }
+            
+
             var code = string.Format("var d = {0};{1};", degree, p);
 
             try
@@ -1772,7 +1846,7 @@ trash can button.
 
             var ptw = new ProofTreeWindow(blob, _fixerBreakerThinkHarder);
             await ptw.BuildTree();
-            ptw.Show();
+          //  ptw.Show();
         }
 
         void _mainMenu_LookupIsomorphismClass()
@@ -1815,7 +1889,7 @@ trash can button.
 
             var mind = new SuperSlimMind(G, true, true);
             mind.MaxPot = pot.Count;
-            mind.SuperabundantOnly = false;
+            mind.SuperabundantOnly = true;
             mind.ThinkHarder = false;
             mind.PerformCompleteAnalysis = true;
 
@@ -1845,10 +1919,7 @@ trash can button.
                         else
                         {
                             var gameTree = mind.BuildGameTree(board, true);
-                            if (gameTree == null)
-                                sb.AppendLine("board is not itself");
-                            else
-                              sb.AppendLine("Fixer wins in " + gameTree.GetDepth() + " moves.");
+                            sb.AppendLine("Fixer wins in " + gameTree.GetDepth() + " moves.");
                         }
                     }
                     else
@@ -1862,17 +1933,21 @@ trash can button.
                     return sb.ToString();
                 });
 
-                resultWindow.Close();
+                resultWindow.ClearChildren();
 
-                if (!mind.BreakerWonBoards.Contains(board))
+                var t = new TextBox();
+                t.Text = result;
+                resultWindow.AddChild(t);
+
+                if (result.Contains("Fixer"))
                 {
-                    var ptw = new ProofTreeWindow(blob, _fixerBreakerThinkHarder);
-                    await ptw.BuildTree(mind, board, pot.Count);
-                    ptw.Show();
-                }
-                else
-                {
-                    MessageBox.Show("Breaker wins");
+                    var treeBuilder = new TreeBuilder();
+
+                    var tc = AddTab(treeBuilder.BuildWinTree(blob.UIGraph, mind, board, numbering), blob.UIGraph.Name + " win tree");
+                    tc.GraphCanvas.SetZoomDelta(0.04);
+                    tc.GraphCanvas.SnapToGrid = false;
+                    tc.GraphCanvas.DrawGrid = false;
+                    tc.GraphCanvas.ZoomFitNextPaint();
                 }
             }
         }

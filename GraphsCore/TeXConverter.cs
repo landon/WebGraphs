@@ -69,9 +69,9 @@ namespace Graphs
             var sb = new StringBuilder();
             sb.AppendLine("\\begin{tikzpicture}[scale = " + scale + "]");
             sb.AppendLine(@"\tikzstyle{VertexStyle} = []");
-            sb.AppendLine(@"\tikzstyle{EdgeStyle} = []");
-            sb.AppendLine(string.Format(@"\tikzstyle{{labeledStyle}}=[shape = circle, minimum size = 6pt, inner sep = 1.2pt, draw]"));
-            sb.AppendLine(string.Format(@"\tikzstyle{{unlabeledStyle}}=[shape = circle, minimum size = 6pt, inner sep = 1.2pt, draw, fill]"));
+            sb.AppendLine(@"\tikzstyle{EdgeStyle} = [line width=2pt]");
+            sb.AppendLine(string.Format(@"\tikzstyle{{labeledStyle}}=[shape = circle, minimum size = 6pt, inner sep = 5pt, outer sep = 5pt, draw]"));
+            sb.AppendLine(string.Format(@"\tikzstyle{{unlabeledStyle}}=[shape = circle, minimum size = 6pt, inner sep = 5pt, outer sep = 5pt, draw, fill]"));
 
             var vertexStyleLookup = new Dictionary<string, string>();
             var edgeStyleLookup = new Dictionary<string, string>();
@@ -91,7 +91,9 @@ namespace Graphs
                     if (!style.Contains("minimum size"))
                         s += "minimum size = 6pt,";
                     if (!style.Contains("inner sep"))
-                        s += "inner sep = 1.2pt,";
+                        s += "inner sep = 5pt,";
+                    if (!style.Contains("outer sep"))
+                        s += "outer sep = 5pt,";
 
                     s += "draw,";
                     s += style;
@@ -132,9 +134,9 @@ namespace Graphs
                 double y = 1.0 - v.Y;
 
                 if (string.IsNullOrEmpty(v.Style))
-                    sb.AppendLine(string.Format(@"\Vertex[style = {4}, x = {0:0.000}, y = {1:0.000}, L = \tiny {{{2}}}]{{{3}}}", x, y, Mathify(v.Label), vertexName, string.IsNullOrEmpty(v.Label) ? "unlabeledStyle" : "labeledStyle"));
+                    sb.AppendLine(string.Format(@"\Vertex[style = {4}, x = {0:0.000}, y = {1:0.000}, L = \small {{{2}}}]{{{3}}}", x, y, Mathify(v.Label), vertexName, string.IsNullOrEmpty(v.Label) ? "unlabeledStyle" : "labeledStyle"));
                 else
-                    sb.AppendLine(string.Format(@"\Vertex[style = {4}, x = {0:0.000}, y = {1:0.000}, L = \tiny {{{2}}}]{{{3}}}", x, y, Mathify(v.Label), vertexName, vertexStyleLookup[v.Style.Trim()]));
+                    sb.AppendLine(string.Format(@"\Vertex[style = {4}, x = {0:0.000}, y = {1:0.000}, L = \small {{{2}}}]{{{3}}}", x, y, Mathify(v.Label), vertexName, vertexStyleLookup[v.Style.Trim()]));
 
                 vertexCount++;
             }
@@ -142,9 +144,9 @@ namespace Graphs
             foreach (var e in graph.Edges)
             {
                 if (string.IsNullOrEmpty(e.Style))
-                    sb.AppendLine(string.Format(@"\Edge[label = \tiny {{{2}}}, labelstyle={{auto=right, fill=none}}]({0})({1})", vertexNameMap[e.V1], vertexNameMap[e.V2], Mathify(e.Label)));
+                    sb.AppendLine(string.Format(@"\Edge[label = \small {{{2}}}, labelstyle={{auto=right, fill=none}}]({0})({1})", vertexNameMap[e.V1], vertexNameMap[e.V2], Mathify(e.Label)));
                 else
-                    sb.AppendLine(string.Format(@"\Edge[style = {2}, label = \tiny {{{3}}}, labelstyle={{auto=right, fill=none}}]({0})({1})", vertexNameMap[e.V1], vertexNameMap[e.V2], edgeStyleLookup[e.Style.Trim()], Mathify(e.Label)));
+                    sb.AppendLine(string.Format(@"\Edge[style = {2}, label = \small {{{3}}}, labelstyle={{auto=right, fill=none}}]({0})({1})", vertexNameMap[e.V1], vertexNameMap[e.V2], edgeStyleLookup[e.Style.Trim()], Mathify(e.Label)));
             }
 
             sb.AppendLine(@"\end{tikzpicture}");

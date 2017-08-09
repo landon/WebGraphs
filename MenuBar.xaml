@@ -113,7 +113,9 @@
         <Button Content="Coloring" Style="{StaticResource MenuButton}" Width="80" Click="MenuTopLevelClick" MouseRightButtonDown="MenuTopLevelRightClick">
             <menu:ContextMenuService.ContextMenu>
                 <menu:ContextMenu>
+                    <local:SuperMenuItem Header="chi color" Click="MenuItemClick"/>
                     <local:SuperMenuItem Header="check f-choosable" Click="MenuItemClick"/>
+                    <local:SuperMenuItem Header="check (f:g)-choosable" Click="MenuItemClick"/>
                     <local:SuperMenuItem Header="Δ-1 color" Click="MenuItemClick"/>
                 </menu:ContextMenu>
             </menu:ContextMenuService.ContextMenu>

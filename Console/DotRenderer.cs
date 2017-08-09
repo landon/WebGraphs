@@ -19,7 +19,10 @@ namespace Console
         png,
         svg,
         eps,
-        ps
+        ps,
+        json,
+        xdot,
+        dot
     }
     public class DotRenderer
     {

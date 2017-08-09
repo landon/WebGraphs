@@ -22,6 +22,7 @@
     <SilverlightApplicationList>{B47F291A-7E4C-4A66-9C80-3EEE77CE8CB4}|..\WebGraphs\WebGraphs.csproj|ClientBin|False</SilverlightApplicationList>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
+    <UseGlobalApplicationHostFile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>

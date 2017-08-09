@@ -1097,6 +1097,38 @@ namespace Choosability
             return best;
         }
 
+        public List<List<int>> FindChiColoring()
+        {
+            for (int K = 0; K < int.MaxValue; K++)
+            {
+                var c = FindKColoring(Vertices, K);
+                if (c != null)
+                    return c;
+            }
+
+            return null;
+        }
+
+        public List<List<int>> FindKColoring(List<int> subgraph, int K)
+        {
+            if (subgraph.Count <= 0)
+                return new List<List<int>>();
+            if (K <= 0)
+                return null;
+
+            foreach (var I in EnumerateMaximalIndependentSets(subgraph))
+            {
+                var c = FindKColoring(subgraph.Difference(I), K - 1);
+                if (c != null)
+                {
+                    c.Insert(0, I);
+                    return c;
+                }
+            }
+
+            return null;
+        }
+
         #endregion
 
         #region List coloring
@@ -1205,6 +1237,48 @@ namespace Choosability
 
             return true;
         }
+
+        public List<List<int>> CheckFGChoosable(Func<int, int> f, Func<int, int> g)
+        {
+            var pot = Enumerable.Range(0, Vertices.Sum(v => g(v)) - 1).ToList();
+            var first = Enumerable.Range(0, f(0)).ToList();
+            foreach (var L in new[] { (new[] { first }) }.Concat(Vertices.Skip(1).Select(v => ListUtility.EnumerateSublists(pot, f(v)))).CartesianProduct())
+            {
+                var LL = L.ToList();
+                if (!IsGColorable(LL, g))
+                    return LL;
+            }
+
+            return null;
+        }
+
+        bool IsGColorable(List<List<int>> L, Func<int, int> g)
+        {
+            foreach (var coloring in Vertices.Select(v => ListUtility.EnumerateSublists(L[v], g(v))).CartesianProduct())
+            {
+                if (IsProperColoring(coloring.ToList()))
+                    return true;
+            }
+
+            return false;
+        }
+
+        bool IsProperColoring(List<List<int>> coloring)
+        {
+            for (int v = 0; v < N; v++)
+            {
+                for (int w = v + 1; w < N; w++)
+                {
+                    if (!_adjacent[v, w])
+                        continue;
+
+                    if (coloring[v].IntersectionCount(coloring[w]) > 0)
+                        return false;
+                }
+            }
+
+            return true;
+        } 
         #endregion
 
         #region Online list coloring
@@ -2071,6 +2145,25 @@ namespace Choosability
                 strongComponents.Add(component);
             }
         }
+
+        public int ComputeDiameter()
+        {
+            int[,] distance;
+            int[,] next;
+            FloydWarshall(out distance, out next);
+            int diameter = 0;
+            foreach (var v in Vertices)
+            {
+                foreach (var w in Vertices)
+                {
+                    if (distance[v, w] > diameter)
+                        diameter = distance[v, w];
+                }
+            }
+
+            return diameter;
+        }
+
         public void FloydWarshall(out int[,] distance, out int[,] next)
         {
             distance = new int[N, N];
