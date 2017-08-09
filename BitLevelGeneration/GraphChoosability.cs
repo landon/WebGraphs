@@ -157,6 +157,83 @@ namespace BitLevelGeneration
 
     public static class GraphChoosability_long
     {
+        public static bool IsFGChoosable(this IGraph_long graph, Func<int, int> f, Func<int, int> g, out List<List<int>> badAssignment)
+        {
+            badAssignment = null;
+
+            var liveVertexBits = Enumerable.Range(0, graph.N).To_long();
+            var sizes = graph.Vertices.Select(v => f(v)).ToList();
+            var maxListSize = sizes.Max();
+
+            for (int potSize = maxListSize; potSize < graph.N; potSize++)
+            {
+                foreach (var colorGraph in BitLevelGeneration.Assignments_long.Enumerate(sizes, potSize))
+                {
+                    var gg = new int[graph.N];
+                    for(int i = 0; i < graph.N; i++)
+                        gg[i] = g(i);
+
+                    if (!graph.IsGChoosable(colorGraph, 0, gg))
+                    {
+                        badAssignment = new List<List<int>>();
+                        foreach (var v in graph.Vertices)
+                        {
+                            var list = new List<int>();
+                            var bit = 1L << v;
+                            for (int i = 0; i < colorGraph.Length; i++)
+                            {
+                                if ((bit & colorGraph[i]) != 0)
+                                    list.Add(i);
+                            }
+
+                            badAssignment.Add(list);
+                        }
+
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        public static bool IsGChoosable(this IGraph_long graph, long[] colorGraph, int[] g)
+        {
+            return graph.IsGChoosable(colorGraph, 0, g);
+        }
+
+        public static bool IsChoosable(this IGraph_long graph, long[] colorGraph, int[] g)
+        {
+            return graph.IsGChoosable(colorGraph, 0, g);
+        }
+
+        static bool IsGChoosable(this IGraph_long graph, long[] colorGraph, int c, int[] g)
+        {
+            if (g.Sum() == 0)
+                return true;
+
+            var choosable = false;
+            var liveVertexBits = Enumerable.Range(0, graph.N).Where(i => g[i] > 0).To_long();
+            var V = colorGraph[c] & liveVertexBits;
+
+            foreach (var C in graph.MaximalIndependentSubsets(V))
+            {
+                foreach (var i in BitUsage_long.ToSet(C))
+                    g[i]--;
+
+                if (graph.IsGChoosable(colorGraph, c + 1, g))
+                    choosable = true;
+
+                foreach (var i in BitUsage_long.ToSet(C))
+                    g[i]++;
+
+                if (choosable)
+                    break;
+            }
+
+            return choosable;
+        }
+
         public static bool IsFChoosable(this IGraph_long graph, Func<int, int> f, out List<List<int>> badAssignment)
         {
             badAssignment = null;
