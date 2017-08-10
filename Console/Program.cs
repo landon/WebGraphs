@@ -17,14 +17,14 @@ namespace Console
         static Choosability.Utility.Permutation CurrentP = null;
         static void Main(string[] args)
         {
-             //var g = GraphsCore.GraphIO.GraphFromGraph6("GliC?K");
+             var g = GraphsCore.GraphIO.GraphFromGraph6("GliC?K");
              //var g = GraphsCore.GraphIO.GraphFromGraph6("I]G_W_O?W");
              //var g = GraphsCore.GraphIO.GraphFromGraph6("GhEKOK");
-            var g = GraphsCore.GraphIO.GraphFromGraph6("GlgO_K");
+            //var g = GraphsCore.GraphIO.GraphFromGraph6("GlgO_K");
             var gg = new BitGraph_long(g.GetEdgeWeights());
 
             List<List<int>> bad;
-            var choosable = gg.IsFGChoosable((x) => 4, (x) => 2, out bad, x => System.Console.WriteLine("finished " + x));
+            var choosable = gg.IsFGChoosable((x) => 4, (x) => 2, out bad, x => System.Console.WriteLine("finished " + x + " in " + GraphChoosability_long.NodesVisited + " nodes "));
 
 
 

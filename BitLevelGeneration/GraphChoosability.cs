@@ -157,11 +157,14 @@ namespace BitLevelGeneration
 
     public static class GraphChoosability_long
     {
+        public static int NodesVisited;
 
         public static bool IsFGChoosable(this IGraph_long graph, Func<int, int> f, Func<int, int> g, out List<List<int>> badAssignment, Action<int> potSizeFinished)
         {
-            badAssignment = null;
+            NodesVisited = 0;
 
+            badAssignment = null;
+            
             var liveVertexBits = Enumerable.Range(0, graph.N).To_long();
             var sizes = graph.Vertices.Select(v => f(v)).ToList();
             var maxListSize = sizes.Max();
@@ -173,16 +176,6 @@ namespace BitLevelGeneration
                 {
                     if (potSize > maxListSize)
                     {
-                        var data = colorGraph.Select(subset => ComponentsInInducedSubgraph(graph, subset)).ToList();
-
-                        for (int i = 0; i < data.Count; i++)
-                        {
-                            var cis = data[i];
-
-                            if (cis.All(component => !colorGraph.All(c => (component & c) != 0)))
-                                goto skip;
-                        }
-
                         for (int i = 0; i < colorGraph.Length; i++)
                             for (int j = i + 1; j < colorGraph.Length; j++)
                                 if ((colorGraph[i] & colorGraph[j]) == 0)
@@ -191,6 +184,13 @@ namespace BitLevelGeneration
                         foreach (var color in colorGraph)
                             if (graph.IsIndependent(color))
                                 goto skip;
+
+                        var data = colorGraph.Select(subset => ComponentsInInducedSubgraph(graph, subset)).ToList();
+                        for (int i = 0; i < data.Count; i++)
+                        {
+                            if (data[i].All(component => !colorGraph.All(c => (component & c) != 0)))
+                                goto skip;
+                        }
                     }
 
                     var gg = new int[graph.N];
@@ -260,6 +260,8 @@ namespace BitLevelGeneration
 
         static bool IsGChoosable(this IGraph_long graph, long[] colorGraph, int c, int[] g)
         {
+            NodesVisited++;
+
             graph.BeGreedyG(colorGraph, g, c);
             if (g.Sum() == 0)
                 return true;
@@ -436,7 +438,7 @@ namespace BitLevelGeneration
             }
         }
 
-        public static bool IsSubsetTwoColorable(BitGraph_long g, long set)
+        public static bool IsSubsetTwoColorable(IGraph_long g, long set)
         {
             var c = new int[g.N];
             var q = new int[g.N];
