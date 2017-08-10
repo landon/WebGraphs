@@ -157,18 +157,42 @@ namespace BitLevelGeneration
 
     public static class GraphChoosability_long
     {
-        public static bool IsFGChoosable(this IGraph_long graph, Func<int, int> f, Func<int, int> g, out List<List<int>> badAssignment)
+
+        public static bool IsFGChoosable(this IGraph_long graph, Func<int, int> f, Func<int, int> g, out List<List<int>> badAssignment, Action<int> potSizeFinished)
         {
             badAssignment = null;
 
             var liveVertexBits = Enumerable.Range(0, graph.N).To_long();
             var sizes = graph.Vertices.Select(v => f(v)).ToList();
             var maxListSize = sizes.Max();
+            var gsum = Enumerable.Range(0, graph.N).Sum(x => g(x));
 
-            for (int potSize = maxListSize; potSize < graph.N; potSize++)
+            for (int potSize = maxListSize; potSize < gsum; potSize++)
             {
                 foreach (var colorGraph in BitLevelGeneration.Assignments_long.Enumerate(sizes, potSize))
                 {
+                    if (potSize > maxListSize)
+                    {
+                        var data = colorGraph.Select(subset => ComponentsInInducedSubgraph(graph, subset)).ToList();
+
+                        for (int i = 0; i < data.Count; i++)
+                        {
+                            var cis = data[i];
+
+                            if (cis.All(component => !colorGraph.All(c => (component & c) != 0)))
+                                goto skip;
+                        }
+
+                        for (int i = 0; i < colorGraph.Length; i++)
+                            for (int j = i + 1; j < colorGraph.Length; j++)
+                                if ((colorGraph[i] & colorGraph[j]) == 0)
+                                    goto skip;
+
+                        foreach (var color in colorGraph)
+                            if (graph.IsIndependent(color))
+                                goto skip;
+                    }
+
                     var gg = new int[graph.N];
                     for(int i = 0; i < graph.N; i++)
                         gg[i] = g(i);
@@ -191,10 +215,37 @@ namespace BitLevelGeneration
 
                         return false;
                     }
+
+                skip:;
                 }
+
+                if (potSizeFinished != null)
+                    potSizeFinished(potSize);
             }
 
             return true;
+        }
+
+        static List<long> ComponentsInInducedSubgraph(this IGraph_long graph, long subset)
+        {
+            var equivalenceRelation = new EquivalenceRelation<int>();
+
+            var S = BitUsage_long.ToSet(subset);
+            foreach (var i in S)
+                equivalenceRelation.AddElement(i);
+
+            foreach (var i in S)
+            {
+                foreach (var j in S)
+                {
+                    if (i == j || graph.IsIndependent((((long)1) << i) | (((long)1) << j)))
+                        continue;
+
+                    equivalenceRelation.Relate(i, j);
+                }
+            }
+
+            return equivalenceRelation.GetEquivalenceClasses().Select(bits => bits.To_long()).ToList();
         }
 
         public static bool IsGChoosable(this IGraph_long graph, long[] colorGraph, int[] g)
@@ -209,8 +260,11 @@ namespace BitLevelGeneration
 
         static bool IsGChoosable(this IGraph_long graph, long[] colorGraph, int c, int[] g)
         {
+            graph.BeGreedyG(colorGraph, g, c);
             if (g.Sum() == 0)
                 return true;
+            if (c >= colorGraph.Length)
+                return false;
 
             var choosable = false;
             var liveVertexBits = Enumerable.Range(0, graph.N).Where(i => g[i] > 0).To_long();
@@ -218,20 +272,49 @@ namespace BitLevelGeneration
 
             foreach (var C in graph.MaximalIndependentSubsets(V))
             {
-                foreach (var i in BitUsage_long.ToSet(C))
-                    g[i]--;
-
-                if (graph.IsGChoosable(colorGraph, c + 1, g))
-                    choosable = true;
+                var gp = new int[g.Length];
+                for (int i = 0; i < g.Length; i++)
+                    gp[i] = g[i];
 
                 foreach (var i in BitUsage_long.ToSet(C))
-                    g[i]++;
+                    gp[i]--;
 
-                if (choosable)
-                    break;
+                if (graph.IsGChoosable(colorGraph, c + 1, gp))
+                    return true;
             }
 
             return choosable;
+        }
+
+        static void BeGreedyG(this IGraph_long graph, long[] colorGraph, int[] g, int c)
+        {
+            while (true)
+            {
+                var sum = g.Sum();
+                var liveVertexBits = Enumerable.Range(0, graph.N).Where(i => g[i] > 0).To_long();
+                var bits = liveVertexBits;
+                while (bits != 0)
+                {
+                    var bit = bits & -bits;
+                    bits ^= bit;
+
+                    var colorCount = 0;
+                    for (int i = c; i < colorGraph.Length; i++)
+                    {
+                        if ((bit & colorGraph[i]) != 0)
+                            colorCount++;
+                    }
+
+                    if (colorCount >= BitUsage_long.ToSet(graph.NeighborsInSet(bit.Extract(), liveVertexBits) | bit).Sum(x => g[x]))
+                    {
+                        g[bit.Extract()] = 0;
+                        liveVertexBits ^= bit;
+                    }
+                }
+
+                if (g.Sum() == sum)
+                    break;
+            }
         }
 
         public static bool IsFChoosable(this IGraph_long graph, Func<int, int> f, out List<List<int>> badAssignment)

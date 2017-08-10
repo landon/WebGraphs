@@ -73,6 +73,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>BitVectors.tt</DependentUpon>
     </Compile>
+    <Compile Include="EquivalenceRelation.cs" />
     <Compile Include="MaximalndependentSetSearching.cs" />
     <Compile Include="GraphChoosability.cs" />
     <Compile Include="HashedAssignment.cs">
