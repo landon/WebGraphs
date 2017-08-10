@@ -56,6 +56,28 @@ namespace BitLevelGeneration
 
         public int N { get { return _vertices.Length; } }
         public IEnumerable<int> Vertices { get { return _vertices; } }
+		public List<int> GetEdgeWeights()
+		{
+		    var w = new List<int>();
+			int k = 0;
+            for (int i = 0; i < _vertices.Length; i++)
+            {
+                var iBit = 1<#=literal#> << i;
+                for (int j = i + 1; j < _vertices.Length; j++)
+                {
+                    var jBit = 1<#=literal#> << j;
+
+					if ((_neighborhood[i] & jBit) != 0)
+				      w.Add(1);
+					else
+					  w.Add(0);
+
+                    k++;
+                }
+            }
+
+			return w;
+		}
 
         public bool IsIndependent(<#=T#> set)
         {

@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Choosability
 {
-    class OnlineChoiceHashGraph
+    public class OnlineChoiceHashGraph
     {
         int[] _f;
         int[] _g;

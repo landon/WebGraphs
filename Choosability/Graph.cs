@@ -1517,6 +1517,14 @@ namespace Choosability
             return result;
         }
 
+        public bool IsOnlineFGChoosableListerRestricted(Func<int, int> f, Func<int, int> g, Func<Graph, Graph, int> comparison, Dictionary<OnlineChoiceHashGraph, bool> cache)
+        {
+            NodesVisited = 0;
+            CacheHits = 0;
+
+            return IsOnlineFGChoosableListerRestricted(_vertices.Select(v => f(v)).ToArray(), _vertices.Select(v => g(v)).ToArray(), cache, this.Clone(), comparison);
+        }
+
         public bool IsOnlineFGChoosableListerRestricted(Func<int, int> f, Func<int, int> g, Func<Graph, Graph, int> comparison)
         {
             NodesVisited = 0;

@@ -14,6 +14,7 @@ namespace BitLevelGeneration
         uint NeighborsInSet(int v, uint set);
         int Degree(int v);
         IEnumerable<uint> MaximalIndependentSubsets(uint set);
+        List<int> GetEdgeWeights();
     }
 
     public interface IGraph_long
@@ -25,5 +26,6 @@ namespace BitLevelGeneration
         long NeighborsInSet(int v, long set);
         int Degree(int v);
         IEnumerable<long> MaximalIndependentSubsets(long set);
+        List<int> GetEdgeWeights();
     }
 }

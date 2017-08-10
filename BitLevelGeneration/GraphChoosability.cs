@@ -6,6 +6,8 @@ using System.Threading;
 
 namespace BitLevelGeneration
 {
+    public delegate bool IsPaintable(IGraph_long graph, long[] colorGraph, int c, int[] g);
+
     public static class GraphChoosability_uint
     {
         public static bool IsFChoosable(this IGraph_uint graph, Func<int, int> f, out List<List<int>> badAssignment)
@@ -158,6 +160,7 @@ namespace BitLevelGeneration
     public static class GraphChoosability_long
     {
         public static int NodesVisited;
+        public static IsPaintable IsPaintable;
 
         public static bool IsFGChoosable(this IGraph_long graph, Func<int, int> f, Func<int, int> g, out List<List<int>> badAssignment, Action<int> potSizeFinished)
         {
@@ -180,10 +183,6 @@ namespace BitLevelGeneration
                             for (int j = i + 1; j < colorGraph.Length; j++)
                                 if ((colorGraph[i] & colorGraph[j]) == 0)
                                     goto skip;
-
-                        foreach (var color in colorGraph)
-                            if (graph.IsIndependent(color))
-                                goto skip;
 
                         var data = colorGraph.Select(subset => ComponentsInInducedSubgraph(graph, subset)).ToList();
                         for (int i = 0; i < data.Count; i++)
@@ -281,6 +280,9 @@ namespace BitLevelGeneration
                 foreach (var i in BitUsage_long.ToSet(C))
                     gp[i]--;
 
+                
+                if (IsPaintable != null & IsPaintable(graph, colorGraph, c + 1, gp))
+                    return true;
                 if (graph.IsGChoosable(colorGraph, c + 1, gp))
                     return true;
             }
