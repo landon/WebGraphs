@@ -19,23 +19,43 @@ namespace Console
         static Dictionary<Choosability.OnlineChoiceHashGraph, bool> cache = new Dictionary<Choosability.OnlineChoiceHashGraph, bool>();
         static void Main(string[] args)
         {
-            GraphChoosability_long.IsPaintable = IsPaintable;
-             var g = GraphsCore.GraphIO.GraphFromGraph6("GliC?K");
-             //var g = GraphsCore.GraphIO.GraphFromGraph6("I]G_W_O?W");
-             //var g = GraphsCore.GraphIO.GraphFromGraph6("GhEKOK");
-            //var g = GraphsCore.GraphIO.GraphFromGraph6("GlgO_K");
+            //var smalls = new[] { Choosability.Graphs.K(1) }
+            //        .Concat(@"C:\Users\landon\Google Drive\research\Graph6\graph2.g6".EnumerateGraph6File())
+            //        .Concat(@"C:\Users\landon\Google Drive\research\Graph6\graph3.g6".EnumerateGraph6File())
+            //        .Concat(@"C:\Users\landon\Google Drive\research\Graph6\graph4.g6".EnumerateGraph6File())
+            //        .Concat(@"C:\Users\landon\Google Drive\research\Graph6\graph5.g6".EnumerateGraph6File())
+            //        .Concat(@"C:\Users\landon\Google Drive\research\Graph6\graph6.g6".EnumerateGraph6File())
+            //        .Concat(@"C:\Users\landon\Google Drive\research\Graph6\graph7.g6".EnumerateGraph6File())
+            //        .Concat(@"C:\Users\landon\Google Drive\research\Graph6\graph8.g6".EnumerateGraph6File())
+            //        .Concat(@"C:\Users\landon\Google Drive\research\Graph6\graph9.g6".EnumerateGraph6File())
+            //        .Concat(@"C:\Users\landon\Google Drive\research\Graph6\graph10.g6".EnumerateGraph6File());
+
+            //int threshold = 3;
+            //foreach(var g in smalls)
+            //{
+            //    if (g.Vertices.All(v => g.Degree(v) - g.Omega(v) >= threshold))
+            //    {
+            //        System.Console.WriteLine(g.ToGraph6());
+            //    }
+            //}
+
+           // GraphChoosability_long.IsPaintable = IsPaintable;
+           //  var g = GraphsCore.GraphIO.GraphFromGraph6("GliC?K");  // done through pot 8
+           var g = GraphsCore.GraphIO.GraphFromGraph6("I]G_W_O?W");
+            //var g = GraphsCore.GraphIO.GraphFromGraph6("GhEKOK");   // done through pot 8
+            // var g = GraphsCore.GraphIO.GraphFromGraph6("GlgO_K");  // done through pot 8
             var gg = new BitGraph_long(g.GetEdgeWeights());
 
-            List<List<int>> bad;
-            var choosable = gg.IsFGChoosable((x) => 4, (x) => 2, out bad, x => System.Console.WriteLine("finished " + x + " in " + GraphChoosability_long.NodesVisited + " nodes "));
+             List<List<int>> bad;
+             var choosable = gg.IsFGChoosable((x) => 4, (x) => 2, out bad, x => System.Console.WriteLine("finished " + x + " in " + GraphChoosability_long.NodesVisited + " nodes "));
 
 
 
-           // WeaklyFixableTester.Go();
-           //  FixerBreakerTrees.Go();
-           //   SuperAbundanceFinder.Go();
-           //  FindFixerBreaker.Go();
-           //MakePictures.Go();
+            // WeaklyFixableTester.Go();
+            //  FixerBreakerTrees.Go();
+            //   SuperAbundanceFinder.Go();
+            //  FindFixerBreaker.Go();
+            //MakePictures.Go();
 
             // MixedChoosables.Go();
             //EliminiteDoubleEdgeSubdivisions.Go(@"C:\Users\landon\Google Drive\research\graphs\WithLows\Mixed spread 2 AT winners1.txt");
@@ -51,6 +71,7 @@ namespace Console
             System.Console.WriteLine("done.");
             System.Console.ReadKey();
         }
+
 
 
         static bool IsPaintable(IGraph_long graph, long[] colorGraph, int c, int[] g)

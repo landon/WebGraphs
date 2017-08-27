@@ -281,8 +281,8 @@ namespace BitLevelGeneration
                     gp[i]--;
 
                 
-                if (IsPaintable != null & IsPaintable(graph, colorGraph, c + 1, gp))
-                    return true;
+              //  if (IsPaintable != null & IsPaintable(graph, colorGraph, c + 1, gp))
+              //      return true;
                 if (graph.IsGChoosable(colorGraph, c + 1, gp))
                     return true;
             }

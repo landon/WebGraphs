@@ -1129,6 +1129,15 @@ namespace Choosability
             return null;
         }
 
+        public int Omega(int v)
+        {
+            return 1 + CliqueNumber(Neighbors[v]);
+        }
+
+        public int CliqueNumber(List<int> subset)
+        {
+            return Complement().IndependenceNumber(subset);
+        }
         #endregion
 
         #region List coloring
