@@ -14,10 +14,10 @@ namespace Console
     public static class FindChoosables
     {
         const int MinVertices = 3;
-        const int MaxVertices = 8;
+        const int MaxVertices = 10;
 
         const bool Offline = false;
-        const bool AT = true;
+        const bool AT = false;
         const int MaxIndependenceNumber = int.MaxValue;
         const int Fold = 1;
         
@@ -25,11 +25,13 @@ namespace Console
         const bool DiamondFreeOnly = false;
         const bool LineGraph = false;
         
-        static readonly string WinnersFile = (MaxIndependenceNumber < int.MaxValue ? "alpha at most " + MaxIndependenceNumber + " " : "") + (DiamondFreeOnly ? "cliquey neighborhoods " : "") + (AT ? "AT " : "") + (Offline ? "offline " : "") + (LineGraph ? "line graph " : "") + (MaxDegree < int.MaxValue ? "max degree " + MaxDegree + "_" : "") + string.Format("winners{0}.txt", Fold);
+        static readonly string WinnersFile = "POS_KELB " + (MaxIndependenceNumber < int.MaxValue ? "alpha at most " + MaxIndependenceNumber + " " : "") + (DiamondFreeOnly ? "cliquey neighborhoods " : "") + (AT ? "AT " : "") + (Offline ? "offline " : "") + (LineGraph ? "line graph " : "") + (MaxDegree < int.MaxValue ? "max degree " + MaxDegree + "_" : "") + string.Format("winners{0}.txt", Fold);
         public static void Go()
         {
             using (var graphIO = new GraphEnumerator(WinnersFile, MinVertices, MaxVertices))
             {
+                graphIO.FileRoot = @"C:\Users\landon\Google Drive\research\Graph6\graph";
+                graphIO.DoNotUsePreviousWinners = true;
                 foreach (var g in graphIO.EnumerateGraph6File())
                 {
                     if (MaxIndependenceNumber < int.MaxValue)
@@ -43,28 +45,28 @@ namespace Console
 
                     if (AT)
                     {
-                            System.Console.Write("checking " + g.ToGraph6() + "...");
-                            if (!g.IsOnlineFGChoosable(v => g.Degree(v) - 1, v => 1))
+                        System.Console.Write("checking " + g.ToGraph6() + "...");
+                        if (!g.IsOnlineFGChoosable(v => g.Degree(v) - 1, v => 1))
+                        {
+                            System.Console.WriteLine(" not paintable");
+                        }
+                        else
+                        {
+                            var result = HasFOrientation(g, v => g.Degree(v) - 1, true);
+                            if (result != null)
                             {
-                                System.Console.WriteLine(" not paintable");
+                                graphIO.AddWinner(g, result.Graph);
+                                System.Console.WriteLine(string.Format(" is d_1-AT"));
                             }
                             else
-                            {
-                                var result = HasFOrientation(g, v => g.Degree(v) - 1, true);
-                                if (result != null)
-                                {
-                                    graphIO.AddWinner(g, result.Graph);
-                                    System.Console.WriteLine(string.Format(" is d_1-AT"));
-                                }
-                                else
-                                    System.Console.WriteLine(" not AT");
-                            }
+                                System.Console.WriteLine(" not AT");
+                        }
                     }
                     else if (Offline)
                     {
                         List<List<int>> badAssignment;
                         var bg = new BitGraph_long(g.GetEdgeWeights());
-                       
+
                         System.Console.Write("checking " + g.ToGraph6() + "...");
                         if (bg.IsFChoosable(v => bg.Degree(v) - 1, out badAssignment))
                         {
@@ -76,19 +78,18 @@ namespace Console
                     }
                     else
                     {
-                        if (!DiamondFreeOnly || !g.ContainsInduced(Choosability.Graphs.Diamond))
+                        System.Console.Write("checking " + g.ToGraph6() + "...");
+                        // if (g.IsOnlineFGChoosable(v => Fold * g.Degree(v) - 1, v => Fold))
+                        if (g.IsOnlineFGChoosable(v => (int)Math.Ceiling((g.Degree(v) + 1 + g.Omega(v)) / 2.0), v => 1))
                         {
-                            System.Console.Write("checking " + g.ToGraph6() + "...");
-                            if (g.IsOnlineFGChoosable(v => Fold * g.Degree(v) - 1, v => Fold))
-                            {
-                                graphIO.AddWinner(g);
-                                System.Console.WriteLine(string.Format(" is {0}-fold d_1-paintable", Fold));
-                            }
-                            else
-                                System.Console.WriteLine(" not paintable");
+                            //   graphIO.AddWinner(g);
+                            System.Console.WriteLine(string.Format(" is {0}-fold d_1-paintable", Fold));
                         }
                         else
-                            System.Console.WriteLine("skipping due to diamond " + g.ToGraph6());
+                        {
+                            System.Console.WriteLine(" not paintable");
+                            graphIO.AddWinner(g);
+                        }
                     }
                 }
             }

@@ -41,13 +41,13 @@ namespace Console
 
            // GraphChoosability_long.IsPaintable = IsPaintable;
            //  var g = GraphsCore.GraphIO.GraphFromGraph6("GliC?K");  // done through pot 8
-           var g = GraphsCore.GraphIO.GraphFromGraph6("I]G_W_O?W");
+          // var g = GraphsCore.GraphIO.GraphFromGraph6("I]G_W_O?W");
             //var g = GraphsCore.GraphIO.GraphFromGraph6("GhEKOK");   // done through pot 8
             // var g = GraphsCore.GraphIO.GraphFromGraph6("GlgO_K");  // done through pot 8
-            var gg = new BitGraph_long(g.GetEdgeWeights());
+            //var gg = new BitGraph_long(g.GetEdgeWeights());
 
-             List<List<int>> bad;
-             var choosable = gg.IsFGChoosable((x) => 4, (x) => 2, out bad, x => System.Console.WriteLine("finished " + x + " in " + GraphChoosability_long.NodesVisited + " nodes "));
+            // List<List<int>> bad;
+            // var choosable = gg.IsFGChoosable((x) => 4, (x) => 2, out bad, x => System.Console.WriteLine("finished " + x + " in " + GraphChoosability_long.NodesVisited + " nodes "));
 
 
 
@@ -62,7 +62,7 @@ namespace Console
 
             //  FindTarpits.Go();
             // FindFixerBreaker.Go();
-            //FindChoosables.Go();
+            FindChoosables.Go();
 
             //   EliminateDoubleEdgeNotSubdivisions.Go(@"C:\Users\landon\Google Drive\research\graphs\WithLows\OneHigh\not 10 vertex Mixed spread 2 max high 1 kappa2 winners1.txt");
 
