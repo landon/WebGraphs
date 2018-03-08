@@ -10,6 +10,32 @@ namespace Console
 {
     public static class LocalGraphExtensions
     {
+        public static IEnumerable<Graph> ToEdgeWeightsFile(this IEnumerable<Graph> graphs, string file)
+        {
+            if (!file.EndsWith(".ew"))
+                file += ".ew";
+            using (var sw = new StreamWriter(file))
+            {
+                foreach (var g in graphs)
+                    sw.WriteLine(string.Join(" ", g.GetEdgeWeights()));
+            }
+
+            return graphs;
+        }
+
+        public static IEnumerable<Graph> ToGraph6File(this IEnumerable<Graph> graphs, string file)
+        {
+            if (!file.EndsWith(".g6"))
+                file += ".g6";
+            using (var sw = new StreamWriter(file))
+            {
+                foreach (var g in graphs)
+                    sw.WriteLine(g.ToGraph6());
+            }
+
+            return graphs;
+        }
+
         public static IEnumerable<Graph> EnumerateGraph6File(this string graph6File)
         {
             if (!File.Exists(graph6File))

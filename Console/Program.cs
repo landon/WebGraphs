@@ -19,6 +19,23 @@ namespace Console
         static Dictionary<Choosability.OnlineChoiceHashGraph, bool> cache = new Dictionary<Choosability.OnlineChoiceHashGraph, bool>();
         static void Main(string[] args)
         {
+            FindChoosables.Go();
+
+
+            //GraphEnumerator
+            //    .EnumerateGraphFile("online d1-choosable no diamond.ew")
+            //    .Where(g => GraphEnumerator.EnumerateGraphFile("offline d1-choosable no diamond.ew").All(h => !g.ContainsInduced(h)))
+            //    .Where(g => !g.ContainsInduced(Choosability.Graphs.E(2) * Choosability.Graphs.E(3)))
+            //    .ToEdgeWeightsFile("online d1-choosable no diamond no offlines no k23.ew");
+
+            //var diamond = Choosability.Graphs.Diamond;
+            //GraphEnumerator
+            //    .EnumerateGraphFile(@"C:\winners3.txt")
+            //    .Where(g => !g.ContainsInduced(diamond))
+            //    .ToEdgeWeightsFile("online 3-fold d1-choosable no diamond")
+            //    .ToGraph6File("online 3-fold d1-choosable no diamond");
+
+
             //var smalls = new[] { Choosability.Graphs.K(1) }
             //        .Concat(@"C:\Users\landon\Google Drive\research\Graph6\graph2.g6".EnumerateGraph6File())
             //        .Concat(@"C:\Users\landon\Google Drive\research\Graph6\graph3.g6".EnumerateGraph6File())
@@ -62,14 +79,14 @@ namespace Console
 
             //  FindTarpits.Go();
             // FindFixerBreaker.Go();
-            FindChoosables.Go();
+            
 
             //   EliminateDoubleEdgeNotSubdivisions.Go(@"C:\Users\landon\Google Drive\research\graphs\WithLows\OneHigh\not 10 vertex Mixed spread 2 max high 1 kappa2 winners1.txt");
 
             //ConAndNon.Go();
             System.Console.WriteLine();
             System.Console.WriteLine("done.");
-            System.Console.ReadKey();
+           // System.Console.ReadKey();
         }
 
 
