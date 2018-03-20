@@ -27,6 +27,7 @@ namespace Choosability
         Lazy<List<List<int>>> _independentThreeSets;
         Lazy<List<List<int>>> _vertexSubsets;
         Lazy<int> _e;
+        Lazy<BitLevelGeneration.BitGraph_long> _bitgraph;
 
         public int N { get; private set; }
         public int E { get { return _e.Value; } }
@@ -59,6 +60,7 @@ namespace Choosability
 
         public List<List<int>> IndependentSets { get { return _independentSets.Value; } }
         public List<List<int>> MaximalIndependentSets { get { return _maximalIndependentSets.Value; } }
+        public BitLevelGeneration.BitGraph_long Bitgraph => _bitgraph.Value;
 
         public Graph FromOutNeighborLists(Dictionary<int, List<int>> outNeighbors)
         {
@@ -290,6 +292,8 @@ namespace Choosability
 
                 return s;
             });
+
+            _bitgraph = new Lazy<BitLevelGeneration.BitGraph_long>(() => new BitLevelGeneration.BitGraph_long(GetEdgeWeights()));
         }
         void InitializeLazyLoaders()
         {
@@ -1104,11 +1108,10 @@ namespace Choosability
 
         public bool Is3Colorable(List<int> subgraph)
         {
-            var bgl = new BitLevelGeneration.BitGraph_long(GetEdgeWeights());
             var vs = subgraph.ToInt64();
-            foreach (var M in bgl.MaximalIndependentSubsets(vs))
+            foreach (var M in Bitgraph.MaximalIndependentSubsets(vs))
             {
-                if (BitLevelGeneration.GraphChoosability_long.IsSubsetTwoColorable(bgl, vs & ~M))
+                if (BitLevelGeneration.GraphChoosability_long.IsSubsetTwoColorable(Bitgraph, vs & ~M))
                     return true;
             }
 
@@ -1537,6 +1540,114 @@ namespace Choosability
 
             return result;
         }
+
+        #region bit twiddle version
+        public bool IsOnlineFGChoosable_bit(Func<int, int> f, Func<int, int> g)
+        {
+            NodesVisited = 0;
+            CacheHits = 0;
+
+            var cache = new Dictionary<OnlineChoiceHashGraph, bool>();
+            return IsOnlineFGChoosable_bit(_vertices.Select(v => f(v)).ToArray(), _vertices.Select(v => g(v)).ToArray(), cache);
+        }
+        bool IsOnlineFGChoosable_bit(int[] f, int[] g, Dictionary<OnlineChoiceHashGraph, bool> cache)
+        {
+            Interlocked.Increment(ref NodesVisited);
+            OnlineChoiceHashGraph key = null;
+
+            var result = true;
+            int[] gClone = new int[g.Length];
+            Array.Copy(g, gClone, g.Length);
+
+            while (true)
+            {
+                var changed = false;
+                foreach (var v in _vertices)
+                {
+                    if (g[v] <= 0)
+                        continue;
+
+                    var need = g[v] + Neighbors[v].Sum(w => g[w]);
+                    if (f[v] >= need)
+                    {
+                        g[v] = 0;
+                        changed = true;
+                    }
+                }
+
+                if (!changed)
+                    break;
+            }
+
+            var liveVertices = g.IndicesWhere(v => v > 0).ToList();
+            if (liveVertices.Count <= 0)
+            {
+                result = true;
+                goto done;
+            }
+            if (liveVertices.Any(v => f[v] < g[v]))
+            {
+                result = false;
+                goto done;
+            }
+
+            key = new OnlineChoiceHashGraph(f, g);
+            bool cachedResult;
+            if (cache.TryGetValue(key, out cachedResult))
+            {
+                Interlocked.Increment(ref CacheHits);
+
+                key = null;
+                result = cachedResult;
+                goto done;
+            }
+
+            var set = liveVertices.ToInt64();
+            var V = set;
+            while (V > 0)
+            {
+                foreach (var v in V.EnumerateBits())
+                    f[v]--;
+
+                var choosable = false;
+                foreach (var C in Bitgraph.MaximalIndependentSubsets(V))
+                {
+                    foreach (var v in C.EnumerateBits())
+                        g[v]--;
+
+                    choosable = IsOnlineFGChoosable_bit(f, g, cache);
+
+                    foreach (var v in C.EnumerateBits())
+                        g[v]++;
+
+                    if (choosable)
+                        break;
+                }
+
+                foreach (var v in V.EnumerateBits())
+                    f[v]++;
+
+                if (!choosable)
+                {
+                    result = false;
+                    goto done;
+                }
+
+                V = (V - 1) & set;
+            }
+
+            done:
+
+            if (gClone != null)
+                Array.Copy(gClone, g, g.Length);
+
+            if (key != null)
+                cache[key] = result;
+
+            return result;
+        }
+        #endregion
+
         #region pregeneration version
         public bool IsOnlineFGChoosable(Func<int, int> f, Func<int, int> g)
         {

@@ -168,7 +168,7 @@ namespace Console
                     else if (FixedNotK != int.MaxValue)
                     {
                         System.Console.Write("checking " + g.ToGraph6() + "...");
-                        if (!g.IsOnlineFGChoosable2(v => FixedNotK, v => 1))
+                        if (!g.IsOnlineFGChoosable_bit(v => FixedNotK, v => 1))
                         {
                             if (IsFixedKColorable)
                             {
@@ -191,7 +191,7 @@ namespace Console
                                     var critical = true;
                                     foreach (var v in g.Vertices)
                                     {
-                                        if (!g.IsOnlineFGChoosable2(w => FixedNotK, w => (w == v ? 0 : 1)))
+                                        if (!g.IsOnlineFGChoosable_bit(w => FixedNotK, w => (w == v ? 0 : 1)))
                                         {
                                             critical = false;
                                             break;
