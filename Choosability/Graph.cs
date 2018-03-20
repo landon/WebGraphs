@@ -1097,6 +1097,24 @@ namespace Choosability
             return best;
         }
 
+        public bool Is3Colorable()
+        {
+            return Is3Colorable(Vertices);
+        }
+
+        public bool Is3Colorable(List<int> subgraph)
+        {
+            var bgl = new BitLevelGeneration.BitGraph_long(GetEdgeWeights());
+            var vs = subgraph.ToInt64();
+            foreach (var M in bgl.MaximalIndependentSubsets(vs))
+            {
+                if (BitLevelGeneration.GraphChoosability_long.IsSubsetTwoColorable(bgl, vs & ~M))
+                    return true;
+            }
+
+            return false;
+        }
+
         public List<List<int>> FindChiColoring()
         {
             for (int K = 0; K < int.MaxValue; K++)
@@ -1415,6 +1433,111 @@ namespace Choosability
             return result;
         }
         #region online (f:g)-choosability
+
+        public bool IsOnlineFGChoosable2(Func<int, int> f, Func<int, int> g)
+        {
+            NodesVisited = 0;
+            CacheHits = 0;
+
+            var cache = new Dictionary<OnlineChoiceHashGraph, bool>();
+            return IsOnlineFGChoosable2(_vertices.Select(v => f(v)).ToArray(), _vertices.Select(v => g(v)).ToArray(), cache);
+        }
+        bool IsOnlineFGChoosable2(int[] f, int[] g, Dictionary<OnlineChoiceHashGraph, bool> cache)
+        {
+            Interlocked.Increment(ref NodesVisited);
+            OnlineChoiceHashGraph key = null;
+
+            var result = true;
+            int[] gClone = new int[g.Length];
+            Array.Copy(g, gClone, g.Length);
+
+            while (true)
+            {
+                var changed = false;
+                foreach (var v in _vertices)
+                {
+                    if (g[v] <= 0)
+                        continue;
+
+                    var need = g[v] + Neighbors[v].Sum(w => g[w]);
+                    if (f[v] >= need)
+                    {
+                        g[v] = 0;
+                        changed = true;
+                    }
+                }
+
+                if (!changed)
+                    break;
+            }
+
+            var liveVertices = g.IndicesWhere(v => v > 0).ToList();
+            if (liveVertices.Count <= 0)
+            {
+                result = true;
+                goto done;
+            }
+            if (liveVertices.Any(v => f[v] < g[v]))
+            {
+                result = false;
+                goto done;
+            }
+
+            key = new OnlineChoiceHashGraph(f, g);
+            bool cachedResult;
+            if (cache.TryGetValue(key, out cachedResult))
+            {
+                Interlocked.Increment(ref CacheHits);
+
+                key = null;
+                result = cachedResult;
+                goto done;
+            }
+
+            foreach (var V in ListUtility.EnumerateSublists(liveVertices))
+            {
+                if (V.Count <= 0)
+                    continue;
+
+                foreach (var v in V)
+                    f[v]--;
+
+                var choosable = false;
+                foreach (var C in EnumerateMaximalIndependentSets(V))
+                {
+                    foreach (var v in C)
+                        g[v]--;
+
+                    choosable = IsOnlineFGChoosable2(f, g, cache);
+
+                    foreach (var v in C)
+                        g[v]++;
+
+                    if (choosable)
+                        break;
+                }
+
+                foreach (var v in V)
+                    f[v]++;
+
+                if (!choosable)
+                {
+                    result = false;
+                    goto done;
+                }
+            }
+
+            done:
+
+            if (gClone != null)
+                Array.Copy(gClone, g, g.Length);
+
+            if (key != null)
+                cache[key] = result;
+
+            return result;
+        }
+        #region pregeneration version
         public bool IsOnlineFGChoosable(Func<int, int> f, Func<int, int> g)
         {
             NodesVisited = 0;
@@ -1525,7 +1648,6 @@ namespace Choosability
 
             return result;
         }
-
         public bool IsOnlineFGChoosableListerRestricted(Func<int, int> f, Func<int, int> g, Func<Graph, Graph, int> comparison, Dictionary<OnlineChoiceHashGraph, bool> cache)
         {
             NodesVisited = 0;
@@ -1533,7 +1655,6 @@ namespace Choosability
 
             return IsOnlineFGChoosableListerRestricted(_vertices.Select(v => f(v)).ToArray(), _vertices.Select(v => g(v)).ToArray(), cache, this.Clone(), comparison);
         }
-
         public bool IsOnlineFGChoosableListerRestricted(Func<int, int> f, Func<int, int> g, Func<Graph, Graph, int> comparison)
         {
             NodesVisited = 0;
@@ -1654,6 +1775,7 @@ namespace Choosability
 
             return result;
         }
+#endregion
         #endregion
         #endregion
 

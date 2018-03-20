@@ -13,27 +13,37 @@ namespace Console
 {
     public static class FindChoosables
     {
-        const int MinVertices = 3;
-        const int MaxVertices = 10;
+        const int MinVertices = 4;
+        const int MaxVertices = 16;
 
         const bool Offline = false;
         const bool AT = false;
         const int MaxIndependenceNumber = int.MaxValue;
-        const int Fold = 4;
+        const int Fold = 1;
         
         const int MaxDegree = int.MaxValue;
         const bool DiamondFreeOnly = false;
         const bool LineGraph = false;
-        const bool ListerRestrictedEleE = true;
+        const bool ListerRestrictedEleE = false;
         const bool ListerRestrictedEgeE = false;
+        const bool ListerRestrictedWeird = false;
 
-        static readonly string WinnersFile = (ListerRestrictedEgeE ? " lister restricted ge " : "") + (ListerRestrictedEleE ? " lister restricted le " : "") + (MaxIndependenceNumber < int.MaxValue ? "alpha at most " + MaxIndependenceNumber + " " : "") + (DiamondFreeOnly ? "cliquey neighborhoods " : "") + (AT ? "AT " : "") + (Offline ? "offline " : "") + (LineGraph ? "line graph " : "") + (MaxDegree < int.MaxValue ? "max degree " + MaxDegree + "_" : "") + string.Format("winners{0}.txt", Fold);
+        const int FixedNotK = 3;
+        const bool IsFixedKColorable = false;
+
+        const bool MinimizeAverageDegree = true;
+
+        static readonly string WinnersFile = ("bit level help ") + (MinimizeAverageDegree ? "minimizing average degree " : "") + (IsFixedKColorable ? $" is {FixedNotK} colorable " : "") + (FixedNotK != int.MaxValue ? "fixed not " + FixedNotK + " " : "") + (ListerRestrictedWeird ? " lister restricted weird " : "") + (ListerRestrictedEgeE ? " lister restricted ge " : "") + (ListerRestrictedEleE ? " lister restricted le " : "") + (MaxIndependenceNumber < int.MaxValue ? "alpha at most " + MaxIndependenceNumber + " " : "") + (DiamondFreeOnly ? "cliquey neighborhoods " : "") + (AT ? "AT " : "") + (Offline ? "offline " : "") + (LineGraph ? "line graph " : "") + (MaxDegree < int.MaxValue ? "max degree " + MaxDegree + "_" : "") + string.Format("winners{0}.txt", Fold);
         public static void Go()
         {
+            var minAverageDegree = double.MaxValue;
+
             var diamond = Choosability.Graphs.Diamond;
             using (var graphIO = new GraphEnumerator(WinnersFile, MinVertices, MaxVertices))
             {
-                graphIO.FileRoot = @"C:\Users\landon\Google Drive\research\Graph6\graph";
+                // graphIO.FileRoot = @"C:\Graph6\graph";
+                graphIO.FileRoot = @"F:\graphs\4pccar\4pccar";
+                
                 foreach (var g in graphIO.EnumerateGraph6File())
                 {
                     if (MaxIndependenceNumber < int.MaxValue)
@@ -47,6 +57,41 @@ namespace Console
 
                     if (DiamondFreeOnly && g.ContainsInduced(diamond))
                         continue;
+
+                    if (MinimizeAverageDegree)
+                    {
+                        var avgd = 2.0 * g.E / g.N;
+                        if (avgd > minAverageDegree)
+                        {
+                            System.Console.WriteLine("avgd excluded: " + minAverageDegree);
+                            continue;
+                        }
+
+                        var mic = g.Mic();
+                        if (2 * g.E < (FixedNotK - 1) * g.N + mic + 1)
+                        {
+                            System.Console.WriteLine("mic excluded: " + minAverageDegree);
+                            continue;
+                        }
+
+                        var notKColorable = false;
+
+                        if (FixedNotK == 3)
+                        {
+                            notKColorable = !g.Is3Colorable();
+                        }
+                        else
+                        {
+                            var chi = g.FindChiColoring().Count;
+                            notKColorable = chi > FixedNotK;
+                        }
+
+                        if (notKColorable)
+                        {
+                            System.Console.WriteLine(FixedNotK + "-color excluded: " + minAverageDegree);
+                            continue;
+                        }
+                    }
 
                     if (AT)
                     {
@@ -87,7 +132,7 @@ namespace Console
                         if (g.IsOnlineFGChoosableListerRestricted(v => Fold * g.Degree(v) - 1, v => Fold, CompareEleE))
                         {
                             graphIO.AddWinner(g);
-                            System.Console.WriteLine(string.Format(" is {0}-fold d_1-paintable (lister restricted || < ||", Fold));
+                            System.Console.WriteLine(string.Format(" is {0}-fold d_1-paintable (lister restricted || < ||)", Fold));
                         }
                         else
                         {
@@ -100,11 +145,82 @@ namespace Console
                         if (g.IsOnlineFGChoosableListerRestricted(v => Fold * g.Degree(v) - 1, v => Fold, CompareEgeE))
                         {
                             graphIO.AddWinner(g);
-                            System.Console.WriteLine(string.Format(" is {0}-fold d_1-paintable (lister restricted || > ||", Fold));
+                            System.Console.WriteLine(string.Format(" is {0}-fold d_1-paintable (lister restricted || > ||)", Fold));
                         }
                         else
                         {
                             System.Console.WriteLine(" not paintable");
+                        }
+                    }
+                    else if (ListerRestrictedWeird)
+                    {
+                        System.Console.Write("checking " + g.ToGraph6() + "...");
+                        if (g.IsOnlineFGChoosableListerRestricted(v => Fold * g.Degree(v) - 1, v => Fold, CompareWeird))
+                        {
+                            graphIO.AddWinner(g);
+                            System.Console.WriteLine(string.Format(" is {0}-fold d_1-paintable (lister restricted weird)", Fold));
+                        }
+                        else
+                        {
+                            System.Console.WriteLine(" not paintable");
+                        }
+                    }
+                    else if (FixedNotK != int.MaxValue)
+                    {
+                        System.Console.Write("checking " + g.ToGraph6() + "...");
+                        if (!g.IsOnlineFGChoosable2(v => FixedNotK, v => 1))
+                        {
+                            if (IsFixedKColorable)
+                            {
+                                var chi = g.FindChiColoring().Count;
+                                if (chi <= FixedNotK)
+                                {
+                                    graphIO.AddWinner(g);
+                                    System.Console.WriteLine($" is not {FixedNotK}-paintable, but is so colorable");
+                                }
+                                else
+                                {
+                                    System.Console.WriteLine($" is not {FixedNotK}-colorable even");
+                                }
+                            }
+                            else
+                            {
+                                var s = "";
+                                if (MinimizeAverageDegree)
+                                {
+                                    var critical = true;
+                                    foreach (var v in g.Vertices)
+                                    {
+                                        if (!g.IsOnlineFGChoosable2(w => FixedNotK, w => (w == v ? 0 : 1)))
+                                        {
+                                            critical = false;
+                                            break;
+                                        }
+                                    }
+
+                                    if (!critical)
+                                        continue;
+
+                                    if (!g.IsComplete())
+                                    {
+                                        minAverageDegree = 2.0 * g.E / g.N;
+                                        s = "average degree = " + minAverageDegree;
+                                    }
+                                }
+
+                                graphIO.AddWinner(g);
+                                System.Console.WriteLine($" is not {FixedNotK}-paintable " + s);
+                            }
+                        }
+                        else
+                        {
+                            var s = "";
+                            if (MinimizeAverageDegree)
+                            {
+                                s = "best average degree = " + minAverageDegree;
+                            }
+
+                            System.Console.WriteLine($" is {FixedNotK}-paintable " + s);
                         }
                     }
                     else
@@ -124,14 +240,19 @@ namespace Console
             }
         }
 
-        static int CompareEleE(Choosability.Graph g1, Choosability.Graph g2)
+        static int CompareEleE(Choosability.Graph current, Choosability.Graph last)
         {
-            return g1.E.CompareTo(g2.E);
+            return current.E.CompareTo(last.E);
         }
 
-        static int CompareEgeE(Choosability.Graph g1, Choosability.Graph g2)
+        static int CompareEgeE(Choosability.Graph current, Choosability.Graph last)
         {
-            return g1.E.CompareTo(g2.E);
+            return last.E.CompareTo(current.E);
+        }
+
+        static int CompareWeird(Choosability.Graph current, Choosability.Graph last)
+        {
+            return last.MaxDegree.CompareTo(current.MaxDegree);
         }
 
         static OrientationResult HasFOrientation(Graph g, Func<int, int> f, bool useDerivative = false)
