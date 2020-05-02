@@ -19,7 +19,7 @@ namespace Console
         static Dictionary<Choosability.OnlineChoiceHashGraph, bool> cache = new Dictionary<Choosability.OnlineChoiceHashGraph, bool>();
         static void Main(string[] args)
         {
-            FindChoosables.Go();
+            //FindChoosables.Go();
 
 
             //GraphEnumerator
@@ -57,16 +57,25 @@ namespace Console
             //}
 
            // GraphChoosability_long.IsPaintable = IsPaintable;
-           //  var g = GraphsCore.GraphIO.GraphFromGraph6("GliC?K");  // done through pot 8
+          //   var g = GraphsCore.GraphIO.GraphFromGraph6("GliC?K");  // done through pot 8
           // var g = GraphsCore.GraphIO.GraphFromGraph6("I]G_W_O?W");
             //var g = GraphsCore.GraphIO.GraphFromGraph6("GhEKOK");   // done through pot 8
             // var g = GraphsCore.GraphIO.GraphFromGraph6("GlgO_K");  // done through pot 8
-            //var gg = new BitGraph_long(g.GetEdgeWeights());
+          //  var gg = new BitGraph_long(g.GetEdgeWeights());
 
             // List<List<int>> bad;
-            // var choosable = gg.IsFGChoosable((x) => 4, (x) => 2, out bad, x => System.Console.WriteLine("finished " + x + " in " + GraphChoosability_long.NodesVisited + " nodes "));
+            //  var choosable = gg.IsFGChoosable((x) => 4, (x) => 2, out bad, x => System.Console.WriteLine("finished " + x + " in " + GraphChoosability_long.NodesVisited + " nodes "));
+
+            var ss = "GhEKOK,GliC?K,GlgO_K,I]G_W_O?W";
+            foreach (var g6 in ss.Split(','))
+            {
+                var g = GraphsCore.GraphIO.GraphFromGraph6(g6);
+                var gc = new Choosability.Graph(g.GetEdgeWeights());
+                var rr = gc.IsOnlineFGChoosableListerRestricted((x) => 4, (x) => 2, Compare);
 
 
+                System.Console.WriteLine(g6 + ":" + rr);
+            }
 
             // WeaklyFixableTester.Go();
             //  FixerBreakerTrees.Go();
@@ -118,7 +127,8 @@ namespace Console
 
         static int Compare(Choosability.Graph g1, Choosability.Graph g2)
         {
-            return g1.E.CompareTo(g2.E);
+            return 0;
+            return -g1.MaxDegree.CompareTo(g2.MaxDegree);
         }
     }
 }
